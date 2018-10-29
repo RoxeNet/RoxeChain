@@ -1,0 +1,33 @@
+version: "3"
+
+services:
+  noddccd:
+    image: dccio/dcc:latest
+    command: /opt/dccio/bin/noddccd.sh --data-dir /opt/dccio/bin/data-dir -e --http-alias=noddccd:8888 --http-alias=127.0.0.1:8888 --http-alias=localhost:8888
+    hostname: noddccd
+    ports:
+      - 8888:8888
+      - 9876:9876
+    expose:
+      - "8888"
+    volumes:
+      - noddcc-data-volume:/opt/dccio/bin/data-dir
+    cap_add:
+      - IPC_LOCK
+    stop_grace_period: 10m
+
+  kdccd:
+    image: dccio/dcc:latest
+    command: /opt/dccio/bin/kdccd --wallet-dir /opt/dccio/bin/data-dir --http-server-address=127.0.0.1:8900 --http-alias=kdccd:8900 --http-alias=localhost:8900
+    hostname: kdccd
+    links:
+      - noddccd
+    volumes:
+      - kdccd-data-volume:/opt/dccio/bin/data-dir
+    stop_grace_period: 10m
+
+volumes:
+ noddcc-data-volume:
+   external: true
+ kdccd-data-volume:
+   external: true

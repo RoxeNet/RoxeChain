@@ -1,0 +1,14 @@
+#include <stdint.h>
+#include <dcc/utilities/git_revision.hpp>
+
+#define dcc_GIT_REVISION_SHA "@dcc_GIT_REVISION_SHA@"
+#define dcc_GIT_REVISION_UNIX_TIMESTAMP @dcc_GIT_REVISION_UNIX_TIMESTAMP@
+#define dcc_GIT_REVISION_DESCRIPTION "@dcc_GIT_REVISION_DESCRIPTION@"
+
+namespace dccio { namespace utilities {
+
+const char* const git_revision_sha = dcc_GIT_REVISION_SHA;
+const uint32_t git_revision_unix_timestamp = dcc_GIT_REVISION_UNIX_TIMESTAMP;
+const char* const git_revision_description = dcc_GIT_REVISION_DESCRIPTION;
+
+} } // end namespace dccio::utilities

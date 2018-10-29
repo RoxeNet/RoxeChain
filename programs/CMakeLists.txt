@@ -1,0 +1,6 @@
+add_subdirectory( noddcc )
+add_subdirectory( cldcc )
+add_subdirectory( kdccd )
+add_subdirectory( dccio-launcher )
+add_subdirectory( dccio-abigen )
+add_subdirectory( dccio-blocklog )
