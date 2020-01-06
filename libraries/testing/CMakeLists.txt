@@ -1,31 +1,31 @@
-file(GLOB HEADERS "include/dccio/testing/*.hpp")
+file(GLOB HEADERS "include/actc/testing/*.hpp")
 
 ## SORT .cpp by most likely to change / break compile
-add_library( dccio_testing
+add_library( actc_testing
              tester.cpp
              tester_network.cpp
              ${HEADERS}
         )
 
-target_link_libraries( dccio_testing dccio_chain dcc_utilities fc chainbase Logging IR WAST WASM Runtime )
-target_include_directories( dccio_testing
+target_link_libraries( actc_testing actc_chain actc_utilities fc chainbase Logging IR WAST WASM Runtime )
+target_include_directories( actc_testing
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../wasm-jit/Include"
                                    "${CMAKE_BINARY_DIR}/contracts"
                             )
 
-add_dependencies( dccio_testing dccio.bios )
+add_dependencies( actc_testing actc.bios )
 
 if(MSVC)
   set_source_files_properties( db_init.cpp db_block.cpp database.cpp block_log.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 endif(MSVC)
 
-set_target_properties( dccio_testing PROPERTIES PUBLIC_HEADER "${HEADERS}" )
-install( TARGETS dccio_testing
+set_target_properties( actc_testing PROPERTIES PUBLIC_HEADER "${HEADERS}" )
+install( TARGETS actc_testing
    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
-   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/dccio/testing
+   PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/actc/testing
 )
-install_directory_permissions( DIRECTORY ${CMAKE_INSTALL_FULL_INCLUDEDIR}/dccio/testing )
+install_directory_permissions( DIRECTORY ${CMAKE_INSTALL_FULL_INCLUDEDIR}/actc/testing )
 

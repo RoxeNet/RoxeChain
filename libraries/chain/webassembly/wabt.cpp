@@ -1,20 +1,20 @@
-#include <dccio/chain/webassembly/wabt.hpp>
-#include <dccio/chain/apply_context.hpp>
-#include <dccio/chain/wasm_dccio_constraints.hpp>
+#include <actc/chain/webassembly/wabt.hpp>
+#include <actc/chain/apply_context.hpp>
+#include <actc/chain/wasm_actc_constraints.hpp>
 
 //wabt includes
 #include <src/interp.h>
 #include <src/binary-reader-interp.h>
 #include <src/error-formatter.h>
 
-namespace dccio { namespace chain { namespace webassembly { namespace wabt_runtime {
+namespace actc { namespace chain { namespace webassembly { namespace wabt_runtime {
 
 //yep 🤮
 static wabt_apply_instance_vars* static_wabt_vars;
 
 using namespace wabt;
 using namespace wabt::interp;
-namespace wasm_constraints = dccio::chain::wasm_constraints;
+namespace wasm_constraints = actc::chain::wasm_constraints;
 
 class wabt_instantiated_module : public wasm_instantiated_module_interface {
    public:
@@ -55,10 +55,10 @@ class wabt_instantiated_module : public wasm_instantiated_module_interface {
          _params[2].set_i64(uint64_t(context.act.name));
 
          ExecResult res = _executor.RunStartFunction(_instatiated_module);
-         dcc_ASSERT( res.result == interp::Result::Ok, wasm_execution_error, "wabt start function failure (${s})", ("s", ResultToString(res.result)) );
+         actc_ASSERT( res.result == interp::Result::Ok, wasm_execution_error, "wabt start function failure (${s})", ("s", ResultToString(res.result)) );
 
          res = _executor.RunExportByName(_instatiated_module, "apply", _params);
-         dcc_ASSERT( res.result == interp::Result::Ok, wasm_execution_error, "wabt execution failure (${s})", ("s", ResultToString(res.result)) );
+         actc_ASSERT( res.result == interp::Result::Ok, wasm_execution_error, "wabt execution failure (${s})", ("s", ResultToString(res.result)) );
       }
 
    private:
@@ -91,7 +91,7 @@ std::unique_ptr<wasm_instantiated_module_interface> wabt_runtime::instantiate_mo
    wabt::Errors errors;
 
    wabt::Result res = ReadBinaryInterp(env.get(), code_bytes, code_size, read_binary_options, &errors, &instantiated_module);
-   dcc_ASSERT( Succeeded(res), wasm_execution_error, "Error building wabt interp: ${e}", ("e", wabt::FormatErrorsToString(errors, Location::Type::Binary)) );
+   actc_ASSERT( Succeeded(res), wasm_execution_error, "Error building wabt interp: ${e}", ("e", wabt::FormatErrorsToString(errors, Location::Type::Binary)) );
    
    return std::make_unique<wabt_instantiated_module>(std::move(env), initial_memory, instantiated_module);
 }

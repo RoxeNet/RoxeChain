@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <fc/network/udp_socket.hpp>
 #include <fc/network/ip.hpp>

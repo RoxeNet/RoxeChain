@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
 #include <asserter/asserter.hpp> /// defines assert_def struct (abi)
@@ -15,12 +15,12 @@ extern "C" {
        require_auth(code);
        if( code == N(asserter) ) {
           if( action == N(procassert) ) {
-             assertdef def = dccio::unpack_action_data<assertdef>();
+             assertdef def = actc::unpack_action_data<assertdef>();
 
              // maybe assert?
-             dccio_assert((uint32_t)def.condition, def.message.c_str());
+             actc_assert((uint32_t)def.condition, def.message.c_str());
           } else if( action == N(provereset) ) {
-             dccio_assert(global_variable == 45, "Global Variable Initialized poorly");
+             actc_assert(global_variable == 45, "Global Variable Initialized poorly");
              global_variable = 100;
           }
        }

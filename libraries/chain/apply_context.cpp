@@ -1,19 +1,19 @@
 #include <algorithm>
-#include <dccio/chain/apply_context.hpp>
-#include <dccio/chain/controller.hpp>
-#include <dccio/chain/transaction_context.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/wasm_interface.hpp>
-#include <dccio/chain/generated_transaction_object.hpp>
-#include <dccio/chain/authorization_manager.hpp>
-#include <dccio/chain/resource_limits.hpp>
-#include <dccio/chain/account_object.hpp>
-#include <dccio/chain/global_property_object.hpp>
+#include <actc/chain/apply_context.hpp>
+#include <actc/chain/controller.hpp>
+#include <actc/chain/transaction_context.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/wasm_interface.hpp>
+#include <actc/chain/generated_transaction_object.hpp>
+#include <actc/chain/authorization_manager.hpp>
+#include <actc/chain/resource_limits.hpp>
+#include <actc/chain/account_object.hpp>
+#include <actc/chain/global_property_object.hpp>
 #include <boost/container/flat_set.hpp>
 
 using boost::container::flat_set;
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
 static inline void print_debug(account_name receiver, const action_trace& ar) {
    if (!ar.console.empty()) {
@@ -121,7 +121,7 @@ void apply_context::exec( action_trace& trace )
    }
 
    if( _cfa_inline_actions.size() > 0 || _inline_actions.size() > 0 ) {
-      dcc_ASSERT( recurse_depth < control.get_global_properties().configuration.max_inline_action_depth,
+      actc_ASSERT( recurse_depth < control.get_global_properties().configuration.max_inline_action_depth,
                   transaction_exception, "max inline action depth per transaction reached" );
    }
 
@@ -148,7 +148,7 @@ void apply_context::require_authorization( const account_name& account ) {
         return;
      }
    }
-   dcc_ASSERT( false, missing_auth_exception, "missing authority of ${account}", ("account",account));
+   actc_ASSERT( false, missing_auth_exception, "missing authority of ${account}", ("account",account));
 }
 
 bool apply_context::has_authorization( const account_name& account )const {
@@ -167,7 +167,7 @@ void apply_context::require_authorization(const account_name& account,
            return;
         }
      }
-  dcc_ASSERT( false, missing_auth_exception, "missing authority of ${account}/${permission}",
+  actc_ASSERT( false, missing_auth_exception, "missing authority of ${account}/${permission}",
               ("account",account)("permission",permission) );
 }
 
@@ -202,14 +202,14 @@ void apply_context::require_recipient( account_name recipient ) {
  */
 void apply_context::execute_inline( action&& a ) {
    auto* code = control.db().find<account_object, by_name>(a.account);
-   dcc_ASSERT( code != nullptr, action_validate_exception,
+   actc_ASSERT( code != nullptr, action_validate_exception,
                "inline action's code account ${account} does not exist", ("account", a.account) );
 
    for( const auto& auth : a.authorization ) {
       auto* actor = control.db().find<account_object, by_name>(auth.actor);
-      dcc_ASSERT( actor != nullptr, action_validate_exception,
+      actc_ASSERT( actor != nullptr, action_validate_exception,
                   "inline action's authorizing actor ${account} does not exist", ("account", auth.actor) );
-      dcc_ASSERT( control.get_authorization_manager().find_permission(auth) != nullptr, action_validate_exception,
+      actc_ASSERT( control.get_authorization_manager().find_permission(auth) != nullptr, action_validate_exception,
                   "inline action's authorizations include a non-existent permission: ${permission}",
                   ("permission", auth) );
    }
@@ -219,7 +219,7 @@ void apply_context::execute_inline( action&& a ) {
       control.get_authorization_manager()
              .check_authorization( {a},
                                    {},
-                                   {{receiver, config::dccio_code_name}},
+                                   {{receiver, config::actc_code_name}},
                                    control.pending_block_time() - trx_context.published,
                                    std::bind(&transaction_context::checktime, &this->trx_context),
                                    false
@@ -235,10 +235,10 @@ void apply_context::execute_inline( action&& a ) {
 
 void apply_context::execute_context_free_inline( action&& a ) {
    auto* code = control.db().find<account_object, by_name>(a.account);
-   dcc_ASSERT( code != nullptr, action_validate_exception,
+   actc_ASSERT( code != nullptr, action_validate_exception,
                "inline action's code account ${account} does not exist", ("account", a.account) );
 
-   dcc_ASSERT( a.authorization.size() == 0, action_validate_exception,
+   actc_ASSERT( a.authorization.size() == 0, action_validate_exception,
                "context-free actions cannot have authorizations" );
 
    _cfa_inline_actions.emplace_back( move(a) );
@@ -246,7 +246,7 @@ void apply_context::execute_context_free_inline( action&& a ) {
 
 
 void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, account_name payer, transaction&& trx, bool replace_existing ) {
-   dcc_ASSERT( trx.context_free_actions.size() == 0, cfa_inside_generated_tx, "context free actions are not currently allowed in generated transactions" );
+   actc_ASSERT( trx.context_free_actions.size() == 0, cfa_inside_generated_tx, "context free actions are not currently allowed in generated transactions" );
    trx.expiration = control.pending_block_time() + fc::microseconds(999'999); // Rounds up to nearest second (makes expiration check unnecessary)
    trx.set_reference_block(control.head_block_id()); // No TaPoS check necessary
    control.validate_referenced_accounts( trx );
@@ -277,7 +277,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
          control.get_authorization_manager()
                 .check_authorization( trx.actions,
                                       {},
-                                      {{receiver, config::dccio_code_name}},
+                                      {{receiver, config::actc_code_name}},
                                       delay,
                                       std::bind(&transaction_context::checktime, &this->trx_context),
                                       false
@@ -287,10 +287,10 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
 
    uint32_t trx_size = 0;
    if ( auto ptr = db.find<generated_transaction_object,by_sender_id>(boost::make_tuple(receiver, sender_id)) ) {
-      dcc_ASSERT( replace_existing, deferred_tx_duplicate, "deferred transaction with the same sender_id and payer already exists" );
+      actc_ASSERT( replace_existing, deferred_tx_duplicate, "deferred transaction with the same sender_id and payer already exists" );
 
       // TODO: Remove the following subjective check when the deferred trx replacement RAM bug has been fixed with a hard fork.
-      dcc_ASSERT( !control.is_producing_block(), subjective_block_production_exception,
+      actc_ASSERT( !control.is_producing_block(), subjective_block_production_exception,
                   "Replacing a deferred transaction is temporarily disabled." );
 
       // TODO: The logic of the next line needs to be incorporated into the next hard fork.
@@ -320,7 +320,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
          });
    }
 
-   dcc_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act.account) || (receiver == payer) || privileged,
+   actc_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act.account) || (receiver == payer) || privileged,
                subjective_block_production_exception, "Cannot charge RAM to other accounts during notify." );
    add_ram_usage( payer, (config::billable_size_v<generated_transaction_object> + trx_size) );
 }
@@ -383,7 +383,7 @@ bytes apply_context::get_packed_transaction() {
 void apply_context::update_db_usage( const account_name& payer, int64_t delta ) {
    if( delta > 0 ) {
       if( !(privileged || payer == account_name(receiver)) ) {
-         dcc_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act.account),
+         actc_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act.account),
                      subjective_block_production_exception, "Cannot charge RAM to other accounts during notify." );
          require_authorization( payer );
       }
@@ -408,7 +408,7 @@ int apply_context::get_action( uint32_t type, uint32_t index, char* buffer, size
       act_ptr = &trx.actions[index];
    }
 
-   dcc_ASSERT(act_ptr, action_not_found_exception, "action is not found" );
+   actc_ASSERT(act_ptr, action_not_found_exception, "action is not found" );
 
    auto ps = fc::raw::pack_size( *act_ptr );
    if( ps <= buffer_size ) {
@@ -442,7 +442,7 @@ int apply_context::db_store_i64( uint64_t code, uint64_t scope, uint64_t table, 
    const auto& tab = find_or_create_table( code, scope, table, payer );
    auto tableid = tab.id;
 
-   dcc_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+   actc_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
 
    const auto& obj = db.create<key_value_object>( [&]( auto& o ) {
       o.t_id        = tableid;
@@ -467,7 +467,7 @@ void apply_context::db_update_i64( int iterator, account_name payer, const char*
    const key_value_object& obj = keyval_cache.get( iterator );
 
    const auto& table_obj = keyval_cache.get_table( obj.t_id );
-   dcc_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
+   actc_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
 
 //   require_write_lock( table_obj.scope );
 
@@ -498,7 +498,7 @@ void apply_context::db_remove_i64( int iterator ) {
    const key_value_object& obj = keyval_cache.get( iterator );
 
    const auto& table_obj = keyval_cache.get_table( obj.t_id );
-   dcc_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
+   actc_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
 
 //   require_write_lock( table_obj.scope );
 
@@ -549,7 +549,7 @@ int apply_context::db_previous_i64( int iterator, uint64_t& primary ) {
    if( iterator < -1 ) // is end iterator
    {
       auto tab = keyval_cache.find_table_by_end_iterator(iterator);
-      dcc_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+      actc_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
       auto itr = idx.upper_bound(tab->id);
       if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty table
@@ -663,4 +663,4 @@ void apply_context::add_ram_usage( account_name account, int64_t ram_delta ) {
 }
 
 
-} } /// dccio::chain
+} } /// actc::chain
