@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 
 /**
  *  @defgroup tictactoecontract Tic Tac Toe Contract
@@ -42,7 +42,7 @@
  *  @{
  */
 
-class tic_tac_toe : public dccio::contract {
+class tic_tac_toe : public actc::contract {
    public:
       tic_tac_toe( account_name self ):contract(self){}
       /**
@@ -74,13 +74,13 @@ class tic_tac_toe : public dccio::contract {
          }
 
          auto primary_key() const { return challenger; }
-         dccLIB_SERIALIZE( game, (challenger)(host)(turn)(winner)(board))
+         actcLIB_SERIALIZE( game, (challenger)(host)(turn)(winner)(board))
       };
 
       /**
        * @brief The table definition, used to store existing games and their current state
        */
-      typedef dccio::multi_index< N(games), game> games;
+      typedef actc::multi_index< N(games), game> games;
 
       /// @abi action
       /// Create a new game

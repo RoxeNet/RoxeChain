@@ -1,7 +1,7 @@
 #pragma once
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
 #include <stdint.h>
