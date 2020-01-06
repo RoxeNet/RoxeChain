@@ -1,21 +1,21 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/contract_types.hpp>
-#include <dccio/chain/authority.hpp>
-#include <dccio/chain/chain_config.hpp>
-#include <dccio/chain/transaction.hpp>
-#include <dccio/chain/asset.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/contract_types.hpp>
+#include <actc/chain/authority.hpp>
+#include <actc/chain/chain_config.hpp>
+#include <actc/chain/transaction.hpp>
+#include <actc/chain/asset.hpp>
+#include <actc/chain/exceptions.hpp>
 #include <fc/io/raw.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <fc/io/varint.hpp>
 
 using namespace boost;
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
    const size_t abi_serializer::max_recursion_depth;
 
@@ -106,7 +106,7 @@ namespace dccio { namespace chain {
    void abi_serializer::set_abi(const abi_def& abi, const fc::microseconds& max_serialization_time) {
       impl::abi_traverse_context ctx(max_serialization_time);
 
-      dcc_ASSERT(starts_with(abi.version, "dccio::abi/1."), unsupported_abi_version_exception, "ABI has an unsupported version");
+      actc_ASSERT(starts_with(abi.version, "actc::abi/1."), unsupported_abi_version_exception, "ABI has an unsupported version");
 
       typedefs.clear();
       structs.clear();
@@ -119,8 +119,8 @@ namespace dccio { namespace chain {
          structs[st.name] = st;
 
       for( const auto& td : abi.types ) {
-         dcc_ASSERT(_is_type(td.type, ctx), invalid_type_inside_abi, "invalid type ${type}", ("type",td.type));
-         dcc_ASSERT(!_is_type(td.new_type_name, ctx), duplicate_abi_type_def_exception, "type already exists", ("new_type_name",td.new_type_name));
+         actc_ASSERT(_is_type(td.type, ctx), invalid_type_inside_abi, "invalid type ${type}", ("type",td.type));
+         actc_ASSERT(!_is_type(td.new_type_name, ctx), duplicate_abi_type_def_exception, "type already exists", ("new_type_name",td.new_type_name));
          typedefs[td.new_type_name] = td.type;
       }
 
@@ -140,12 +140,12 @@ namespace dccio { namespace chain {
        *  The ABI vector may contain duplicates which would make it
        *  an invalid ABI
        */
-      dcc_ASSERT( typedefs.size() == abi.types.size(), duplicate_abi_type_def_exception, "duplicate type definition detected" );
-      dcc_ASSERT( structs.size() == abi.structs.size(), duplicate_abi_struct_def_exception, "duplicate struct definition detected" );
-      dcc_ASSERT( actions.size() == abi.actions.size(), duplicate_abi_action_def_exception, "duplicate action definition detected" );
-      dcc_ASSERT( tables.size() == abi.tables.size(), duplicate_abi_table_def_exception, "duplicate table definition detected" );
-      dcc_ASSERT( error_messages.size() == abi.error_messages.size(), duplicate_abi_err_msg_def_exception, "duplicate error message definition detected" );
-      dcc_ASSERT( variants.size() == abi.variants.value.size(), duplicate_abi_variant_def_exception, "duplicate variant definition detected" );
+      actc_ASSERT( typedefs.size() == abi.types.size(), duplicate_abi_type_def_exception, "duplicate type definition detected" );
+      actc_ASSERT( structs.size() == abi.structs.size(), duplicate_abi_struct_def_exception, "duplicate struct definition detected" );
+      actc_ASSERT( actions.size() == abi.actions.size(), duplicate_abi_action_def_exception, "duplicate action definition detected" );
+      actc_ASSERT( tables.size() == abi.tables.size(), duplicate_abi_table_def_exception, "duplicate table definition detected" );
+      actc_ASSERT( error_messages.size() == abi.error_messages.size(), duplicate_abi_err_msg_def_exception, "duplicate error message definition detected" );
+      actc_ASSERT( variants.size() == abi.variants.value.size(), duplicate_abi_variant_def_exception, "duplicate variant definition detected" );
 
       validate(ctx);
    }
@@ -161,7 +161,7 @@ namespace dccio { namespace chain {
 
    int abi_serializer::get_integer_size(const type_name& type) const {
       string stype = type;
-      dcc_ASSERT( is_integer(type), invalid_type_inside_abi, "${stype} is not an integer type", ("stype",stype));
+      actc_ASSERT( is_integer(type), invalid_type_inside_abi, "${stype} is not an integer type", ("stype",stype));
       if( boost::starts_with(stype, "uint") ) {
          return boost::lexical_cast<int>(stype.substr(4));
       } else {
@@ -215,7 +215,7 @@ namespace dccio { namespace chain {
 
    const struct_def& abi_serializer::get_struct(const type_name& type)const {
       auto itr = structs.find(resolve_type(type) );
-      dcc_ASSERT( itr != structs.end(), invalid_type_inside_abi, "Unknown struct ${type}", ("type",type) );
+      actc_ASSERT( itr != structs.end(), invalid_type_inside_abi, "Unknown struct ${type}", ("type",type) );
       return itr->second;
    }
 
@@ -225,13 +225,13 @@ namespace dccio { namespace chain {
          auto itr = typedefs.find(t.second);
          while( itr != typedefs.end() ) {
             ctx.check_deadline();
-            dcc_ASSERT( find(types_seen.begin(), types_seen.end(), itr->second) == types_seen.end(), abi_circular_def_exception, "Circular reference in type ${type}", ("type",t.first) );
+            actc_ASSERT( find(types_seen.begin(), types_seen.end(), itr->second) == types_seen.end(), abi_circular_def_exception, "Circular reference in type ${type}", ("type",t.first) );
             types_seen.emplace_back(itr->second);
             itr = typedefs.find(itr->second);
          }
       } FC_CAPTURE_AND_RETHROW( (t) ) }
       for( const auto& t : typedefs ) { try {
-         dcc_ASSERT(_is_type(t.second, ctx), invalid_type_inside_abi, "${type}", ("type",t.second) );
+         actc_ASSERT(_is_type(t.second, ctx), invalid_type_inside_abi, "${type}", ("type",t.second) );
       } FC_CAPTURE_AND_RETHROW( (t) ) }
       for( const auto& s : structs ) { try {
          if( s.second.base != type_name() ) {
@@ -240,30 +240,30 @@ namespace dccio { namespace chain {
             while( current.base != type_name() ) {
                ctx.check_deadline();
                const auto& base = get_struct(current.base); //<-- force struct to inherit from another struct
-               dcc_ASSERT( find(types_seen.begin(), types_seen.end(), base.name) == types_seen.end(), abi_circular_def_exception, "Circular reference in struct ${type}", ("type",s.second.name) );
+               actc_ASSERT( find(types_seen.begin(), types_seen.end(), base.name) == types_seen.end(), abi_circular_def_exception, "Circular reference in struct ${type}", ("type",s.second.name) );
                types_seen.emplace_back(base.name);
                current = base;
             }
          }
          for( const auto& field : s.second.fields ) { try {
             ctx.check_deadline();
-            dcc_ASSERT(_is_type(_remove_bin_extension(field.type), ctx), invalid_type_inside_abi, "${type}", ("type",field.type) );
+            actc_ASSERT(_is_type(_remove_bin_extension(field.type), ctx), invalid_type_inside_abi, "${type}", ("type",field.type) );
          } FC_CAPTURE_AND_RETHROW( (field) ) }
       } FC_CAPTURE_AND_RETHROW( (s) ) }
       for( const auto& s : variants ) { try {
          for( const auto& type : s.second.types ) { try {
             ctx.check_deadline();
-            dcc_ASSERT(_is_type(type, ctx), invalid_type_inside_abi, "${type}", ("type",type) );
+            actc_ASSERT(_is_type(type, ctx), invalid_type_inside_abi, "${type}", ("type",type) );
          } FC_CAPTURE_AND_RETHROW( (type) ) }
       } FC_CAPTURE_AND_RETHROW( (s) ) }
       for( const auto& a : actions ) { try {
         ctx.check_deadline();
-        dcc_ASSERT(_is_type(a.second, ctx), invalid_type_inside_abi, "${type}", ("type",a.second) );
+        actc_ASSERT(_is_type(a.second, ctx), invalid_type_inside_abi, "${type}", ("type",a.second) );
       } FC_CAPTURE_AND_RETHROW( (a)  ) }
 
       for( const auto& t : tables ) { try {
         ctx.check_deadline();
-        dcc_ASSERT(_is_type(t.second, ctx), invalid_type_inside_abi, "${type}", ("type",t.second) );
+        actc_ASSERT(_is_type(t.second, ctx), invalid_type_inside_abi, "${type}", ("type",t.second) );
       } FC_CAPTURE_AND_RETHROW( (t)  ) }
    }
 
@@ -284,7 +284,7 @@ namespace dccio { namespace chain {
    {
       auto h = ctx.enter_scope();
       auto s_itr = structs.find(type);
-      dcc_ASSERT( s_itr != structs.end(), invalid_type_inside_abi, "Unknown type ${type}", ("type",ctx.maybe_shorten(type)) );
+      actc_ASSERT( s_itr != structs.end(), invalid_type_inside_abi, "Unknown type ${type}", ("type",ctx.maybe_shorten(type)) );
       ctx.hint_struct_type_if_in_array( s_itr );
       const auto& st = s_itr->second;
       if( st.base != type_name() ) {
@@ -300,10 +300,10 @@ namespace dccio { namespace chain {
                continue;
             }
             if( encountered_extension ) {
-               dcc_THROW( abi_exception, "Encountered field '${f}' without binary extension designation while processing struct '${p}'",
+               actc_THROW( abi_exception, "Encountered field '${f}' without binary extension designation while processing struct '${p}'",
                           ("f", ctx.maybe_shorten(field.name))("p", ctx.get_path_string()) );
             }
-            dcc_THROW( unpack_exception, "Stream unexpectedly ended; unable to unpack field '${f}' of struct '${p}'",
+            actc_THROW( unpack_exception, "Stream unexpectedly ended; unable to unpack field '${f}' of struct '${p}'",
                        ("f", ctx.maybe_shorten(field.name))("p", ctx.get_path_string()) );
 
          }
@@ -322,7 +322,7 @@ namespace dccio { namespace chain {
       if( btype != built_in_types.end() ) {
          try {
             return btype->second.first(stream, is_array(rtype), is_optional(rtype));
-         } dcc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack ${class} type '${type}' while processing '${p}'",
+         } actc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack ${class} type '${type}' while processing '${p}'",
                                    ("class", is_array(rtype) ? "array of built-in" : is_optional(rtype) ? "optional of built-in" : "built-in")
                                    ("type", ftype)("p", ctx.get_path_string()) )
       }
@@ -331,7 +331,7 @@ namespace dccio { namespace chain {
          fc::unsigned_int size;
          try {
             fc::raw::unpack(stream, size);
-         } dcc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack size of array '${p}'", ("p", ctx.get_path_string()) )
+         } actc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack size of array '${p}'", ("p", ctx.get_path_string()) )
          vector<fc::variant> vars;
          auto h1 = ctx.push_to_path( impl::array_index_path_item{} );
          for( decltype(size.value) i = 0; i < size; ++i ) {
@@ -340,11 +340,11 @@ namespace dccio { namespace chain {
             // QUESTION: Is it actually desired behavior to require the returned variant to not be null?
             //           This would disallow arrays of optionals in general (though if all optionals in the array were present it would be allowed).
             //           Is there any scenario in which the returned variant would be null other than in the case of an empty optional?
-            dcc_ASSERT( !v.is_null(), unpack_exception, "Invalid packed array '${p}'", ("p", ctx.get_path_string()) );
+            actc_ASSERT( !v.is_null(), unpack_exception, "Invalid packed array '${p}'", ("p", ctx.get_path_string()) );
             vars.emplace_back(std::move(v));
          }
          // QUESTION: Why would the assert below ever fail?
-         dcc_ASSERT( vars.size() == size.value,
+         actc_ASSERT( vars.size() == size.value,
                      unpack_exception,
                      "packed size does not match unpacked array size, packed size ${p} actual size ${a}",
                      ("p", size)("a", vars.size()) );
@@ -353,7 +353,7 @@ namespace dccio { namespace chain {
          char flag;
          try {
             fc::raw::unpack(stream, flag);
-         } dcc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack presence flag of optional '${p}'", ("p", ctx.get_path_string()) )
+         } actc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack presence flag of optional '${p}'", ("p", ctx.get_path_string()) )
          return flag ? _binary_to_variant(ftype, stream, ctx) : fc::variant();
       } else {
          auto v_itr = variants.find(rtype);
@@ -362,8 +362,8 @@ namespace dccio { namespace chain {
             fc::unsigned_int select;
             try {
                fc::raw::unpack(stream, select);
-            } dcc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack tag of variant '${p}'", ("p", ctx.get_path_string()) )
-            dcc_ASSERT( (size_t)select < v_itr->second.types.size(), unpack_exception,
+            } actc_RETHROW_EXCEPTIONS( unpack_exception, "Unable to unpack tag of variant '${p}'", ("p", ctx.get_path_string()) )
+            actc_ASSERT( (size_t)select < v_itr->second.types.size(), unpack_exception,
                         "Unpacked invalid tag (${select}) for variant '${p}'", ("select", select.value)("p",ctx.get_path_string()) );
             auto h1 = ctx.push_to_path( impl::variant_path_item{ .variant_itr = v_itr, .variant_ordinal = static_cast<uint32_t>(select) } );
             return vector<fc::variant>{v_itr->second.types[select], _binary_to_variant(v_itr->second.types[select], stream, ctx)};
@@ -373,7 +373,7 @@ namespace dccio { namespace chain {
       fc::mutable_variant_object mvo;
       _binary_to_variant(rtype, stream, mvo, ctx);
       // QUESTION: Is this assert actually desired? It disallows unpacking empty structs from datastream.
-      dcc_ASSERT( mvo.size() > 0, unpack_exception, "Unable to unpack '${p}' from stream", ("p", ctx.get_path_string()) );
+      actc_ASSERT( mvo.size() > 0, unpack_exception, "Unable to unpack '${p}' from stream", ("p", ctx.get_path_string()) );
       return fc::variant( std::move(mvo) );
    }
 
@@ -424,13 +424,13 @@ namespace dccio { namespace chain {
       } else if( (v_itr = variants.find(rtype)) != variants.end() ) {
          ctx.hint_variant_type_if_in_array( v_itr );
          auto& v = v_itr->second;
-         dcc_ASSERT( var.is_array() && var.size() == 2, pack_exception,
+         actc_ASSERT( var.is_array() && var.size() == 2, pack_exception,
                     "Expected input to be an array of two items while processing variant '${p}'", ("p", ctx.get_path_string()) );
-         dcc_ASSERT( var[size_t(0)].is_string(), pack_exception,
+         actc_ASSERT( var[size_t(0)].is_string(), pack_exception,
                     "Encountered non-string as first item of input array while processing variant '${p}'", ("p", ctx.get_path_string()) );
          auto variant_type_str = var[size_t(0)].get_string();
          auto it = find(v.types.begin(), v.types.end(), variant_type_str);
-         dcc_ASSERT( it != v.types.end(), pack_exception,
+         actc_ASSERT( it != v.types.end(), pack_exception,
                      "Specified type '${t}' in input array is not valid within the variant '${p}'",
                      ("t", ctx.maybe_shorten(variant_type_str))("p", ctx.get_path_string()) );
          fc::raw::pack(ds, fc::unsigned_int(it - v.types.begin()));
@@ -452,7 +452,7 @@ namespace dccio { namespace chain {
                const auto& field = st.fields[i];
                if( vo.contains( string(field.name).c_str() ) ) {
                   if( disallow_additional_fields )
-                     dcc_THROW( pack_exception, "Unexpected field '${f}' found in input object while processing struct '${p}'",
+                     actc_THROW( pack_exception, "Unexpected field '${f}' found in input object while processing struct '${p}'",
                                 ("f", ctx.maybe_shorten(field.name))("p", ctx.get_path_string()) );
                   {
                      auto h1 = ctx.push_to_path( impl::field_path_item{ .parent_struct_itr = s_itr, .field_ordinal = i } );
@@ -462,16 +462,16 @@ namespace dccio { namespace chain {
                } else if( ends_with(field.type, "$") && ctx.extensions_allowed() ) {
                   disallow_additional_fields = true;
                } else if( disallow_additional_fields ) {
-                  dcc_THROW( abi_exception, "Encountered field '${f}' without binary extension designation while processing struct '${p}'",
+                  actc_THROW( abi_exception, "Encountered field '${f}' without binary extension designation while processing struct '${p}'",
                              ("f", ctx.maybe_shorten(field.name))("p", ctx.get_path_string()) );
                } else {
-                  dcc_THROW( pack_exception, "Missing field '${f}' in input object while processing struct '${p}'",
+                  actc_THROW( pack_exception, "Missing field '${f}' in input object while processing struct '${p}'",
                              ("f", ctx.maybe_shorten(field.name))("p", ctx.get_path_string()) );
                }
             }
          } else if( var.is_array() ) {
             const auto& va = var.get_array();
-            dcc_ASSERT( st.base == type_name(), invalid_type_inside_abi,
+            actc_ASSERT( st.base == type_name(), invalid_type_inside_abi,
                         "Using input array to specify the fields of the derived struct '${p}'; input arrays are currently only allowed for structs without a base",
                         ("p",ctx.get_path_string()) );
             for( uint32_t i = 0; i < st.fields.size(); ++i ) {
@@ -483,15 +483,15 @@ namespace dccio { namespace chain {
                } else if( ends_with(field.type, "$") && ctx.extensions_allowed() ) {
                   break;
                } else {
-                  dcc_THROW( pack_exception, "Early end to input array specifying the fields of struct '${p}'; require input for field '${f}'",
+                  actc_THROW( pack_exception, "Early end to input array specifying the fields of struct '${p}'; require input for field '${f}'",
                              ("p", ctx.get_path_string())("f", ctx.maybe_shorten(field.name)) );
                }
             }
          } else {
-            dcc_THROW( pack_exception, "Unexpected input encountered while processing struct '${p}'", ("p",ctx.get_path_string()) );
+            actc_THROW( pack_exception, "Unexpected input encountered while processing struct '${p}'", ("p",ctx.get_path_string()) );
          }
       } else {
-         dcc_THROW( invalid_type_inside_abi, "Unknown type ${type}", ("type",ctx.maybe_shorten(type)) );
+         actc_THROW( invalid_type_inside_abi, "Unknown type ${type}", ("type",ctx.maybe_shorten(type)) );
       }
    } FC_CAPTURE_AND_RETHROW( (type)(var) ) }
 
@@ -543,7 +543,7 @@ namespace dccio { namespace chain {
    namespace impl {
 
       void abi_traverse_context::check_deadline()const {
-         dcc_ASSERT( fc::time_point::now() < deadline, abi_serialization_deadline_exception,
+         actc_ASSERT( fc::time_point::now() < deadline, abi_serialization_deadline_exception,
                      "serialization time limit ${t}us exceeded", ("t", max_serialization_time) );
       }
 
@@ -553,7 +553,7 @@ namespace dccio { namespace chain {
          };
 
          ++recursion_depth;
-         dcc_ASSERT( recursion_depth < abi_serializer::max_recursion_depth, abi_recursion_depth_exception,
+         actc_ASSERT( recursion_depth < abi_serializer::max_recursion_depth, abi_recursion_depth_exception,
                      "recursive definition, max_recursion_depth ${r} ", ("r", abi_serializer::max_recursion_depth) );
 
          check_deadline();
@@ -581,7 +581,7 @@ namespace dccio { namespace chain {
 
       fc::scoped_exit<std::function<void()>> abi_traverse_context_with_path::push_to_path( const path_item& item ) {
          std::function<void()> callback = [this](){
-            dcc_ASSERT( path.size() > 0, abi_exception,
+            actc_ASSERT( path.size() > 0, abi_exception,
                         "invariant failure in variant_to_binary_context: path is empty on scope exit" );
             path.pop_back();
          };
@@ -592,11 +592,11 @@ namespace dccio { namespace chain {
       }
 
       void abi_traverse_context_with_path::set_array_index_of_path_back( uint32_t i ) {
-         dcc_ASSERT( path.size() > 0, abi_exception, "path is empty" );
+         actc_ASSERT( path.size() > 0, abi_exception, "path is empty" );
 
          auto& b = path.back();
 
-         dcc_ASSERT( b.contains<array_index_path_item>(), abi_exception, "trying to set array index without first pushing new array index item" );
+         actc_ASSERT( b.contains<array_index_path_item>(), abi_exception, "trying to set array index without first pushing new array index item" );
 
          b.get<array_index_path_item>().array_index = i;
       }

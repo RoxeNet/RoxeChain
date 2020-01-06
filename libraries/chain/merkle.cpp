@@ -1,7 +1,7 @@
-#include <dccio/chain/merkle.hpp>
+#include <actc/chain/merkle.hpp>
 #include <fc/io/raw.hpp>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
 /**
  * in order to keep proofs concise, before hashing we set the first bit
@@ -49,4 +49,4 @@ digest_type merkle(vector<digest_type> ids) {
    return ids.front();
 }
 
-} } // dccio::chain
+} } // actc::chain
