@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
-#include <dccio/chain_plugin/chain_plugin.hpp>
-#include <dccio/http_plugin/http_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
 
 #include <appbase/application.hpp>
-#include <dccio/chain/controller.hpp>
+#include <actc/chain/controller.hpp>
 
-namespace dccio {
+namespace actc {
 
 class login_plugin : public plugin<login_plugin> {
  public:
@@ -82,17 +82,17 @@ class login_plugin : public plugin<login_plugin> {
    unique_ptr<class login_plugin_impl> my;
 };
 
-} // namespace dccio
+} // namespace actc
 
-FC_REFLECT(dccio::login_plugin::start_login_request_params, (expiration_time))
-FC_REFLECT(dccio::login_plugin::start_login_request_results, (server_ephemeral_pub_key))
-FC_REFLECT(dccio::login_plugin::finalize_login_request_params,
+FC_REFLECT(actc::login_plugin::start_login_request_params, (expiration_time))
+FC_REFLECT(actc::login_plugin::start_login_request_results, (server_ephemeral_pub_key))
+FC_REFLECT(actc::login_plugin::finalize_login_request_params,
            (server_ephemeral_pub_key)(client_ephemeral_pub_key)(permission)(data)(signatures))
-FC_REFLECT(dccio::login_plugin::finalize_login_request_results, (digest)(recovered_keys)(permission_satisfied)(error))
+FC_REFLECT(actc::login_plugin::finalize_login_request_results, (digest)(recovered_keys)(permission_satisfied)(error))
 
-FC_REFLECT_EMPTY(dccio::login_plugin::do_not_use_gen_r1_key_params)
-FC_REFLECT(dccio::login_plugin::do_not_use_gen_r1_key_results, (pub_key)(priv_key))
-FC_REFLECT(dccio::login_plugin::do_not_use_sign_params, (priv_key)(data))
-FC_REFLECT(dccio::login_plugin::do_not_use_sign_results, (sig))
-FC_REFLECT(dccio::login_plugin::do_not_use_get_secret_params, (pub_key)(priv_key))
-FC_REFLECT(dccio::login_plugin::do_not_use_get_secret_results, (secret))
+FC_REFLECT_EMPTY(actc::login_plugin::do_not_use_gen_r1_key_params)
+FC_REFLECT(actc::login_plugin::do_not_use_gen_r1_key_results, (pub_key)(priv_key))
+FC_REFLECT(actc::login_plugin::do_not_use_sign_params, (priv_key)(data))
+FC_REFLECT(actc::login_plugin::do_not_use_sign_results, (sig))
+FC_REFLECT(actc::login_plugin::do_not_use_get_secret_params, (pub_key)(priv_key))
+FC_REFLECT(actc::login_plugin::do_not_use_get_secret_results, (secret))
