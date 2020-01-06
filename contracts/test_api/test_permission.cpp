@@ -1,15 +1,15 @@
 /**
  * @file action_test.cpp
- * @copyright defined in dcc/LICENSE.txt
+ * @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/permission.h>
-#include <dcciolib/db.h>
+#include <actclib/permission.h>
+#include <actclib/db.h>
 
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/print.hpp>
-#include <dcciolib/compiler_builtins.h>
-#include <dcciolib/serialize.hpp>
-#include <dcciolib/action.hpp>
+#include <actclib/actc.hpp>
+#include <actclib/print.hpp>
+#include <actclib/compiler_builtins.h>
+#include <actclib/serialize.hpp>
+#include <actclib/action.hpp>
 
 #include "test_api.hpp"
 
@@ -20,13 +20,13 @@ struct check_auth_msg {
    permission_name      permission;
    std::vector<public_key>   pubkeys;
 
-   dccLIB_SERIALIZE( check_auth_msg, (account)(permission)(pubkeys)  )
+   actcLIB_SERIALIZE( check_auth_msg, (account)(permission)(pubkeys)  )
 };
 
 void test_permission::check_authorization(uint64_t receiver, uint64_t code, uint64_t action) {
    (void)code;
    (void)action;
-   using namespace dccio;
+   using namespace actc;
 
    auto self = receiver;
    auto params = unpack_action_data<check_auth_msg>();
@@ -55,25 +55,25 @@ struct test_permission_last_used_msg {
    permission_name  permission;
    int64_t          last_used_time;
 
-   dccLIB_SERIALIZE( test_permission_last_used_msg, (account)(permission)(last_used_time) )
+   actcLIB_SERIALIZE( test_permission_last_used_msg, (account)(permission)(last_used_time) )
 };
 
 void test_permission::test_permission_last_used(uint64_t /* receiver */, uint64_t code, uint64_t action) {
    (void)code;
    (void)action;
-   using namespace dccio;
+   using namespace actc;
 
    auto params = unpack_action_data<test_permission_last_used_msg>();
 
-   dccio_assert( get_permission_last_used(params.account, params.permission) == params.last_used_time, "unexpected last used permission time" );
+   actc_assert( get_permission_last_used(params.account, params.permission) == params.last_used_time, "unexpected last used permission time" );
 }
 
 void test_permission::test_account_creation_time(uint64_t /* receiver */, uint64_t code, uint64_t action) {
    (void)code;
    (void)action;
-   using namespace dccio;
+   using namespace actc;
 
    auto params = unpack_action_data<test_permission_last_used_msg>();
 
-   dccio_assert( get_account_creation_time(params.account) == params.last_used_time, "unexpected account creation time" );
+   actc_assert( get_account_creation_time(params.account) == params.last_used_time, "unexpected account creation time" );
 }
