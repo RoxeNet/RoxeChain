@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
 
-#include <dccio/chain_plugin/chain_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
 
 namespace fc { class variant; }
 
-namespace dccio {
+namespace actc {
    using chain::transaction_id_type;
    using std::shared_ptr;
    using namespace appbase;
@@ -49,6 +49,6 @@ class bnet_plugin : public plugin<bnet_plugin> {
       bnet_ptr my;
 };
 
-} /// namespace dccio
+} /// namespace actc
 
 
