@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  *  @brief launch testnet nodes
  **/
 #include <string>
@@ -34,7 +34,7 @@
 #include <sys/types.h>
 #include <netinet/in.h>
 #include <net/if.h>
-#include <dccio/chain/genesis_state.hpp>
+#include <actc/chain/genesis_state.hpp>
 
 #include "config.hpp"
 
@@ -115,7 +115,7 @@ struct local_identity {
 
 } local_id;
 
-class dccd_def;
+class actcd_def;
 
 class host_def {
 public:
@@ -123,7 +123,7 @@ public:
     : genesis("genesis.json"),
       ssh_identity (""),
       ssh_args (""),
-      dccio_home(),
+      actc_home(),
       host_name("127.0.0.1"),
       public_name("localhost"),
       listen_addr("0.0.0.0"),
@@ -139,14 +139,14 @@ public:
   string           genesis;
   string           ssh_identity;
   string           ssh_args;
-  string           dccio_home;
+  string           actc_home;
   string           host_name;
   string           public_name;
   string           listen_addr;
   uint16_t         base_p2p_port;
   uint16_t         base_http_port;
   uint16_t         def_file_size;
-  vector<dccd_def> instances;
+  vector<actcd_def> instances;
 
   uint16_t p2p_port() {
     return base_p2p_port + p2p_count++;
@@ -196,9 +196,9 @@ protected:
 
 class tn_node_def;
 
-class dccd_def {
+class actcd_def {
 public:
-  dccd_def()
+  actcd_def()
     : config_dir_name (),
       data_dir_name (),
       p2p_port(),
@@ -245,12 +245,12 @@ public:
   vector<private_key_type> keys;
   vector<string>  peers;
   vector<string>  producers;
-  dccd_def*       instance;
+  actcd_def*       instance;
   string          gelf_endpoint;
 };
 
 void
-dccd_def::mk_dot_label () {
+actcd_def::mk_dot_label () {
   dot_label_str = name + "\\nprod=";
   if (node == 0 || node->producers.empty()) {
     dot_label_str += "<none>";
@@ -268,7 +268,7 @@ dccd_def::mk_dot_label () {
 }
 
 void
-dccd_def::set_host( host_def* h, bool is_bios ) {
+actcd_def::set_host( host_def* h, bool is_bios ) {
   host = h->host_name;
   p2p_port = is_bios ? h->p2p_bios_port() : h->p2p_port();
   http_port = is_bios ? h->http_bios_port() : h->http_port();
@@ -303,16 +303,16 @@ struct server_name_def {
   string ipaddr;
   string name;
   bool has_bios;
-  string dccio_home;
+  string actc_home;
   uint16_t instances;
-  server_name_def () : ipaddr(), name(), has_bios(false), dccio_home(), instances(1) {}
+  server_name_def () : ipaddr(), name(), has_bios(false), actc_home(), instances(1) {}
 };
 
 struct server_identities {
   vector<server_name_def> producer;
   vector<server_name_def> nonprod;
   vector<string> db;
-  string default_dccio_home;
+  string default_actc_home;
   remote_deploy ssh;
 };
 
@@ -406,8 +406,8 @@ struct launcher_def {
    bfs::path config_dir_base;
    bfs::path data_dir_base;
    bool skip_transaction_signatures = false;
-   string dccd_extra_args;
-   std::map<uint,string> specific_noddcc_args;
+   string actcd_extra_args;
+   std::map<uint,string> specific_nodactc_args;
    testnet_def network;
    string gelf_endpoint;
    vector <string> aliases;
@@ -427,9 +427,9 @@ struct launcher_def {
    string start_script;
    fc::optional<uint32_t> max_block_cpu_usage;
    fc::optional<uint32_t> max_transaction_cpu_usage;
-   dccio::chain::genesis_state genesis_from_file;
+   actc::chain::genesis_state genesis_from_file;
 
-   void assign_name (dccd_def &node, bool is_bios);
+   void assign_name (actcd_def &node, bool is_bios);
 
    void set_options (bpo::options_description &cli);
    void initialize (const variables_map &vmap);
@@ -462,12 +462,12 @@ struct launcher_def {
    void format_ssh (const string &cmd, const string &host_name, string &ssh_cmd_line);
    void do_command(const host_def& host, const string& name, vector<pair<string, string>> env_pairs, const string& cmd);
    bool do_ssh (const string &cmd, const string &host_name);
-   void prep_remote_config_dir (dccd_def &node, host_def *host);
-   void launch (dccd_def &node, string &gts);
+   void prep_remote_config_dir (actcd_def &node, host_def *host);
+   void launch (actcd_def &node, string &gts);
    void kill (launch_modes mode, string sig_opt);
    static string get_node_num(uint16_t node_num);
-   pair<host_def, dccd_def> find_node(uint16_t node_num);
-   vector<pair<host_def, dccd_def>> get_nodes(const string& node_number_list);
+   pair<host_def, actcd_def> find_node(uint16_t node_num);
+   vector<pair<host_def, actcd_def>> get_nodes(const string& node_number_list);
    void bounce (const string& node_numbers);
    void down (const string& node_numbers);
    void roll (const string& host_names);
@@ -486,16 +486,16 @@ launcher_def::set_options (bpo::options_description &cfg) {
     ("shape,s",bpo::value<string>(&shape)->default_value("star"),"network topology, use \"star\" \"mesh\" or give a filename for custom")
     ("p2p-plugin", bpo::value<string>()->default_value("net"),"select a p2p plugin to use (either net or bnet). Defaults to net.")
     ("genesis,g",bpo::value<string>()->default_value("./genesis.json"),"set the path to genesis.json")
-    ("skip-signature", bpo::bool_switch(&skip_transaction_signatures)->default_value(false), "noddcc does not require transaction signatures.")
-    ("noddcc", bpo::value<string>(&dccd_extra_args), "forward noddcc command line argument(s) to each instance of noddcc, enclose arg(s) in quotes")
-    ("specific-num", bpo::value<vector<uint>>()->composing(), "forward noddcc command line argument(s) (using \"--specific-noddcc\" flag) to this specific instance of noddcc. This parameter can be entered multiple times and requires a paired \"--specific-noddcc\" flag")
-    ("specific-noddcc", bpo::value<vector<string>>()->composing(), "forward noddcc command line argument(s) to its paired specific instance of noddcc(using \"--specific-num\"), enclose arg(s) in quotes")
+    ("skip-signature", bpo::bool_switch(&skip_transaction_signatures)->default_value(false), "nodactc does not require transaction signatures.")
+    ("nodactc", bpo::value<string>(&actcd_extra_args), "forward nodactc command line argument(s) to each instance of nodactc, enclose arg(s) in quotes")
+    ("specific-num", bpo::value<vector<uint>>()->composing(), "forward nodactc command line argument(s) (using \"--specific-nodactc\" flag) to this specific instance of nodactc. This parameter can be entered multiple times and requires a paired \"--specific-nodactc\" flag")
+    ("specific-nodactc", bpo::value<vector<string>>()->composing(), "forward nodactc command line argument(s) to its paired specific instance of nodactc(using \"--specific-num\"), enclose arg(s) in quotes")
     ("delay,d",bpo::value<int>(&start_delay)->default_value(0),"seconds delay before starting each node after the first")
     ("boot",bpo::bool_switch(&boot)->default_value(false),"After deploying the nodes and generating a boot script, invoke it.")
     ("nogen",bpo::bool_switch(&nogen)->default_value(false),"launch nodes without writing new config files")
     ("host-map",bpo::value<string>(),"a file containing mapping specific nodes to hosts. Used to enhance the custom shape argument")
     ("servers",bpo::value<string>(),"a file containing ip addresses and names of individual servers to deploy as producers or non-producers ")
-    ("per-host",bpo::value<int>(&per_host)->default_value(0),"specifies how many noddcc instances will run on a single host. Use 0 to indicate all on one.")
+    ("per-host",bpo::value<int>(&per_host)->default_value(0),"specifies how many nodactc instances will run on a single host. Use 0 to indicate all on one.")
     ("network-name",bpo::value<string>(&network.name)->default_value("testnet_"),"network name prefix used in GELF logging source")
     ("enable-gelf-logging",bpo::value<bool>(&gelf_enabled)->default_value(true),"enable gelf logging appender in logging configuration file")
     ("gelf-endpoint",bpo::value<string>(&gelf_endpoint)->default_value("10.160.11.21:12201"),"hostname:port or ip:port of GELF endpoint")
@@ -552,9 +552,9 @@ launcher_def::initialize (const variables_map &vmap) {
 
   if (vmap.count("specific-num")) {
     const auto specific_nums = vmap["specific-num"].as<vector<uint>>();
-    const auto specific_args = vmap["specific-noddcc"].as<vector<string>>();
+    const auto specific_args = vmap["specific-nodactc"].as<vector<string>>();
     if (specific_nums.size() != specific_args.size()) {
-      cerr << "ERROR: every specific-num argument must be paired with a specific-noddcc argument" << endl;
+      cerr << "ERROR: every specific-num argument must be paired with a specific-nodactc argument" << endl;
       exit (-1);
     }
     const auto total_nodes = vmap["nodes"].as<size_t>();
@@ -565,7 +565,7 @@ launcher_def::initialize (const variables_map &vmap) {
         cerr << "\"--specific-num\" provided value= " << num << " is higher than \"--nodes\" provided value=" << total_nodes << endl;
         exit (-1);
       }
-      specific_noddcc_args[num] = specific_args[i];
+      specific_nodactc_args[num] = specific_args[i];
     }
   }
 
@@ -603,18 +603,18 @@ launcher_def::initialize (const variables_map &vmap) {
     try {
       fc::json::from_file(host_map_file).as<vector<host_def>>(bindings);
       for (auto &binding : bindings) {
-        for (auto &dccd : binding.instances) {
-          dccd.host = binding.host_name;
-          dccd.p2p_endpoint = binding.public_name + ":" + boost::lexical_cast<string,uint16_t>(dccd.p2p_port);
+        for (auto &actcd : binding.instances) {
+          actcd.host = binding.host_name;
+          actcd.p2p_endpoint = binding.public_name + ":" + boost::lexical_cast<string,uint16_t>(actcd.p2p_port);
 
-          aliases.push_back (dccd.name);
+          aliases.push_back (actcd.name);
         }
       }
     } catch (...) { // this is an optional feature, so an exception is OK
     }
   }
 
-  config_dir_base = "etc/dccio";
+  config_dir_base = "etc/actc";
   data_dir_base = "var/lib";
   next_node = 0;
   ++prod_nodes; // add one for the bios node
@@ -627,7 +627,7 @@ launcher_def::initialize (const variables_map &vmap) {
   if (prod_nodes > total_nodes)
     total_nodes = prod_nodes;
 
-  char* erd_env_var = getenv ("dccIO_HOME");
+  char* erd_env_var = getenv ("actc_HOME");
   if (erd_env_var == nullptr || std::string(erd_env_var).empty()) {
      erd_env_var = getenv ("PWD");
   }
@@ -640,7 +640,7 @@ launcher_def::initialize (const variables_map &vmap) {
 
   stage = bfs::path(erd);
   if (!bfs::exists(stage)) {
-    cerr << "\"" << erd << "\" is not a valid path. Please ensure environment variable dccIO_HOME is set to the build path." << endl;
+    cerr << "\"" << erd << "\" is not a valid path. Please ensure environment variable actc_HOME is set to the build path." << endl;
     exit (-1);
   }
   stage /= bfs::path("staging");
@@ -678,7 +678,7 @@ launcher_def::load_servers () {
 
 
 void
-launcher_def::assign_name (dccd_def &node, bool is_bios) {
+launcher_def::assign_name (actcd_def &node, bool is_bios) {
    string node_cfg_name;
 
    if (is_bios) {
@@ -768,14 +768,14 @@ launcher_def::define_network () {
 
   if (per_host == 0) {
     host_def local_host;
-    local_host.dccio_home = erd;
+    local_host.actc_home = erd;
     local_host.genesis = genesis.string();
     for (size_t i = 0; i < (total_nodes); i++) {
-      dccd_def dccd;
-      assign_name(dccd, i == 0);
-      aliases.push_back(dccd.name);
-      dccd.set_host (&local_host, i == 0);
-      local_host.instances.emplace_back(move(dccd));
+      actcd_def actcd;
+      assign_name(actcd, i == 0);
+      aliases.push_back(actcd.name);
+      actcd.set_host (&local_host, i == 0);
+      local_host.instances.emplace_back(move(actcd));
     }
     bindings.emplace_back(move(local_host));
   }
@@ -814,28 +814,28 @@ launcher_def::define_network () {
           lhost->public_name = lhost->host_name;
           ph_count = 1;
         }
-        lhost->dccio_home =
-          (local_id.contains (lhost->host_name) || servers.default_dccio_home.empty()) ?
-          erd : servers.default_dccio_home;
+        lhost->actc_home =
+          (local_id.contains (lhost->host_name) || servers.default_actc_home.empty()) ?
+          erd : servers.default_actc_home;
         host_ndx++;
       } // ph_count == 0
 
-      dccd_def dccd;
-      assign_name(dccd, do_bios);
-      dccd.has_db = false;
+      actcd_def actcd;
+      assign_name(actcd, do_bios);
+      actcd.has_db = false;
 
       if (servers.db.size()) {
         for (auto &dbn : servers.db) {
           if (lhost->host_name == dbn) {
-            dccd.has_db = true;
+            actcd.has_db = true;
             break;
          }
         }
       }
-      aliases.push_back(dccd.name);
-      dccd.set_host (lhost, do_bios);
+      aliases.push_back(actcd.name);
+      actcd.set_host (lhost, do_bios);
       do_bios = false;
-      lhost->instances.emplace_back(move(dccd));
+      lhost->instances.emplace_back(move(actcd));
       --ph_count;
     } // for i
     bindings.emplace_back( move(*lhost) );
@@ -867,7 +867,7 @@ launcher_def::bind_nodes () {
          auto pubkey = kp.get_public_key();
          node.keys.emplace_back (move(kp));
          if (is_bios) {
-            string prodname = "dccio";
+            string prodname = "actc";
             node.producers.push_back(prodname);
             producer_set.schedule.push_back({prodname,pubkey});
          }
@@ -931,7 +931,7 @@ launcher_def::find_host_by_name_or_address (const string &host_id)
 host_def *
 launcher_def::deploy_config_files (tn_node_def &node) {
   boost::system::error_code ec;
-  dccd_def &instance = *node.instance;
+  actcd_def &instance = *node.instance;
   host_def *host = find_host (instance.host);
 
   bfs::path source = stage / instance.config_dir_name / "config.ini";
@@ -939,8 +939,8 @@ launcher_def::deploy_config_files (tn_node_def &node) {
   bfs::path genesis_source = stage / instance.config_dir_name / "genesis.json";
 
   if (host->is_local()) {
-    bfs::path cfgdir = bfs::path(host->dccio_home) / instance.config_dir_name;
-    bfs::path dd = bfs::path(host->dccio_home) / instance.data_dir_name;
+    bfs::path cfgdir = bfs::path(host->actc_home) / instance.config_dir_name;
+    bfs::path dd = bfs::path(host->actc_home) / instance.data_dir_name;
 
     if (!bfs::exists (cfgdir)) {
        if (!bfs::create_directories (cfgdir, ec) && ec.value()) {
@@ -988,7 +988,7 @@ launcher_def::deploy_config_files (tn_node_def &node) {
   else {
     prep_remote_config_dir (instance, host);
 
-    bfs::path rfile = bfs::path (host->dccio_home) / instance.config_dir_name / "config.ini";
+    bfs::path rfile = bfs::path (host->actc_home) / instance.config_dir_name / "config.ini";
     auto scp_cmd_line = compose_scp_command(*host, source, rfile);
 
     cerr << "cmdline = " << scp_cmd_line << endl;
@@ -998,7 +998,7 @@ launcher_def::deploy_config_files (tn_node_def &node) {
       exit(-1);
     }
 
-    rfile = bfs::path (host->dccio_home) / instance.config_dir_name / "logging.json";
+    rfile = bfs::path (host->actc_home) / instance.config_dir_name / "logging.json";
 
     scp_cmd_line = compose_scp_command(*host, logging_source, rfile);
 
@@ -1008,7 +1008,7 @@ launcher_def::deploy_config_files (tn_node_def &node) {
       exit(-1);
     }
 
-    rfile = bfs::path (host->dccio_home) / instance.config_dir_name / "genesis.json";
+    rfile = bfs::path (host->actc_home) / instance.config_dir_name / "genesis.json";
 
     scp_cmd_line = compose_scp_command(*host, genesis_source, rfile);
 
@@ -1044,7 +1044,7 @@ void
 launcher_def::write_config_file (tn_node_def &node) {
    bool is_bios = (node.name == "bios");
    bfs::path filename;
-   dccd_def &instance = *node.instance;
+   actcd_def &instance = *node.instance;
    host_def *host = find_host (instance.host);
 
    bfs::path dd = stage / instance.config_dir_name;
@@ -1122,25 +1122,25 @@ launcher_def::write_config_file (tn_node_def &node) {
     for (auto &p : node.producers) {
       cfg << "producer-name = " << p << "\n";
     }
-    cfg << "plugin = dccio::producer_plugin\n";
+    cfg << "plugin = actc::producer_plugin\n";
   }
   if( instance.has_db ) {
-    cfg << "plugin = dccio::mongo_db_plugin\n";
+    cfg << "plugin = actc::mongo_db_plugin\n";
   }
   if ( p2p == p2p_plugin::NET ) {
-    cfg << "plugin = dccio::net_plugin\n";
+    cfg << "plugin = actc::net_plugin\n";
   } else {
-    cfg << "plugin = dccio::bnet_plugin\n";
+    cfg << "plugin = actc::bnet_plugin\n";
   }
-  cfg << "plugin = dccio::chain_api_plugin\n"
-      << "plugin = dccio::history_api_plugin\n";
+  cfg << "plugin = actc::chain_api_plugin\n"
+      << "plugin = actc::history_api_plugin\n";
   cfg.close();
 }
 
 void
 launcher_def::write_logging_config_file(tn_node_def &node) {
   bfs::path filename;
-  dccd_def &instance = *node.instance;
+  actcd_def &instance = *node.instance;
 
   bfs::path dd = stage / instance.config_dir_name;
   if (!bfs::exists(dd)) {
@@ -1181,12 +1181,12 @@ launcher_def::init_genesis () {
    const bfs::path genesis_path = genesis.is_complete() ? genesis : bfs::current_path() / genesis;
    if (!bfs::exists(genesis_path)) {
       cout << "generating default genesis file " << genesis_path << endl;
-      dccio::chain::genesis_state default_genesis;
+      actc::chain::genesis_state default_genesis;
       fc::json::save_to_file( default_genesis, genesis_path, true );
    }
    string bioskey = string(network.nodes["bios"].keys[0].get_public_key());
 
-   fc::json::from_file(genesis_path).as<dccio::chain::genesis_state>(genesis_from_file);
+   fc::json::from_file(genesis_path).as<actc::chain::genesis_state>(genesis_from_file);
    genesis_from_file.initial_key = public_key_type(bioskey);
    if (max_block_cpu_usage)
       genesis_from_file.initial_configuration.max_block_cpu_usage = *max_block_cpu_usage;
@@ -1197,7 +1197,7 @@ launcher_def::init_genesis () {
 void
 launcher_def::write_genesis_file(tn_node_def &node) {
   bfs::path filename;
-  dccd_def &instance = *node.instance;
+  actcd_def &instance = *node.instance;
 
   bfs::path dd = stage / instance.config_dir_name;
   if (!bfs::exists(dd)) {
@@ -1218,7 +1218,7 @@ launcher_def::write_setprods_file() {
   }
    producer_set_def no_bios;
    for (auto &p : producer_set.schedule) {
-      if (p.producer_name != "dccio")
+      if (p.producer_name != "actc")
          no_bios.schedule.push_back(p);
    }
   auto str = fc::json::to_pretty_string( no_bios, fc::json::stringify_large_ints_and_doubles );
@@ -1259,7 +1259,7 @@ launcher_def::write_bios_boot () {
          }
          else if (key == "cacmd") {
             for (auto &p : producer_set.schedule) {
-               if (p.producer_name == "dccio") {
+               if (p.producer_name == "actc") {
                   continue;
                }
                brb << "cacmd " << p.producer_name
@@ -1443,17 +1443,17 @@ launcher_def::do_ssh (const string &cmd, const string &host_name) {
 }
 
 void
-launcher_def::prep_remote_config_dir (dccd_def &node, host_def *host) {
-  bfs::path abs_config_dir = bfs::path(host->dccio_home) / node.config_dir_name;
-  bfs::path abs_data_dir = bfs::path(host->dccio_home) / node.data_dir_name;
+launcher_def::prep_remote_config_dir (actcd_def &node, host_def *host) {
+  bfs::path abs_config_dir = bfs::path(host->actc_home) / node.config_dir_name;
+  bfs::path abs_data_dir = bfs::path(host->actc_home) / node.data_dir_name;
 
   string acd = abs_config_dir.string();
   string add = abs_data_dir.string();
-  string cmd = "cd " + host->dccio_home;
+  string cmd = "cd " + host->actc_home;
 
-  cmd = "cd " + host->dccio_home;
+  cmd = "cd " + host->actc_home;
   if (!do_ssh(cmd, host->host_name)) {
-    cerr << "Unable to switch to path " << host->dccio_home
+    cerr << "Unable to switch to path " << host->actc_home
          << " on host " <<  host->host_name << endl;
     exit (-1);
   }
@@ -1493,13 +1493,13 @@ launcher_def::prep_remote_config_dir (dccd_def &node, host_def *host) {
 }
 
 void
-launcher_def::launch (dccd_def &instance, string &gts) {
+launcher_def::launch (actcd_def &instance, string &gts) {
   bfs::path dd = instance.data_dir_name;
   bfs::path reout = dd / "stdout.txt";
   bfs::path reerr_sl = dd / "stderr.txt";
   bfs::path reerr_base = bfs::path("stderr." + launch_time + ".txt");
   bfs::path reerr = dd / reerr_base;
-  bfs::path pidf  = dd / "noddcc.pid";
+  bfs::path pidf  = dd / "nodactc.pid";
   host_def* host;
   try {
      host = deploy_config_files (*instance.node);
@@ -1511,45 +1511,45 @@ launcher_def::launch (dccd_def &instance, string &gts) {
   node_rt_info info;
   info.remote = !host->is_local();
 
-  string dccdcmd = "programs/noddcc/noddcc ";
+  string actcdcmd = "programs/nodactc/nodactc ";
   if (skip_transaction_signatures) {
-    dccdcmd += "--skip-transaction-signatures ";
+    actcdcmd += "--skip-transaction-signatures ";
   }
-  if (!dccd_extra_args.empty()) {
+  if (!actcd_extra_args.empty()) {
     if (instance.name == "bios") {
        // Strip the mongo-related options out of the bios node so
        // the plugins don't conflict between 00 and bios.
-       regex r("--plugin +dccio::mongo_db_plugin");
-       string args = std::regex_replace (dccd_extra_args,r,"");
+       regex r("--plugin +actc::mongo_db_plugin");
+       string args = std::regex_replace (actcd_extra_args,r,"");
        regex r2("--mongodb-uri +[^ ]+");
        args = std::regex_replace (args,r2,"");
-       dccdcmd += args + " ";
+       actcdcmd += args + " ";
     }
     else {
-       dccdcmd += dccd_extra_args + " ";
+       actcdcmd += actcd_extra_args + " ";
     }
   }
-  if (instance.name != "bios" && !specific_noddcc_args.empty()) {
+  if (instance.name != "bios" && !specific_nodactc_args.empty()) {
      const auto node_num = boost::lexical_cast<uint16_t,string>(instance.get_node_num());
-     if (specific_noddcc_args.count(node_num)) {
-        dccdcmd += specific_noddcc_args[node_num] + " ";
+     if (specific_nodactc_args.count(node_num)) {
+        actcdcmd += specific_nodactc_args[node_num] + " ";
      }
   }
 
   if( add_enable_stale_production ) {
-    dccdcmd += "--enable-stale-production true ";
+    actcdcmd += "--enable-stale-production true ";
     add_enable_stale_production = false;
   }
 
-  dccdcmd += " --config-dir " + instance.config_dir_name + " --data-dir " + instance.data_dir_name;
-  dccdcmd += " --genesis-json " + instance.config_dir_name + "/genesis.json";
+  actcdcmd += " --config-dir " + instance.config_dir_name + " --data-dir " + instance.data_dir_name;
+  actcdcmd += " --genesis-json " + instance.config_dir_name + "/genesis.json";
   if (gts.length()) {
-    dccdcmd += " --genesis-timestamp " + gts;
+    actcdcmd += " --genesis-timestamp " + gts;
   }
 
   if (!host->is_local()) {
     string cmdl ("cd ");
-    cmdl += host->dccio_home + "; nohup " + dccdcmd + " > "
+    cmdl += host->actc_home + "; nohup " + actcdcmd + " > "
       + reout.string() + " 2> " + reerr.string() + "& echo $! > " + pidf.string()
       + "; rm -f " + reerr_sl.string()
       + "; ln -s " + reerr_base.string() + " " + reerr_sl.string();
@@ -1559,13 +1559,13 @@ launcher_def::launch (dccd_def &instance, string &gts) {
       exit (-1);
     }
 
-    string cmd = "cd " + host->dccio_home + "; kill -15 $(cat " + pidf.string() + ")";
+    string cmd = "cd " + host->actc_home + "; kill -15 $(cat " + pidf.string() + ")";
     format_ssh (cmd, host->host_name, info.kill_cmd);
   }
   else {
-    cerr << "spawning child, " << dccdcmd << endl;
+    cerr << "spawning child, " << actcdcmd << endl;
 
-    bp::child c(dccdcmd, bp::std_out > reout, bp::std_err > reerr );
+    bp::child c(actcdcmd, bp::std_out > reout, bp::std_err > reerr );
     bfs::remove(reerr_sl);
     bfs::create_symlink (reerr_base, reerr_sl);
 
@@ -1577,7 +1577,7 @@ launcher_def::launch (dccd_def &instance, string &gts) {
     info.kill_cmd = "";
 
     if(!c.running()) {
-      cerr << "child not running after spawn " << dccdcmd << endl;
+      cerr << "child not running after spawn " << actcdcmd << endl;
       for (int i = 0; i > 0; i++) {
         if (c.running () ) break;
       }
@@ -1589,7 +1589,7 @@ launcher_def::launch (dccd_def &instance, string &gts) {
 
 #if 0
 void
-launcher_def::kill_instance(dccd_def, string sig_opt) {
+launcher_def::kill_instance(actcd_def, string sig_opt) {
 }
 #endif
 
@@ -1639,7 +1639,7 @@ launcher_def::get_node_num(uint16_t node_num) {
    return node_num_str;
 }
 
-pair<host_def, dccd_def>
+pair<host_def, actcd_def>
 launcher_def::find_node(uint16_t node_num) {
    const string node_name = network.name + get_node_num(node_num);
    for (const auto& host: bindings) {
@@ -1653,9 +1653,9 @@ launcher_def::find_node(uint16_t node_num) {
    exit (-1);
 }
 
-vector<pair<host_def, dccd_def>>
+vector<pair<host_def, actcd_def>>
 launcher_def::get_nodes(const string& node_number_list) {
-   vector<pair<host_def, dccd_def>> node_list;
+   vector<pair<host_def, actcd_def>> node_list;
    if (fc::to_lower(node_number_list) == "all") {
       for (auto host: bindings) {
          for (auto node: host.instances) {
@@ -1689,7 +1689,7 @@ void
 launcher_def::do_command(const host_def& host, const string& name,
                          vector<pair<string, string>> env_pairs, const string& cmd) {
    if (!host.is_local()) {
-      string rcmd = "cd " + host.dccio_home + "; ";
+      string rcmd = "cd " + host.actc_home + "; ";
       for (auto& env_pair : env_pairs) {
          rcmd += "export " + env_pair.first + "=" + env_pair.second + "; ";
       }
@@ -1714,18 +1714,18 @@ launcher_def::bounce (const string& node_numbers) {
    auto node_list = get_nodes(node_numbers);
    for (auto node_pair: node_list) {
       const host_def& host = node_pair.first;
-      const dccd_def& node = node_pair.second;
+      const actcd_def& node = node_pair.second;
       const string node_num = node.get_node_num();
       cout << "Bouncing " << node.name << endl;
-      string cmd = "./scripts/dccio-tn_bounce.sh " + dccd_extra_args;
-      if (node_num != "bios" && !specific_noddcc_args.empty()) {
+      string cmd = "./scripts/actc-tn_bounce.sh " + actcd_extra_args;
+      if (node_num != "bios" && !specific_nodactc_args.empty()) {
          const auto node_num_i = boost::lexical_cast<uint16_t,string>(node_num);
-         if (specific_noddcc_args.count(node_num_i)) {
-            cmd += " " + specific_noddcc_args[node_num_i];
+         if (specific_nodactc_args.count(node_num_i)) {
+            cmd += " " + specific_nodactc_args[node_num_i];
          }
       }
 
-      do_command(host, node.name, { { "dccIO_HOME", host.dccio_home }, { "dccIO_NODE", node_num } }, cmd);
+      do_command(host, node.name, { { "actc_HOME", host.actc_home }, { "actc_NODE", node_num } }, cmd);
    }
 }
 
@@ -1734,12 +1734,12 @@ launcher_def::down (const string& node_numbers) {
    auto node_list = get_nodes(node_numbers);
    for (auto node_pair: node_list) {
       const host_def& host = node_pair.first;
-      const dccd_def& node = node_pair.second;
+      const actcd_def& node = node_pair.second;
       const string node_num = node.get_node_num();
       cout << "Taking down " << node.name << endl;
-      string cmd = "./scripts/dccio-tn_down.sh ";
+      string cmd = "./scripts/actc-tn_down.sh ";
       do_command(host, node.name,
-                 { { "dccIO_HOME", host.dccio_home }, { "dccIO_NODE", node_num }, { "dccIO_TN_RESTART_CONFIG_DIR", node.config_dir_name } },
+                 { { "actc_HOME", host.actc_home }, { "actc_NODE", node_num }, { "actc_TN_RESTART_CONFIG_DIR", node.config_dir_name } },
                  cmd);
    }
 }
@@ -1751,8 +1751,8 @@ launcher_def::roll (const string& host_names) {
    for (string host_name: hosts) {
       cout << "Rolling " << host_name << endl;
       auto host = find_host_by_name_or_address(host_name);
-      string cmd = "./scripts/dccio-tn_roll.sh ";
-      do_command(*host, host_name, { { "dccIO_HOME", host->dccio_home } }, cmd);
+      string cmd = "./scripts/actc-tn_roll.sh ";
+      do_command(*host, host_name, { { "actc_HOME", host->actc_home } }, cmd);
    }
 }
 
@@ -1902,9 +1902,9 @@ int main (int argc, char *argv[]) {
     ("launch,l",bpo::value<string>(), "select a subset of nodes to launch. Currently may be \"all\", \"none\", or \"local\". If not set, the default is to launch all unless an output file is named, in which case it starts none.")
     ("output,o",bpo::value<bfs::path>(&top.output),"save a copy of the generated topology in this file")
     ("kill,k", bpo::value<string>(&kill_arg),"The launcher retrieves the previously started process ids and issues a kill to each.")
-    ("down", bpo::value<string>(&down_nodes),"comma-separated list of node numbers that will be taken down using the dccio-tn_down.sh script")
-    ("bounce", bpo::value<string>(&bounce_nodes),"comma-separated list of node numbers that will be restarted using the dccio-tn_bounce.sh script")
-    ("roll", bpo::value<string>(&roll_nodes),"comma-separated list of host names where the nodes should be rolled to a new version using the dccio-tn_roll.sh script")
+    ("down", bpo::value<string>(&down_nodes),"comma-separated list of node numbers that will be taken down using the actc-tn_down.sh script")
+    ("bounce", bpo::value<string>(&bounce_nodes),"comma-separated list of node numbers that will be restarted using the actc-tn_bounce.sh script")
+    ("roll", bpo::value<string>(&roll_nodes),"comma-separated list of host names where the nodes should be rolled to a new version using the actc-tn_roll.sh script")
     ("version,v", "print version information")
     ("help,h","print this list")
     ("config-dir", bpo::value<bfs::path>(), "Directory containing configuration files such as config.ini")
@@ -1923,7 +1923,7 @@ int main (int argc, char *argv[]) {
       return 0;
     }
     if (vmap.count("version") > 0) {
-      cout << dccio::launcher::config::version_str << endl;
+      cout << actc::launcher::config::version_str << endl;
       return 0;
     }
 
@@ -2017,12 +2017,12 @@ FC_REFLECT( producer_set_def,
             (schedule))
 
 FC_REFLECT( host_def,
-            (genesis)(ssh_identity)(ssh_args)(dccio_home)
+            (genesis)(ssh_identity)(ssh_args)(actc_home)
             (host_name)(public_name)
             (base_p2p_port)(base_http_port)(def_file_size)
             (instances) )
 
-FC_REFLECT( dccd_def,
+FC_REFLECT( actcd_def,
             (name)(config_dir_name)(data_dir_name)(has_db)
             (p2p_port)(http_port)(file_size) )
 
@@ -2030,9 +2030,9 @@ FC_REFLECT( tn_node_def, (name)(keys)(peers)(producers) )
 
 FC_REFLECT( testnet_def, (name)(ssh_helper)(nodes) )
 
-FC_REFLECT( server_name_def, (ipaddr) (name) (has_bios) (dccio_home) (instances) )
+FC_REFLECT( server_name_def, (ipaddr) (name) (has_bios) (actc_home) (instances) )
 
-FC_REFLECT( server_identities, (producer) (nonprod) (db) (default_dccio_home) (ssh) )
+FC_REFLECT( server_identities, (producer) (nonprod) (db) (default_actc_home) (ssh) )
 
 FC_REFLECT( node_rt_info, (remote)(pid_file)(kill_cmd) )
 

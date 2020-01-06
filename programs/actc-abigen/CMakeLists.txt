@@ -3,7 +3,7 @@ find_package(LLVM 4.0 REQUIRED CONFIG)
 
 link_directories(${LLVM_LIBRARY_DIR})
 
-add_executable(dccio-abigen ${SOURCES})
+add_executable(actc-abigen ${SOURCES})
 
 set( CMAKE_CXX_STANDARD 14 )
 
@@ -17,11 +17,11 @@ if( GPERFTOOLS_FOUND )
     list( APPEND PLATFORM_SPECIFIC_LIBS tcmalloc )
 endif()
 
-target_link_libraries(dccio-abigen abi_generator)
+target_link_libraries(actc-abigen abi_generator)
 
 
 install( TARGETS
-   dccio-abigen
+   actc-abigen
    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}

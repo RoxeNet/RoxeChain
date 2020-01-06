@@ -1,8 +1,8 @@
-if(dccIO_ROOT STREQUAL "" OR NOT dccIO_ROOT)
-   set(dccIO_ROOT "@dcc_ROOT_DIR@")
+if(actc_ROOT STREQUAL "" OR NOT actc_ROOT)
+   set(actc_ROOT "@actc_ROOT_DIR@")
 endif()
-list(APPEND CMAKE_MODULE_PATH ${dccIO_ROOT}/lib/cmake/dccio)
-include(dccioTester)
+list(APPEND CMAKE_MODULE_PATH ${actc_ROOT}/lib/cmake/actc)
+include(actcTester)
 
 function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    string(REGEX REPLACE "^([0-9]+)\\..+$" "\\1" _major "${version}")
@@ -22,7 +22,7 @@ function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    set(${success} TRUE      PARENT_SCOPE)
 endfunction(EXTRACT_MAJOR_MINOR_FROM_VERSION)
 
-function(dccIO_CHECK_VERSION output version hard_min soft_max hard_max) # optional 6th argument for error message
+function(actc_CHECK_VERSION output version hard_min soft_max hard_max) # optional 6th argument for error message
    set(${output} "INVALID" PARENT_SCOPE)
 
    EXTRACT_MAJOR_MINOR_FROM_VERSION("${version}" success major minor)
@@ -93,4 +93,4 @@ function(dccIO_CHECK_VERSION output version hard_min soft_max hard_max) # option
    endif()
 
    set(${output} "MATCH" PARENT_SCOPE)
-endfunction(dccIO_CHECK_VERSION)
+endfunction(actc_CHECK_VERSION)

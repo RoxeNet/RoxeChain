@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include "help_text.hpp"
 #include "localize.hpp"
 #include <regex>
 #include <fc/io/json.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/exceptions.hpp>
 
-using namespace dccio::client::localize;
-using namespace dccio::chain;
+using namespace actc::client::localize;
+using namespace actc::chain;
 
 const char* transaction_help_text_header = _("An error occurred while submitting the transaction for this command!");
 
@@ -65,14 +65,14 @@ const char* duplicate_key_import_help_text = _("This key is already imported int
 const char* unknown_abi_table_help_text = _(R"text(The ABI for the code on account "${1}" does not specify table "${2}".
 
 Please check the account and table name, and verify that the account has the expected code using:
-  cldcc get code ${1})text");
+  clactc get code ${1})text");
 
 const char* failed_to_find_transaction_text = _("Failed to fetch information for transaction: \033[1m${1}\033[0m from the history plugin\n\n"
                                                 "\033[32mIf you know the block number which included this transaction you providing it with the \033[2m--block-hint\033[22m option may help\033[0m");
 
 const char* failed_to_find_transaction_with_block_text = _("Failed to fetch information for transaction: \033[1m${1}\033[0m from the history plugin and the transaction was not present in block \033[1m${2}\033[0m\n");
 
-const char* history_plugin_advice_text = _("\033[32mPlease ensure that the \033[2mdccio::history_plugin\033[22m is enabled on the RPC node you are connecting to and that an account involved in this transaction was configured in the \033[2mfilter-on\033[22m setting.\033[0m\n");
+const char* history_plugin_advice_text = _("\033[32mPlease ensure that the \033[2mactc::history_plugin\033[22m is enabled on the RPC node you are connecting to and that an account involved in this transaction was configured in the \033[2mfilter-on\033[22m setting.\033[0m\n");
 
 const char* help_regex_error = _("Error locating help text: ${code} ${what}");
 
@@ -109,7 +109,7 @@ auto smatch_to_variant(const std::smatch& smatch) {
 };
 
 const char* error_advice_name_type_exception = R"=====(Name should be less than 13 characters and only contains the following symbol .12345abcdefghijklmnopqrstuvwxyz)=====";
-const char* error_advice_public_key_type_exception = R"=====(Public key should be encoded in base58 and starts with dcc prefix)=====";
+const char* error_advice_public_key_type_exception = R"=====(Public key should be encoded in base58 and starts with actc prefix)=====";
 const char* error_advice_private_key_type_exception = R"=====(Private key should be encoded in base58 WIF)=====";
 const char* error_advice_authority_type_exception = R"=====(Ensure that your authority JSON is valid follows the following format!
 {
@@ -117,7 +117,7 @@ const char* error_advice_authority_type_exception = R"=====(Ensure that your aut
   "keys": [         <keys must be alpha-numerically sorted by their string representations and unique>
     ...
     {
-      "key":        <STRING: dcc.IO compatible Public Key>,
+      "key":        <STRING: actc.IO compatible Public Key>,
       "weight":     <INTEGER [1-2^16): a signature from this key contributes this to satisfying the threshold>
     }
     ...
@@ -145,7 +145,7 @@ const char* error_advice_authority_type_exception = R"=====(Ensure that your aut
 )=====";
 const char* error_advice_action_type_exception = R"=====(Ensure that your action JSON follows the contract's abi!)=====";
 const char* error_advice_transaction_type_exception = R"=====(Ensure that your transaction JSON follows the right transaction format!
-You can refer to contracts/dcciolib/transaction.hpp for reference)=====";
+You can refer to contracts/actclib/transaction.hpp for reference)=====";
 const char* error_advice_abi_type_exception =  R"=====(Ensure that your abi JSON follows the following format!
 {
   "types" : [{ "new_type_name":"type_name", "type":"type_name" }],
@@ -198,10 +198,10 @@ const char* error_advice_transaction_exception =  "Ensure that your transaction 
 const char* error_advice_expired_tx_exception =  "Please increase the expiration time of your transaction!";
 const char* error_advice_tx_exp_too_far_exception =  "Please decrease the expiration time of your transaction!";
 const char* error_advice_invalid_ref_block_exception =  "Ensure that the reference block exist in the blockchain!";
-const char* error_advice_tx_duplicate =  "You can try embedding dccio nonce action inside your transaction to ensure uniqueness.";
+const char* error_advice_tx_duplicate =  "You can try embedding actc nonce action inside your transaction to ensure uniqueness.";
 
 const char* error_advice_invalid_action_args_exception = R"=====(Ensure that your arguments follow the contract abi!
-You can check the contract's abi by using 'cldcc get code' command.)=====";
+You can check the contract's abi by using 'clactc get code' command.)=====";
 
 const char* error_advice_permission_query_exception =  "Most likely, the given account/ permission doesn't exist in the blockchain.";
 const char* error_advice_account_query_exception =  "Most likely, the given account doesn't exist in the blockchain.";
@@ -211,14 +211,14 @@ const char* error_advice_contract_query_exception =  "Most likely, the given con
 const char* error_advice_tx_irrelevant_sig =  "Please remove the unnecessary signature from your transaction!";
 const char* error_advice_unsatisfied_authorization =  "Ensure that you have the related private keys inside your wallet and your wallet is unlocked.";
 const char* error_advice_missing_auth_exception =  R"=====(Ensure that you have the related authority inside your transaction!;
-If you are currently using 'cldcc push action' command, try to add the relevant authority using -p option.)=====";
+If you are currently using 'clactc push action' command, try to add the relevant authority using -p option.)=====";
 const char* error_advice_irrelevant_auth_exception =  "Please remove the unnecessary authority from your action!";
 
-const char* error_advice_missing_chain_api_plugin_exception =  "Ensure that you have \033[2mdccio::chain_api_plugin\033[0m\033[32m added to your node's configuration!";
-const char* error_advice_missing_wallet_api_plugin_exception =  "Ensure that you have \033[2mdccio::wallet_api_plugin\033[0m\033[32m added to your node's configuration!\n"\
+const char* error_advice_missing_chain_api_plugin_exception =  "Ensure that you have \033[2mactc::chain_api_plugin\033[0m\033[32m added to your node's configuration!";
+const char* error_advice_missing_wallet_api_plugin_exception =  "Ensure that you have \033[2mactc::wallet_api_plugin\033[0m\033[32m added to your node's configuration!\n"\
                                     "Otherwise specify your wallet location with \033[2m--wallet-url\033[0m\033[32m argument!";
-const char* error_advice_missing_history_api_plugin_exception =  "Ensure that you have \033[2mdccio::history_api_plugin\033[0m\033[32m added to your node's configuration!";
-const char* error_advice_missing_net_api_plugin_exception =  "Ensure that you have \033[2mdccio::net_api_plugin\033[0m\033[32m added to your node's configuration!";
+const char* error_advice_missing_history_api_plugin_exception =  "Ensure that you have \033[2mactc::history_api_plugin\033[0m\033[32m added to your node's configuration!";
+const char* error_advice_missing_net_api_plugin_exception =  "Ensure that you have \033[2mactc::net_api_plugin\033[0m\033[32m added to your node's configuration!";
 
 const char* error_advice_wallet_exist_exception =  "Try to use different wallet name.";
 const char* error_advice_wallet_nonexistent_exception =  "Are you sure you typed the wallet name correctly?";
@@ -270,11 +270,11 @@ const std::map<int64_t, std::string> error_advice = {
    { wallet_not_available_exception::code_value, error_advice_wallet_not_available_exception }
 };
 
-namespace dccio { namespace client { namespace help {
+namespace actc { namespace client { namespace help {
 
 bool print_recognized_errors(const fc::exception& e, const bool verbose_errors) {
-   // dcc recognized error code is from 3000000
-   // refer to libraries/chain/include/dccio/chain/exceptions.hpp
+   // actc recognized error code is from 3000000
+   // refer to libraries/chain/include/actc/chain/exceptions.hpp
    if (e.code() >= chain_exception::code_value) {
       std::string advice, explanation, stack_trace;
 

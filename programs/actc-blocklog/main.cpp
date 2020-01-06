@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dccio/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/block_log.hpp>
-#include <dccio/chain/config.hpp>
-#include <dccio/chain/reversible_block_object.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/block_log.hpp>
+#include <actc/chain/config.hpp>
+#include <actc/chain/reversible_block_object.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/filesystem.hpp>
@@ -16,7 +16,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/path.hpp>
 
-using namespace dccio::chain;
+using namespace actc::chain;
 namespace bfs = boost::filesystem;
 namespace bpo = boost::program_options;
 using bpo::options_description;
@@ -41,8 +41,8 @@ struct blocklog {
 void blocklog::read_log() {
    block_log block_logger(blocks_dir);
    const auto end = block_logger.read_head();
-   dcc_ASSERT( end, block_log_exception, "No blocks found in block log" );
-   dcc_ASSERT( end->block_num() > 1, block_log_exception, "Only one block found in block log" );
+   actc_ASSERT( end, block_log_exception, "No blocks found in block log" );
+   actc_ASSERT( end->block_num() > 1, block_log_exception, "Only one block found in block log" );
 
    ilog( "existing block log contains block num 1 through block num ${n}", ("n",end->block_num()) );
 
@@ -173,7 +173,7 @@ void blocklog::initialize(const variables_map& options) {
 int main(int argc, char** argv)
 {
    std::ios::sync_with_stdio(false); // for potential performance boost for large block log files
-   options_description cli ("dccio-blocklog command line options");
+   options_description cli ("actc-blocklog command line options");
    try {
       blocklog blog;
       blog.set_program_options(cli);
