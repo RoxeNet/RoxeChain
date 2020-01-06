@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/http_plugin/http_plugin.hpp>
-#include <dccio/http_plugin/local_endpoint.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
+#include <actc/http_plugin/local_endpoint.hpp>
+#include <actc/chain/exceptions.hpp>
 
 #include <fc/network/ip.hpp>
 #include <fc/log/logger_config.hpp>
@@ -26,7 +26,7 @@
 #include <memory>
 #include <regex>
 
-namespace dccio {
+namespace actc {
 
    static appbase::abstract_plugin& _http_plugin = app().register_plugin<http_plugin>();
 
@@ -191,14 +191,14 @@ namespace dccio {
 
                fc::ec_key ecdh = EC_KEY_new_by_curve_name(NID_secp384r1);
                if (!ecdh)
-                  dcc_THROW(chain::http_exception, "Failed to set NID_secp384r1");
+                  actc_THROW(chain::http_exception, "Failed to set NID_secp384r1");
                if(SSL_CTX_set_tmp_ecdh(ctx->native_handle(), (EC_KEY*)ecdh) != 1)
-                  dcc_THROW(chain::http_exception, "Failed to set ECDH PFS");
+                  actc_THROW(chain::http_exception, "Failed to set ECDH PFS");
 
                if(SSL_CTX_set_cipher_list(ctx->native_handle(), \
                   "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:AES256:" \
                   "!DHE:!RSA:!AES128:!RC4:!DES:!3DES:!DSS:!SRP:!PSK:!EXP:!MD5:!LOW:!aNULL:!eNULL") != 1)
-                  dcc_THROW(chain::http_exception, "Failed to set HTTPS cipher list");
+                  actc_THROW(chain::http_exception, "Failed to set HTTPS cipher list");
             } catch (const fc::exception& e) {
                elog("https server initialization error: ${w}", ("w", e.to_detail_string()));
             } catch(std::exception& e) {

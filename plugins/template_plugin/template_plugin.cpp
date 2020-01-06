@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/template_plugin/template_plugin.hpp>
+#include <actc/template_plugin/template_plugin.hpp>
 
-namespace dccio {
+namespace actc {
    static appbase::abstract_plugin& _template_plugin = app().register_plugin<template_plugin>();
 
 class template_plugin_impl {

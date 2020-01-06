@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/history_api_plugin/history_api_plugin.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/history_api_plugin/history_api_plugin.hpp>
+#include <actc/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace dccio {
+namespace actc {
 
-using namespace dccio;
+using namespace actc;
 
 static appbase::abstract_plugin& _history_api_plugin = app().register_plugin<history_api_plugin>();
 

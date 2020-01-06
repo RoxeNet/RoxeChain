@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
-#include <dccio/db_size_api_plugin/db_size_api_plugin.hpp>
+#include <actc/db_size_api_plugin/db_size_api_plugin.hpp>
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _db_size_api_plugin = app().register_plugin<db_size_api_plugin>();
 
-using namespace dccio;
+using namespace actc;
 
 #define CALL(api_name, api_handle, call_name, INVOKE, http_response_code) \
 {std::string("/v1/" #api_name "/" #call_name), \

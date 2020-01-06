@@ -1,18 +1,18 @@
 # Community Plugin List
 
-This file contains a list of community authored plugins for `noddcc`, acting as a directory of the plugins that are available.
+This file contains a list of community authored plugins for `nodactc`, acting as a directory of the plugins that are available.
 
 Third parties are encouraged to make pull requests to this file (`develop` branch please) in order to list new plugins.
 
 | Description | URL |
 | ----------- | --- |
-| BP Heartbeat  | https://github.com/bancorprotocol/dcc-producer-heartbeat-plugin |
-| ElasticSearch | https://github.com/dccLaoMao/elasticsearch_plugin |
+| BP Heartbeat  | https://github.com/bancorprotocol/actc-producer-heartbeat-plugin |
+| ElasticSearch | https://github.com/actcLaoMao/elasticsearch_plugin |
 | Kafka | https://github.com/TP-Lab/kafka_plugin |
-| MySQL | https://github.com/dccBLACK/dccio_mysqldb_plugin |
-| SQL | https://github.com/asiniscalchi/dccio_sql_plugin |
-| Watch for specific actions and send them to an HTTP URL | https://github.com/dccauthority/dccio-watcher-plugin |
-| ZMQ / history | https://github.com/cc32d9/dcc_zmq_plugin |
+| MySQL | https://github.com/actcBLACK/actc_mysqldb_plugin |
+| SQL | https://github.com/asiniscalchi/actc_sql_plugin |
+| Watch for specific actions and send them to an HTTP URL | https://github.com/actcauthority/actc-watcher-plugin |
+| ZMQ / history | https://github.com/cc32d9/actc_zmq_plugin |
 
 ## DISCLAIMER:
 
