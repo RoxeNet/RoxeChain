@@ -1,12 +1,12 @@
 cmake_minimum_required( VERSION 3.5 )
 
-project( dccIO )
+project( actc )
 
 enable_testing()
 
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-   message(WARNING "CMAKE_INSTALL_PREFIX is set to default path of ${CMAKE_INSTALL_PREFIX}, resetting to ${CMAKE_INSTALL_PREFIX}/dccio")
-   set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/dccio")
+   message(WARNING "CMAKE_INSTALL_PREFIX is set to default path of ${CMAKE_INSTALL_PREFIX}, resetting to ${CMAKE_INSTALL_PREFIX}/actc")
+   set(CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}/actc")
 elseif ("${CMAKE_INSTALL_PREFIX}" STREQUAL "/usr/local")
    message(WARNING "CMAKE_INSTALL_PREFIX is explicitly set to /usr/local. This is not recommended.")
 endif()
@@ -20,7 +20,7 @@ include( SetupTargetMacros )
 include( InstallDirectoryPermissions )
 include( MASSigning )
 
-set( BLOCKCHAIN_NAME "dccIO" )
+set( BLOCKCHAIN_NAME "actc" )
 set( CMAKE_CXX_STANDARD 14 )
 set( CMAKE_CXX_EXTENSIONS ON )
 set( CXX_STANDARD_REQUIRED ON)
@@ -29,10 +29,10 @@ set(VERSION_MAJOR 1)
 set(VERSION_MINOR 4)
 set(VERSION_PATCH 1)
 
-set( CLI_CLIENT_EXECUTABLE_NAME cldcc )
-set( NODE_EXECUTABLE_NAME noddcc )
-set( KEY_STORE_EXECUTABLE_NAME kdccd )
-set( GUI_CLIENT_EXECUTABLE_NAME dccio )
+set( CLI_CLIENT_EXECUTABLE_NAME clactc )
+set( NODE_EXECUTABLE_NAME nodactc )
+set( KEY_STORE_EXECUTABLE_NAME kactcd )
+set( GUI_CLIENT_EXECUTABLE_NAME actc )
 set( CUSTOM_URL_SCHEME "gcs" )
 set( INSTALLER_APP_ID "68ad7005-8eee-49c9-95ce-9eed97e5b347" )
 
@@ -109,7 +109,7 @@ FIND_PACKAGE(Boost 1.67 REQUIRED COMPONENTS
 
 if( WIN32 )
 
-    message( STATUS "Configuring dccIO on WIN32")
+    message( STATUS "Configuring actc on WIN32")
     set( DB_VERSION 60 )
     set( BDB_STATIC_LIBS 1 )
 
@@ -144,11 +144,11 @@ else( WIN32 ) # Apple AND Linux
 
     if( APPLE )
         # Apple Specific Options Here
-        message( STATUS "Configuring dccIO on OS X" )
+        message( STATUS "Configuring actc on OS X" )
         set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall -Wno-deprecated-declarations" )
     else( APPLE )
         # Linux Specific Options Here
-        message( STATUS "Configuring dccIO on Linux" )
+        message( STATUS "Configuring actc on Linux" )
         set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -Wall" )
         if ( FULL_STATIC_BUILD )
           set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
@@ -177,7 +177,7 @@ else( WIN32 ) # Apple AND Linux
 
 endif( WIN32 )
 
-set(ENABLE_COVERAGE_TESTING FALSE CACHE BOOL "Build dccIO for code coverage analysis")
+set(ENABLE_COVERAGE_TESTING FALSE CACHE BOOL "Build actc for code coverage analysis")
 
 if(ENABLE_COVERAGE_TESTING)
   SET(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
@@ -201,11 +201,11 @@ endif()
 
 message( STATUS "Using '${CORE_SYMBOL_NAME}' as CORE symbol name" )
 
-if ("${dccIO_ROOT_KEY}" STREQUAL "")
-   set(dccIO_ROOT_KEY "dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV")
+if ("${actc_ROOT_KEY}" STREQUAL "")
+   set(actc_ROOT_KEY "actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV")
 endif()
 
-message( STATUS "Using '${dccIO_ROOT_KEY}' as public key for 'dccio' account" )
+message( STATUS "Using '${actc_ROOT_KEY}' as public key for 'actc' account" )
 
 include(wasm)
 add_subdirectory( libraries )
@@ -218,48 +218,48 @@ add_subdirectory( tests )
 add_subdirectory( tools )
 add_subdirectory( debian )
 
-install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/dccio)
+install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc)
 
-install(FILES testnet.template DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/dccio/launcher)
-install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/dccio)
-install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/dccio/launcher)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testnet.template ${CMAKE_CURRENT_BINARY_DIR}/etc/dccio/launcher/testnet.template COPYONLY)
+install(FILES testnet.template DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc/launcher)
+install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc)
+install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc/launcher)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testnet.template ${CMAKE_CURRENT_BINARY_DIR}/etc/actc/launcher/testnet.template COPYONLY)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/dccio.version.in ${CMAKE_CURRENT_BINARY_DIR}/dccio.version.hpp)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/dccio.version.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/actc.version.in ${CMAKE_CURRENT_BINARY_DIR}/actc.version.hpp)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/actc.version.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
-set(dcc_ROOT_DIR ${CMAKE_BINARY_DIR})
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/dccio-config.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/dccio/dccio-config.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/dccioTesterBuild.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/dccio/dccioTester.cmake @ONLY)
+set(actc_ROOT_DIR ${CMAKE_BINARY_DIR})
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/actc-config.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc/actc-config.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/actcTesterBuild.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc/actcTester.cmake @ONLY)
 
-set(dcc_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/dccio-config.cmake.in ${CMAKE_BINARY_DIR}/modules/dccio-config.cmake @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/modules/dccio-config.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/dccio)
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/dccioTester.cmake.in ${CMAKE_BINARY_DIR}/modules/dccioTester.cmake @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/modules/dccioTester.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/dccio)
+set(actc_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/actc-config.cmake.in ${CMAKE_BINARY_DIR}/modules/actc-config.cmake @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/modules/actc-config.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/actc)
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/actcTester.cmake.in ${CMAKE_BINARY_DIR}/modules/actcTester.cmake @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/modules/actcTester.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/actc)
 
 configure_file(${CMAKE_SOURCE_DIR}/LICENSE 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/wabt/LICENSE 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE.wabt COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.wabt COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/softfloat/COPYING.txt 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE.softfloat COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.softfloat COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/wasm-jit/LICENSE 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE.wavm COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.wavm COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/fc/secp256k1/upstream/COPYING 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE.secp256k1 COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.secp256k1 COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/fc/src/network/LICENSE.go 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE.go COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.go COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/externals/binaryen/LICENSE 
-               ${CMAKE_BINARY_DIR}/licenses/dccio/LICENSE.binaryen COPYONLY)
+               ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.binaryen COPYONLY)
 
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/)
-install(FILES libraries/wabt/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/ RENAME LICENSE.wabt)
-install(FILES libraries/softfloat/COPYING.txt DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/ RENAME LICENSE.softfloat)
-install(FILES libraries/wasm-jit/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/ RENAME LICENSE.wavm)
-install(FILES libraries/fc/secp256k1/upstream/COPYING DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/ RENAME LICENSE.secp256k1)
-install(FILES externals/binaryen/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/ RENAME LICENSE.binaryen)
-install(FILES libraries/fc/src/network/LICENSE.go DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/dccio/ )
+install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/)
+install(FILES libraries/wabt/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.wabt)
+install(FILES libraries/softfloat/COPYING.txt DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.softfloat)
+install(FILES libraries/wasm-jit/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.wavm)
+install(FILES libraries/fc/secp256k1/upstream/COPYING DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.secp256k1)
+install(FILES externals/binaryen/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.binaryen)
+install(FILES libraries/fc/src/network/LICENSE.go DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ )
 
 include(package)
 include(doxygen)

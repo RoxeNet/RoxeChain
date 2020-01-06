@@ -1,7 +1,7 @@
 #!/bin/bash
 ##########################################################################
-# This is the dccIO automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/dccIO/dcc
+# This is the actc automated install script for Linux and Mac OS.
+# This file was downloaded from https://github.com/actc/actc
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -27,7 +27,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/dccIO/dcc/blob/master/LICENSE.txt
+# https://github.com/actc/actc/blob/master/LICENSE.txt
 ##########################################################################
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -44,7 +44,7 @@ fi
    BUILD_DIR="${PWD}/build"
    CMAKE_BUILD_TYPE=Release
    TIME_BEGIN=$( date -u +%s )
-   INSTALL_PREFIX="/usr/local/dccio"
+   INSTALL_PREFIX="/usr/local/actc"
    VERSION=1.2
 
    txtbld=$(tput bold)
@@ -53,31 +53,31 @@ fi
 
    create_symlink() {
       pushd /usr/local/bin &> /dev/null
-      ln -sf ../dccio/bin/$1 $1
+      ln -sf ../actc/bin/$1 $1
       popd &> /dev/null
    }
 
    create_cmake_symlink() {
-      mkdir -p /usr/local/lib/cmake/dccio
-      pushd /usr/local/lib/cmake/dccio &> /dev/null
-      ln -sf ../../../dccio/lib/cmake/dccio/$1 $1
+      mkdir -p /usr/local/lib/cmake/actc
+      pushd /usr/local/lib/cmake/actc &> /dev/null
+      ln -sf ../../../actc/lib/cmake/actc/$1 $1
       popd &> /dev/null
    }
 
    install_symlinks() {
-      printf "\\n\\tInstalling dccIO Binary Symlinks\\n\\n"
-      create_symlink "cldcc"
-      create_symlink "dccio-abigen"
-      create_symlink "dccio-launcher"
-      create_symlink "dccio-s2wasm"
-      create_symlink "dccio-wast2wasm"
-      create_symlink "dcciocpp"
-      create_symlink "kdccd"
-      create_symlink "noddcc"
+      printf "\\n\\tInstalling actc Binary Symlinks\\n\\n"
+      create_symlink "clactc"
+      create_symlink "actc-abigen"
+      create_symlink "actc-launcher"
+      create_symlink "actc-s2wasm"
+      create_symlink "actc-wast2wasm"
+      create_symlink "actccpp"
+      create_symlink "kactcd"
+      create_symlink "nodactc"
    }
 
    if [ ! -d "${BUILD_DIR}" ]; then
-      printf "\\n\\tError, dccio_build.sh has not ran.  Please run ./dccio_build.sh first!\\n\\n"
+      printf "\\n\\tError, actc_build.sh has not ran.  Please run ./actc_build.sh first!\\n\\n"
       exit -1
    fi
 
@@ -95,13 +95,13 @@ fi
    
    if ! make install
    then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE installing dccIO has exited with the above error.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE installing actc has exited with the above error.\\n\\n"
       exit -1
    fi
    popd &> /dev/null 
 
    install_symlinks   
-   create_cmake_symlink "dccio-config.cmake"
+   create_cmake_symlink "actc-config.cmake"
 
    printf "\n\n${bldred}\t _______  _______  _______ _________ _______\n"
    printf '\t(  ____ \(  ___  )(  ____ \\\\__   __/(  ___  )\n'
@@ -113,8 +113,8 @@ fi
    printf "\t(_______/(_______)\_______)\_______/(_______)\n${txtrst}"
 
    printf "\\tFor more information:\\n"
-   printf "\\tdccIO website: https://dcc.io\\n"
-   printf "\\tdccIO Telegram channel @ https://t.me/dccProject\\n"
-   printf "\\tdccIO resources: https://dcc.io/resources/\\n"
-   printf "\\tdccIO Stack Exchange: https://dccio.stackexchange.com\\n"
-   printf "\\tdccIO wiki: https://github.com/dccIO/dcc/wiki\\n\\n\\n"
+   printf "\\tactc website: https://actc.io\\n"
+   printf "\\tactc Telegram channel @ https://t.me/actcProject\\n"
+   printf "\\tactc resources: https://actc.io/resources/\\n"
+   printf "\\tactc Stack Exchange: https://actc.stackexchange.com\\n"
+   printf "\\tactc wiki: https://github.com/actc/actc/wiki\\n\\n\\n"

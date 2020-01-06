@@ -1,7 +1,7 @@
 #!/bin/bash
 ##########################################################################
-# This is the dccIO automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/dccIO/dcc
+# This is the actc automated install script for Linux and Mac OS.
+# This file was downloaded from https://github.com/actc/actc
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -27,7 +27,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/dccIO/dcc/blob/master/LICENSE
+# https://github.com/actc/actc/blob/master/LICENSE
 ##########################################################################
 
    SOURCE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
@@ -120,8 +120,8 @@
 
    if [ ! -d "${SOURCE_DIR}/.git" ]; then
       printf "\\n\\tThis build script only works with sources cloned from git\\n"
-      printf "\\tPlease clone a new dcc directory with 'git clone https://github.com/dccIO/dcc --recursive'\\n"
-      printf "\\tSee the wiki for instructions: https://github.com/dccIO/dcc/wiki\\n"
+      printf "\\tPlease clone a new actc directory with 'git clone https://github.com/actc/actc --recursive'\\n"
+      printf "\\tSee the wiki for instructions: https://github.com/actc/actc/wiki\\n"
       exit 1
    fi
 
@@ -146,7 +146,7 @@
    if [ "$ARCH" == "Linux" ]; then
 
       if [ ! -e /etc/os-release ]; then
-         printf "\\n\\tdccIO currently supports Amazon, Centos, Fedora, Mint & Ubuntu Linux only.\\n"
+         printf "\\n\\tactc currently supports Amazon, Centos, Fedora, Mint & Ubuntu Linux only.\\n"
          printf "\\tPlease install on the latest version of one of these Linux distributions.\\n"
          printf "\\thttps://aws.amazon.com/amazon-linux-ami/\\n"
          printf "\\thttps://www.centos.org/\\n"
@@ -161,7 +161,7 @@
 
       case "$OS_NAME" in
          "Amazon Linux AMI"|"Amazon Linux")
-            FILE="${SOURCE_DIR}/scripts/dccio_build_amazon.sh"
+            FILE="${SOURCE_DIR}/scripts/actc_build_amazon.sh"
             CXX_COMPILER=g++
             C_COMPILER=gcc
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
@@ -170,7 +170,7 @@
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "CentOS Linux")
-            FILE="${SOURCE_DIR}/scripts/dccio_build_centos.sh"
+            FILE="${SOURCE_DIR}/scripts/actc_build_centos.sh"
             CXX_COMPILER=g++
             C_COMPILER=gcc
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
@@ -179,35 +179,35 @@
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "elementary OS")
-            FILE="${SOURCE_DIR}/scripts/dccio_build_ubuntu.sh"
+            FILE="${SOURCE_DIR}/scripts/actc_build_ubuntu.sh"
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "Fedora")
-            FILE="${SOURCE_DIR}/scripts/dccio_build_fedora.sh"
+            FILE="${SOURCE_DIR}/scripts/actc_build_fedora.sh"
             CXX_COMPILER=g++
             C_COMPILER=gcc
             MONGOD_CONF=/etc/mongod.conf
             export LLVM_DIR=${HOME}/opt/wasm/lib/cmake/llvm
          ;;
          "Linux Mint")
-            FILE="${SOURCE_DIR}/scripts/dccio_build_ubuntu.sh"
+            FILE="${SOURCE_DIR}/scripts/actc_build_ubuntu.sh"
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "Ubuntu")
-            FILE="${SOURCE_DIR}/scripts/dccio_build_ubuntu.sh"
+            FILE="${SOURCE_DIR}/scripts/actc_build_ubuntu.sh"
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
             export PATH=${HOME}/opt/mongodb/bin:$PATH
          ;;
          "Debian GNU/Linux")
-            FILE=${SOURCE_DIR}/scripts/dccio_build_ubuntu.sh
+            FILE=${SOURCE_DIR}/scripts/actc_build_ubuntu.sh
             CXX_COMPILER=clang++-4.0
             C_COMPILER=clang-4.0
             MONGOD_CONF=${HOME}/opt/mongodb/mongod.conf
@@ -223,7 +223,7 @@
    fi
 
    if [ "$ARCH" == "Darwin" ]; then
-      FILE="${SOURCE_DIR}/scripts/dccio_build_darwin.sh"
+      FILE="${SOURCE_DIR}/scripts/actc_build_darwin.sh"
       CXX_COMPILER=clang++
       C_COMPILER=clang
       MONGOD_CONF=/usr/local/etc/mongod.conf
@@ -238,7 +238,7 @@
 
    . "$FILE"
 
-   printf "\\n\\n>>>>>>>> ALL dependencies sucessfully found or installed . Installing dccIO\\n\\n"
+   printf "\\n\\n>>>>>>>> ALL dependencies sucessfully found or installed . Installing actc\\n\\n"
    printf ">>>>>>>> CMAKE_BUILD_TYPE=%s\\n" "${CMAKE_BUILD_TYPE}"
    printf ">>>>>>>> ENABLE_COVERAGE_TESTING=%s\\n" "${ENABLE_COVERAGE_TESTING}"
    printf ">>>>>>>> DOXYGEN=%s\\n\\n" "${DOXYGEN}"
@@ -265,21 +265,21 @@
       -DCMAKE_C_COMPILER="${C_COMPILER}" -DWASM_ROOT="${WASM_ROOT}" -DCORE_SYMBOL_NAME="${CORE_SYMBOL_NAME}" \
       -DOPENSSL_ROOT_DIR="${OPENSSL_ROOT_DIR}" -DBUILD_MONGO_DB_PLUGIN=true \
       -DENABLE_COVERAGE_TESTING="${ENABLE_COVERAGE_TESTING}" -DBUILD_DOXYGEN="${DOXYGEN}" \
-      -DCMAKE_INSTALL_PREFIX="/usr/local/dccio" ${LOCAL_CMAKE_FLAGS} "${SOURCE_DIR}"
+      -DCMAKE_INSTALL_PREFIX="/usr/local/actc" ${LOCAL_CMAKE_FLAGS} "${SOURCE_DIR}"
    then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> CMAKE building dccIO has exited with the above error.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> CMAKE building actc has exited with the above error.\\n\\n"
       exit -1
    fi
 
    if [ "${START_MAKE}" == "false" ]; then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> dccIO has been successfully configured but not yet built.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> actc has been successfully configured but not yet built.\\n\\n"
       exit 0
    fi
 
-   if [ -z ${JOBS} ]; then JOBS=$CPU_CORE; fi # Future proofing: Ensure $JOBS is set (usually set in scripts/dccio_build_*.sh scripts)
+   if [ -z ${JOBS} ]; then JOBS=$CPU_CORE; fi # Future proofing: Ensure $JOBS is set (usually set in scripts/actc_build_*.sh scripts)
    if ! make -j"${JOBS}"
    then
-      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE building dccIO has exited with the above error.\\n\\n"
+      printf "\\n\\t>>>>>>>>>>>>>>>>>>>> MAKE building actc has exited with the above error.\\n\\n"
       exit -1
    fi
 
@@ -294,14 +294,14 @@
    printf "\t| (____/\| (___) |/\____) |___) (___| (___) |\n"
    printf "\t(_______/(_______)\_______)\_______/(_______)\n${txtrst}"
 
-   printf "\\n\\tdccIO has been successfully built. %02d:%02d:%02d\\n\\n" $(($TIME_END/3600)) $(($TIME_END%3600/60)) $(($TIME_END%60))
+   printf "\\n\\tactc has been successfully built. %02d:%02d:%02d\\n\\n" $(($TIME_END/3600)) $(($TIME_END%3600/60)) $(($TIME_END%60))
    printf "\\tTo verify your installation run the following commands:\\n"
 
    print_instructions
 
    printf "\\tFor more information:\\n"
-   printf "\\tdccIO website: https://dcc.io\\n"
-   printf "\\tdccIO Telegram channel @ https://t.me/dccProject\\n"
-   printf "\\tdccIO resources: https://dcc.io/resources/\\n"
-   printf "\\tdccIO Stack Exchange: https://dccio.stackexchange.com\\n"
-   printf "\\tdccIO wiki: https://github.com/dccIO/dcc/wiki\\n\\n\\n"
+   printf "\\tactc website: https://actc.io\\n"
+   printf "\\tactc Telegram channel @ https://t.me/actcProject\\n"
+   printf "\\tactc resources: https://actc.io/resources/\\n"
+   printf "\\tactc Stack Exchange: https://actc.stackexchange.com\\n"
+   printf "\\tactc wiki: https://github.com/actc/actc/wiki\\n\\n\\n"
