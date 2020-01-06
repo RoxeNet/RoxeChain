@@ -3,7 +3,7 @@
 
 #include <memory>
 
-namespace dccio { namespace testing {
+namespace actc { namespace testing {
 
 /**
  * Utility class to create and tear down a temporary chainbase::database using RAII
@@ -28,4 +28,4 @@ struct chainbase_fixture {
    std::unique_ptr<chainbase::database>  _db;
 };
 
-} }  // dccio::testing
+} }  // actc::testing

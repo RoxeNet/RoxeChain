@@ -4,7 +4,7 @@
 #include <boost/signals2/signal.hpp>
 #include <boost/signals2/shared_connection_block.hpp>
 
-namespace dccio { namespace testing {
+namespace actc { namespace testing {
    using namespace boost::signals2;
 
    /**
@@ -45,4 +45,4 @@ namespace dccio { namespace testing {
       std::map<base_tester *, scoped_connection> blockchains;
    };
 
-} } /// dccio::testing
+} } /// actc::testing
