@@ -1,31 +1,31 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
- *  @defgroup dccclienttool dccIO Command Line Client Reference
- *  @brief Tool for sending transactions and querying state from @ref noddcc
- *  @ingroup dccclienttool
+ *  @copyright defined in actc/LICENSE.txt
+ *  @defgroup actcclienttool actc Command Line Client Reference
+ *  @brief Tool for sending transactions and querying state from @ref nodactc
+ *  @ingroup actcclienttool
  */
 
 /**
-  @defgroup dccclienttool
+  @defgroup actcclienttool
 
-  @section intro Introduction to cldcc
+  @section intro Introduction to clactc
 
-  `cldcc` is a command line tool that interfaces with the REST api exposed by @ref noddcc. In order to use `cldcc` you will need to
-  have a local copy of `noddcc` running and configured to load the 'dccio::chain_api_plugin'.
+  `clactc` is a command line tool that interfaces with the REST api exposed by @ref nodactc. In order to use `clactc` you will need to
+  have a local copy of `nodactc` running and configured to load the 'actc::chain_api_plugin'.
 
-   cldcc contains documentation for all of its commands. For a list of all commands known to cldcc, simply run it with no arguments:
+   clactc contains documentation for all of its commands. For a list of all commands known to clactc, simply run it with no arguments:
 ```
-$ ./cldcc
-Command Line Interface to dccIO Client
-Usage: programs/cldcc/cldcc [OPTIONS] SUBCOMMAND
+$ ./clactc
+Command Line Interface to actc Client
+Usage: programs/clactc/clactc [OPTIONS] SUBCOMMAND
 
 Options:
   -h,--help                   Print this help message and exit
   -u,--url TEXT=http://localhost:8888/
-                              the http/https URL where noddcc is running
+                              the http/https URL where nodactc is running
   --wallet-url TEXT=http://localhost:8888/
-                              the http/https URL where kdccd is running
+                              the http/https URL where kactcd is running
   -r,--header                 pass specific HTTP header, repeat this option to pass multiple headers
   -n,--no-verify              don't verify peer certificate when using HTTPS
   -v,--verbose                output verbose actions on error
@@ -35,7 +35,7 @@ Subcommands:
   create                      Create various items, on and off the blockchain
   get                         Retrieve various items and information from the blockchain
   set                         Set or update blockchain state
-  transfer                    Transfer dcc from account to account
+  transfer                    Transfer actc from account to account
   net                         Interact with local p2p network connections
   wallet                      Interact with local wallet
   sign                        Sign a transaction
@@ -45,17 +45,17 @@ Subcommands:
 ```
 To get help with any particular subcommand, run it with no arguments as well:
 ```
-$ ./cldcc create
+$ ./clactc create
 Create various items, on and off the blockchain
-Usage: ./cldcc create SUBCOMMAND
+Usage: ./clactc create SUBCOMMAND
 
 Subcommands:
   key                         Create a new keypair and print the public and private keys
   account                     Create a new account on the blockchain (assumes system contract does not restrict RAM usage)
 
-$ ./cldcc create account
+$ ./clactc create account
 Create a new account on the blockchain (assumes system contract does not restrict RAM usage)
-Usage: ./cldcc create account [OPTIONS] creator name OwnerKey ActiveKey
+Usage: ./clactc create account [OPTIONS] creator name OwnerKey ActiveKey
 
 Positionals:
   creator TEXT                The name of the account creating the new account
@@ -84,14 +84,14 @@ Options:
 #include <fc/io/console.hpp>
 #include <fc/exception/exception.hpp>
 #include <fc/variant_object.hpp>
-#include <dccio/utilities/key_conversion.hpp>
+#include <actc/utilities/key_conversion.hpp>
 
-#include <dccio/chain/name.hpp>
-#include <dccio/chain/config.hpp>
-#include <dccio/chain/wast_to_wasm.hpp>
-#include <dccio/chain/trace.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
-#include <dccio/chain/contract_types.hpp>
+#include <actc/chain/name.hpp>
+#include <actc/chain/config.hpp>
+#include <actc/chain/wast_to_wasm.hpp>
+#include <actc/chain/trace.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
+#include <actc/chain/contract_types.hpp>
 
 #pragma push_macro("N")
 #undef N
@@ -127,18 +127,18 @@ Options:
 #include "httpc.hpp"
 
 using namespace std;
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::utilities;
-using namespace dccio::client::help;
-using namespace dccio::client::http;
-using namespace dccio::client::localize;
-using namespace dccio::client::config;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::utilities;
+using namespace actc::client::help;
+using namespace actc::client::http;
+using namespace actc::client::localize;
+using namespace actc::client::config;
 using namespace boost::filesystem;
 
 FC_DECLARE_EXCEPTION( explained_exception, 9000000, "explained exception, see error log" );
 FC_DECLARE_EXCEPTION( localized_exception, 10000000, "an error occured" );
-#define dccC_ASSERT( TEST, ... ) \
+#define actcC_ASSERT( TEST, ... ) \
   FC_EXPAND_MACRO( \
     FC_MULTILINE_MACRO_BEGIN \
       if( UNLIKELY(!(TEST)) ) \
@@ -149,7 +149,7 @@ FC_DECLARE_EXCEPTION( localized_exception, 10000000, "an error occured" );
     FC_MULTILINE_MACRO_END \
   )
 
-//copy pasta from kdccd's main.cpp
+//copy pasta from kactcd's main.cpp
 bfs::path determine_home_directory()
 {
    bfs::path home;
@@ -166,7 +166,7 @@ bfs::path determine_home_directory()
 }
 
 string url = "http://127.0.0.1:8888/";
-string default_wallet_url = "unix://" + (determine_home_directory() / "dccio-wallet" / (string(key_store_executable_name) + ".sock")).string();
+string default_wallet_url = "unix://" + (determine_home_directory() / "actc-wallet" / (string(key_store_executable_name) + ".sock")).string();
 string wallet_url; //to be set to default_wallet_url in main
 bool no_verify = false;
 vector<string> headers;
@@ -181,7 +181,7 @@ bool   tx_skip_sign = false;
 bool   tx_print_json = false;
 bool   print_request = false;
 bool   print_response = false;
-bool   no_auto_kdccd = false;
+bool   no_auto_kactcd = false;
 
 uint8_t  tx_max_cpu_usage = 0;
 uint32_t tx_max_net_usage = 0;
@@ -190,7 +190,7 @@ uint32_t delaysec = 0;
 
 vector<string> tx_permission;
 
-dccio::client::http::http_context context;
+actc::client::http::http_context context;
 
 void add_standard_transaction_options(CLI::App* cmd, string default_permission = "") {
    CLI::callback_t parse_expiration = [](CLI::results_t res) -> bool {
@@ -239,14 +239,14 @@ fc::variant call( const std::string& url,
                   const std::string& path,
                   const T& v ) {
    try {
-      auto sp = std::make_unique<dccio::client::http::connection_param>(context, parse_url(url) + path, no_verify ? false : true, headers);
-      return dccio::client::http::do_http_call(*sp, fc::variant(v), print_request, print_response );
+      auto sp = std::make_unique<actc::client::http::connection_param>(context, parse_url(url) + path, no_verify ? false : true, headers);
+      return actc::client::http::do_http_call(*sp, fc::variant(v), print_request, print_response );
    }
    catch(boost::system::system_error& e) {
       if(url == ::url)
-         std::cerr << localized("Failed to connect to noddcc at ${u}; is noddcc running?", ("u", url)) << std::endl;
+         std::cerr << localized("Failed to connect to nodactc at ${u}; is nodactc running?", ("u", url)) << std::endl;
       else if(url == ::wallet_url)
-         std::cerr << localized("Failed to connect to kdccd at ${u}; is kdccd running?", ("u", url)) << std::endl;
+         std::cerr << localized("Failed to connect to kactcd at ${u}; is kactcd running?", ("u", url)) << std::endl;
       throw connection_exception(fc::log_messages{FC_LOG_MESSAGE(error, e.what())});
    }
 }
@@ -259,8 +259,8 @@ template<>
 fc::variant call( const std::string& url,
                   const std::string& path) { return call( url, path, fc::variant() ); }
 
-dccio::chain_apis::read_only::get_info_results get_info() {
-   return call(url, get_info_func).as<dccio::chain_apis::read_only::get_info_results>();
+actc::chain_apis::read_only::get_info_results get_info() {
+   return call(url, get_info_func).as<actc::chain_apis::read_only::get_info_results>();
 }
 
 string generate_nonce_string() {
@@ -311,7 +311,7 @@ fc::variant push_transaction( signed_transaction& trx, int32_t extra_kcpu = 1000
             ref_block = call(get_block_func, fc::mutable_variant_object("block_num_or_id", tx_ref_block_num_or_id));
             ref_block_id = ref_block["id"].as<block_id_type>();
          }
-      } dcc_RETHROW_EXCEPTIONS(invalid_ref_block_exception, "Invalid reference block num or id: ${block_num_or_id}", ("block_num_or_id", tx_ref_block_num_or_id));
+      } actc_RETHROW_EXCEPTIONS(invalid_ref_block_exception, "Invalid reference block num or id: ${block_num_or_id}", ("block_num_or_id", tx_ref_block_num_or_id));
       trx.set_reference_block(ref_block_id);
 
       if (tx_force_unique) {
@@ -356,7 +356,7 @@ void print_action( const fc::variant& at ) {
    auto console = at["console"].as_string();
 
    /*
-   if( code == "dccio" && func == "setcode" )
+   if( code == "actc" && func == "setcode" )
       args = args.substr(40)+"...";
    if( name(code) == config::system_account_name && func == "setabi" )
       args = args.substr(40)+"...";
@@ -377,7 +377,7 @@ auto abi_serializer_resolver = [](const name& account) -> optional<abi_serialize
    auto it = abi_cache.find( account );
    if ( it == abi_cache.end() ) {
       auto result = call(get_abi_func, fc::mutable_variant_object("account_name", account));
-      auto abi_results = result.as<dccio::chain_apis::read_only::get_abi_results>();
+      auto abi_results = result.as<actc::chain_apis::read_only::get_abi_results>();
 
       optional<abi_serializer> abis;
       if( abi_results.abi.valid() ) {
@@ -426,7 +426,7 @@ bytes json_or_file_to_bin( const account_name& account, const action_name& actio
    if( !data_or_filename.empty() ) {
       try {
          action_args_var = json_from_file_or_string(data_or_filename, fc::json::relaxed_parser);
-      } dcc_RETHROW_EXCEPTIONS(action_type_exception, "Fail to parse action JSON data='${data}'", ("data", data_or_filename));
+      } actc_RETHROW_EXCEPTIONS(action_type_exception, "Fail to parse action JSON data='${data}'", ("data", data_or_filename));
    }
    return variant_to_bin( account, action, action_args_var );
 }
@@ -510,11 +510,11 @@ void send_transaction( signed_transaction& trx, int32_t extra_kcpu, packed_trans
 chain::action create_newaccount(const name& creator, const name& newaccount, public_key_type owner, public_key_type active) {
    return action {
       tx_permission.empty() ? vector<chain::permission_level>{{creator,config::active_name}} : get_account_permissions(tx_permission),
-      dccio::chain::newaccount{
+      actc::chain::newaccount{
          .creator      = creator,
          .name         = newaccount,
-         .owner        = dccio::chain::authority{1, {{owner, 1}}, {}},
-         .active       = dccio::chain::authority{1, {{active, 1}}, {}}
+         .owner        = actc::chain::authority{1, {{owner, 1}}, {}},
+         .active       = actc::chain::authority{1, {{active, 1}}, {}}
       }
    };
 }
@@ -631,25 +631,25 @@ chain::action create_unlinkauth(const name& account, const name& code, const nam
 authority parse_json_authority(const std::string& authorityJsonOrFile) {
    try {
       return json_from_file_or_string(authorityJsonOrFile).as<authority>();
-   } dcc_RETHROW_EXCEPTIONS(authority_type_exception, "Fail to parse Authority JSON '${data}'", ("data",authorityJsonOrFile))
+   } actc_RETHROW_EXCEPTIONS(authority_type_exception, "Fail to parse Authority JSON '${data}'", ("data",authorityJsonOrFile))
 }
 
 authority parse_json_authority_or_key(const std::string& authorityJsonOrFile) {
-   if (boost::istarts_with(authorityJsonOrFile, "dcc") || boost::istarts_with(authorityJsonOrFile, "PUB_R1")) {
+   if (boost::istarts_with(authorityJsonOrFile, "actc") || boost::istarts_with(authorityJsonOrFile, "PUB_R1")) {
       try {
          return authority(public_key_type(authorityJsonOrFile));
-      } dcc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid public key: ${public_key}", ("public_key", authorityJsonOrFile))
+      } actc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid public key: ${public_key}", ("public_key", authorityJsonOrFile))
    } else {
       auto result = parse_json_authority(authorityJsonOrFile);
-      dcc_ASSERT( dccio::chain::validate(result), authority_type_exception, "Authority failed validation! ensure that keys, accounts, and waits are sorted and that the threshold is valid and satisfiable!");
+      actc_ASSERT( actc::chain::validate(result), authority_type_exception, "Authority failed validation! ensure that keys, accounts, and waits are sorted and that the threshold is valid and satisfiable!");
       return result;
    }
 }
 
 asset to_asset( account_name code, const string& s ) {
-   static map< pair<account_name, dccio::chain::symbol_code>, dccio::chain::symbol> cache;
+   static map< pair<account_name, actc::chain::symbol_code>, actc::chain::symbol> cache;
    auto a = asset::from_string( s );
-   dccio::chain::symbol_code sym = a.get_symbol().to_symbol_code();
+   actc::chain::symbol_code sym = a.get_symbol().to_symbol_code();
    auto it = cache.find( make_pair(code, sym) );
    auto sym_str = a.symbol_name();
    if ( it == cache.end() ) {
@@ -660,11 +660,11 @@ asset to_asset( account_name code, const string& s ) {
       auto obj = json.get_object();
       auto obj_it = obj.find( sym_str );
       if (obj_it != obj.end()) {
-         auto result = obj_it->value().as<dccio::chain_apis::read_only::get_currency_stats_result>();
+         auto result = obj_it->value().as<actc::chain_apis::read_only::get_currency_stats_result>();
          auto p = cache.emplace( make_pair( code, sym ), result.max_supply.get_symbol() );
          it = p.first;
       } else {
-         dcc_THROW(symbol_type_exception, "Symbol ${s} is not supported by token contract ${c}", ("s", sym_str)("c", code));
+         actc_THROW(symbol_type_exception, "Symbol ${s} is not supported by token contract ${c}", ("s", sym_str)("c", code));
       }
    }
    auto expected_symbol = it->second;
@@ -673,13 +673,13 @@ asset to_asset( account_name code, const string& s ) {
       auto a_old = a;
       a = asset( a.get_amount() * factor, expected_symbol );
    } else if ( a.decimals() > expected_symbol.decimals() ) {
-      dcc_THROW(symbol_type_exception, "Too many decimal digits in ${a}, only ${d} supported", ("a", a)("d", expected_symbol.decimals()));
+      actc_THROW(symbol_type_exception, "Too many decimal digits in ${a}, only ${d} supported", ("a", a)("d", expected_symbol.decimals()));
    } // else precision matches
    return a;
 }
 
 inline asset to_asset( const string& s ) {
-   return to_asset( N(dccio.token), s );
+   return to_asset( N(actc.token), s );
 }
 
 struct set_account_permission_subcommand {
@@ -786,16 +786,16 @@ void try_local_port(uint32_t duration) {
    auto start_time = duration_cast<std::chrono::milliseconds>( system_clock::now().time_since_epoch() ).count();
    while ( !local_port_used()) {
       if (duration_cast<std::chrono::milliseconds>( system_clock::now().time_since_epoch()).count() - start_time > duration ) {
-         std::cerr << "Unable to connect to kdccd, if kdccd is running please kill the process and try again.\n";
-         throw connection_exception(fc::log_messages{FC_LOG_MESSAGE(error, "Unable to connect to kdccd")});
+         std::cerr << "Unable to connect to kactcd, if kactcd is running please kill the process and try again.\n";
+         throw connection_exception(fc::log_messages{FC_LOG_MESSAGE(error, "Unable to connect to kactcd")});
       }
    }
 }
 
-void ensure_kdccd_running(CLI::App* app) {
-    if (no_auto_kdccd)
+void ensure_kactcd_running(CLI::App* app) {
+    if (no_auto_kactcd)
         return;
-    // get, version, net do not require kdccd
+    // get, version, net do not require kactcd
     if (tx_skip_sign || app->got_subcommand("get") || app->got_subcommand("version") || app->got_subcommand("net"))
         return;
     if (app->get_subcommand("create")->got_subcommand("key")) // create key does not require wallet
@@ -812,12 +812,12 @@ void ensure_kdccd_running(CLI::App* app) {
 
     boost::filesystem::path binPath = boost::dll::program_location();
     binPath.remove_filename();
-    // This extra check is necessary when running cldcc like this: ./cldcc ...
+    // This extra check is necessary when running clactc like this: ./clactc ...
     if (binPath.filename_is_dot())
         binPath.remove_filename();
-    binPath.append(key_store_executable_name); // if cldcc and kdccd are in the same installation directory
+    binPath.append(key_store_executable_name); // if clactc and kactcd are in the same installation directory
     if (!boost::filesystem::exists(binPath)) {
-        binPath.remove_filename().remove_filename().append("kdccd").append(key_store_executable_name);
+        binPath.remove_filename().remove_filename().append("kactcd").append(key_store_executable_name);
     }
 
     if (boost::filesystem::exists(binPath)) {
@@ -832,20 +832,20 @@ void ensure_kdccd_running(CLI::App* app) {
         pargs.push_back("--unix-socket-path");
         pargs.push_back(string(key_store_executable_name) + ".sock");
 
-        ::boost::process::child kdcc(binPath, pargs,
+        ::boost::process::child kactc(binPath, pargs,
                                      bp::std_in.close(),
                                      bp::std_out > bp::null,
                                      bp::std_err > bp::null);
-        if (kdcc.running()) {
+        if (kactc.running()) {
             std::cerr << binPath << " launched" << std::endl;
-            kdcc.detach();
+            kactc.detach();
             try_local_port(2000);
         } else {
             std::cerr << "No wallet service listening on " << wallet_url << ". Failed to launch " << binPath << std::endl;
         }
     } else {
         std::cerr << "No wallet service listening on "
-                  << ". Cannot automatically start kdccd because kdccd was not found." << std::endl;
+                  << ". Cannot automatically start kactcd because kactcd was not found." << std::endl;
     }
 }
 
@@ -876,7 +876,7 @@ struct register_producer_subcommand {
          public_key_type producer_key;
          try {
             producer_key = public_key_type(producer_key_str);
-         } dcc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid producer public key: ${public_key}", ("public_key", producer_key_str))
+         } actc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid producer public key: ${public_key}", ("public_key", producer_key_str))
 
          auto regprod_var = regproducer_variant(producer_str, producer_key, url, loc );
          send_actions({create_action({permission_level{producer_str,config::active_name}}, config::system_account_name, N(regproducer), regprod_var)});
@@ -893,7 +893,7 @@ struct create_account_subcommand {
    string stake_cpu;
    uint32_t buy_ram_bytes_in_kbytes = 0;
    uint32_t buy_ram_bytes = 0;
-   string buy_ram_dcc;
+   string buy_ram_actc;
    bool transfer;
    bool simple;
 
@@ -910,17 +910,17 @@ struct create_account_subcommand {
 
       if (!simple) {
          createAccount->add_option("--stake-net", stake_net,
-                                   (localized("The amount of dcc delegated for net bandwidth")))->required();
+                                   (localized("The amount of actc delegated for net bandwidth")))->required();
          createAccount->add_option("--stake-cpu", stake_cpu,
-                                   (localized("The amount of dcc delegated for CPU bandwidth")))->required();
+                                   (localized("The amount of actc delegated for CPU bandwidth")))->required();
          createAccount->add_option("--buy-ram-kbytes", buy_ram_bytes_in_kbytes,
                                    (localized("The amount of RAM bytes to purchase for the new account in kibibytes (KiB)")));
          createAccount->add_option("--buy-ram-bytes", buy_ram_bytes,
                                    (localized("The amount of RAM bytes to purchase for the new account in bytes")));
-         createAccount->add_option("--buy-ram", buy_ram_dcc,
-                                   (localized("The amount of RAM bytes to purchase for the new account in dcc")));
+         createAccount->add_option("--buy-ram", buy_ram_actc,
+                                   (localized("The amount of RAM bytes to purchase for the new account in actc")));
          createAccount->add_flag("--transfer", transfer,
-                                 (localized("Transfer voting power and right to unstake dcc to receiver")));
+                                 (localized("Transfer voting power and right to unstake actc to receiver")));
       }
 
       add_standard_transaction_options(createAccount);
@@ -931,15 +931,15 @@ struct create_account_subcommand {
             public_key_type owner_key, active_key;
             try {
                owner_key = public_key_type(owner_key_str);
-            } dcc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid owner public key: ${public_key}", ("public_key", owner_key_str));
+            } actc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid owner public key: ${public_key}", ("public_key", owner_key_str));
             try {
                active_key = public_key_type(active_key_str);
-            } dcc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid active public key: ${public_key}", ("public_key", active_key_str));
+            } actc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid active public key: ${public_key}", ("public_key", active_key_str));
             auto create = create_newaccount(creator, account_name, owner_key, active_key);
             if (!simple) {
-               dccC_ASSERT( buy_ram_dcc.size() || buy_ram_bytes_in_kbytes || buy_ram_bytes, "ERROR: One of --buy-ram, --buy-ram-kbytes or --buy-ram-bytes should have non-zero value" );
-               dccC_ASSERT( !buy_ram_bytes_in_kbytes || !buy_ram_bytes, "ERROR: --buy-ram-kbytes and --buy-ram-bytes cannot be set at the same time" );
-               action buyram = !buy_ram_dcc.empty() ? create_buyram(creator, account_name, to_asset(buy_ram_dcc))
+               actcC_ASSERT( buy_ram_actc.size() || buy_ram_bytes_in_kbytes || buy_ram_bytes, "ERROR: One of --buy-ram, --buy-ram-kbytes or --buy-ram-bytes should have non-zero value" );
+               actcC_ASSERT( !buy_ram_bytes_in_kbytes || !buy_ram_bytes, "ERROR: --buy-ram-kbytes and --buy-ram-bytes cannot be set at the same time" );
+               action buyram = !buy_ram_actc.empty() ? create_buyram(creator, account_name, to_asset(buy_ram_actc))
                   : create_buyrambytes(creator, account_name, (buy_ram_bytes_in_kbytes) ? (buy_ram_bytes_in_kbytes * 1024) : buy_ram_bytes);
                auto net = to_asset(stake_net);
                auto cpu = to_asset(stake_cpu);
@@ -995,7 +995,7 @@ struct vote_producer_proxy_subcommand {
 
 struct vote_producers_subcommand {
    string voter_str;
-   vector<dccio::name> producer_names;
+   vector<actc::name> producer_names;
 
    vote_producers_subcommand(CLI::App* actionRoot) {
       auto vote_producers = actionRoot->add_subcommand("prods", localized("Vote for one or more producers"));
@@ -1017,8 +1017,8 @@ struct vote_producers_subcommand {
 };
 
 struct approve_producer_subcommand {
-   dccio::name voter;
-   dccio::name producer_name;
+   actc::name voter;
+   actc::name producer_name;
 
    approve_producer_subcommand(CLI::App* actionRoot) {
       auto approve_producer = actionRoot->add_subcommand("approve", localized("Add one producer to list of voted producers"));
@@ -1035,14 +1035,14 @@ struct approve_producer_subcommand {
                                ("lower_bound", voter.value)
                                ("limit", 1)
             );
-            auto res = result.as<dccio::chain_apis::read_only::get_table_rows_result>();
+            auto res = result.as<actc::chain_apis::read_only::get_table_rows_result>();
             if ( res.rows.empty() || res.rows[0]["owner"].as_string() != name(voter).to_string() ) {
                std::cerr << "Voter info not found for account " << voter << std::endl;
                return;
             }
-            dcc_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
+            actc_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
             auto prod_vars = res.rows[0]["producers"].get_array();
-            vector<dccio::name> prods;
+            vector<actc::name> prods;
             for ( auto& x : prod_vars ) {
                prods.push_back( name(x.as_string()) );
             }
@@ -1063,8 +1063,8 @@ struct approve_producer_subcommand {
 };
 
 struct unapprove_producer_subcommand {
-   dccio::name voter;
-   dccio::name producer_name;
+   actc::name voter;
+   actc::name producer_name;
 
    unapprove_producer_subcommand(CLI::App* actionRoot) {
       auto approve_producer = actionRoot->add_subcommand("unapprove", localized("Remove one producer from list of voted producers"));
@@ -1081,14 +1081,14 @@ struct unapprove_producer_subcommand {
                                ("lower_bound", voter.value)
                                ("limit", 1)
             );
-            auto res = result.as<dccio::chain_apis::read_only::get_table_rows_result>();
+            auto res = result.as<actc::chain_apis::read_only::get_table_rows_result>();
             if ( res.rows.empty() || res.rows[0]["owner"].as_string() != name(voter).to_string() ) {
                std::cerr << "Voter info not found for account " << voter << std::endl;
                return;
             }
-            dcc_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
+            actc_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
             auto prod_vars = res.rows[0]["producers"].get_array();
-            vector<dccio::name> prods;
+            vector<actc::name> prods;
             for ( auto& x : prod_vars ) {
                prods.push_back( name(x.as_string()) );
             }
@@ -1124,7 +1124,7 @@ struct list_producers_subcommand {
             std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
             return;
          }
-         auto result = rawResult.as<dccio::chain_apis::read_only::get_producers_result>();
+         auto result = rawResult.as<actc::chain_apis::read_only::get_producers_result>();
          if ( result.rows.empty() ) {
             std::cout << "No producers found" << std::endl;
             return;
@@ -1189,7 +1189,7 @@ struct get_transaction_id_subcommand {
             auto trx_var = json_from_file_or_string(trx_to_check);
             auto trx = trx_var.as<transaction>();
             std::cout << string(trx.id()) << std::endl;
-         } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_check))
+         } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_check))
       });
    }
 };
@@ -1208,11 +1208,11 @@ struct delegate_bandwidth_subcommand {
       auto delegate_bandwidth = actionRoot->add_subcommand("delegatebw", localized("Delegate bandwidth"));
       delegate_bandwidth->add_option("from", from_str, localized("The account to delegate bandwidth from"))->required();
       delegate_bandwidth->add_option("receiver", receiver_str, localized("The account to receive the delegated bandwidth"))->required();
-      delegate_bandwidth->add_option("stake_net_quantity", stake_net_amount, localized("The amount of dcc to stake for network bandwidth"))->required();
-      delegate_bandwidth->add_option("stake_cpu_quantity", stake_cpu_amount, localized("The amount of dcc to stake for CPU bandwidth"))->required();
-      delegate_bandwidth->add_option("--buyram", buy_ram_amount, localized("The amount of dcc to buyram"));
+      delegate_bandwidth->add_option("stake_net_quantity", stake_net_amount, localized("The amount of actc to stake for network bandwidth"))->required();
+      delegate_bandwidth->add_option("stake_cpu_quantity", stake_cpu_amount, localized("The amount of actc to stake for CPU bandwidth"))->required();
+      delegate_bandwidth->add_option("--buyram", buy_ram_amount, localized("The amount of actc to buyram"));
       delegate_bandwidth->add_option("--buy-ram-bytes", buy_ram_bytes, localized("The amount of RAM to buy in number of bytes"));
-      delegate_bandwidth->add_flag("--transfer", transfer, localized("Transfer voting power and right to unstake dcc to receiver"));
+      delegate_bandwidth->add_flag("--transfer", transfer, localized("Transfer voting power and right to unstake actc to receiver"));
       add_standard_transaction_options(delegate_bandwidth);
 
       delegate_bandwidth->set_callback([this] {
@@ -1223,7 +1223,7 @@ struct delegate_bandwidth_subcommand {
                   ("stake_cpu_quantity", to_asset(stake_cpu_amount))
                   ("transfer", transfer);
          std::vector<chain::action> acts{create_action({permission_level{from_str,config::active_name}}, config::system_account_name, N(delegatebw), act_payload)};
-         dccC_ASSERT( !(buy_ram_amount.size()) || !buy_ram_bytes, "ERROR: --buyram and --buy-ram-bytes cannot be set at the same time" );
+         actcC_ASSERT( !(buy_ram_amount.size()) || !buy_ram_bytes, "ERROR: --buyram and --buy-ram-bytes cannot be set at the same time" );
          if (buy_ram_amount.size()) {
             acts.push_back( create_buyram(from_str, receiver_str, to_asset(buy_ram_amount)) );
          } else if (buy_ram_bytes) {
@@ -1245,8 +1245,8 @@ struct undelegate_bandwidth_subcommand {
       auto undelegate_bandwidth = actionRoot->add_subcommand("undelegatebw", localized("Undelegate bandwidth"));
       undelegate_bandwidth->add_option("from", from_str, localized("The account undelegating bandwidth"))->required();
       undelegate_bandwidth->add_option("receiver", receiver_str, localized("The account to undelegate bandwidth from"))->required();
-      undelegate_bandwidth->add_option("unstake_net_quantity", unstake_net_amount, localized("The amount of dcc to undelegate for network bandwidth"))->required();
-      undelegate_bandwidth->add_option("unstake_cpu_quantity", unstake_cpu_amount, localized("The amount of dcc to undelegate for CPU bandwidth"))->required();
+      undelegate_bandwidth->add_option("unstake_net_quantity", unstake_net_amount, localized("The amount of actc to undelegate for network bandwidth"))->required();
+      undelegate_bandwidth->add_option("unstake_cpu_quantity", unstake_cpu_amount, localized("The amount of actc to undelegate for CPU bandwidth"))->required();
       add_standard_transaction_options(undelegate_bandwidth);
 
       undelegate_bandwidth->set_callback([this] {
@@ -1268,7 +1268,7 @@ struct bidname_subcommand {
       auto bidname = actionRoot->add_subcommand("bidname", localized("Name bidding"));
       bidname->add_option("bidder", bidder_str, localized("The bidding account"))->required();
       bidname->add_option("newname", newname_str, localized("The bidding name"))->required();
-      bidname->add_option("bid", bid_amount, localized("The amount of dcc to bid"))->required();
+      bidname->add_option("bid", bid_amount, localized("The amount of actc to bid"))->required();
       add_standard_transaction_options(bidname);
       bidname->set_callback([this] {
          fc::variant act_payload = fc::mutable_variant_object()
@@ -1289,13 +1289,13 @@ struct bidname_info_subcommand {
       list_producers->add_option("newname", newname_str, localized("The bidding name"))->required();
       list_producers->set_callback([this] {
          auto rawResult = call(get_table_func, fc::mutable_variant_object("json", true)
-                               ("code", "dccio")("scope", "dccio")("table", "namebids")
-                               ("lower_bound", dccio::chain::string_to_name(newname_str.c_str()))("limit", 1));
+                               ("code", "actc")("scope", "actc")("table", "namebids")
+                               ("lower_bound", actc::chain::string_to_name(newname_str.c_str()))("limit", 1));
          if ( print_json ) {
             std::cout << fc::json::to_pretty_string(rawResult) << std::endl;
             return;
          }
-         auto result = rawResult.as<dccio::chain_apis::read_only::get_table_rows_result>();
+         auto result = rawResult.as<actc::chain_apis::read_only::get_table_rows_result>();
          if ( result.rows.empty() ) {
             std::cout << "No bidname record found" << std::endl;
             return;
@@ -1314,7 +1314,7 @@ struct bidname_info_subcommand {
 };
 
 struct list_bw_subcommand {
-   dccio::name account;
+   actc::name account;
    bool print_json = false;
 
    list_bw_subcommand(CLI::App* actionRoot) {
@@ -1330,7 +1330,7 @@ struct list_bw_subcommand {
                                ("table", "delband")
             );
             if (!print_json) {
-               auto res = result.as<dccio::chain_apis::read_only::get_table_rows_result>();
+               auto res = result.as<actc::chain_apis::read_only::get_table_rows_result>();
                if ( !res.rows.empty() ) {
                   std::cout << std::setw(13) << std::left << "Receiver" << std::setw(21) << std::left << "Net bandwidth"
                             << std::setw(21) << std::left << "CPU bandwidth" << std::endl;
@@ -1361,12 +1361,12 @@ struct buyram_subcommand {
       auto buyram = actionRoot->add_subcommand("buyram", localized("Buy RAM"));
       buyram->add_option("payer", from_str, localized("The account paying for RAM"))->required();
       buyram->add_option("receiver", receiver_str, localized("The account receiving bought RAM"))->required();
-      buyram->add_option("amount", amount, localized("The amount of dcc to pay for RAM, or number of bytes/kibibytes of RAM if --bytes/--kbytes is set"))->required();
+      buyram->add_option("amount", amount, localized("The amount of actc to pay for RAM, or number of bytes/kibibytes of RAM if --bytes/--kbytes is set"))->required();
       buyram->add_flag("--kbytes,-k", kbytes, localized("buyram in number of kibibytes (KiB)"));
       buyram->add_flag("--bytes,-b", bytes, localized("buyram in number of bytes"));
       add_standard_transaction_options(buyram);
       buyram->set_callback([this] {
-         dccC_ASSERT( !kbytes || !bytes, "ERROR: --kbytes and --bytes cannot be set at the same time" );
+         actcC_ASSERT( !kbytes || !bytes, "ERROR: --kbytes and --bytes cannot be set at the same time" );
          if (kbytes || bytes) {
             send_actions( { create_buyrambytes(from_str, receiver_str, fc::to_uint64(amount) * ((kbytes) ? 1024ull : 1ull)) } );
          } else {
@@ -1383,7 +1383,7 @@ struct sellram_subcommand {
 
    sellram_subcommand(CLI::App* actionRoot) {
       auto sellram = actionRoot->add_subcommand("sellram", localized("Sell RAM"));
-      sellram->add_option("account", receiver_str, localized("The account to receive dcc for sold RAM"))->required();
+      sellram->add_option("account", receiver_str, localized("The account to receive actc for sold RAM"))->required();
       sellram->add_option("bytes", amount, localized("Number of RAM bytes to sell"))->required();
       add_standard_transaction_options(sellram);
 
@@ -1477,7 +1477,7 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
       json = call(get_account_func, fc::mutable_variant_object("account_name", accountName)("expected_core_symbol", symbol::from_string(coresym)));
    }
 
-   auto res = json.as<dccio::chain_apis::read_only::get_account_results>();
+   auto res = json.as<actc::chain_apis::read_only::get_account_results>();
    if (!json_format) {
       asset staked;
       asset unstaking;
@@ -1497,7 +1497,7 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
       std::cout << "permissions: " << std::endl;
       unordered_map<name, vector<name>/*children*/> tree;
       vector<name> roots; //we don't have multiple roots, but we can easily handle them here, so let's do it just in case
-      unordered_map<name, dccio::chain_apis::permission> cache;
+      unordered_map<name, actc::chain_apis::permission> cache;
       for ( auto& perm : res.permissions ) {
          if ( perm.parent ) {
             tree[perm.parent].push_back( perm.perm_name );
@@ -1576,7 +1576,7 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
          auto net_total = to_asset(res.total_resources.get_object()["net_weight"].as_string());
 
          if( net_total.get_symbol() != unstaking.get_symbol() ) {
-            // Core symbol of noddcc responding to the request is different than core symbol built into cldcc
+            // Core symbol of nodactc responding to the request is different than core symbol built into clactc
             unstaking = asset( 0, net_total.get_symbol() ); // Correct core symbol for unstaking asset.
             staked = asset( 0, net_total.get_symbol() ); // Correct core symbol for staked asset.
          }
@@ -1683,7 +1683,7 @@ void get_account( const string& accountName, const string& coresym, bool json_fo
             std::cout << "unstaking tokens:" << std::endl;
             std::cout << indent << std::left << std::setw(25) << "time of unstake request:" << std::right << std::setw(20) << string(request_time);
             if( now >= refund_time ) {
-               std::cout << " (available to claim now with 'dccio::refund' action)\n";
+               std::cout << " (available to claim now with 'actc::refund' action)\n";
             } else {
                std::cout << " (funds will be available in " << to_pretty_time( (refund_time - now).count(), 0 ) << ")\n";
             }
@@ -1747,23 +1747,23 @@ int main( int argc, char** argv ) {
    setlocale(LC_ALL, "");
    bindtextdomain(locale_domain, locale_path);
    textdomain(locale_domain);
-   context = dccio::client::http::create_http_context();
+   context = actc::client::http::create_http_context();
    wallet_url = default_wallet_url;
 
-   CLI::App app{"Command Line Interface to dccIO Client"};
+   CLI::App app{"Command Line Interface to actc Client"};
    app.require_subcommand();
-   app.add_option( "-H,--host", obsoleted_option_host_port, localized("the host where noddcc is running") )->group("hidden");
-   app.add_option( "-p,--port", obsoleted_option_host_port, localized("the port where noddcc is running") )->group("hidden");
-   app.add_option( "--wallet-host", obsoleted_option_host_port, localized("the host where kdccd is running") )->group("hidden");
-   app.add_option( "--wallet-port", obsoleted_option_host_port, localized("the port where kdccd is running") )->group("hidden");
+   app.add_option( "-H,--host", obsoleted_option_host_port, localized("the host where nodactc is running") )->group("hidden");
+   app.add_option( "-p,--port", obsoleted_option_host_port, localized("the port where nodactc is running") )->group("hidden");
+   app.add_option( "--wallet-host", obsoleted_option_host_port, localized("the host where kactcd is running") )->group("hidden");
+   app.add_option( "--wallet-port", obsoleted_option_host_port, localized("the port where kactcd is running") )->group("hidden");
 
-   app.add_option( "-u,--url", url, localized("the http/https URL where noddcc is running"), true );
-   app.add_option( "--wallet-url", wallet_url, localized("the http/https URL where kdccd is running"), true );
+   app.add_option( "-u,--url", url, localized("the http/https URL where nodactc is running"), true );
+   app.add_option( "--wallet-url", wallet_url, localized("the http/https URL where kactcd is running"), true );
 
    app.add_option( "-r,--header", header_opt_callback, localized("pass specific HTTP header; repeat this option to pass multiple headers"));
    app.add_flag( "-n,--no-verify", no_verify, localized("don't verify peer certificate when using HTTPS"));
-   app.add_flag( "--no-auto-kdccd", no_auto_kdccd, localized("don't automatically launch a kdccd if one is not currently running"));
-   app.set_callback([&app]{ ensure_kdccd_running(&app);});
+   app.add_flag( "--no-auto-kactcd", no_auto_kactcd, localized("don't automatically launch a kactcd if one is not currently running"));
+   app.set_callback([&app]{ ensure_kactcd_running(&app);});
 
    bool verbose_errors = false;
    app.add_flag( "-v,--verbose", verbose_errors, localized("output verbose actions on error"));
@@ -1774,7 +1774,7 @@ int main( int argc, char** argv ) {
    version->require_subcommand();
 
    version->add_subcommand("client", localized("Retrieve version information of the client"))->set_callback([] {
-     std::cout << localized("Build version: ${ver}", ("ver", dccio::client::config::version_str)) << std::endl;
+     std::cout << localized("Build version: ${ver}", ("ver", actc::client::config::version_str)) << std::endl;
    });
 
    // Create subcommand
@@ -1820,12 +1820,12 @@ int main( int argc, char** argv ) {
    bool pack_action_data_flag = false;
    auto pack_transaction = convert->add_subcommand("pack_transaction", localized("From plain signed json to packed form"));
    pack_transaction->add_option("transaction", plain_signed_transaction_json, localized("The plain signed json (string)"))->required();
-   pack_transaction->add_flag("--pack-action-data", pack_action_data_flag, localized("Pack all action data within transaction, needs interaction with noddcc"));
+   pack_transaction->add_flag("--pack-action-data", pack_action_data_flag, localized("Pack all action data within transaction, needs interaction with nodactc"));
    pack_transaction->set_callback([&] {
       fc::variant trx_var;
       try {
          trx_var = json_from_file_or_string( plain_signed_transaction_json );
-      } dcc_RETHROW_EXCEPTIONS( transaction_type_exception, "Fail to parse plain transaction JSON '${data}'", ("data", plain_signed_transaction_json))
+      } actc_RETHROW_EXCEPTIONS( transaction_type_exception, "Fail to parse plain transaction JSON '${data}'", ("data", plain_signed_transaction_json))
       if( pack_action_data_flag ) {
          signed_transaction trx;
          abi_serializer::from_variant( trx_var, trx, abi_serializer_resolver, abi_serializer_max_time );
@@ -1834,7 +1834,7 @@ int main( int argc, char** argv ) {
          try {
             signed_transaction trx = trx_var.as<signed_transaction>();
             std::cout << fc::json::to_pretty_string( fc::variant( packed_transaction( trx, packed_transaction::none ))) << std::endl;
-         } dcc_RETHROW_EXCEPTIONS( transaction_type_exception, "Fail to convert transaction, --pack-action-data likely needed" )
+         } actc_RETHROW_EXCEPTIONS( transaction_type_exception, "Fail to convert transaction, --pack-action-data likely needed" )
       }
    });
 
@@ -1843,14 +1843,14 @@ int main( int argc, char** argv ) {
    bool unpack_action_data_flag = false;
    auto unpack_transaction = convert->add_subcommand("unpack_transaction", localized("From packed to plain signed json form"));
    unpack_transaction->add_option("transaction", packed_transaction_json, localized("The packed transaction json (string containing packed_trx and optionally compression fields)"))->required();
-   unpack_transaction->add_flag("--unpack-action-data", unpack_action_data_flag, localized("Unpack all action data within transaction, needs interaction with noddcc"));
+   unpack_transaction->add_flag("--unpack-action-data", unpack_action_data_flag, localized("Unpack all action data within transaction, needs interaction with nodactc"));
    unpack_transaction->set_callback([&] {
       fc::variant packed_trx_var;
       packed_transaction packed_trx;
       try {
          packed_trx_var = json_from_file_or_string( packed_transaction_json );
          fc::from_variant<packed_transaction>( packed_trx_var, packed_trx );
-      } dcc_RETHROW_EXCEPTIONS( transaction_type_exception, "Fail to parse packed transaction JSON '${data}'", ("data", packed_transaction_json))
+      } actc_RETHROW_EXCEPTIONS( transaction_type_exception, "Fail to parse packed transaction JSON '${data}'", ("data", packed_transaction_json))
       signed_transaction strx = packed_trx.get_signed_transaction();
       fc::variant trx_var;
       if( unpack_action_data_flag ) {
@@ -1873,7 +1873,7 @@ int main( int argc, char** argv ) {
       fc::variant unpacked_action_data_json;
       try {
          unpacked_action_data_json = json_from_file_or_string(unpacked_action_data_string);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse unpacked action data JSON")
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse unpacked action data JSON")
       bytes packed_action_data_string = variant_to_bin(unpacked_action_data_account_string, unpacked_action_data_name_string, unpacked_action_data_json);
       std::cout << fc::to_hex(packed_action_data_string.data(), packed_action_data_string.size()) << std::endl;
    });
@@ -1887,7 +1887,7 @@ int main( int argc, char** argv ) {
    unpack_action_data->add_option("name", packed_action_data_name_string, localized("The name of the function that's called by this action"))->required();
    unpack_action_data->add_option("packed_action_data", packed_action_data_string, localized("The action data expressed as packed hex string"))->required();
    unpack_action_data->set_callback([&] {
-      dcc_ASSERT( packed_action_data_string.size() >= 2, transaction_type_exception, "No packed_action_data found" );
+      actc_ASSERT( packed_action_data_string.size() >= 2, transaction_type_exception, "No packed_action_data found" );
       vector<char> packed_action_data_blob(packed_action_data_string.size()/2);
       fc::from_hex(packed_action_data_string, packed_action_data_blob.data(), packed_action_data_blob.size());
       fc::variant unpacked_action_data_json = bin_to_variant(packed_action_data_account_string, packed_action_data_name_string, packed_action_data_blob);
@@ -1958,12 +1958,12 @@ int main( int argc, char** argv ) {
             abi = fc::json::to_pretty_string(abi_d);
       }
       catch(chain::missing_chain_api_plugin_exception&) {
-         //see if this is an old noddcc that doesn't support get_raw_code_and_abi
+         //see if this is an old nodactc that doesn't support get_raw_code_and_abi
          const auto old_result = call(get_code_func, fc::mutable_variant_object("account_name", accountName)("code_as_wasm",code_as_wasm));
          code_hash = old_result["code_hash"].as_string();
          if(code_as_wasm) {
             wasm = old_result["wasm"].as_string();
-            std::cout << localized("Warning: communicating to older noddcc which returns malformed binary wasm") << std::endl;
+            std::cout << localized("Warning: communicating to older nodactc which returns malformed binary wasm") << std::endl;
          }
          else
             wast = old_result["wast"].as_string();
@@ -2117,7 +2117,7 @@ int main( int argc, char** argv ) {
       public_key_type public_key;
       try {
          public_key = public_key_type(public_key_str);
-      } dcc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid public key: ${public_key}", ("public_key", public_key_str))
+      } actc_RETHROW_EXCEPTIONS(public_key_type_exception, "Invalid public key: ${public_key}", ("public_key", public_key_str))
       auto arg = fc::mutable_variant_object( "public_key", public_key);
       std::cout << fc::json::to_pretty_string(call(get_key_accounts_func, arg)) << std::endl;
    });
@@ -2257,14 +2257,14 @@ int main( int argc, char** argv ) {
          uint64_t skip_seq;
          try {
             skip_seq = boost::lexical_cast<uint64_t>(skip_seq_str);
-         } dcc_RETHROW_EXCEPTIONS(chain_type_exception, "Invalid Skip Seq: ${skip_seq}", ("skip_seq", skip_seq_str))
+         } actc_RETHROW_EXCEPTIONS(chain_type_exception, "Invalid Skip Seq: ${skip_seq}", ("skip_seq", skip_seq_str))
          if (num_seq_str.empty()) {
             arg = fc::mutable_variant_object( "account_name", account_name)("skip_seq", skip_seq);
          } else {
             uint64_t num_seq;
             try {
                num_seq = boost::lexical_cast<uint64_t>(num_seq_str);
-            } dcc_RETHROW_EXCEPTIONS(chain_type_exception, "Invalid Num Seq: ${num_seq}", ("num_seq", num_seq_str))
+            } actc_RETHROW_EXCEPTIONS(chain_type_exception, "Invalid Num Seq: ${num_seq}", ("num_seq", num_seq_str))
             arg = fc::mutable_variant_object( "account_name", account_name)("skip_seq", skip_seq_str)("num_seq", num_seq);
          }
       }
@@ -2364,7 +2364,7 @@ int main( int argc, char** argv ) {
 
         std::cerr << localized(("Reading WASM from " + wasmPath + "...").c_str()) << std::endl;
         fc::read_file_contents(wasmPath, wasm);
-        dcc_ASSERT( !wasm.empty(), wast_file_not_found, "no wasm file found ${f}", ("f", wasmPath) );
+        actc_ASSERT( !wasm.empty(), wast_file_not_found, "no wasm file found ${f}", ("f", wasmPath) );
 
         const string binary_wasm_header("\x00\x61\x73\x6d\x01\x00\x00\x00", 8);
         if(wasm.compare(0, 8, binary_wasm_header))
@@ -2417,7 +2417,7 @@ int main( int argc, char** argv ) {
            abiPath = (cpath / abiPath).generic_string();
         }
 
-        dcc_ASSERT( fc::exists( abiPath ), abi_file_not_found, "no abi file found ${f}", ("f", abiPath)  );
+        actc_ASSERT( fc::exists( abiPath ), abi_file_not_found, "no abi file found ${f}", ("f", abiPath)  );
 
         abi_bytes = fc::raw::pack(fc::json::from_file(abiPath).as<abi_def>());
       } else {
@@ -2431,7 +2431,7 @@ int main( int argc, char** argv ) {
       if (!duplicate) {
          try {
             actions.emplace_back( create_setabi(account, abi_bytes) );
-         } dcc_RETHROW_EXCEPTIONS(abi_type_exception,  "Fail to parse ABI JSON")
+         } actc_RETHROW_EXCEPTIONS(abi_type_exception,  "Fail to parse ABI JSON")
          if ( shouldSend ) {
             std::cerr << localized("Setting ABI...") << std::endl;
             send_actions(std::move(actions), 10000, packed_transaction::zlib);
@@ -2445,7 +2445,7 @@ int main( int argc, char** argv ) {
    add_standard_transaction_options(codeSubcommand, "account@active");
    add_standard_transaction_options(abiSubcommand, "account@active");
    contractSubcommand->set_callback([&] {
-      if(!contract_clear) dcc_ASSERT( !contractPath.empty(), contract_exception, " contract-dir is null ", ("f", contractPath) );
+      if(!contract_clear) actc_ASSERT( !contractPath.empty(), contract_exception, " contract-dir is null ", ("f", contractPath) );
       shouldSend = false;
       set_code_callback();
       set_abi_callback();
@@ -2472,16 +2472,16 @@ int main( int argc, char** argv ) {
    auto setActionPermission = set_action_permission_subcommand(setAction);
 
    // Transfer subcommand
-   string con = "dccio.token";
+   string con = "actc.token";
    string sender;
    string recipient;
    string amount;
    string memo;
    bool pay_ram = false;
-   auto transfer = app.add_subcommand("transfer", localized("Transfer dcc from account to account"), false);
-   transfer->add_option("sender", sender, localized("The account sending dcc"))->required();
-   transfer->add_option("recipient", recipient, localized("The account receiving dcc"))->required();
-   transfer->add_option("amount", amount, localized("The amount of dcc to send"))->required();
+   auto transfer = app.add_subcommand("transfer", localized("Transfer actc from account to account"), false);
+   transfer->add_option("sender", sender, localized("The account sending actc"))->required();
+   transfer->add_option("recipient", recipient, localized("The account receiving actc"))->required();
+   transfer->add_option("amount", amount, localized("The amount of actc to send"))->required();
    transfer->add_option("memo", memo, localized("The memo for the transfer"));
    transfer->add_option("--contract,-c", con, localized("The contract which controls the token"));
    transfer->add_flag("--pay-ram-to-open", pay_ram, localized("Pay ram to open recipient's token balance row"));
@@ -2548,8 +2548,8 @@ int main( int argc, char** argv ) {
    createWallet->add_option("-f,--file", password_file, localized("Name of file to write wallet password output to. (Must be set, unless \"--to-console\" is passed"));
    createWallet->add_flag( "--to-console", print_console, localized("Print password to console."));
    createWallet->set_callback([&wallet_name, &password_file, &print_console] {
-      dccC_ASSERT( !password_file.empty() ^ print_console, "ERROR: Either indicate a file using \"--file\" or pass \"--to-console\"" );
-      dccC_ASSERT( password_file.empty() || !std::ofstream(password_file.c_str()).fail(), "ERROR: Failed to create file in specified path" );
+      actcC_ASSERT( !password_file.empty() ^ print_console, "ERROR: Either indicate a file using \"--file\" or pass \"--to-console\"" );
+      actcC_ASSERT( password_file.empty() || !std::ofstream(password_file.c_str()).fail(), "ERROR: Failed to create file in specified path" );
 
       const auto& v = call(wallet_url, wallet_create, wallet_name);
       std::cout << localized("Creating wallet: ${wallet_name}", ("wallet_name", wallet_name)) << std::endl;
@@ -2619,7 +2619,7 @@ int main( int argc, char** argv ) {
       try {
          wallet_key = private_key_type( wallet_key_str );
       } catch (...) {
-         dcc_THROW(private_key_type_exception, "Invalid private key: ${private_key}", ("private_key", wallet_key_str))
+         actc_THROW(private_key_type_exception, "Invalid private key: ${private_key}", ("private_key", wallet_key_str))
       }
       public_key_type pubkey = wallet_key.get_public_key();
 
@@ -2640,7 +2640,7 @@ int main( int argc, char** argv ) {
       try {
          pubkey = public_key_type( wallet_rm_key_str );
       } catch (...) {
-         dcc_THROW(public_key_type_exception, "Invalid public key: ${public_key}", ("public_key", wallet_rm_key_str))
+         actc_THROW(public_key_type_exception, "Invalid public key: ${public_key}", ("public_key", wallet_rm_key_str))
       }
       fc::variants vs = {fc::variant(wallet_name), fc::variant(wallet_pw), fc::variant(wallet_rm_key_str)};
       call(wallet_url, wallet_remove_key, vs);
@@ -2685,10 +2685,10 @@ int main( int argc, char** argv ) {
       std::cout << fc::json::to_pretty_string(v) << std::endl;
    });
 
-   auto stopKdccd = wallet->add_subcommand("stop", localized("Stop kdccd (doesn't work with noddcc)."), false);
-   stopKdccd->set_callback([] {
-      const auto& v = call(wallet_url, kdccd_stop);
-      if ( !v.is_object() || v.get_object().size() != 0 ) { //on success kdccd responds with empty object
+   auto stopKactcd = wallet->add_subcommand("stop", localized("Stop kactcd (doesn't work with nodactc)."), false);
+   stopKactcd->set_callback([] {
+      const auto& v = call(wallet_url, kactcd_stop);
+      if ( !v.is_object() || v.get_object().size() != 0 ) { //on success kactcd responds with empty object
          std::cerr << fc::json::to_pretty_string(v) << std::endl;
       } else {
          std::cout << "OK" << std::endl;
@@ -2714,7 +2714,7 @@ int main( int argc, char** argv ) {
       fc::optional<chain_id_type> chain_id;
 
       if( str_chain_id.size() == 0 ) {
-         ilog( "grabbing chain_id from noddcc" );
+         ilog( "grabbing chain_id from nodactc" );
          auto info = get_info();
          chain_id = info.chain_id;
       } else {
@@ -2762,7 +2762,7 @@ int main( int argc, char** argv ) {
       if( !data.empty() ) {
          try {
             action_args_var = json_from_file_or_string(data, fc::json::relaxed_parser);
-         } dcc_RETHROW_EXCEPTIONS(action_type_exception, "Fail to parse action JSON data='${data}'", ("data", data))
+         } actc_RETHROW_EXCEPTIONS(action_type_exception, "Fail to parse action JSON data='${data}'", ("data", data))
       }
       auto accountPermissions = get_account_permissions(tx_permission);
 
@@ -2779,7 +2779,7 @@ int main( int argc, char** argv ) {
       fc::variant trx_var;
       try {
          trx_var = json_from_file_or_string(trx_to_push);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_push))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_push))
       try {
          signed_transaction trx = trx_var.as<signed_transaction>();
          std::cout << fc::json::to_pretty_string( push_transaction( trx )) << std::endl;
@@ -2799,7 +2799,7 @@ int main( int argc, char** argv ) {
       fc::variant trx_var;
       try {
          trx_var = json_from_file_or_string(trxsJson);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trxsJson))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trxsJson))
       auto trxs_result = call(push_txns_func, trx_var);
       std::cout << fc::json::to_pretty_string(trxs_result) << std::endl;
    });
@@ -2843,34 +2843,34 @@ int main( int argc, char** argv ) {
       fc::variant requested_perm_var;
       try {
          requested_perm_var = json_from_file_or_string(requested_perm);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",requested_perm))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",requested_perm))
       fc::variant transaction_perm_var;
       try {
          transaction_perm_var = json_from_file_or_string(transaction_perm);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",transaction_perm))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",transaction_perm))
       fc::variant trx_var;
       try {
          trx_var = json_from_file_or_string(proposed_transaction);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",proposed_transaction))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",proposed_transaction))
       transaction proposed_trx = trx_var.as<transaction>();
       bytes proposed_trx_serialized = variant_to_bin( proposed_contract, proposed_action, trx_var );
 
       vector<permission_level> reqperm;
       try {
          reqperm = requested_perm_var.as<vector<permission_level>>();
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Wrong requested permissions format: '${data}'", ("data",requested_perm_var));
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Wrong requested permissions format: '${data}'", ("data",requested_perm_var));
 
       vector<permission_level> trxperm;
       try {
          trxperm = transaction_perm_var.as<vector<permission_level>>();
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Wrong transaction permissions format: '${data}'", ("data",transaction_perm_var));
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Wrong transaction permissions format: '${data}'", ("data",transaction_perm_var));
 
       auto accountPermissions = get_account_permissions(tx_permission);
       if (accountPermissions.empty()) {
          if (!proposer.empty()) {
             accountPermissions = vector<permission_level>{{proposer, config::active_name}};
          } else {
-            dcc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <proposer> or -p)");
+            actc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <proposer> or -p)");
          }
       }
       if (proposer.empty()) {
@@ -2895,7 +2895,7 @@ int main( int argc, char** argv ) {
          ("requested", requested_perm_var)
          ("trx", trx_var);
 
-      send_actions({chain::action{accountPermissions, "dccio.msig", "propose", variant_to_bin( N(dccio.msig), N(propose), args ) }});
+      send_actions({chain::action{accountPermissions, "actc.msig", "propose", variant_to_bin( N(actc.msig), N(propose), args ) }});
    });
 
    //multisige propose transaction
@@ -2910,19 +2910,19 @@ int main( int argc, char** argv ) {
       fc::variant requested_perm_var;
       try {
          requested_perm_var = json_from_file_or_string(requested_perm);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",requested_perm))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",requested_perm))
 
       fc::variant trx_var;
       try {
          trx_var = json_from_file_or_string(trx_to_push);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_push))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_push))
 
       auto accountPermissions = get_account_permissions(tx_permission);
       if (accountPermissions.empty()) {
          if (!proposer.empty()) {
             accountPermissions = vector<permission_level>{{proposer, config::active_name}};
          } else {
-            dcc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <proposer> or -p)");
+            actc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <proposer> or -p)");
          }
       }
       if (proposer.empty()) {
@@ -2935,7 +2935,7 @@ int main( int argc, char** argv ) {
          ("requested", requested_perm_var)
          ("trx", trx_var);
 
-      send_actions({chain::action{accountPermissions, "dccio.msig", "propose", variant_to_bin( N(dccio.msig), N(propose), args ) }});
+      send_actions({chain::action{accountPermissions, "actc.msig", "propose", variant_to_bin( N(actc.msig), N(propose), args ) }});
    });
 
 
@@ -2946,11 +2946,11 @@ int main( int argc, char** argv ) {
 
    review->set_callback([&] {
       auto result = call(get_table_func, fc::mutable_variant_object("json", true)
-                         ("code", "dccio.msig")
+                         ("code", "actc.msig")
                          ("scope", proposer)
                          ("table", "proposal")
                          ("table_key", "")
-                         ("lower_bound", dccio::chain::string_to_name(proposal_name.c_str()))
+                         ("lower_bound", actc::chain::string_to_name(proposal_name.c_str()))
                          ("upper_bound", "")
                          ("limit", 1)
                          );
@@ -2984,14 +2984,14 @@ int main( int argc, char** argv ) {
       fc::variant perm_var;
       try {
          perm_var = json_from_file_or_string(perm);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",perm))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse permissions JSON '${data}'", ("data",perm))
       auto args = fc::mutable_variant_object()
          ("proposer", proposer)
          ("proposal_name", proposal_name)
          ("level", perm_var);
 
       auto accountPermissions = tx_permission.empty() ? vector<chain::permission_level>{{sender,config::active_name}} : get_account_permissions(tx_permission);
-      send_actions({chain::action{accountPermissions, "dccio.msig", action, variant_to_bin( N(dccio.msig), action, args ) }});
+      send_actions({chain::action{accountPermissions, "actc.msig", action, variant_to_bin( N(actc.msig), action, args ) }});
    };
 
    // multisig approve
@@ -3023,7 +3023,7 @@ int main( int argc, char** argv ) {
          if (!canceler.empty()) {
             accountPermissions = vector<permission_level>{{canceler, config::active_name}};
          } else {
-            dcc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <canceler> or -p)");
+            actc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <canceler> or -p)");
          }
       }
       if (canceler.empty()) {
@@ -3034,7 +3034,7 @@ int main( int argc, char** argv ) {
          ("proposal_name", proposal_name)
          ("canceler", canceler);
 
-      send_actions({chain::action{accountPermissions, "dccio.msig", "cancel", variant_to_bin( N(dccio.msig), N(cancel), args ) }});
+      send_actions({chain::action{accountPermissions, "actc.msig", "cancel", variant_to_bin( N(actc.msig), N(cancel), args ) }});
       }
    );
 
@@ -3051,7 +3051,7 @@ int main( int argc, char** argv ) {
          if (!executer.empty()) {
             accountPermissions = vector<permission_level>{{executer, config::active_name}};
          } else {
-            dcc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <executer> or -p)");
+            actc_THROW(missing_auth_exception, "Authority is not provided (either by multisig parameter <executer> or -p)");
          }
       }
       if (executer.empty()) {
@@ -3063,7 +3063,7 @@ int main( int argc, char** argv ) {
          ("proposal_name", proposal_name)
          ("executer", executer);
 
-      send_actions({chain::action{accountPermissions, "dccio.msig", "exec", variant_to_bin( N(dccio.msig), N(exec), args ) }});
+      send_actions({chain::action{accountPermissions, "actc.msig", "exec", variant_to_bin( N(actc.msig), N(exec), args ) }});
       }
    );
 
@@ -3072,7 +3072,7 @@ int main( int argc, char** argv ) {
    wrap->require_subcommand();
 
    // wrap exec
-   string wrap_con = "dccio.wrap";
+   string wrap_con = "actc.wrap";
    executer = "";
    string trx_to_exec;
    auto wrap_exec = wrap->add_subcommand("exec", localized("Execute a transaction while bypassing authorization checks"));
@@ -3085,7 +3085,7 @@ int main( int argc, char** argv ) {
       fc::variant trx_var;
       try {
          trx_var = json_from_file_or_string(trx_to_exec);
-      } dcc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_exec))
+      } actc_RETHROW_EXCEPTIONS(transaction_type_exception, "Fail to parse transaction JSON '${data}'", ("data",trx_to_exec))
 
       auto accountPermissions = get_account_permissions(tx_permission);
       if( accountPermissions.empty() ) {
@@ -3100,7 +3100,7 @@ int main( int argc, char** argv ) {
    });
 
    // system subcommand
-   auto system = app.add_subcommand("system", localized("Send dccio.system contract action to the blockchain."), false);
+   auto system = app.add_subcommand("system", localized("Send actc.system contract action to the blockchain."), false);
    system->require_subcommand();
 
    auto createAccountSystem = create_account_subcommand( system, false /*simple*/ );

@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  *
  * \warning This file is machine generated. DO NOT EDIT.  See config.hpp.in for changes.
  */
@@ -9,7 +9,7 @@
 #ifndef CONFIG_HPP_IN
 #define CONFIG_HPP_IN
 
-namespace dccio { namespace launcher { namespace config {
+namespace actc { namespace launcher { namespace config {
   constexpr char version_str[] = "${launcher_BUILD_VERSION}";
 }}}
 

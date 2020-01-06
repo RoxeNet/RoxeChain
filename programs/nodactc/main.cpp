@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dccio/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <appbase/application.hpp>
 
-#include <dccio/chain_plugin/chain_plugin.hpp>
-#include <dccio/http_plugin/http_plugin.hpp>
-#include <dccio/history_plugin/history_plugin.hpp>
-#include <dccio/net_plugin/net_plugin.hpp>
-#include <dccio/producer_plugin/producer_plugin.hpp>
-#include <dccio/utilities/common.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
+#include <actc/history_plugin/history_plugin.hpp>
+#include <actc/net_plugin/net_plugin.hpp>
+#include <actc/producer_plugin/producer_plugin.hpp>
+#include <actc/utilities/common.hpp>
 
 #include <fc/log/logger_config.hpp>
 #include <fc/log/appender.hpp>
@@ -21,7 +21,7 @@
 #include "config.hpp"
 
 using namespace appbase;
-using namespace dccio;
+using namespace actc;
 
 namespace fc {
    std::unordered_map<std::string,appender::ptr>& get_appender_map();
@@ -93,12 +93,12 @@ enum return_codes {
 int main(int argc, char** argv)
 {
    try {
-      app().set_version(dccio::noddcc::config::version);
+      app().set_version(actc::nodactc::config::version);
       app().register_plugin<history_plugin>();
 
       auto root = fc::app_path();
-      app().set_default_data_dir(root / "dccio/noddcc/data" );
-      app().set_default_config_dir(root / "dccio/noddcc/config" );
+      app().set_default_data_dir(root / "actc/nodactc/data" );
+      app().set_default_config_dir(root / "actc/nodactc/config" );
       http_plugin::set_defaults({
          .address_config_prefix = "",
          .default_unix_socket_path = "",
@@ -107,8 +107,8 @@ int main(int argc, char** argv)
       if(!app().initialize<chain_plugin, http_plugin, net_plugin, producer_plugin>(argc, argv))
          return INITIALIZE_FAIL;
       initialize_logging();
-      ilog("noddcc version ${ver}", ("ver", app().version_string()));
-      ilog("dccio root is ${root}", ("root", root.string()));
+      ilog("nodactc version ${ver}", ("ver", app().version_string()));
+      ilog("actc root is ${root}", ("root", root.string()));
       app().startup();
       app().exec();
    } catch( const extract_genesis_state_exception& e ) {
