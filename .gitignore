@@ -45,17 +45,17 @@ libraries/wasm-jit/Source/Programs/Disassemble
 libraries/wasm-jit/Source/Programs/Test
 libraries/wasm-jit/Source/Programs/wavm
 
-programs/cldcc/cldcc
+programs/clactc/clactc
 programs/js_operation_serializer/js_operation_serializer
 programs/data-dir
-programs/dccio-abigen/dccio-abigen
-programs/cldcc/config.hpp
-programs/dccio-applesedemo/dccio-applesedemo
-programs/dccio-launcher/config.hpp
-programs/dccio-launcher/dccio-launcher
-programs/kdccd/kdccd
-programs/noddcc/config.hpp
-programs/noddcc/noddcc
+programs/actc-abigen/actc-abigen
+programs/clactc/config.hpp
+programs/actc-applesedemo/actc-applesedemo
+programs/actc-launcher/config.hpp
+programs/actc-launcher/actc-launcher
+programs/kactcd/kactcd
+programs/nodactc/config.hpp
+programs/nodactc/nodactc
 
 scripts/tn_init.sh
 
@@ -63,7 +63,7 @@ tests/plugin_test
 unittests/unit_test
 
 doxygen
-dcc.doxygen
+actc.doxygen
 
 wallet.json
 witness_node_data_dir
@@ -76,7 +76,7 @@ witness_node_data_dir
 build/*
 build-debug/*
 
-etc/dccio/node_*
+etc/actc/node_*
 var/lib/node_*
 .vscode
 .idea/
