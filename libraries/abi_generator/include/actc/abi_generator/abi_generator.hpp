@@ -8,8 +8,8 @@
 #include <fstream>
 #include <sstream>
 
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/contract_types.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/contract_types.hpp>
 #include <fc/io/json.hpp>
 
 //clashes with something deep in the AST includes in clang 6 and possibly other versions of clang
@@ -42,8 +42,8 @@ using namespace std;
 using namespace clang::tooling;
 namespace cl = llvm::cl;
 
-namespace dccio {
-   using namespace dccio::chain;
+namespace actc {
+   using namespace actc::chain;
 
    FC_DECLARE_EXCEPTION( abi_generation_exception, 999999, "Unable to generate abi" );
 
@@ -54,7 +54,7 @@ namespace dccio {
          {                                                                      \
            if( fc::enable_record_assert_trip )                                  \
               fc::record_assert_trip( __FILE__, __LINE__, #TEST );              \
-           FC_THROW_EXCEPTION( dccio::abi_generation_exception, #TEST ": "  __VA_ARGS__ ); \
+           FC_THROW_EXCEPTION( actc::abi_generation_exception, #TEST ": "  __VA_ARGS__ ); \
          }                                                                      \
        FC_MULTILINE_MACRO_END \
       )
@@ -89,7 +89,7 @@ namespace dccio {
          inline string is_clause_decl( string line ) {
             smatch match;
             if ( regex_match( line, match, regex("(###[ ]+CLAUSE[ ]+NAME[ ]*:[ ]*)(.*)", regex_constants::ECMAScript) ) ) {
-               dcc_ASSERT( match.size() == 3, invalid_ricardian_clause_exception, "Error, malformed clause declaration" );
+               actc_ASSERT( match.size() == 3, invalid_ricardian_clause_exception, "Error, malformed clause declaration" );
                return match[2].str();
             }
             return {};
@@ -98,7 +98,7 @@ namespace dccio {
          inline string is_action_decl( string line ) {
             smatch match;
             if ( regex_match( line, match, regex("(##[ ]+ACTION[ ]+NAME[ ]*:[ ]*)(.*)", regex_constants::ECMAScript) ) ) {
-               dcc_ASSERT( match.size() == 3,  invalid_ricardian_action_exception, "Error, malformed action declaration" );
+               actc_ASSERT( match.size() == 3,  invalid_ricardian_action_exception, "Error, malformed action declaration" );
                return match[2].str();
             }
             return {};
@@ -137,7 +137,7 @@ namespace dccio {
                if ( !(_name = is_clause_decl( line )).empty() ) {
                   if ( !first_time ) {
                      if (body.str().empty() ) {
-                        dcc_ASSERT( false, invalid_ricardian_clause_exception, "Error, invalid input in ricardian clauses, no body found" );
+                        actc_ASSERT( false, invalid_ricardian_clause_exception, "Error, invalid input in ricardian clauses, no body found" );
                      }
                      _clauses.emplace_back( name, body.str() );
                      body.str("");
@@ -156,7 +156,7 @@ namespace dccio {
    };
 
    /**
-     * @brief Generates dccio::abi_def struct handling events from ASTConsumer
+     * @brief Generates actc::abi_def struct handling events from ASTConsumer
      */
    class abi_generator {
       private:
@@ -324,13 +324,13 @@ namespace dccio {
       }
    };
 
-   struct find_dccio_abi_macro_action : public PreprocessOnlyAction {
+   struct find_actc_abi_macro_action : public PreprocessOnlyAction {
 
          string& contract;
          vector<string>& actions;
          const string& abi_context;
 
-         find_dccio_abi_macro_action(string& contract, vector<string>& actions, const string& abi_context
+         find_actc_abi_macro_action(string& contract, vector<string>& actions, const string& abi_context
             ): contract(contract),
             actions(actions), abi_context(abi_context) {
          }
@@ -338,9 +338,9 @@ namespace dccio {
          struct callback_handler : public PPCallbacks {
 
             CompilerInstance& compiler_instance;
-            find_dccio_abi_macro_action& act;
+            find_actc_abi_macro_action& act;
 
-            callback_handler(CompilerInstance& compiler_instance, find_dccio_abi_macro_action& act)
+            callback_handler(CompilerInstance& compiler_instance, find_actc_abi_macro_action& act)
             : compiler_instance(compiler_instance), act(act) {}
 
             string remove_namespace(const string& full_name) {
@@ -366,7 +366,7 @@ namespace dccio {
 
                auto* id = token.getIdentifierInfo();
                if( id == nullptr ) return;
-               if( id->getName() != "dccIO_ABI" ) return;
+               if( id->getName() != "actc_ABI" ) return;
 
                const auto& sm = compiler_instance.getSourceManager();
                auto file_name = sm.getFilename(range.getBegin());
@@ -380,7 +380,7 @@ namespace dccio {
                clang::SourceLocation e(clang::Lexer::getLocForEndOfToken(_e, 0, sm, compiler_instance.getLangOpts()));
                auto macrostr = string(sm.getCharacterData(b), sm.getCharacterData(e)-sm.getCharacterData(b));
 
-               regex r(R"(dccIO_ABI\s*\(\s*(.+?)\s*,((?:.+?)*)\s*\))");
+               regex r(R"(actc_ABI\s*\(\s*(.+?)\s*,((?:.+?)*)\s*\))");
                smatch smatch;
                auto res = regex_search(macrostr, smatch, r);
                ABI_ASSERT( res );
@@ -437,6 +437,6 @@ namespace dccio {
          }
    };
 
-} //ns dccio
+} //ns actc
 
 #pragma pop_macro("N")
