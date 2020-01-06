@@ -1,17 +1,17 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
-#include <dccio/chain/transaction.hpp>
-#include <dccio/wallet_plugin/wallet_api.hpp>
+#include <actc/chain/transaction.hpp>
+#include <actc/wallet_plugin/wallet_api.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/interprocess/sync/file_lock.hpp>
 #include <chrono>
 
 namespace fc { class variant; }
 
-namespace dccio {
+namespace actc {
 namespace wallet {
 
 /// Provides associate of wallet name to wallet and manages the interaction with each wallet.
@@ -113,7 +113,7 @@ public:
    /// Wallet must be opened and unlocked.
    /// @param name the name of the wallet to remove the key from.
    /// @param password the plaintext password returned from ::create.
-   /// @param key the Public Key to remove, e.g. dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+   /// @param key the Public Key to remove, e.g. actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
    /// @throws fc::exception if wallet not found or locked or key is not removed.
    void remove_key(const std::string& name, const std::string& password, const std::string& key);
 
@@ -146,6 +146,6 @@ private:
 };
 
 } // namespace wallet
-} // namespace dccio
+} // namespace actc
 
 

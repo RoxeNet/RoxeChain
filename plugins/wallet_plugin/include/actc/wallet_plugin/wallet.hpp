@@ -1,19 +1,19 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
-#include <dccio/chain/types.hpp>
-#include <dccio/wallet_plugin/wallet_api.hpp>
+#include <actc/chain/types.hpp>
+#include <actc/wallet_plugin/wallet_api.hpp>
 
 #include <fc/real128.hpp>
 #include <fc/crypto/base58.hpp>
 
 using namespace std;
-using namespace dccio::chain;
+using namespace actc::chain;
 
-namespace dccio { namespace wallet {
+namespace actc { namespace wallet {
 
 typedef uint16_t transaction_handle_type;
 
@@ -165,7 +165,7 @@ class soft_wallet final : public wallet_api
 
       /** Removes a key from the wallet.
        *
-       * example: remove_key dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       * example: remove_key actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
        *
        * @param key the Public Key to remove
        */
@@ -194,6 +194,6 @@ struct plain_keys {
 
 } }
 
-FC_REFLECT( dccio::wallet::wallet_data, (cipher_keys) )
+FC_REFLECT( actc::wallet::wallet_data, (cipher_keys) )
 
-FC_REFLECT( dccio::wallet::plain_keys, (checksum)(keys) )
+FC_REFLECT( actc::wallet::plain_keys, (checksum)(keys) )

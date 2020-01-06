@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
-#include <dccio/chain/types.hpp>
-#include <dccio/chain/transaction.hpp>
+#include <actc/chain/types.hpp>
+#include <actc/chain/transaction.hpp>
 
 using namespace std;
-using namespace dccio::chain;
+using namespace actc::chain;
 
-namespace dccio { namespace wallet {
+namespace actc { namespace wallet {
 
 class wallet_api
 {
@@ -85,7 +85,7 @@ class wallet_api
 
       /** Removes a key from the wallet.
        *
-       * example: remove_key dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       * example: remove_key actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
        *
        * @param key the Public Key to remove
        */

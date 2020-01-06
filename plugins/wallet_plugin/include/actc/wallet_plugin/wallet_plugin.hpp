@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
 #include <fc/variant.hpp>
-#include <dccio/chain/contract_types.hpp>
-#include <dccio/chain/transaction.hpp>
+#include <actc/chain/contract_types.hpp>
+#include <actc/chain/transaction.hpp>
 
 namespace fc { class variant; }
 
-namespace dccio {
+namespace actc {
    using namespace appbase;
 
    namespace wallet {

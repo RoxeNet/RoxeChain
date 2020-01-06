@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/dccio/wallet_api_plugin/*.hpp")
+file(GLOB HEADERS "include/actc/wallet_api_plugin/*.hpp")
 add_library( wallet_api_plugin
              wallet_api_plugin.cpp
              ${HEADERS} )

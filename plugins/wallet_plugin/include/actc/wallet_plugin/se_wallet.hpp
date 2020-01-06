@@ -1,12 +1,12 @@
 #pragma once
 
-#include <dccio/chain/types.hpp>
-#include <dccio/wallet_plugin/wallet_api.hpp>
+#include <actc/chain/types.hpp>
+#include <actc/wallet_plugin/wallet_api.hpp>
 
 using namespace std;
-using namespace dccio::chain;
+using namespace actc::chain;
 
-namespace dccio { namespace wallet {
+namespace actc { namespace wallet {
 
 namespace detail {
 struct se_wallet_impl;
