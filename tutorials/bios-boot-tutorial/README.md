@@ -1,6 +1,6 @@
 # Bios Boot Tutorial
 
-The `bios-boot-tutorial.py` script simulates the dccIO bios boot sequence.
+The `bios-boot-tutorial.py` script simulates the actc bios boot sequence.
 
 The script can be run with no arguments directly from the `tutorials/bios-boot-tutorial` directory.
 
@@ -10,4 +10,4 @@ $ cd tutorials/bios-boot-tutorial
 $ ./bios-boot-tutorial.py
 ```
 
-See [dccIO Documentation Wiki: Tutorial - Bios Boot](https://github.com/dccIO/dcc/wiki/Tutorial-Bios-Boot-Sequence) for additional information.
+See [actc Documentation Wiki: Tutorial - Bios Boot](https://github.com/actc/actc/wiki/Tutorial-Bios-Boot-Sequence) for additional information.

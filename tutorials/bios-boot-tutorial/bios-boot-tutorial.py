@@ -14,18 +14,18 @@ args = None
 logFile = None
 
 unlockTimeout = 999999999
-fastUnstakeSystem = './fast.refund/dccio.system/dccio.system.wasm'
+fastUnstakeSystem = './fast.refund/actc.system/actc.system.wasm'
 
 systemAccounts = [
-    'dccio.bpay',
-    'dccio.msig',
-    'dccio.names',
-    'dccio.ram',
-    'dccio.ramfee',
-    'dccio.saving',
-    'dccio.stake',
-    'dccio.token',
-    'dccio.vpay',
+    'actc.bpay',
+    'actc.msig',
+    'actc.names',
+    'actc.ram',
+    'actc.ramfee',
+    'actc.saving',
+    'actc.stake',
+    'actc.token',
+    'actc.vpay',
 ]
 
 def jsonArg(a):
@@ -72,12 +72,12 @@ def sleep(t):
 def startWallet():
     run('rm -rf ' + os.path.abspath(args.wallet_dir))
     run('mkdir -p ' + os.path.abspath(args.wallet_dir))
-    background(args.kdccd + ' --unlock-timeout %d --http-server-address 127.0.0.1:6666 --wallet-dir %s' % (unlockTimeout, os.path.abspath(args.wallet_dir)))
+    background(args.kactcd + ' --unlock-timeout %d --http-server-address 127.0.0.1:6666 --wallet-dir %s' % (unlockTimeout, os.path.abspath(args.wallet_dir)))
     sleep(.4)
-    run(args.cldcc + 'wallet create --to-console')
+    run(args.clactc + 'wallet create --to-console')
 
 def importKeys():
-    run(args.cldcc + 'wallet import --private-key ' + args.private_key)
+    run(args.clactc + 'wallet import --private-key ' + args.private_key)
     keys = {}
     for a in accounts:
         key = a['pvt']
@@ -85,13 +85,13 @@ def importKeys():
             if len(keys) >= args.max_user_keys:
                 break
             keys[key] = True
-            run(args.cldcc + 'wallet import --private-key ' + key)
+            run(args.clactc + 'wallet import --private-key ' + key)
     for i in range(firstProducer, firstProducer + numProducers):
         a = accounts[i]
         key = a['pvt']
         if not key in keys:
             keys[key] = True
-            run(args.cldcc + 'wallet import --private-key ' + key)
+            run(args.clactc + 'wallet import --private-key ' + key)
 
 def startNode(nodeIndex, account):
     dir = args.nodes_dir + ('%02d-' % nodeIndex) + account['name'] + '/'
@@ -99,11 +99,11 @@ def startNode(nodeIndex, account):
     run('mkdir -p ' + dir)
     otherOpts = ''.join(list(map(lambda i: '    --p2p-peer-address localhost:' + str(9000 + i), range(nodeIndex))))
     if not nodeIndex: otherOpts += (
-        '    --plugin dccio::history_plugin'
-        '    --plugin dccio::history_api_plugin'
+        '    --plugin actc::history_plugin'
+        '    --plugin actc::history_api_plugin'
     )
     cmd = (
-        args.noddcc +
+        args.nodactc +
         '    --max-irreversible-block-age -1'
         '    --contracts-console'
         '    --genesis-json ' + os.path.abspath(args.genesis) +
@@ -118,9 +118,9 @@ def startNode(nodeIndex, account):
         '    --enable-stale-production'
         '    --producer-name ' + account['name'] +
         '    --private-key \'["' + account['pub'] + '","' + account['pvt'] + '"]\''
-        '    --plugin dccio::http_plugin'
-        '    --plugin dccio::chain_api_plugin'
-        '    --plugin dccio::producer_plugin' +
+        '    --plugin actc::http_plugin'
+        '    --plugin actc::chain_api_plugin'
+        '    --plugin actc::producer_plugin' +
         otherOpts)
     with open(dir + 'stderr', mode='w') as f:
         f.write(cmd + '\n\n')
@@ -132,7 +132,7 @@ def startProducers(b, e):
 
 def createSystemAccounts():
     for a in systemAccounts:
-        run(args.cldcc + 'create account dccio ' + a + ' ' + args.public_key)
+        run(args.clactc + 'create account actc ' + a + ' ' + args.public_key)
 
 def intToCurrency(i):
     return '%d.%04d %s' % (i // 10000, i % 10000, args.symbol)
@@ -171,45 +171,45 @@ def createStakedAccounts(b, e):
         stakeCpu = stake - stakeNet
         print('%s: total funds=%s, ram=%s, net=%s, cpu=%s, unstaked=%s' % (a['name'], intToCurrency(a['funds']), intToCurrency(ramFunds), intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(unstaked)))
         assert(funds == ramFunds + stakeNet + stakeCpu + unstaked)
-        retry(args.cldcc + 'system newaccount --transfer dccio %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' % 
+        retry(args.clactc + 'system newaccount --transfer actc %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' %
             (a['name'], a['pub'], intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(ramFunds)))
         if unstaked:
-            retry(args.cldcc + 'transfer dccio %s "%s"' % (a['name'], intToCurrency(unstaked)))
+            retry(args.clactc + 'transfer actc %s "%s"' % (a['name'], intToCurrency(unstaked)))
 
 def regProducers(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.cldcc + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
+        retry(args.clactc + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
 
 def listProducers():
-    run(args.cldcc + 'system listproducers')
+    run(args.clactc + 'system listproducers')
 
 def vote(b, e):
     for i in range(b, e):
         voter = accounts[i]['name']
         prods = random.sample(range(firstProducer, firstProducer + numProducers), args.num_producers_vote)
         prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
-        retry(args.cldcc + 'system voteproducer prods ' + voter + ' ' + prods)
+        retry(args.clactc + 'system voteproducer prods ' + voter + ' ' + prods)
 
 def claimRewards():
-    table = getJsonOutput(args.cldcc + 'get table dccio dccio producers -l 100')
+    table = getJsonOutput(args.clactc + 'get table actc actc producers -l 100')
     times = []
     for row in table['rows']:
         if row['unpaid_blocks'] and not row['last_claim_time']:
-            times.append(getJsonOutput(args.cldcc + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
+            times.append(getJsonOutput(args.clactc + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
     print('Elapsed time for claimrewards:', times)
 
 def proxyVotes(b, e):
     vote(firstProducer, firstProducer + 1)
     proxy = accounts[firstProducer]['name']
-    retry(args.cldcc + 'system regproxy ' + proxy)
+    retry(args.clactc + 'system regproxy ' + proxy)
     sleep(1.0)
     for i in range(b, e):
         voter = accounts[i]['name']
-        retry(args.cldcc + 'system voteproducer proxy ' + voter + ' ' + proxy)
+        retry(args.clactc + 'system voteproducer proxy ' + voter + ' ' + proxy)
 
 def updateAuth(account, permission, parent, controller):
-    run(args.cldcc + 'push action dccio updateauth' + jsonArg({
+    run(args.clactc + 'push action actc updateauth' + jsonArg({
         'account': account,
         'permission': permission,
         'parent': parent,
@@ -226,7 +226,7 @@ def resign(account, controller):
     updateAuth(account, 'owner', '', controller)
     updateAuth(account, 'active', 'owner', controller)
     sleep(1)
-    run(args.cldcc + 'get account ' + account)
+    run(args.clactc + 'get account ' + account)
 
 def randomTransfer(b, e):
     for j in range(20):
@@ -234,29 +234,29 @@ def randomTransfer(b, e):
         dest = src
         while dest == src:
             dest = accounts[random.randint(b, e - 1)]['name']
-        run(args.cldcc + 'transfer -f ' + src + ' ' + dest + ' "0.0001 ' + args.symbol + '"' + ' || true')
+        run(args.clactc + 'transfer -f ' + src + ' ' + dest + ' "0.0001 ' + args.symbol + '"' + ' || true')
 
 def msigProposeReplaceSystem(proposer, proposalName):
     requestedPermissions = []
     for i in range(firstProducer, firstProducer + numProducers):
         requestedPermissions.append({'actor': accounts[i]['name'], 'permission': 'active'})
-    trxPermissions = [{'actor': 'dccio', 'permission': 'active'}]
+    trxPermissions = [{'actor': 'actc', 'permission': 'active'}]
     with open(fastUnstakeSystem, mode='rb') as f:
-        setcode = {'account': 'dccio', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
-    run(args.cldcc + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) + 
-        jsonArg(trxPermissions) + 'dccio setcode' + jsonArg(setcode) + ' -p ' + proposer)
+        setcode = {'account': 'actc', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
+    run(args.clactc + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) +
+        jsonArg(trxPermissions) + 'actc setcode' + jsonArg(setcode) + ' -p ' + proposer)
 
 def msigApproveReplaceSystem(proposer, proposalName):
     for i in range(firstProducer, firstProducer + numProducers):
-        run(args.cldcc + 'multisig approve ' + proposer + ' ' + proposalName +
+        run(args.clactc + 'multisig approve ' + proposer + ' ' + proposalName +
             jsonArg({'actor': accounts[i]['name'], 'permission': 'active'}) +
             '-p ' + accounts[i]['name'])
 
 def msigExecReplaceSystem(proposer, proposalName):
-    retry(args.cldcc + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
+    retry(args.clactc + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
 
 def msigReplaceSystem():
-    run(args.cldcc + 'push action dccio buyrambytes' + jsonArg(['dccio', accounts[0]['name'], 200000]) + '-p dccio')
+    run(args.clactc + 'push action actc buyrambytes' + jsonArg(['actc', accounts[0]['name'], 200000]) + '-p actc')
     sleep(1)
     msigProposeReplaceSystem(accounts[0]['name'], 'fast.unstake')
     sleep(1)
@@ -266,7 +266,7 @@ def msigReplaceSystem():
 def produceNewAccounts():
     with open('newusers', 'w') as f:
         for i in range(120_000, 200_000):
-            x = getOutput(args.cldcc + 'create key --to-console')
+            x = getOutput(args.clactc + 'create key --to-console')
             r = re.match('Private key: *([^ \n]*)\nPublic key: *([^ \n]*)', x, re.DOTALL | re.MULTILINE)
             name = 'user'
             for j in range(7, -1, -1):
@@ -275,26 +275,26 @@ def produceNewAccounts():
             f.write('        {"name":"%s", "pvt":"%s", "pub":"%s"},\n' % (name, r[1], r[2]))
 
 def stepKillAll():
-    run('killall kdccd noddcc || true')
+    run('killall kactcd nodactc || true')
     sleep(1.5)
 def stepStartWallet():
     startWallet()
     importKeys()
 def stepStartBoot():
-    startNode(0, {'name': 'dccio', 'pvt': args.private_key, 'pub': args.public_key})
+    startNode(0, {'name': 'actc', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(1.5)
 def stepInstallSystemContracts():
-    run(args.cldcc + 'set contract dccio.token ' + args.contracts_dir + 'dccio.token/')
-    run(args.cldcc + 'set contract dccio.msig ' + args.contracts_dir + 'dccio.msig/')
+    run(args.clactc + 'set contract actc.token ' + args.contracts_dir + 'actc.token/')
+    run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + 'actc.msig/')
 def stepCreateTokens():
-    run(args.cldcc + 'push action dccio.token create \'["dccio", "10000000000.0000 %s"]\' -p dccio.token' % (args.symbol))
+    run(args.clactc + 'push action actc.token create \'["actc", "10000000000.0000 %s"]\' -p actc.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
-    run(args.cldcc + 'push action dccio.token issue \'["dccio", "%s", "memo"]\' -p dccio' % intToCurrency(totalAllocation))
+    run(args.clactc + 'push action actc.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
     sleep(1)
 def stepSetSystemContract():
-    retry(args.cldcc + 'set contract dccio ' + args.contracts_dir + 'dccio.system/')
+    retry(args.clactc + 'set contract actc ' + args.contracts_dir + 'actc.system/')
     sleep(1)
-    run(args.cldcc + 'push action dccio setpriv' + jsonArg(['dccio.msig', 1]) + '-p dccio@active')
+    run(args.clactc + 'push action actc setpriv' + jsonArg(['actc.msig', 1]) + '-p actc@active')
 def stepCreateStakedAccounts():
     createStakedAccounts(0, len(accounts))
 def stepRegProducers():
@@ -312,24 +312,24 @@ def stepVote():
 def stepProxyVotes():
     proxyVotes(0, 0 + args.num_voters)
 def stepResign():
-    resign('dccio', 'dccio.prods')
+    resign('actc', 'actc.prods')
     for a in systemAccounts:
-        resign(a, 'dccio')
+        resign(a, 'actc')
 def stepTransfer():
     while True:
         randomTransfer(0, args.num_senders)
 def stepLog():
-    run('tail -n 60 ' + args.nodes_dir + '00-dccio/stderr')
+    run('tail -n 60 ' + args.nodes_dir + '00-actc/stderr')
 
 # Command Line Arguments
 
 parser = argparse.ArgumentParser()
 
 commands = [
-    ('k', 'kill',           stepKillAll,                True,    "Kill all noddcc and kdccd processes"),
-    ('w', 'wallet',         stepStartWallet,            True,    "Start kdccd, create wallet, fill with keys"),
+    ('k', 'kill',           stepKillAll,                True,    "Kill all nodactc and kactcd processes"),
+    ('w', 'wallet',         stepStartWallet,            True,    "Start kactcd, create wallet, fill with keys"),
     ('b', 'boot',           stepStartBoot,              True,    "Start boot node"),
-    ('s', 'sys',            createSystemAccounts,       True,    "Create system accounts (dccio.*)"),
+    ('s', 'sys',            createSystemAccounts,       True,    "Create system accounts (actc.*)"),
     ('c', 'contracts',      stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
     ('t', 'tokens',         stepCreateTokens,           True,    "Create tokens"),
     ('S', 'sys-contract',   stepSetSystemContract,      True,    "Set system contract"),
@@ -339,23 +339,23 @@ commands = [
     ('v', 'vote',           stepVote,                   True,    "Vote for producers"),
     ('R', 'claim',          claimRewards,               True,    "Claim rewards"),
     ('x', 'proxy',          stepProxyVotes,             True,    "Proxy votes"),
-    ('q', 'resign',         stepResign,                 True,    "Resign dccio"),
+    ('q', 'resign',         stepResign,                 True,    "Resign actc"),
     ('m', 'msg-replace',    msigReplaceSystem,          False,   "Replace system contract using msig"),
     ('X', 'xfer',           stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
     ('l', 'log',            stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="dccIO Public Key", default='dcc8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
-parser.add_argument('--private-Key', metavar='', help="dccIO Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
-parser.add_argument('--cldcc', metavar='', help="Cldcc command", default='../../build/programs/cldcc/cldcc --wallet-url http://127.0.0.1:6666 ')
-parser.add_argument('--noddcc', metavar='', help="Path to noddcc binary", default='../../build/programs/noddcc/noddcc')
-parser.add_argument('--kdccd', metavar='', help="Path to kdccd binary", default='../../build/programs/kdccd/kdccd')
+parser.add_argument('--public-key', metavar='', help="actc Public Key", default='actc8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--private-Key', metavar='', help="actc Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
+parser.add_argument('--clactc', metavar='', help="Clactc command", default='../../build/programs/clactc/clactc --wallet-url http://127.0.0.1:6666 ')
+parser.add_argument('--nodactc', metavar='', help="Path to nodactc binary", default='../../build/programs/nodactc/nodactc')
+parser.add_argument('--kactcd', metavar='', help="Path to kactcd binary", default='../../build/programs/kactcd/kactcd')
 parser.add_argument('--contracts-dir', metavar='', help="Path to contracts directory", default='../../build/contracts/')
 parser.add_argument('--nodes-dir', metavar='', help="Path to nodes directory", default='./nodes/')
 parser.add_argument('--genesis', metavar='', help="Path to genesis.json", default="./genesis.json")
 parser.add_argument('--wallet-dir', metavar='', help="Path to wallet directory", default='./wallet/')
 parser.add_argument('--log-path', metavar='', help="Path to log file", default='./output.log')
-parser.add_argument('--symbol', metavar='', help="The dccio.system symbol", default='SYS')
+parser.add_argument('--symbol', metavar='', help="The actc.system symbol", default='SYS')
 parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=3000)
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=10)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)
@@ -368,7 +368,7 @@ parser.add_argument('--num-voters', metavar='', help="Number of voters", type=in
 parser.add_argument('--num-senders', metavar='', help="Number of users to transfer funds randomly", type=int, default=10)
 parser.add_argument('--producer-sync-delay', metavar='', help="Time (s) to sleep to allow producers to sync", type=int, default=80)
 parser.add_argument('-a', '--all', action='store_true', help="Do everything marked with (*)")
-parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for cldcc')
+parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for clactc')
 
 for (flag, command, function, inAll, help) in commands:
     prefix = ''
@@ -381,7 +381,7 @@ for (flag, command, function, inAll, help) in commands:
         
 args = parser.parse_args()
 
-args.cldcc += '--url http://127.0.0.1:%d ' % args.http_port
+args.clactc += '--url http://127.0.0.1:%d ' % args.http_port
 
 logFile = open(args.log_path, 'a')
 

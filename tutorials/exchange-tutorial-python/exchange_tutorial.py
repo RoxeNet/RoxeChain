@@ -30,7 +30,7 @@ def main():
 
 def monitor_exchange():
     action_num = get_last_action() + 1
-    results = cldcc('get actions tokenxchange {} 0 -j'.format(action_num))
+    results = clactc('get actions tokenxchange {} 0 -j'.format(action_num))
 
     results = json.loads(results.stdout)
     action_list = results['actions']
@@ -64,7 +64,7 @@ def update_balance(action, to):
 def transfer(to, quantity):
     if quantity[:-4] != ' SYS':
         quantity += ' SYS'
-    results = cldcc('transfer tokenxchange {} "{}" {} -j'.format(to, quantity, KEY_TO_INTERNAL_ACCOUNT))
+    results = clactc('transfer tokenxchange {} "{}" {} -j'.format(to, quantity, KEY_TO_INTERNAL_ACCOUNT))
     transaction_info = json.loads(str(results.stdout, 'utf-8'))
     transaction_id = transaction_info['transaction_id']
 
@@ -94,7 +94,7 @@ def is_valid_deposit(action):
     if receiver != 'tokenxchange':
         return False
 
-    if (account == 'dccio.token' and
+    if (account == 'actc.token' and
             action_name == 'transfer' and
             memo == KEY_TO_INTERNAL_ACCOUNT and
             valid_user and
@@ -121,7 +121,7 @@ def is_valid_withdrawal(action):
     if receiver != 'tokenxchange':
         return False
 
-    if (account == 'dccio.token' and
+    if (account == 'actc.token' and
             action_name == 'transfer' and
             memo == KEY_TO_INTERNAL_ACCOUNT and
             valid_user and
@@ -133,12 +133,12 @@ def is_valid_withdrawal(action):
     print('Invalid withdrawal')
     return False
 
-def cldcc(args):
+def clactc(args):
     if isinstance(args, list):
-        command = ['cldcc']
+        command = ['clactc']
         command.extend(args)
     else:
-        command = 'cldcc ' + args
+        command = 'clactc ' + args
 
     results = subprocess.run(command, stdin=PIPE, stdout=PIPE, stderr=PIPE, shell=True, check=True)
     return results
