@@ -1,7 +1,7 @@
-#include <dcciolib/dccio.hpp>
-using namespace dccio;
+#include <actclib/actc.hpp>
+using namespace actc;
 
-class hello : public dccio::contract {
+class hello : public actc::contract {
   public:
       using contract::contract;
 
@@ -11,4 +11,4 @@ class hello : public dccio::contract {
       }
 };
 
-dccIO_ABI( hello, (hi) )
+actc_ABI( hello, (hi) )
