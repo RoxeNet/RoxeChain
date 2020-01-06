@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <stdint.h>
-#include <dccio/utilities/words.hpp>
+#include <actc/utilities/words.hpp>
 
-namespace dccio { namespace words {
+namespace actc { namespace words {
 
 const const_char_ptr word_list[] = { 
 "a",
@@ -7569,7 +7569,7 @@ const const_char_ptr word_list[] = {
 "casefy",
 "caseic",
 "casein",
-"casdcce",
+"casactce",
 "caseous",
 "caser",
 "casern",
@@ -10157,7 +10157,7 @@ const const_char_ptr word_list[] = {
 "crenic",
 "crenula",
 "creole",
-"crdccol",
+"cractcol",
 "crepe",
 "crepine",
 "crepon",
@@ -14064,10 +14064,10 @@ const const_char_ptr word_list[] = {
 "eon",
 "eonism",
 "eophyte",
-"dccate",
-"dccide",
-"dccin",
-"dccinic",
+"actcate",
+"actcide",
+"actcin",
+"actcinic",
 "eozoon",
 "epacme",
 "epacrid",
@@ -17318,8 +17318,8 @@ const const_char_ptr word_list[] = {
 "geopony",
 "georama",
 "georgic",
-"gdccid",
-"gdccide",
+"gactcid",
+"gactcide",
 "geotaxy",
 "geotic",
 "geoty",
@@ -24540,7 +24540,7 @@ const const_char_ptr word_list[] = {
 "lunulet",
 "lupe",
 "lupeol",
-"lupdcce",
+"lupactce",
 "lupine",
 "lupinin",
 "lupis",
@@ -27351,7 +27351,7 @@ const const_char_ptr word_list[] = {
 "neon",
 "neonate",
 "neorama",
-"ndccsin",
+"nactcsin",
 "neoteny",
 "neotype",
 "neoza",
@@ -28436,7 +28436,7 @@ const const_char_ptr word_list[] = {
 "olenid",
 "olent",
 "oleo",
-"oldcce",
+"olactce",
 "oleous",
 "olfact",
 "olfacty",
@@ -39628,7 +39628,7 @@ const const_char_ptr word_list[] = {
 "spender",
 "spense",
 "spent",
-"spdcc",
+"spactc",
 "sperate",
 "sperity",
 "sperket",
@@ -42276,7 +42276,7 @@ const const_char_ptr word_list[] = {
 "tele",
 "teledu",
 "telega",
-"teldcct",
+"telactct",
 "teleran",
 "telergy",
 "telesia",
@@ -42801,7 +42801,7 @@ const const_char_ptr word_list[] = {
 "three",
 "threne",
 "threnos",
-"thrdcce",
+"thractce",
 "thresh",
 "threw",
 "thrice",
@@ -49761,4 +49761,4 @@ void hide_unused_warning() {
   (void)word_list; 
 }
 
-} } // dccio::words
+} } // actc::words
