@@ -1,8 +1,8 @@
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/print.hpp>
-using namespace dccio;
+#include <actclib/actc.hpp>
+#include <actclib/print.hpp>
+using namespace actc;
 
-class payloadless : public dccio::contract {
+class payloadless : public actc::contract {
   public:
       using contract::contract;
 
@@ -11,4 +11,4 @@ class payloadless : public dccio::contract {
       }
 };
 
-dccIO_ABI( payloadless, (doit) )
+actc_ABI( payloadless, (doit) )

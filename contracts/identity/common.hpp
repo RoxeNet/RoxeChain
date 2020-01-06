@@ -1,7 +1,7 @@
 #pragma once
 
-#include <dcciolib/singleton.hpp>
-#include <dcciolib/multi_index.hpp>
+#include <actclib/singleton.hpp>
+#include <actclib/multi_index.hpp>
 
 namespace identity {
 
@@ -17,7 +17,7 @@ namespace identity {
       uint8_t           confidence = 1; ///< used to define liability for lies,
       /// 0 to delete
 
-      dccLIB_SERIALIZE( certvalue, (property)(type)(data)(memo)(confidence) )
+      actcLIB_SERIALIZE( certvalue, (property)(type)(data)(memo)(confidence) )
    };
 
    struct certrow {
@@ -29,7 +29,7 @@ namespace identity {
       std::string         type;
       std::vector<char>   data;
       uint64_t primary_key() const { return id; }
-      /* constexpr */ static dccio::key256 key(uint64_t property, uint64_t trusted, uint64_t certifier) {
+      /* constexpr */ static actc::key256 key(uint64_t property, uint64_t trusted, uint64_t certifier) {
          /*
            key256 key;
            key.uint64s[0] = property;
@@ -37,11 +37,11 @@ namespace identity {
            key.uint64s[2] = certifier;
            key.uint64s[3] = 0;
          */
-         return dccio::key256::make_from_word_sequence<uint64_t>(property, trusted, certifier);
+         return actc::key256::make_from_word_sequence<uint64_t>(property, trusted, certifier);
       }
-      dccio::key256 get_key() const { return key(property, trusted, certifier); }
+      actc::key256 get_key() const { return key(property, trusted, certifier); }
 
-      dccLIB_SERIALIZE( certrow , (property)(trusted)(certifier)(confidence)(type)(data)(id) )
+      actcLIB_SERIALIZE( certrow , (property)(trusted)(certifier)(confidence)(type)(data)(id) )
    };
 
    struct identrow {
@@ -50,7 +50,7 @@ namespace identity {
 
       uint64_t primary_key() const { return identity; }
 
-      dccLIB_SERIALIZE( identrow , (identity)(creator) )
+      actcLIB_SERIALIZE( identrow , (identity)(creator) )
    };
 
    struct trustrow {
@@ -58,15 +58,15 @@ namespace identity {
 
       uint64_t primary_key() const { return account; }
 
-      dccLIB_SERIALIZE( trustrow, (account) )
+      actcLIB_SERIALIZE( trustrow, (account) )
    };
 
-   typedef dccio::multi_index<N(certs), certrow,
-                              dccio::indexed_by< N(bytuple), dccio::const_mem_fun<certrow, dccio::key256, &certrow::get_key> >
+   typedef actc::multi_index<N(certs), certrow,
+                              actc::indexed_by< N(bytuple), actc::const_mem_fun<certrow, actc::key256, &certrow::get_key> >
                               > certs_table;
-   typedef dccio::multi_index<N(ident), identrow> idents_table;
-   typedef dccio::singleton<N(account), identity_name>  accounts_table;
-   typedef dccio::multi_index<N(trust), trustrow> trust_table;
+   typedef actc::multi_index<N(ident), identrow> idents_table;
+   typedef actc::singleton<N(account), identity_name>  accounts_table;
+   typedef actc::multi_index<N(trust), trustrow> trust_table;
 
    class identity_base {
       public:

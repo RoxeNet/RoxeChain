@@ -1,6 +1,6 @@
-#include <dcciolib/multi_index.hpp>
+#include <actclib/multi_index.hpp>
 #include "../test_api/test_api.hpp"
-#include <dcciolib/print.hpp>
+#include <actclib/print.hpp>
 #include <boost/range/iterator_range.hpp>
 #include <limits>
 #include <cmath>
@@ -10,7 +10,7 @@
 
 namespace _test_multi_index {
 
-   using dccio::key256;
+   using actc::key256;
 
    struct record_idx64 {
       uint64_t id;
@@ -19,7 +19,7 @@ namespace _test_multi_index {
       auto primary_key()const { return id; }
       uint64_t get_secondary()const { return sec; }
 
-      dccLIB_SERIALIZE( record_idx64, (id)(sec) )
+      actcLIB_SERIALIZE( record_idx64, (id)(sec) )
    };
 
    struct record_idx128 {
@@ -29,7 +29,7 @@ namespace _test_multi_index {
       auto primary_key()const { return id; }
       uint128_t get_secondary()const { return sec; }
 
-      dccLIB_SERIALIZE( record_idx128, (id)(sec) )
+      actcLIB_SERIALIZE( record_idx128, (id)(sec) )
    };
 
    struct record_idx256 {
@@ -39,7 +39,7 @@ namespace _test_multi_index {
       auto primary_key()const { return id; }
       const key256& get_secondary()const { return sec; }
 
-      dccLIB_SERIALIZE( record_idx256, (id)(sec) )
+      actcLIB_SERIALIZE( record_idx256, (id)(sec) )
    };
 
    struct record_idx_double {
@@ -49,7 +49,7 @@ namespace _test_multi_index {
       auto primary_key()const { return id; }
       double get_secondary()const { return sec; }
 
-      dccLIB_SERIALIZE( record_idx_double, (id)(sec) )
+      actcLIB_SERIALIZE( record_idx_double, (id)(sec) )
    };
 
    struct record_idx_long_double {
@@ -59,13 +59,13 @@ namespace _test_multi_index {
       auto primary_key()const { return id; }
       long double get_secondary()const { return sec; }
 
-      dccLIB_SERIALIZE( record_idx_long_double, (id)(sec) )
+      actcLIB_SERIALIZE( record_idx_long_double, (id)(sec) )
    };
 
    template<uint64_t TableName>
    void idx64_store_only(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
 
       typedef record_idx64 record;
 
@@ -97,7 +97,7 @@ namespace _test_multi_index {
    template<uint64_t TableName>
    void idx64_check_without_storing(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
 
       typedef record_idx64 record;
 
@@ -113,52 +113,52 @@ namespace _test_multi_index {
       // find by primary key
       {
          auto itr = table.find(999);
-         dccio_assert(itr == table.end(), "idx64_general - table.find() of non-existing primary key");
+         actc_assert(itr == table.end(), "idx64_general - table.find() of non-existing primary key");
 
          itr = table.find(976);
-         dccio_assert(itr != table.end() && itr->sec == N(emily), "idx64_general - table.find() of existing primary key");
+         actc_assert(itr != table.end() && itr->sec == N(emily), "idx64_general - table.find() of existing primary key");
 
          ++itr;
-         dccio_assert(itr == table.end(), "idx64_general - increment primary iterator to end");
+         actc_assert(itr == table.end(), "idx64_general - increment primary iterator to end");
          
          itr = table.require_find(976);
-         dccio_assert(itr != table.end() && itr->sec == N(emily), "idx64_general - table.require_find() of existing primary key");
+         actc_assert(itr != table.end() && itr->sec == N(emily), "idx64_general - table.require_find() of existing primary key");
          
          ++itr;
-         dccio_assert(itr == table.end(), "idx64_general - increment primary iterator to end");
+         actc_assert(itr == table.end(), "idx64_general - increment primary iterator to end");
       }
 
       // iterate forward starting with charlie
       {
          auto itr = secondary_index.lower_bound(N(charlie));
-         dccio_assert(itr != secondary_index.end() && itr->sec == N(charlie), "idx64_general - secondary_index.lower_bound()");
+         actc_assert(itr != secondary_index.end() && itr->sec == N(charlie), "idx64_general - secondary_index.lower_bound()");
 
          ++itr;
-         dccio_assert(itr != secondary_index.end() && itr->id == 976 && itr->sec == N(emily), "idx64_general - increment secondary iterator");
+         actc_assert(itr != secondary_index.end() && itr->id == 976 && itr->sec == N(emily), "idx64_general - increment secondary iterator");
 
          ++itr;
-         dccio_assert(itr != secondary_index.end() && itr->id == 110 && itr->sec == N(joe), "idx64_general - increment secondary iterator again");
+         actc_assert(itr != secondary_index.end() && itr->id == 110 && itr->sec == N(joe), "idx64_general - increment secondary iterator again");
 
          ++itr;
-         dccio_assert(itr == secondary_index.end(), "idx64_general - increment secondary iterator to end");
+         actc_assert(itr == secondary_index.end(), "idx64_general - increment secondary iterator to end");
       }
 
       // iterate backward starting with second bob
       {
          auto pk_itr = table.find(781);
-         dccio_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_general - table.find() of existing primary key");
+         actc_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_general - table.find() of existing primary key");
 
          auto itr = secondary_index.iterator_to(*pk_itr);
-         dccio_assert(itr->id == 781 && itr->sec == N(bob), "idx64_general - iterator to existing object in secondary index");
+         actc_assert(itr->id == 781 && itr->sec == N(bob), "idx64_general - iterator to existing object in secondary index");
 
          --itr;
-         dccio_assert(itr != secondary_index.end() && itr->id == 540 && itr->sec == N(bob), "idx64_general - decrement secondary iterator");
+         actc_assert(itr != secondary_index.end() && itr->id == 540 && itr->sec == N(bob), "idx64_general - decrement secondary iterator");
 
          --itr;
-         dccio_assert(itr != secondary_index.end() && itr->id == 650 && itr->sec == N(allyson), "idx64_general - decrement secondary iterator again");
+         actc_assert(itr != secondary_index.end() && itr->id == 650 && itr->sec == N(allyson), "idx64_general - decrement secondary iterator again");
 
          --itr;
-         dccio_assert(itr == secondary_index.begin() && itr->id == 265 && itr->sec == N(alice), "idx64_general - decrement secondary iterator to beginning");
+         actc_assert(itr == secondary_index.begin() && itr->id == 265 && itr->sec == N(alice), "idx64_general - decrement secondary iterator to beginning");
       }
 
       // iterate backward starting with emily using const_reverse_iterator
@@ -169,21 +169,21 @@ namespace _test_multi_index {
 
          auto itr = --std::make_reverse_iterator( secondary_index.find( N(emily) ) );
          for( ; itr != secondary_index.rend(); ++itr ) {
-            dccio_assert(pk_itr != pks.end(), "idx64_general - unexpected continuation of secondary index in reverse iteration");
-            dccio_assert(*pk_itr == itr->id, "idx64_general - primary key mismatch in reverse iteration");
+            actc_assert(pk_itr != pks.end(), "idx64_general - unexpected continuation of secondary index in reverse iteration");
+            actc_assert(*pk_itr == itr->id, "idx64_general - primary key mismatch in reverse iteration");
             ++pk_itr;
          }
-         dccio_assert( pk_itr == pks.end(), "idx64_general - did not iterate backwards through secondary index properly" );
+         actc_assert( pk_itr == pks.end(), "idx64_general - did not iterate backwards through secondary index properly" );
       }
 
       // require_find secondary key
       {
          auto itr = secondary_index.require_find(N(bob));
-         dccio_assert(itr != secondary_index.end(), "idx64_general - require_find must never return end iterator");
-         dccio_assert(itr->id == 540, "idx64_general - require_find test");
+         actc_assert(itr != secondary_index.end(), "idx64_general - require_find must never return end iterator");
+         actc_assert(itr->id == 540, "idx64_general - require_find test");
          
          ++itr;
-         dccio_assert(itr->id == 781, "idx64_general - require_find secondary key test");
+         actc_assert(itr->id == 781, "idx64_general - require_find secondary key test");
       }
 
       // modify and erase
@@ -199,18 +199,18 @@ namespace _test_multi_index {
          });
 
          auto itr1 = table.find(ssn);
-         dccio_assert(itr1 != table.end() && itr1->sec == N(billy), "idx64_general - table.modify()");
+         actc_assert(itr1 != table.end() && itr1->sec == N(billy), "idx64_general - table.modify()");
 
          table.erase(itr1);
          auto itr2 = table.find(ssn);
-         dccio_assert( itr2 == table.end(), "idx64_general - table.erase()");
+         actc_assert( itr2 == table.end(), "idx64_general - table.erase()");
       }
    }
 
    template<uint64_t TableName>
    void idx64_require_find_fail(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
       typedef record_idx64 record;
 
       // Load table using multi_index
@@ -218,7 +218,7 @@ namespace _test_multi_index {
       
       // make sure we're looking at the right table
       auto itr = table.require_find(781, "table not loaded");
-      dccio_assert(itr != table.end(), "table not loaded");
+      actc_assert(itr != table.end(), "table not loaded");
 
       // require_find by primary key
       // should fail
@@ -228,7 +228,7 @@ namespace _test_multi_index {
    template<uint64_t TableName>
    void idx64_require_find_fail_with_msg(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
       typedef record_idx64 record;
 
       // Load table using multi_index
@@ -236,7 +236,7 @@ namespace _test_multi_index {
 
       // make sure we're looking at the right table
       auto itr = table.require_find(234, "table not loaded");
-      dccio_assert(itr != table.end(), "table not loaded");
+      actc_assert(itr != table.end(), "table not loaded");
 
       // require_find by primary key
       // should fail
@@ -246,7 +246,7 @@ namespace _test_multi_index {
    template<uint64_t TableName>
    void idx64_require_find_sk_fail(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
       typedef record_idx64 record;
 
       // Load table using multi_index
@@ -255,7 +255,7 @@ namespace _test_multi_index {
       
       // make sure we're looking at the right table
       auto itr = sec_index.require_find(N(charlie), "table not loaded");
-      dccio_assert(itr != sec_index.end(), "table not loaded");
+      actc_assert(itr != sec_index.end(), "table not loaded");
 
       // require_find by secondary key
       // should fail
@@ -265,7 +265,7 @@ namespace _test_multi_index {
    template<uint64_t TableName>
    void idx64_require_find_sk_fail_with_msg(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
       typedef record_idx64 record;
 
       // Load table using multi_index
@@ -274,7 +274,7 @@ namespace _test_multi_index {
       
       // make sure we're looking at the right table
       auto itr = sec_index.require_find(N(emily), "table not loaded");
-      dccio_assert(itr != sec_index.end(), "table not loaded");
+      actc_assert(itr != sec_index.end(), "table not loaded");
 
       // require_find by secondary key
       // should fail
@@ -284,7 +284,7 @@ namespace _test_multi_index {
    template<uint64_t TableName>
    void idx128_store_only(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
 
       typedef record_idx128 record;
 
@@ -307,7 +307,7 @@ namespace _test_multi_index {
    template<uint64_t TableName>
    void idx128_check_without_storing(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
 
       typedef record_idx128 record;
 
@@ -328,17 +328,17 @@ namespace _test_multi_index {
          uint128_t multiplier = 1ULL << 63;
 
          auto itr = secondary_index.begin();
-         dccio_assert( itr->primary_key() == 0 && itr->get_secondary() == multiplier*0, "idx128_general - secondary key sort" );
+         actc_assert( itr->primary_key() == 0 && itr->get_secondary() == multiplier*0, "idx128_general - secondary key sort" );
          ++itr;
-         dccio_assert( itr->primary_key() == 1 && itr->get_secondary() == multiplier*1, "idx128_general - secondary key sort" );
+         actc_assert( itr->primary_key() == 1 && itr->get_secondary() == multiplier*1, "idx128_general - secondary key sort" );
          ++itr;
-         dccio_assert( itr->primary_key() == 2 && itr->get_secondary() == multiplier*2, "idx128_general - secondary key sort" );
+         actc_assert( itr->primary_key() == 2 && itr->get_secondary() == multiplier*2, "idx128_general - secondary key sort" );
          ++itr;
-         dccio_assert( itr->primary_key() == 4 && itr->get_secondary() == multiplier*4, "idx128_general - secondary key sort" );
+         actc_assert( itr->primary_key() == 4 && itr->get_secondary() == multiplier*4, "idx128_general - secondary key sort" );
          ++itr;
-         dccio_assert( itr->primary_key() == 3 && itr->get_secondary() == multiplier*6, "idx128_general - secondary key sort" );
+         actc_assert( itr->primary_key() == 3 && itr->get_secondary() == multiplier*6, "idx128_general - secondary key sort" );
          ++itr;
-         dccio_assert( itr == secondary_index.end(), "idx128_general - secondary key sort" );
+         actc_assert( itr == secondary_index.end(), "idx128_general - secondary key sort" );
       }
 
    }
@@ -346,7 +346,7 @@ namespace _test_multi_index {
    template<uint64_t TableName, uint64_t SecondaryIndex>
    auto idx64_table(uint64_t receiver)
    {
-      using namespace dccio;
+      using namespace actc;
       typedef record_idx64 record;
       // Load table using multi_index
       multi_index<TableName, record,
@@ -415,7 +415,7 @@ void test_multi_index::idx64_require_find_sk_fail_with_msg(uint64_t receiver, ui
 
 void test_multi_index::idx128_autoincrement_test(uint64_t receiver, uint64_t code, uint64_t action)
 {
-   using namespace dccio;
+   using namespace actc;
    using namespace _test_multi_index;
 
    typedef record_idx128 record;
@@ -437,13 +437,13 @@ void test_multi_index::idx128_autoincrement_test(uint64_t receiver, uint64_t cod
    uint64_t expected_key = 4;
    for( const auto& r : table.get_index<N(bysecondary)>() )
    {
-      dccio_assert( r.primary_key() == expected_key, "idx128_autoincrement_test - unexpected primary key" );
+      actc_assert( r.primary_key() == expected_key, "idx128_autoincrement_test - unexpected primary key" );
       --expected_key;
    }
-   dccio_assert( expected_key == static_cast<uint64_t>(-1), "idx128_autoincrement_test - did not iterate through secondary index properly" );
+   actc_assert( expected_key == static_cast<uint64_t>(-1), "idx128_autoincrement_test - did not iterate through secondary index properly" );
 
    auto itr = table.find(3);
-   dccio_assert( itr != table.end(), "idx128_autoincrement_test - could not find object with primary key of 3" );
+   actc_assert( itr != table.end(), "idx128_autoincrement_test - could not find object with primary key of 3" );
 
    // The modification below would trigger an error:
    /*
@@ -458,12 +458,12 @@ void test_multi_index::idx128_autoincrement_test(uint64_t receiver, uint64_t cod
    });
    table.erase(itr);
 
-   dccio_assert( table.available_primary_key() == 101, "idx128_autoincrement_test - next_primary_key was not correct after record modify" );
+   actc_assert( table.available_primary_key() == 101, "idx128_autoincrement_test - next_primary_key was not correct after record modify" );
 }
 
 void test_multi_index::idx128_autoincrement_test_part1(uint64_t receiver, uint64_t code, uint64_t action)
 {
-   using namespace dccio;
+   using namespace actc;
    using namespace _test_multi_index;
 
    typedef record_idx128 record;
@@ -487,16 +487,16 @@ void test_multi_index::idx128_autoincrement_test_part1(uint64_t receiver, uint64
    uint64_t expected_key = 2;
    for( const auto& r : table.get_index<N(bysecondary)>() )
    {
-      dccio_assert( r.primary_key() == expected_key, "idx128_autoincrement_test_part1 - unexpected primary key" );
+      actc_assert( r.primary_key() == expected_key, "idx128_autoincrement_test_part1 - unexpected primary key" );
       --expected_key;
    }
-   dccio_assert( expected_key == 0, "idx128_autoincrement_test_part1 - did not iterate through secondary index properly" );
+   actc_assert( expected_key == 0, "idx128_autoincrement_test_part1 - did not iterate through secondary index properly" );
 
 }
 
 void test_multi_index::idx128_autoincrement_test_part2(uint64_t receiver, uint64_t code, uint64_t action)
 {
-   using namespace dccio;
+   using namespace actc;
    using namespace _test_multi_index;
 
    typedef record_idx128 record;
@@ -509,7 +509,7 @@ void test_multi_index::idx128_autoincrement_test_part2(uint64_t receiver, uint64
          indexed_by< N(bysecondary), const_mem_fun<record, uint128_t, &record::get_secondary> >
       > table( receiver, receiver );
 
-      dccio_assert( table.available_primary_key() == 3, "idx128_autoincrement_test_part2 - did not recover expected next primary key");
+      actc_assert( table.available_primary_key() == 3, "idx128_autoincrement_test_part2 - did not recover expected next primary key");
    }
 
    multi_index<table_name, record,
@@ -533,13 +533,13 @@ void test_multi_index::idx128_autoincrement_test_part2(uint64_t receiver, uint64
    uint64_t expected_key = 4;
    for( const auto& r : table.get_index<N(bysecondary)>() )
    {
-      dccio_assert( r.primary_key() == expected_key, "idx128_autoincrement_test_part2 - unexpected primary key" );
+      actc_assert( r.primary_key() == expected_key, "idx128_autoincrement_test_part2 - unexpected primary key" );
       --expected_key;
    }
-   dccio_assert( expected_key == static_cast<uint64_t>(-1), "idx128_autoincrement_test_part2 - did not iterate through secondary index properly" );
+   actc_assert( expected_key == static_cast<uint64_t>(-1), "idx128_autoincrement_test_part2 - did not iterate through secondary index properly" );
 
    auto itr = table.find(3);
-   dccio_assert( itr != table.end(), "idx128_autoincrement_test_part2 - could not find object with primary key of 3" );
+   actc_assert( itr != table.end(), "idx128_autoincrement_test_part2 - could not find object with primary key of 3" );
 
    table.emplace( payer, [&]( auto& r) {
       r.id  = 100;
@@ -547,12 +547,12 @@ void test_multi_index::idx128_autoincrement_test_part2(uint64_t receiver, uint64
    });
    table.erase(itr);
 
-   dccio_assert( table.available_primary_key() == 101, "idx128_autoincrement_test_part2 - next_primary_key was not correct after record update" );
+   actc_assert( table.available_primary_key() == 101, "idx128_autoincrement_test_part2 - next_primary_key was not correct after record update" );
 }
 
 void test_multi_index::idx256_general(uint64_t receiver, uint64_t code, uint64_t action)
 {
-   using namespace dccio;
+   using namespace actc;
    using namespace _test_multi_index;
 
    typedef record_idx256 record;
@@ -593,24 +593,24 @@ void test_multi_index::idx256_general(uint64_t receiver, uint64_t code, uint64_t
 
    {
       auto itr = table.begin();
-      dccio_assert( itr->primary_key() == 1 && itr->get_secondary() == fourtytwo, "idx256_general - primary key sort" );
+      actc_assert( itr->primary_key() == 1 && itr->get_secondary() == fourtytwo, "idx256_general - primary key sort" );
       ++itr;
-      dccio_assert( itr->primary_key() == 2 && itr->get_secondary() == onetwothreefour, "idx256_general - primary key sort" );
+      actc_assert( itr->primary_key() == 2 && itr->get_secondary() == onetwothreefour, "idx256_general - primary key sort" );
       ++itr;
-      dccio_assert( itr->primary_key() == 3 && itr->get_secondary() == fourtytwo, "idx256_general - primary key sort" );
+      actc_assert( itr->primary_key() == 3 && itr->get_secondary() == fourtytwo, "idx256_general - primary key sort" );
       ++itr;
-      dccio_assert( itr == table.end(), "idx256_general - primary key sort" );
+      actc_assert( itr == table.end(), "idx256_general - primary key sort" );
    }
 
    auto secidx = table.get_index<N(bysecondary)>();
 
    auto lower1 = secidx.lower_bound(key256::make_from_word_sequence<uint64_t>(0ULL, 0ULL, 0ULL, 40ULL));
    print("First entry with a secondary key of at least 40 has ID=", lower1->id, ".\n");
-   dccio_assert( lower1->id == 1, "idx256_general - lower_bound" );
+   actc_assert( lower1->id == 1, "idx256_general - lower_bound" );
 
    auto lower2 = secidx.lower_bound(key256::make_from_word_sequence<uint64_t>(0ULL, 0ULL, 0ULL, 50ULL));
    print("First entry with a secondary key of at least 50 has ID=", lower2->id, ".\n");
-   dccio_assert( lower2->id == 2, "idx256_general - lower_bound" );
+   actc_assert( lower2->id == 2, "idx256_general - lower_bound" );
 
    if( table.iterator_to(*lower2) == e ) {
       print("Previously found entry is the same as the one found earlier with a primary key value of 2.\n");
@@ -623,20 +623,20 @@ void test_multi_index::idx256_general(uint64_t receiver, uint64_t code, uint64_t
 
    {
       auto itr = secidx.begin();
-      dccio_assert( itr->primary_key() == 1, "idx256_general - secondary key sort" );
+      actc_assert( itr->primary_key() == 1, "idx256_general - secondary key sort" );
       ++itr;
-      dccio_assert( itr->primary_key() == 3, "idx256_general - secondary key sort" );
+      actc_assert( itr->primary_key() == 3, "idx256_general - secondary key sort" );
       ++itr;
-      dccio_assert( itr->primary_key() == 2, "idx256_general - secondary key sort" );
+      actc_assert( itr->primary_key() == 2, "idx256_general - secondary key sort" );
       ++itr;
-      dccio_assert( itr == secidx.end(), "idx256_general - secondary key sort" );
+      actc_assert( itr == secidx.end(), "idx256_general - secondary key sort" );
    }
 
    auto upper = secidx.upper_bound(key256{std::array<uint64_t,4>{{0, 0, 0, 42}}});
 
    print("First entry with a secondary key greater than 42 has ID=", upper->id, ".\n");
-   dccio_assert( upper->id == 2, "idx256_general - upper_bound" );
-   dccio_assert( upper->id == secidx.get(onetwothreefour).id, "idx256_general - secondary index get" );
+   actc_assert( upper->id == 2, "idx256_general - upper_bound" );
+   actc_assert( upper->id == secidx.get(onetwothreefour).id, "idx256_general - secondary index get" );
 
    print("Removed entry with ID=", lower1->id, ".\n");
    secidx.erase( lower1 );
@@ -648,17 +648,17 @@ void test_multi_index::idx256_general(uint64_t receiver, uint64_t code, uint64_t
 
    {
       auto itr = table.rbegin();
-      dccio_assert( itr->primary_key() == 3 && itr->get_secondary() == fourtytwo, "idx256_general - primary key sort after remove" );
+      actc_assert( itr->primary_key() == 3 && itr->get_secondary() == fourtytwo, "idx256_general - primary key sort after remove" );
       ++itr;
-      dccio_assert( itr->primary_key() == 2 && itr->get_secondary() == onetwothreefour, "idx256_general - primary key sort after remove" );
+      actc_assert( itr->primary_key() == 2 && itr->get_secondary() == onetwothreefour, "idx256_general - primary key sort after remove" );
       ++itr;
-      dccio_assert( itr == table.rend(), "idx256_general - primary key sort after remove" );
+      actc_assert( itr == table.rend(), "idx256_general - primary key sort after remove" );
    }
 }
 
 void test_multi_index::idx_double_general(uint64_t receiver, uint64_t code, uint64_t action)
 {
-   using namespace dccio;
+   using namespace actc;
    using namespace _test_multi_index;
 
    typedef record_idx_double record;
@@ -688,32 +688,32 @@ void test_multi_index::idx_double_general(uint64_t receiver, uint64_t code, uint
 
    uint64_t expected_key = 10;
    for( const auto& obj : secidx ) {
-      dccio_assert( obj.primary_key() == expected_key, "idx_double_general - unexpected primary key" );
+      actc_assert( obj.primary_key() == expected_key, "idx_double_general - unexpected primary key" );
 
       double prod = obj.sec * obj.id;
 
       print(" id = ", obj.id, ", sec = ", obj.sec, ", sec * id = ", prod, "\n");
 
-      dccio_assert( std::abs(prod - expected_product) <= tolerance,
+      actc_assert( std::abs(prod - expected_product) <= tolerance,
                     "idx_double_general - product of secondary and id not equal to expected_product within tolerance" );
 
       --expected_key;
    }
-   dccio_assert( expected_key == 0, "idx_double_general - did not iterate through secondary index properly" );
+   actc_assert( expected_key == 0, "idx_double_general - did not iterate through secondary index properly" );
 
    {
       auto itr = secidx.lower_bound( expected_product / 5.5 );
-      dccio_assert( std::abs(1.0 / itr->sec - 5000000.0) <= tolerance, "idx_double_general - lower_bound" );
+      actc_assert( std::abs(1.0 / itr->sec - 5000000.0) <= tolerance, "idx_double_general - lower_bound" );
 
       itr = secidx.upper_bound( expected_product / 5.0 );
-      dccio_assert( std::abs(1.0 / itr->sec - 4000000.0) <= tolerance, "idx_double_general - upper_bound" );
+      actc_assert( std::abs(1.0 / itr->sec - 4000000.0) <= tolerance, "idx_double_general - upper_bound" );
 
    }
 }
 
 void test_multi_index::idx_long_double_general(uint64_t receiver, uint64_t code, uint64_t action)
 {
-   using namespace dccio;
+   using namespace actc;
    using namespace _test_multi_index;
 
    typedef record_idx_long_double record;
@@ -745,25 +745,25 @@ void test_multi_index::idx_long_double_general(uint64_t receiver, uint64_t code,
 
    uint64_t expected_key = 10;
    for( const auto& obj : secidx ) {
-      dccio_assert( obj.primary_key() == expected_key, "idx_long_double_general - unexpected primary key" );
+      actc_assert( obj.primary_key() == expected_key, "idx_long_double_general - unexpected primary key" );
 
       long double prod = obj.sec * obj.id;
 
       print(" id = ", obj.id, ", sec = ", obj.sec, ", sec * id = ", prod, "\n");
 
-      dccio_assert( std::abs(prod - expected_product) <= tolerance,
+      actc_assert( std::abs(prod - expected_product) <= tolerance,
                     "idx_long_double_general - product of secondary and id not equal to expected_product within tolerance" );
 
       --expected_key;
    }
-   dccio_assert( expected_key == 0, "idx_long_double_general - did not iterate through secondary index properly" );
+   actc_assert( expected_key == 0, "idx_long_double_general - did not iterate through secondary index properly" );
 
    {
       auto itr = secidx.lower_bound( expected_product / 5.5l );
-      dccio_assert( std::abs(1.0l / itr->sec - 5000000.0l) <= tolerance, "idx_long_double_general - lower_bound" );
+      actc_assert( std::abs(1.0l / itr->sec - 5000000.0l) <= tolerance, "idx_long_double_general - lower_bound" );
 
       itr = secidx.upper_bound( expected_product / 5.0l );
-      dccio_assert( std::abs(1.0l / itr->sec - 4000000.0l) <= tolerance, "idx_long_double_general - upper_bound" );
+      actc_assert( std::abs(1.0l / itr->sec - 4000000.0l) <= tolerance, "idx_long_double_general - upper_bound" );
 
    }
 }
@@ -806,7 +806,7 @@ void test_multi_index::idx64_pass_pk_ref_to_other_table(uint64_t receiver, uint6
    auto table2 = _test_multi_index::idx64_table<N(indextable2), N(bysecondary)>(receiver);
 
    auto table1_pk_itr = table1.find(781);
-   dccio_assert(table1_pk_itr != table1.end() && table1_pk_itr->sec == N(bob), "idx64_pass_pk_ref_to_other_table - table.find() of existing primary key");
+   actc_assert(table1_pk_itr != table1.end() && table1_pk_itr->sec == N(bob), "idx64_pass_pk_ref_to_other_table - table.find() of existing primary key");
 
    // Should fail
    table2.iterator_to(*table1_pk_itr);
@@ -818,7 +818,7 @@ void test_multi_index::idx64_pass_sk_ref_to_other_table(uint64_t receiver, uint6
    auto table2 = _test_multi_index::idx64_table<N(indextable2), N(bysecondary)>(receiver);
 
    auto table1_pk_itr = table1.find(781);
-   dccio_assert(table1_pk_itr != table1.end() && table1_pk_itr->sec == N(bob), "idx64_pass_sk_ref_to_other_table - table.find() of existing primary key");
+   actc_assert(table1_pk_itr != table1.end() && table1_pk_itr->sec == N(bob), "idx64_pass_sk_ref_to_other_table - table.find() of existing primary key");
 
    auto table2_sec_index = table2.get_index<N(bysecondary)>();
    // Should fail
@@ -889,7 +889,7 @@ void test_multi_index::idx64_modify_primary_key(uint64_t receiver, uint64_t code
    auto table = _test_multi_index::idx64_table<N(indextable1), N(bysecondary)>(receiver);
 
    auto pk_itr = table.find(781);
-   dccio_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_modify_primary_key - table.find() of existing primary key");
+   actc_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_modify_primary_key - table.find() of existing primary key");
 
    auto payer = receiver;
 
@@ -904,7 +904,7 @@ void test_multi_index::idx64_run_out_of_avl_pk(uint64_t receiver, uint64_t code,
    auto table = _test_multi_index::idx64_table<N(indextable1), N(bysecondary)>(receiver);
 
    auto pk_itr = table.find(781);
-   dccio_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_modify_primary_key - table.find() of existing primary key");
+   actc_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_modify_primary_key - table.find() of existing primary key");
 
    auto payer = receiver;
 
@@ -912,7 +912,7 @@ void test_multi_index::idx64_run_out_of_avl_pk(uint64_t receiver, uint64_t code,
       r.id = static_cast<uint64_t>(-4);
       r.sec = N(alice);
    });
-   dccio_assert(table.available_primary_key() == static_cast<uint64_t>(-3), "idx64_run_out_of_avl_pk - incorrect available primary key");
+   actc_assert(table.available_primary_key() == static_cast<uint64_t>(-3), "idx64_run_out_of_avl_pk - incorrect available primary key");
 
    table.emplace( payer, [&]( auto& r ) {
       r.id = table.available_primary_key();
@@ -929,11 +929,11 @@ void test_multi_index::idx64_sk_cache_pk_lookup(uint64_t receiver, uint64_t code
 
    auto sec_index = table.get_index<N(bysecondary)>();
    auto sk_itr = sec_index.find(N(bob));
-   dccio_assert(sk_itr != sec_index.end() && sk_itr->id == 540, "idx64_sk_cache_pk_lookup - sec_index.find() of existing secondary key");
+   actc_assert(sk_itr != sec_index.end() && sk_itr->id == 540, "idx64_sk_cache_pk_lookup - sec_index.find() of existing secondary key");
 
    auto pk_itr = table.iterator_to(*sk_itr);
    auto prev_itr = --pk_itr;
-   dccio_assert(prev_itr->id == 265 && prev_itr->sec == N(alice), "idx64_sk_cache_pk_lookup - previous record");
+   actc_assert(prev_itr->id == 265 && prev_itr->sec == N(alice), "idx64_sk_cache_pk_lookup - previous record");
 }
 
 void test_multi_index::idx64_pk_cache_sk_lookup(uint64_t receiver, uint64_t code, uint64_t action)
@@ -942,12 +942,12 @@ void test_multi_index::idx64_pk_cache_sk_lookup(uint64_t receiver, uint64_t code
 
 
    auto pk_itr = table.find(540);
-   dccio_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_pk_cache_sk_lookup - table.find() of existing primary key");
+   actc_assert(pk_itr != table.end() && pk_itr->sec == N(bob), "idx64_pk_cache_sk_lookup - table.find() of existing primary key");
 
    auto sec_index = table.get_index<N(bysecondary)>();
    auto sk_itr = sec_index.iterator_to(*pk_itr);
    auto next_itr = ++sk_itr;
-   dccio_assert(next_itr->id == 781 && next_itr->sec == N(bob), "idx64_pk_cache_sk_lookup - next record");
+   actc_assert(next_itr->id == 781 && next_itr->sec == N(bob), "idx64_pk_cache_sk_lookup - next record");
 }
 
 #pragma GCC diagnostic pop

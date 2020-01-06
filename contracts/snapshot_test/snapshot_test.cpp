@@ -1,7 +1,7 @@
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/multi_index.hpp>
+#include <actclib/actc.hpp>
+#include <actclib/multi_index.hpp>
 
-using namespace dccio;
+using namespace actc;
 
 namespace snapshot_test {
 
@@ -21,7 +21,7 @@ namespace snapshot_test {
       auto get_index_i128 () const { return index_i128; }
       const key256& get_index_i256 () const { return index_i256; }
 
-      dccLIB_SERIALIZE( main_record, (id)(index_f64)(index_f128)(index_i64)(index_i128)(index_i256) )
+      actcLIB_SERIALIZE( main_record, (id)(index_f64)(index_f128)(index_i64)(index_i128)(index_i256) )
    };
 
    struct increment {
@@ -30,10 +30,10 @@ namespace snapshot_test {
 
       uint32_t value;
 
-      dccLIB_SERIALIZE(increment, (value))
+      actcLIB_SERIALIZE(increment, (value))
    };
 
-   using multi_index_type = dccio::multi_index<N(data), main_record,
+   using multi_index_type = actc::multi_index<N(data), main_record,
       indexed_by< N(byf ),    const_mem_fun<main_record, double        ,&main_record::get_index_f64 >>,
       indexed_by< N(byff),    const_mem_fun<main_record, long double   ,&main_record::get_index_f128>>,
       indexed_by< N(byi ),    const_mem_fun<main_record, uint64_t      ,&main_record::get_index_i64 >>,
@@ -72,7 +72,7 @@ namespace multi_index_test {
       /// The apply method implements the dispatch of events to this contract
       void apply( uint64_t self, uint64_t code, uint64_t action ) {
          require_auth(code);
-         dccio_assert(action == N(increment), "unsupported action");
+         actc_assert(action == N(increment), "unsupported action");
          snapshot_test::exec(self, unpack_action_data<snapshot_test::increment>().value);
       }
    }

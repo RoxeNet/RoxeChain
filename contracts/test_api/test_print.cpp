@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 
 #include "test_api.hpp"
 
-//using namespace dccio;
+//using namespace actc;
 
 void test_print::test_prints_l() {
   char ab[] = { 'a', 'b' };
@@ -116,7 +116,7 @@ void test_print::test_printqf() {
 
 void test_print::test_print_simple() {
     std::string const cvalue = "cvalue";
-    dccio::print(cvalue);
+    actc::print(cvalue);
     std::string value = "value";
-    dccio::print(value);
+    actc::print(value);
 }

@@ -1,11 +1,11 @@
 /**
  * @file
- * @copyright defined in dcc/LICENSE.txt
+ * @copyright defined in actc/LICENSE.txt
  */
 
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/crypto.h>
-#include <dcciolib/print.h>
+#include <actclib/actc.hpp>
+#include <actclib/crypto.h>
+#include <actclib/print.h>
 #include "test_api.hpp"
 
 #include <vector>
@@ -15,7 +15,7 @@ void test_checktime::checktime_pass() {
    for ( int i = 0; i < 10000; i++ )
       p += i;
 
-   dccio::print(p);
+   actc::print(p);
 }
 
 void test_checktime::checktime_failure() {
@@ -25,7 +25,7 @@ void test_checktime::checktime_failure() {
          p += i+j;
 
 
-   dccio::print(p);
+   actc::print(p);
 }
 
 constexpr size_t size = 20000000;

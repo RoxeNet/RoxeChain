@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 // include entire libc
 #include <alloca.h>
@@ -135,10 +135,10 @@
 #include <string>
 #include <stdexcept>
 */
-//include <dcciolib/dcc.hpp>
-#include <dcciolib/dispatcher.hpp>
+//include <actclib/actc.hpp>
+#include <actclib/dispatcher.hpp>
 
-using namespace dccio;
+using namespace actc;
 /*
 namespace std {
    extern ios_base __start_std_streams;
@@ -195,7 +195,7 @@ namespace stltest {
            */
            /*
            prints("STD string: "); prints(s.c_str());
-           prints("\ndcc string: "); prints_l(s2.get_data(), s2.get_size());
+           prints("\nactc string: "); prints_l(s2.get_data(), s2.get_size());
            */
            prints("STL test start\n");
            /* doesn't work with WASM::serializeWithInjection
@@ -253,11 +253,11 @@ namespace stltest {
         }
 
         static void apply( account_name c, action_name act) {
-            dccio::dispatch<stltest::contract, message>(c,act);
+            actc::dispatch<stltest::contract, message>(c,act);
         }
     };
 
-} /// namespace dccio
+} /// namespace actc
 
 
 extern "C" {
