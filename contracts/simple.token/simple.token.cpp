@@ -1,6 +1,6 @@
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 
-class simpletoken : public dccio::contract {
+class simpletoken : public actc::contract {
    public:
       simpletoken( account_name self )
       :contract(self),_accounts( _self, _self){}
@@ -9,7 +9,7 @@ class simpletoken : public dccio::contract {
          require_auth( from );
 
          const auto& fromacnt = _accounts.get( from );
-         dccio_assert( fromacnt.balance >= quantity, "overdrawn balance" );
+         actc_assert( fromacnt.balance >= quantity, "overdrawn balance" );
          _accounts.modify( fromacnt, from, [&]( auto& a ){ a.balance -= quantity; } );
 
          add_balance( from, to, quantity );
@@ -28,7 +28,7 @@ class simpletoken : public dccio::contract {
          uint64_t primary_key()const { return owner; }
       };
 
-      dccio::multi_index<N(accounts), account> _accounts;
+      actc::multi_index<N(accounts), account> _accounts;
 
       void add_balance( account_name payer, account_name to, uint64_t q ) {
          auto toitr = _accounts.find( to );
@@ -40,10 +40,10 @@ class simpletoken : public dccio::contract {
          } else {
            _accounts.modify( toitr, 0, [&]( auto& a ) {
               a.balance += q;
-              dccio_assert( a.balance >= q, "overflow detected" );
+              actc_assert( a.balance >= q, "overflow detected" );
            });
          }
       }
 };
 
-dccIO_ABI( simpletoken, (transfer)(issue) )
+actc_ABI( simpletoken, (transfer)(issue) )
