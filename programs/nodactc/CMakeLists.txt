@@ -16,15 +16,15 @@ if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/../../.git)
     execute_process(
       COMMAND ${GIT_EXECUTABLE} rev-parse --short=8 HEAD
       WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../.."
-      OUTPUT_VARIABLE "noddcc_BUILD_VERSION"
+      OUTPUT_VARIABLE "nodactc_BUILD_VERSION"
       ERROR_QUIET
       OUTPUT_STRIP_TRAILING_WHITESPACE)
-    message(STATUS "Git commit revision: ${noddcc_BUILD_VERSION}")
+    message(STATUS "Git commit revision: ${nodactc_BUILD_VERSION}")
   else()
-    set(noddcc_BUILD_VERSION 0)
+    set(nodactc_BUILD_VERSION 0)
   endif()
 else()
-  set(noddcc_BUILD_VERSION 0)
+  set(nodactc_BUILD_VERSION 0)
 endif()
 
 configure_file(config.hpp.in config.hpp ESCAPE_QUOTES)
@@ -64,7 +64,7 @@ target_link_libraries( ${NODE_EXECUTABLE_NAME}
         PRIVATE -Wl,${whole_archive_flag} test_control_api_plugin    -Wl,${no_whole_archive_flag}
         PRIVATE -Wl,${build_id_flag}
         PRIVATE chain_plugin http_plugin producer_plugin http_client_plugin
-        PRIVATE dccio_chain fc ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS} )
+        PRIVATE actc_chain fc ${CMAKE_DL_LIBS} ${PLATFORM_SPECIFIC_LIBS} )
 
 if(BUILD_MONGO_DB_PLUGIN)
   target_link_libraries( ${NODE_EXECUTABLE_NAME} PRIVATE -Wl,${whole_archive_flag} mongo_db_plugin -Wl,${no_whole_archive_flag} )
@@ -80,7 +80,7 @@ install( TARGETS
    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
-install(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/log/dccio
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/log/actc
         DIRECTORY_PERMISSIONS OWNER_READ
                               OWNER_WRITE
                               OWNER_EXECUTE
@@ -90,7 +90,7 @@ install(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/log/dccio
                               WORLD_READ
                               WORLD_EXECUTE
 )
-install(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/lib/dccio
+install(DIRECTORY DESTINATION ${CMAKE_INSTALL_FULL_LOCALSTATEDIR}/lib/actc
         DIRECTORY_PERMISSIONS OWNER_READ
                               OWNER_WRITE
                               OWNER_EXECUTE

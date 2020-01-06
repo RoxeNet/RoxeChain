@@ -19,15 +19,15 @@
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 #include <fc/network/platform_root_ca.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/http_plugin/http_plugin.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
 #include <boost/asio/ssl/rfc2818_verification.hpp>
 #include "httpc.hpp"
 
 using boost::asio::ip::tcp;
-using namespace dccio::chain;
-namespace dccio { namespace client { namespace http {
+using namespace actc::chain;
+namespace actc { namespace client { namespace http {
 
    namespace detail {
       class http_context_impl {
@@ -71,11 +71,11 @@ namespace dccio { namespace client { namespace http {
       response_stream >> http_version;
       response_stream >> status_code;
 
-      dcc_ASSERT( status_code != 400, invalid_http_request, "The server has rejected the request as invalid!");
+      actc_ASSERT( status_code != 400, invalid_http_request, "The server has rejected the request as invalid!");
 
       std::string status_message;
       std::getline(response_stream, status_message);
-      dcc_ASSERT( !(!response_stream || http_version.substr(0, 5) != "HTTP/"), invalid_http_response, "Invalid Response" );
+      actc_ASSERT( !(!response_stream || http_version.substr(0, 5) != "HTTP/"), invalid_http_response, "Invalid Response" );
 
       // Read the response headers, which are terminated by a blank line.
       boost::asio::read_until(socket, response, "\r\n\r\n");
@@ -89,7 +89,7 @@ namespace dccio { namespace client { namespace http {
          if(std::regex_search(header, match, clregex))
             response_content_length = std::stoi(match[1]);
       }
-      dcc_ASSERT(response_content_length >= 0, invalid_http_response, "Invalid content-length response");
+      actc_ASSERT(response_content_length >= 0, invalid_http_response, "Invalid content-length response");
 
       std::stringstream re;
       // Write whatever content we already have to output.
@@ -124,9 +124,9 @@ namespace dccio { namespace client { namespace http {
          res.path = match[7];
       }
       if(res.scheme != "http" && res.scheme != "https")
-         dcc_THROW(fail_to_resolve_host, "Unrecognized URL scheme (${s}) in URL \"${u}\"", ("s", res.scheme)("u", server_url));
+         actc_THROW(fail_to_resolve_host, "Unrecognized URL scheme (${s}) in URL \"${u}\"", ("s", res.scheme)("u", server_url));
       if(res.server.empty())
-         dcc_THROW(fail_to_resolve_host, "No server parsed from URL \"${u}\"", ("u", server_url));
+         actc_THROW(fail_to_resolve_host, "No server parsed from URL \"${u}\"", ("u", server_url));
       if(res.port.empty())
          res.port = res.scheme == "http" ? "80" : "443";
       boost::trim_right_if(res.path, boost::is_any_of("/"));
@@ -141,7 +141,7 @@ namespace dccio { namespace client { namespace http {
       boost::system::error_code ec;
       auto result = resolver.resolve(tcp::v4(), url.server, url.port, ec);
       if (ec) {
-         dcc_THROW(fail_to_resolve_host, "Error resolving \"${server}:${port}\" : ${m}", ("server", url.server)("port",url.port)("m",ec.message()));
+         actc_THROW(fail_to_resolve_host, "Error resolving \"${server}:${port}\" : ${m}", ("server", url.server)("port",url.port)("m",ec.message()));
       }
 
       // non error results are guaranteed to return a non-empty range
@@ -158,7 +158,7 @@ namespace dccio { namespace client { namespace http {
          is_loopback = is_loopback && addr.is_loopback();
 
          if (resolved_port) {
-            dcc_ASSERT(*resolved_port == port, resolved_to_multiple_ports, "Service name \"${port}\" resolved to multiple ports and this is not supported!", ("port",url.port));
+            actc_ASSERT(*resolved_port == port, resolved_to_multiple_ports, "Service name \"${port}\" resolved to multiple ports and this is not supported!", ("port",url.port));
          } else {
             resolved_port = port;
          }
@@ -272,7 +272,7 @@ namespace dccio { namespace client { namespace http {
          throw chain::missing_net_api_plugin_exception(FC_LOG_MESSAGE(error, "Net API plugin is not enabled"));
       }
    } else {
-      auto &&error_info = response_result.as<dccio::error_results>().error;
+      auto &&error_info = response_result.as<actc::error_results>().error;
       // Construct fc exception from error
       const auto &error_details = error_info.details;
 
@@ -285,7 +285,7 @@ namespace dccio { namespace client { namespace http {
       throw fc::exception(logs, error_info.code, error_info.name, error_info.what);
    }
 
-   dcc_ASSERT( status_code == 200, http_request_fail, "Error code ${c}\n: ${msg}\n", ("c", status_code)("msg", re) );
+   actc_ASSERT( status_code == 200, http_request_fail, "Error code ${c}\n: ${msg}\n", ("c", status_code)("msg", re) );
    return response_result;
    }
 }}}

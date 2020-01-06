@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
 #include <libintl.h>
 #include <fc/variant.hpp>
 
-namespace dccio { namespace client { namespace localize {
+namespace actc { namespace client { namespace localize {
    #if !defined(_)
    #define _(str) str
    #endif
