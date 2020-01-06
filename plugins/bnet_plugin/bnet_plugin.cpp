@@ -45,10 +45,10 @@
  *
  */
 
-#include <dccio/bnet_plugin/bnet_plugin.hpp>
-#include <dccio/chain/controller.hpp>
-#include <dccio/chain/trace.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
+#include <actc/bnet_plugin/bnet_plugin.hpp>
+#include <actc/chain/controller.hpp>
+#include <actc/chain/trace.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
 
 #include <fc/io/json.hpp>
 
@@ -61,17 +61,17 @@
 #include <boost/algorithm/string/split.hpp>
 #include <boost/algorithm/string/classification.hpp>
 
-#include <dccio/chain/plugin_interface.hpp>
+#include <actc/chain/plugin_interface.hpp>
 
 using tcp = boost::asio::ip::tcp;
 namespace ws  = boost::beast::websocket;
 
-namespace dccio {
+namespace actc {
    using namespace chain;
 
    static appbase::abstract_plugin& _bnet_plugin = app().register_plugin<bnet_plugin>();
 
-} /// namespace dccio
+} /// namespace actc
 
 namespace fc {
    extern std::unordered_map<std::string,logger>& get_logger_map();
@@ -106,14 +106,14 @@ std::string peer_log_format;
   FC_MULTILINE_MACRO_END
 
 
-using dccio::public_key_type;
-using dccio::chain_id_type;
-using dccio::block_id_type;
-using dccio::block_timestamp_type;
+using actc::public_key_type;
+using actc::chain_id_type;
+using actc::block_id_type;
+using actc::block_timestamp_type;
 using std::string;
-using dccio::sha256;
-using dccio::signed_block_ptr;
-using dccio::packed_transaction_ptr;
+using actc::sha256;
+using actc::signed_block_ptr;
+using actc::packed_transaction_ptr;
 using std::vector;
 
 struct hello {
@@ -183,7 +183,7 @@ struct by_num;
 struct by_received;
 struct by_expired;
 
-namespace dccio {
+namespace actc {
   using namespace chain::plugin_interface;
 
   class bnet_plugin_impl;
@@ -998,7 +998,7 @@ namespace dccio {
            peer_ilog(this, "received signed_block_ptr");
            if (!b) {
               peer_elog(this, "bad signed_block_ptr : null pointer");
-              dcc_THROW(block_validate_exception, "bad block" );
+              actc_THROW(block_validate_exception, "bad block" );
            }
            status( "received block " + std::to_string(b->block_num()) );
            //ilog( "recv block ${n}", ("n", b->block_num()) );
@@ -1045,7 +1045,7 @@ namespace dccio {
            peer_ilog(this, "received packed_transaction_ptr");
            if (!p) {
               peer_elog(this, "bad packed_transaction_ptr : null pointer");
-              dcc_THROW(transaction_exception, "bad transaction");
+              actc_THROW(transaction_exception, "bad transaction");
            }
            if( app().get_plugin<chain_plugin>().chain().get_read_mode() == chain::db_read_mode::READ_ONLY )
               return;
@@ -1131,7 +1131,7 @@ namespace dccio {
         }
 
         void run() {
-           dcc_ASSERT( _acceptor.is_open(), plugin_exception, "unable top open listen socket" );
+           actc_ASSERT( _acceptor.is_open(), plugin_exception, "unable top open listen socket" );
            do_accept();
         }
 
@@ -1457,7 +1457,7 @@ namespace dccio {
       wlog( "done joining threads" );
 
       my->for_each_session([](auto ses){
-         dcc_ASSERT( false, plugin_exception, "session ${ses} still active", ("ses", ses->_session_num) );
+         actc_ASSERT( false, plugin_exception, "session ${ses} still active", ("ses", ses->_session_num) );
       });
 
       // lifetime of _ioc is guarded by shared_ptr of bnet_plugin_impl
@@ -1557,4 +1557,4 @@ namespace dccio {
 
    }
 
-} /// namespace dccio
+} /// namespace actc

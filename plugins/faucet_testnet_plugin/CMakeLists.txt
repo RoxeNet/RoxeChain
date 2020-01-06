@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/dccio/faucet_testnet_plugin/*.hpp")
+file(GLOB HEADERS "include/actc/faucet_testnet_plugin/*.hpp")
 add_library( faucet_testnet_plugin
              faucet_testnet_plugin.cpp
              ${HEADERS} )

@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/producer_plugin/producer_plugin.hpp>
-#include <dccio/chain/producer_object.hpp>
-#include <dccio/chain/plugin_interface.hpp>
-#include <dccio/chain/global_property_object.hpp>
-#include <dccio/chain/transaction_object.hpp>
-#include <dccio/chain/snapshot.hpp>
+#include <actc/producer_plugin/producer_plugin.hpp>
+#include <actc/chain/producer_object.hpp>
+#include <actc/chain/plugin_interface.hpp>
+#include <actc/chain/global_property_object.hpp>
+#include <actc/chain/transaction_object.hpp>
+#include <actc/chain/snapshot.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/smart_ref_impl.hpp>
@@ -53,12 +53,12 @@ fc::logger _log;
 const fc::string trx_trace_logger_name("transaction_tracing");
 fc::logger _trx_trace_log;
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _producer_plugin = app().register_plugin<producer_plugin>();
 
-using namespace dccio::chain;
-using namespace dccio::chain::plugin_interface;
+using namespace actc::chain;
+using namespace actc::chain::plugin_interface;
 
 namespace {
    bool failure_is_subjective(const fc::exception& e, bool deadline_is_subjective) {
@@ -122,7 +122,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       boost::program_options::variables_map _options;
       bool     _production_enabled                 = false;
       bool     _pause_production                   = false;
-      uint32_t _production_skip_flags              = 0; //dccio::chain::skip_nothing;
+      uint32_t _production_skip_flags              = 0; //actc::chain::skip_nothing;
 
       using signature_provider_type = std::function<chain::signature_type(chain::digest_type)>;
       std::map<chain::public_key_type, signature_provider_type> _signature_providers;
@@ -137,7 +137,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       int32_t                                                   _produce_time_offset_us = 0;
       int32_t                                                   _last_block_time_offset_us = 0;
       fc::time_point                                            _irreversible_block_time;
-      fc::microseconds                                          _kdccd_provider_timeout_us;
+      fc::microseconds                                          _kactcd_provider_timeout_us;
 
       time_point _last_signed_block_time;
       time_point _start_time = fc::time_point::now();
@@ -287,7 +287,7 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       void on_incoming_block(const signed_block_ptr& block) {
          fc_dlog(_log, "received incoming block ${id}", ("id", block->id()));
 
-         dcc_ASSERT( block->timestamp < (fc::time_point::now() + fc::seconds(7)), block_from_the_future, "received a block from the future, ignoring it" );
+         actc_ASSERT( block->timestamp < (fc::time_point::now() + fc::seconds(7)), block_from_the_future, "received a block from the future, ignoring it" );
 
 
          chain::controller& chain = app().get_plugin<chain_plugin>().chain();
@@ -457,13 +457,13 @@ class producer_plugin_impl : public std::enable_shared_from_this<producer_plugin
       void schedule_delayed_production_loop(const std::weak_ptr<producer_plugin_impl>& weak_this, const block_timestamp_type& current_block_time);
 };
 
-void new_chain_banner(const dccio::chain::controller& db)
+void new_chain_banner(const actc::chain::controller& db)
 {
    std::cerr << "\n"
       "*******************************\n"
       "*                             *\n"
       "*   ------ NEW CHAIN ------   *\n"
-      "*   -  Welcome to dccIO!  -   *\n"
+      "*   -  Welcome to actc!  -   *\n"
       "*   -----------------------   *\n"
       "*                             *\n"
       "*******************************\n"
@@ -509,13 +509,13 @@ void producer_plugin::set_program_options(
          ("signature-provider", boost::program_options::value<vector<string>>()->composing()->multitoken()->default_value({std::string(default_priv_key.get_public_key()) + "=KEY:" + std::string(default_priv_key)}, std::string(default_priv_key.get_public_key()) + "=KEY:" + std::string(default_priv_key)),
           "Key=Value pairs in the form <public-key>=<provider-spec>\n"
           "Where:\n"
-          "   <public-key>    \tis a string form of a vaild dccIO public key\n\n"
+          "   <public-key>    \tis a string form of a vaild actc public key\n\n"
           "   <provider-spec> \tis a string in the form <provider-type>:<data>\n\n"
-          "   <provider-type> \tis KEY, or KdccD\n\n"
-          "   KEY:<data>      \tis a string form of a valid dccIO private key which maps to the provided public key\n\n"
-          "   KdccD:<data>    \tis the URL where kdccd is available and the approptiate wallet(s) are unlocked")
-         ("kdccd-provider-timeout", boost::program_options::value<int32_t>()->default_value(5),
-          "Limits the maximum time (in milliseconds) that is allowd for sending blocks to a kdccd provider for signing")
+          "   <provider-type> \tis KEY, or KactcD\n\n"
+          "   KEY:<data>      \tis a string form of a valid actc private key which maps to the provided public key\n\n"
+          "   KactcD:<data>    \tis the URL where kactcd is available and the approptiate wallet(s) are unlocked")
+         ("kactcd-provider-timeout", boost::program_options::value<int32_t>()->default_value(5),
+          "Limits the maximum time (in milliseconds) that is allowd for sending blocks to a kactcd provider for signing")
          ("greylist-account", boost::program_options::value<vector<string>>()->composing()->multitoken(),
           "account that can not access to extended CPU/NET virtual resources")
          ("produce-time-offset-us", boost::program_options::value<int32_t>()->default_value(0),
@@ -542,7 +542,7 @@ chain::signature_type producer_plugin::sign_compact(const chain::public_key_type
 {
   if(key != chain::public_key_type()) {
     auto private_key_itr = my->_signature_providers.find(key);
-    dcc_ASSERT(private_key_itr != my->_signature_providers.end(), producer_priv_key_not_found, "Local producer has no private key in config.ini corresponding to public key ${key}", ("key", key));
+    actc_ASSERT(private_key_itr != my->_signature_providers.end(), producer_priv_key_not_found, "Local producer has no private key in config.ini corresponding to public key ${key}", ("key", key));
 
     return private_key_itr->second(digest);
   }
@@ -570,23 +570,23 @@ make_key_signature_provider(const private_key_type& key) {
 }
 
 static producer_plugin_impl::signature_provider_type
-make_kdccd_signature_provider(const std::shared_ptr<producer_plugin_impl>& impl, const string& url_str, const public_key_type pubkey) {
-   fc::url kdccd_url;
+make_kactcd_signature_provider(const std::shared_ptr<producer_plugin_impl>& impl, const string& url_str, const public_key_type pubkey) {
+   fc::url kactcd_url;
    if(boost::algorithm::starts_with(url_str, "unix://"))
       //send the entire string after unix:// to http_plugin. It'll auto-detect which part
       // is the unix socket path, and which part is the url to hit on the server
-      kdccd_url = fc::url("unix", url_str.substr(7), ostring(), ostring(), ostring(), ostring(), ovariant_object(), fc::optional<uint16_t>());
+      kactcd_url = fc::url("unix", url_str.substr(7), ostring(), ostring(), ostring(), ostring(), ovariant_object(), fc::optional<uint16_t>());
    else
-      kdccd_url = fc::url(url_str);
+      kactcd_url = fc::url(url_str);
    std::weak_ptr<producer_plugin_impl> weak_impl = impl;
 
-   return [weak_impl, kdccd_url, pubkey]( const chain::digest_type& digest ) {
+   return [weak_impl, kactcd_url, pubkey]( const chain::digest_type& digest ) {
       auto impl = weak_impl.lock();
       if (impl) {
          fc::variant params;
          fc::to_variant(std::make_pair(digest, pubkey), params);
-         auto deadline = impl->_kdccd_provider_timeout_us.count() >= 0 ? fc::time_point::now() + impl->_kdccd_provider_timeout_us : fc::time_point::maximum();
-         return app().get_plugin<http_client_plugin>().get_client().post_sync(kdccd_url, params, deadline).as<chain::signature_type>();
+         auto deadline = impl->_kactcd_provider_timeout_us.count() >= 0 ? fc::time_point::now() + impl->_kactcd_provider_timeout_us : fc::time_point::maximum();
+         return app().get_plugin<http_client_plugin>().get_client().post_sync(kactcd_url, params, deadline).as<chain::signature_type>();
       } else {
          return signature_type();
       }
@@ -619,12 +619,12 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
       for (const auto& key_spec_pair : key_spec_pairs) {
          try {
             auto delim = key_spec_pair.find("=");
-            dcc_ASSERT(delim != std::string::npos, plugin_config_exception, "Missing \"=\" in the key spec pair");
+            actc_ASSERT(delim != std::string::npos, plugin_config_exception, "Missing \"=\" in the key spec pair");
             auto pub_key_str = key_spec_pair.substr(0, delim);
             auto spec_str = key_spec_pair.substr(delim + 1);
 
             auto spec_delim = spec_str.find(":");
-            dcc_ASSERT(spec_delim != std::string::npos, plugin_config_exception, "Missing \":\" in the key spec pair");
+            actc_ASSERT(spec_delim != std::string::npos, plugin_config_exception, "Missing \":\" in the key spec pair");
             auto spec_type_str = spec_str.substr(0, spec_delim);
             auto spec_data = spec_str.substr(spec_delim + 1);
 
@@ -632,8 +632,8 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
 
             if (spec_type_str == "KEY") {
                my->_signature_providers[pubkey] = make_key_signature_provider(private_key_type(spec_data));
-            } else if (spec_type_str == "KdccD") {
-               my->_signature_providers[pubkey] = make_kdccd_signature_provider(my, spec_data, pubkey);
+            } else if (spec_type_str == "KactcD") {
+               my->_signature_providers[pubkey] = make_kactcd_signature_provider(my, spec_data, pubkey);
             }
 
          } catch (...) {
@@ -642,7 +642,7 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
       }
    }
 
-   my->_kdccd_provider_timeout_us = fc::milliseconds(options.at("kdccd-provider-timeout").as<int32_t>());
+   my->_kactcd_provider_timeout_us = fc::milliseconds(options.at("kactcd-provider-timeout").as<int32_t>());
 
    my->_produce_time_offset_us = options.at("produce-time-offset-us").as<int32_t>();
 
@@ -665,7 +665,7 @@ void producer_plugin::plugin_initialize(const boost::program_options::variables_
          my->_snapshots_dir = sd;
       }
 
-      dcc_ASSERT( fc::is_directory(my->_snapshots_dir), snapshot_directory_not_found_exception,
+      actc_ASSERT( fc::is_directory(my->_snapshots_dir), snapshot_directory_not_found_exception,
                   "No such directory '${dir}'", ("dir", my->_snapshots_dir.generic_string()) );
    }
 
@@ -714,10 +714,10 @@ void producer_plugin::plugin_startup()
    ilog("producer plugin:  plugin_startup() begin");
 
    chain::controller& chain = app().get_plugin<chain_plugin>().chain();
-   dcc_ASSERT( my->_producers.empty() || chain.get_read_mode() == chain::db_read_mode::SPECULATIVE, plugin_config_exception,
+   actc_ASSERT( my->_producers.empty() || chain.get_read_mode() == chain::db_read_mode::SPECULATIVE, plugin_config_exception,
               "node cannot have any producer-name configured because block production is impossible when read_mode is not \"speculative\"" );
 
-   dcc_ASSERT( my->_producers.empty() || chain.get_validation_mode() == chain::validation_mode::FULL, plugin_config_exception,
+   actc_ASSERT( my->_producers.empty() || chain.get_validation_mode() == chain::validation_mode::FULL, plugin_config_exception,
               "node cannot have any producer-name configured because block production is not safe when validation_mode is not \"full\"" );
 
 
@@ -739,7 +739,7 @@ void producer_plugin::plugin_startup()
          if (chain.head_block_num() == 0) {
             new_chain_banner(chain);
          }
-         //_production_skip_flags |= dccio::chain::skip_undo_history_check;
+         //_production_skip_flags |= actc::chain::skip_undo_history_check;
       }
    }
 
@@ -905,7 +905,7 @@ producer_plugin::snapshot_information producer_plugin::create_snapshot() const {
    auto head_id = chain.head_block_id();
    std::string snapshot_path = (my->_snapshots_dir / fc::format_string("snapshot-${id}.bin", fc::mutable_variant_object()("id", head_id))).generic_string();
 
-   dcc_ASSERT( !fc::is_regular_file(snapshot_path), snapshot_exists_exception,
+   actc_ASSERT( !fc::is_regular_file(snapshot_path), snapshot_exists_exception,
                "snapshot named ${name} already exists", ("name", snapshot_path));
 
 
@@ -1352,12 +1352,12 @@ void producer_plugin_impl::schedule_production_loop() {
       static const boost::posix_time::ptime epoch(boost::gregorian::date(1970, 1, 1));
       if (result == start_block_result::succeeded) {
          // ship this block off no later than its deadline
-         dcc_ASSERT( chain.pending_block_state(), missing_pending_block_state, "producing without pending_block_state, start_block succeeded" );
+         actc_ASSERT( chain.pending_block_state(), missing_pending_block_state, "producing without pending_block_state, start_block succeeded" );
          auto deadline = chain.pending_block_time().time_since_epoch().count() + (last_block ? _last_block_time_offset_us : _produce_time_offset_us);
          _timer.expires_at( epoch + boost::posix_time::microseconds( deadline ));
          fc_dlog(_log, "Scheduling Block Production on Normal Block #${num} for ${time}", ("num", chain.pending_block_state()->block_num)("time",deadline));
       } else {
-         dcc_ASSERT( chain.pending_block_state(), missing_pending_block_state, "producing without pending_block_state" );
+         actc_ASSERT( chain.pending_block_state(), missing_pending_block_state, "producing without pending_block_state" );
          auto expect_time = chain.pending_block_time() - fc::microseconds(config::block_interval_us);
          // ship this block off up to 1 block time earlier or immediately
          if (fc::time_point::now() >= expect_time) {
@@ -1380,7 +1380,7 @@ void producer_plugin_impl::schedule_production_loop() {
       });
    } else if (_pending_block_mode == pending_block_mode::speculating && !_producers.empty() && !production_disabled_by_policy()){
       fc_dlog(_log, "Specualtive Block Created; Scheduling Speculative/Production Change");
-      dcc_ASSERT( chain.pending_block_state(), missing_pending_block_state, "speculating without pending_block_state" );
+      actc_ASSERT( chain.pending_block_state(), missing_pending_block_state, "speculating without pending_block_state" );
       const auto& pbs = chain.pending_block_state();
       schedule_delayed_production_loop(weak_this, pbs->header.timestamp);
    } else {
@@ -1461,14 +1461,14 @@ static auto maybe_make_debug_time_logger() -> fc::optional<decltype(make_debug_t
 
 void producer_plugin_impl::produce_block() {
    //ilog("produce_block ${t}", ("t", fc::time_point::now())); // for testing _produce_time_offset_us
-   dcc_ASSERT(_pending_block_mode == pending_block_mode::producing, producer_exception, "called produce_block while not actually producing");
+   actc_ASSERT(_pending_block_mode == pending_block_mode::producing, producer_exception, "called produce_block while not actually producing");
    chain::controller& chain = app().get_plugin<chain_plugin>().chain();
    const auto& pbs = chain.pending_block_state();
    const auto& hbs = chain.head_block_state();
-   dcc_ASSERT(pbs, missing_pending_block_state, "pending_block_state does not exist but it should, another plugin may have corrupted it");
+   actc_ASSERT(pbs, missing_pending_block_state, "pending_block_state does not exist but it should, another plugin may have corrupted it");
    auto signature_provider_itr = _signature_providers.find( pbs->block_signing_key );
 
-   dcc_ASSERT(signature_provider_itr != _signature_providers.end(), producer_priv_key_not_found, "Attempting to produce a block for which we don't have the private key");
+   actc_ASSERT(signature_provider_itr != _signature_providers.end(), producer_priv_key_not_found, "Attempting to produce a block for which we don't have the private key");
 
    //idump( (fc::time_point::now() - chain.pending_block_time()) );
    chain.finalize_block();
@@ -1491,4 +1491,4 @@ void producer_plugin_impl::produce_block() {
 
 }
 
-} // namespace dccio
+} // namespace actc

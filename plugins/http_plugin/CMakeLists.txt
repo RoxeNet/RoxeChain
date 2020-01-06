@@ -1,7 +1,7 @@
-file(GLOB HEADERS "include/dccio/http_plugin/*.hpp")
+file(GLOB HEADERS "include/actc/http_plugin/*.hpp")
 add_library( http_plugin
              http_plugin.cpp
              ${HEADERS} )
 
-target_link_libraries( http_plugin dccio_chain appbase fc )
+target_link_libraries( http_plugin actc_chain appbase fc )
 target_include_directories( http_plugin PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )

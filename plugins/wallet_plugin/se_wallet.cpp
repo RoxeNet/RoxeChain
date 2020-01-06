@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/wallet_plugin/se_wallet.hpp>
-#include <dccio/wallet_plugin/macos_user_auth.h>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/wallet_plugin/se_wallet.hpp>
+#include <actc/wallet_plugin/macos_user_auth.h>
+#include <actc/chain/exceptions.hpp>
 
 #include <fc/crypto/openssl.hpp>
 
@@ -15,7 +15,7 @@
 
 #include <future>
 
-namespace dccio { namespace wallet {
+namespace actc { namespace wallet {
 
 using namespace fc::crypto::r1;
 
@@ -238,7 +238,7 @@ struct se_wallet_impl {
 
       promise<bool> prom;
       future<bool> fut = prom.get_future();
-      macos_user_auth(auth_callback, &prom, CFSTR("remove a key from your dccIO wallet"));
+      macos_user_auth(auth_callback, &prom, CFSTR("remove a key from your actc wallet"));
       if(!fut.get())
          FC_THROW_EXCEPTION(chain::wallet_invalid_password_exception, "Local user authentication failed");
 
@@ -281,7 +281,7 @@ static void check_signed() {
 
    if(is_valid != errSecSuccess) {
       wlog("Application does not have a valid signature; Secure Enclave support disabled");
-      dcc_THROW(secure_enclave_exception, "");
+      actc_THROW(secure_enclave_exception, "");
    }
 }
 
@@ -307,7 +307,7 @@ se_wallet::se_wallet() : my(new detail::se_wallet_impl()) {
       }
    }
 
-   dcc_THROW(secure_enclave_exception, "Secure Enclave not supported on this hardware");
+   actc_THROW(secure_enclave_exception, "Secure Enclave not supported on this hardware");
 }
 
 se_wallet::~se_wallet() {
@@ -321,14 +321,14 @@ bool se_wallet::is_locked() const {
    return my->locked;
 }
 void se_wallet::lock() {
-   dcc_ASSERT(!is_locked(), wallet_locked_exception, "You can not lock an already locked wallet");
+   actc_ASSERT(!is_locked(), wallet_locked_exception, "You can not lock an already locked wallet");
    my->locked = true;
 }
 
 void se_wallet::unlock(string password) {
    promise<bool> prom;
    future<bool> fut = prom.get_future();
-   macos_user_auth(detail::auth_callback, &prom, CFSTR("unlock your dccIO wallet"));
+   macos_user_auth(detail::auth_callback, &prom, CFSTR("unlock your actc wallet"));
    if(!fut.get())
       FC_THROW_EXCEPTION(chain::wallet_invalid_password_exception, "Local user authentication failed");
    my->locked = false;
@@ -358,7 +358,7 @@ string se_wallet::create_key(string key_type) {
 }
 
 bool se_wallet::remove_key(string key) {
-   dcc_ASSERT(!is_locked(), wallet_locked_exception, "You can not remove a key from a locked wallet");
+   actc_ASSERT(!is_locked(), wallet_locked_exception, "You can not remove a key from a locked wallet");
    return my->remove_key(key);
 }
 

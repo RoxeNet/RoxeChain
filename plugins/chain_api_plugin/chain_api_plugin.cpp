@@ -1,17 +1,17 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain_api_plugin/chain_api_plugin.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain_api_plugin/chain_api_plugin.hpp>
+#include <actc/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _chain_api_plugin = app().register_plugin<chain_api_plugin>();
 
-using namespace dccio;
+using namespace actc;
 
 class chain_api_plugin_impl {
 public:
