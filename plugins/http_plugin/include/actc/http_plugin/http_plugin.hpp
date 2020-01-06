@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
@@ -8,7 +8,7 @@
 
 #include <fc/reflect/reflect.hpp>
 
-namespace dccio {
+namespace actc {
    using namespace appbase;
 
    /**
@@ -149,6 +149,6 @@ namespace dccio {
    };
 }
 
-FC_REFLECT(dccio::error_results::error_info::error_detail, (message)(file)(line_number)(method))
-FC_REFLECT(dccio::error_results::error_info, (code)(name)(what)(details))
-FC_REFLECT(dccio::error_results, (code)(message)(error))
+FC_REFLECT(actc::error_results::error_info::error_detail, (message)(file)(line_number)(method))
+FC_REFLECT(actc::error_results::error_info, (code)(name)(what)(details))
+FC_REFLECT(actc::error_results, (code)(message)(error))
