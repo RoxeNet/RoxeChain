@@ -1,18 +1,18 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/types.hpp>
+#include <actc/chain/types.hpp>
 
-#include <dccio/net_plugin/net_plugin.hpp>
-#include <dccio/net_plugin/protocol.hpp>
-#include <dccio/chain/controller.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/block.hpp>
-#include <dccio/chain/plugin_interface.hpp>
-#include <dccio/producer_plugin/producer_plugin.hpp>
-#include <dccio/utilities/key_conversion.hpp>
-#include <dccio/chain/contract_types.hpp>
+#include <actc/net_plugin/net_plugin.hpp>
+#include <actc/net_plugin/protocol.hpp>
+#include <actc/chain/controller.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/block.hpp>
+#include <actc/chain/plugin_interface.hpp>
+#include <actc/producer_plugin/producer_plugin.hpp>
+#include <actc/utilities/key_conversion.hpp>
+#include <actc/chain/contract_types.hpp>
 
 #include <fc/network/message_buffer.hpp>
 #include <fc/network/ip.hpp>
@@ -29,13 +29,13 @@
 #include <boost/asio/steady_timer.hpp>
 #include <boost/intrusive/set.hpp>
 
-using namespace dccio::chain::plugin_interface::compat;
+using namespace actc::chain::plugin_interface::compat;
 
 namespace fc {
    extern std::unordered_map<std::string,logger>& get_logger_map();
 }
 
-namespace dccio {
+namespace actc {
    static appbase::abstract_plugin& _net_plugin = app().register_plugin<net_plugin>();
 
    using std::vector;
@@ -48,7 +48,7 @@ namespace dccio {
 
    using fc::time_point;
    using fc::time_point_sec;
-   using dccio::chain::transaction_id_type;
+   using actc::chain::transaction_id_type;
    namespace bip = boost::interprocess;
 
    class connection;
@@ -392,22 +392,22 @@ namespace dccio {
       void operator() (struct transaction_state &ts) {
          ts.requested_time = time_point::now();
       }
-      void operator () (struct dccio::peer_block_state &bs) {
+      void operator () (struct actc::peer_block_state &bs) {
          bs.requested_time = time_point::now();
       }
    } set_request_time;
 
    typedef multi_index_container<
-      dccio::peer_block_state,
+      actc::peer_block_state,
       indexed_by<
-         ordered_unique< tag<by_id>, member<dccio::peer_block_state, block_id_type, &dccio::peer_block_state::id > >,
-         ordered_unique< tag<by_block_num>, member<dccio::peer_block_state, uint32_t, &dccio::peer_block_state::block_num > >
+         ordered_unique< tag<by_id>, member<actc::peer_block_state, block_id_type, &actc::peer_block_state::id > >,
+         ordered_unique< tag<by_block_num>, member<actc::peer_block_state, uint32_t, &actc::peer_block_state::block_num > >
          >
       > peer_block_state_index;
 
 
    struct update_known_by_peer {
-      void operator() (dccio::peer_block_state& bs) {
+      void operator() (actc::peer_block_state& bs) {
          bs.is_known = true;
       }
       void operator() (transaction_state& ts) {
@@ -1256,7 +1256,7 @@ namespace dccio {
       ,state(in_sync)
    {
       chain_plug = app( ).find_plugin<chain_plugin>( );
-      dcc_ASSERT( chain_plug, chain::missing_chain_plugin_exception, ""  );
+      actc_ASSERT( chain_plug, chain::missing_chain_plugin_exception, ""  );
    }
 
    constexpr auto sync_manager::stage_str(stages s ) {
@@ -2095,7 +2095,7 @@ namespace dccio {
                         elog("async_read_some callback: bytes_transfered = ${bt}, buffer.bytes_to_write = ${btw}",
                              ("bt",bytes_transferred)("btw",conn->pending_message_buffer.bytes_to_write()));
                      }
-                     dcc_ASSERT(bytes_transferred <= conn->pending_message_buffer.bytes_to_write(), plugin_exception, "");
+                     actc_ASSERT(bytes_transferred <= conn->pending_message_buffer.bytes_to_write(), plugin_exception, "");
                      conn->pending_message_buffer.advance_write_ptr(bytes_transferred);
                      while (conn->pending_message_buffer.bytes_to_read() > 0) {
                         uint32_t bytes_in_buffer = conn->pending_message_buffer.bytes_to_read();
@@ -2481,7 +2481,7 @@ namespace dccio {
       fc_dlog(logger, "got a packed transaction, cancel wait");
       peer_ilog(c, "received packed_transaction");
       controller& cc = my_impl->chain_plug->chain();
-      if( cc.get_read_mode() == dccio::db_read_mode::READ_ONLY ) {
+      if( cc.get_read_mode() == actc::db_read_mode::READ_ONLY ) {
          fc_dlog(logger, "got a txn in read-only mode - dropping");
          return;
       }
@@ -2866,7 +2866,7 @@ namespace dccio {
          ( "p2p-server-address", bpo::value<string>(), "An externally accessible host:port for identifying this node. Defaults to p2p-listen-endpoint.")
          ( "p2p-peer-address", bpo::value< vector<string> >()->composing(), "The public endpoint of a peer node to connect to. Use multiple p2p-peer-address options as needed to compose a network.")
          ( "p2p-max-nodes-per-host", bpo::value<int>()->default_value(def_max_nodes_per_host), "Maximum number of client nodes from any single IP address")
-         ( "agent-name", bpo::value<string>()->default_value("\"dcc Test Agent\""), "The name supplied to identify this node amongst the peers.")
+         ( "agent-name", bpo::value<string>()->default_value("\"actc Test Agent\""), "The name supplied to identify this node amongst the peers.")
          ( "allowed-connection", bpo::value<vector<string>>()->multitoken()->default_value({"any"}, "any"), "Can be 'any' or 'producers' or 'specified' or 'none'. If 'specified', peer-key must be specified at least once. If only 'producers', peer-key is not required. 'producers' and 'specified' may be combined.")
          ( "peer-key", bpo::value<vector<string>>()->composing()->multitoken(), "Optional public key of peer allowed to connect.  May be used multiple times.")
          ( "peer-private-key", boost::program_options::value<vector<string>>()->composing()->multitoken(),
@@ -2971,7 +2971,7 @@ namespace dccio {
          }
 
          if( my->allowed_connections & net_plugin_impl::Specified )
-            dcc_ASSERT( options.count( "peer-key" ),
+            actc_ASSERT( options.count( "peer-key" ),
                         plugin_config_exception,
                        "At least one peer-key must accompany 'allowed-connection=specified'" );
 
@@ -2992,7 +2992,7 @@ namespace dccio {
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         dcc_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         actc_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          my->chain_id = app().get_plugin<chain_plugin>().get_chain_id();
          fc::rand_pseudo_bytes( my->node_id.data(), my->node_id.data_size());
          ilog( "my node_id is ${id}", ("id", my->node_id));

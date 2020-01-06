@@ -1,28 +1,28 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/producer_api_plugin/producer_api_plugin.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/producer_api_plugin/producer_api_plugin.hpp>
+#include <actc/chain/exceptions.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 
 #include <chrono>
 
-namespace dccio { namespace detail {
+namespace actc { namespace detail {
   struct producer_api_plugin_response {
      std::string result;
   };
 }}
 
-FC_REFLECT(dccio::detail::producer_api_plugin_response, (result));
+FC_REFLECT(actc::detail::producer_api_plugin_response, (result));
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _producer_api_plugin = app().register_plugin<producer_api_plugin>();
 
-using namespace dccio;
+using namespace actc;
 
 #define CALL(api_name, api_handle, call_name, INVOKE, http_response_code) \
 {std::string("/v1/" #api_name "/" #call_name), \
@@ -48,16 +48,16 @@ using namespace dccio;
 
 #define INVOKE_V_R(api_handle, call_name, in_param) \
      api_handle.call_name(fc::json::from_string(body).as<in_param>()); \
-     dccio::detail::producer_api_plugin_response result{"ok"};
+     actc::detail::producer_api_plugin_response result{"ok"};
 
 #define INVOKE_V_R_R(api_handle, call_name, in_param0, in_param1) \
      const auto& vs = fc::json::json::from_string(body).as<fc::variants>(); \
      api_handle.call_name(vs.at(0).as<in_param0>(), vs.at(1).as<in_param1>()); \
-     dccio::detail::producer_api_plugin_response result{"ok"};
+     actc::detail::producer_api_plugin_response result{"ok"};
 
 #define INVOKE_V_V(api_handle, call_name) \
      api_handle.call_name(); \
-     dccio::detail::producer_api_plugin_response result{"ok"};
+     actc::detail::producer_api_plugin_response result{"ok"};
 
 
 void producer_api_plugin::plugin_startup() {
