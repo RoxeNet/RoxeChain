@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
 #include <fc/variant.hpp>
 #include <memory>
 
 namespace fc { class variant; }
 
-namespace dccio {
+namespace actc {
    using namespace appbase;
    typedef std::shared_ptr<class test_control_plugin_impl> test_control_ptr;
 
@@ -63,5 +63,5 @@ private:
 
 }
 
-FC_REFLECT(dccio::test_control_apis::empty, )
-FC_REFLECT(dccio::test_control_apis::read_write::kill_node_on_producer_params, (producer)(where_in_sequence)(based_on_lib) )
+FC_REFLECT(actc::test_control_apis::empty, )
+FC_REFLECT(actc::test_control_apis::read_write::kill_node_on_producer_params, (producer)(where_in_sequence)(based_on_lib) )

@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/txn_test_gen_plugin/txn_test_gen_plugin.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
-#include <dccio/chain/wast_to_wasm.hpp>
-#include <dccio/utilities/key_conversion.hpp>
+#include <actc/txn_test_gen_plugin/txn_test_gen_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
+#include <actc/chain/wast_to_wasm.hpp>
+#include <actc/utilities/key_conversion.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
@@ -23,20 +23,20 @@
 #include <WASM/WASM.h>
 #include <Runtime/Runtime.h>
 
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
 
-namespace dccio { namespace detail {
+namespace actc { namespace detail {
   struct txn_test_gen_empty {};
 }}
 
-FC_REFLECT(dccio::detail::txn_test_gen_empty, );
+FC_REFLECT(actc::detail::txn_test_gen_empty, );
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _txn_test_gen_plugin = app().register_plugin<txn_test_gen_plugin>();
 
-using namespace dccio::chain;
+using namespace actc::chain;
 
 #define CALL(api_name, api_handle, call_name, INVOKE, http_response_code) \
 {std::string("/v1/" #api_name "/" #call_name), \
@@ -53,16 +53,16 @@ using namespace dccio::chain;
 #define INVOKE_V_R_R_R(api_handle, call_name, in_param0, in_param1, in_param2) \
      const auto& vs = fc::json::json::from_string(body).as<fc::variants>(); \
      api_handle->call_name(vs.at(0).as<in_param0>(), vs.at(1).as<in_param1>(), vs.at(2).as<in_param2>()); \
-     dccio::detail::txn_test_gen_empty result;
+     actc::detail::txn_test_gen_empty result;
 
 #define INVOKE_V_R_R(api_handle, call_name, in_param0, in_param1) \
      const auto& vs = fc::json::json::from_string(body).as<fc::variants>(); \
      api_handle->call_name(vs.at(0).as<in_param0>(), vs.at(1).as<in_param1>()); \
-     dccio::detail::txn_test_gen_empty result;
+     actc::detail::txn_test_gen_empty result;
 
 #define INVOKE_V_V(api_handle, call_name) \
      api_handle->call_name(); \
-     dccio::detail::txn_test_gen_empty result;
+     actc::detail::txn_test_gen_empty result;
 
 #define CALL_ASYNC(api_name, api_handle, call_name, INVOKE, http_response_code) \
 {std::string("/v1/" #api_name "/" #call_name), \
@@ -76,7 +76,7 @@ using namespace dccio::chain;
                http_plugin::handle_exception(#api_name, #call_name, body, cb);\
             }\
          } else {\
-            cb(http_response_code, fc::json::to_string(dccio::detail::txn_test_gen_empty())); \
+            cb(http_response_code, fc::json::to_string(actc::detail::txn_test_gen_empty())); \
          }\
       };\
       INVOKE \
@@ -118,13 +118,13 @@ struct txn_test_gen_plugin_impl {
          name newaccountC("txn.test.t");
          name creator(init_name);
 
-         abi_def currency_abi_def = fc::json::from_string(dccio_token_abi).as<abi_def>();
+         abi_def currency_abi_def = fc::json::from_string(actc_token_abi).as<abi_def>();
 
          controller& cc = app().get_plugin<chain_plugin>().chain();
          auto chainid = app().get_plugin<chain_plugin>().get_chain_id();
          auto abi_serializer_max_time = app().get_plugin<chain_plugin>().get_abi_serializer_max_time();
 
-         abi_serializer dccio_token_serializer{fc::json::from_string(dccio_token_abi).as<abi_def>(), abi_serializer_max_time};
+         abi_serializer actc_token_serializer{fc::json::from_string(actc_token_abi).as<abi_def>(), abi_serializer_max_time};
 
          fc::crypto::private_key txn_test_receiver_A_priv_key = fc::crypto::private_key::regenerate(fc::sha256(std::string(64, 'a')));
          fc::crypto::private_key txn_test_receiver_B_priv_key = fc::crypto::private_key::regenerate(fc::sha256(std::string(64, 'b')));
@@ -140,22 +140,22 @@ struct txn_test_gen_plugin_impl {
 
             //create "A" account
             {
-            auto owner_auth   = dccio::chain::authority{1, {{txn_text_receiver_A_pub_key, 1}}, {}};
-            auto active_auth  = dccio::chain::authority{1, {{txn_text_receiver_A_pub_key, 1}}, {}};
+            auto owner_auth   = actc::chain::authority{1, {{txn_text_receiver_A_pub_key, 1}}, {}};
+            auto active_auth  = actc::chain::authority{1, {{txn_text_receiver_A_pub_key, 1}}, {}};
 
             trx.actions.emplace_back(vector<chain::permission_level>{{creator,"active"}}, newaccount{creator, newaccountA, owner_auth, active_auth});
             }
             //create "B" account
             {
-            auto owner_auth   = dccio::chain::authority{1, {{txn_text_receiver_B_pub_key, 1}}, {}};
-            auto active_auth  = dccio::chain::authority{1, {{txn_text_receiver_B_pub_key, 1}}, {}};
+            auto owner_auth   = actc::chain::authority{1, {{txn_text_receiver_B_pub_key, 1}}, {}};
+            auto active_auth  = actc::chain::authority{1, {{txn_text_receiver_B_pub_key, 1}}, {}};
 
             trx.actions.emplace_back(vector<chain::permission_level>{{creator,"active"}}, newaccount{creator, newaccountB, owner_auth, active_auth});
             }
             //create "txn.test.t" account
             {
-            auto owner_auth   = dccio::chain::authority{1, {{txn_text_receiver_C_pub_key, 1}}, {}};
-            auto active_auth  = dccio::chain::authority{1, {{txn_text_receiver_C_pub_key, 1}}, {}};
+            auto owner_auth   = actc::chain::authority{1, {{txn_text_receiver_C_pub_key, 1}}, {}};
+            auto active_auth  = actc::chain::authority{1, {{txn_text_receiver_C_pub_key, 1}}, {}};
 
             trx.actions.emplace_back(vector<chain::permission_level>{{creator,"active"}}, newaccount{creator, newaccountC, owner_auth, active_auth});
             }
@@ -166,11 +166,11 @@ struct txn_test_gen_plugin_impl {
             trxs.emplace_back(std::move(trx));
          }
 
-         //set txn.test.t contract to dccio.token & initialize it
+         //set txn.test.t contract to actc.token & initialize it
          {
             signed_transaction trx;
 
-            vector<uint8_t> wasm = wast_to_wasm(std::string(dccio_token_wast));
+            vector<uint8_t> wasm = wast_to_wasm(std::string(actc_token_wast));
 
             setcode handler;
             handler.account = newaccountC;
@@ -181,7 +181,7 @@ struct txn_test_gen_plugin_impl {
             {
                setabi handler;
                handler.account = newaccountC;
-               handler.abi = fc::raw::pack(json::from_string(dccio_token_abi).as<abi_def>());
+               handler.abi = fc::raw::pack(json::from_string(actc_token_abi).as<abi_def>());
                trx.actions.emplace_back( vector<chain::permission_level>{{newaccountC,"active"}}, handler);
             }
 
@@ -190,7 +190,7 @@ struct txn_test_gen_plugin_impl {
                act.account = N(txn.test.t);
                act.name = N(create);
                act.authorization = vector<permission_level>{{newaccountC,config::active_name}};
-               act.data = dccio_token_serializer.variant_to_binary("create", fc::json::from_string("{\"issuer\":\"txn.test.t\",\"maximum_supply\":\"1000000000.0000 CUR\"}}"), abi_serializer_max_time);
+               act.data = actc_token_serializer.variant_to_binary("create", fc::json::from_string("{\"issuer\":\"txn.test.t\",\"maximum_supply\":\"1000000000.0000 CUR\"}}"), abi_serializer_max_time);
                trx.actions.push_back(act);
             }
             {
@@ -198,7 +198,7 @@ struct txn_test_gen_plugin_impl {
                act.account = N(txn.test.t);
                act.name = N(issue);
                act.authorization = vector<permission_level>{{newaccountC,config::active_name}};
-               act.data = dccio_token_serializer.variant_to_binary("issue", fc::json::from_string("{\"to\":\"txn.test.t\",\"quantity\":\"600.0000 CUR\",\"memo\":\"\"}"), abi_serializer_max_time);
+               act.data = actc_token_serializer.variant_to_binary("issue", fc::json::from_string("{\"to\":\"txn.test.t\",\"quantity\":\"600.0000 CUR\",\"memo\":\"\"}"), abi_serializer_max_time);
                trx.actions.push_back(act);
             }
             {
@@ -206,7 +206,7 @@ struct txn_test_gen_plugin_impl {
                act.account = N(txn.test.t);
                act.name = N(transfer);
                act.authorization = vector<permission_level>{{newaccountC,config::active_name}};
-               act.data = dccio_token_serializer.variant_to_binary("transfer", fc::json::from_string("{\"from\":\"txn.test.t\",\"to\":\"txn.test.a\",\"quantity\":\"200.0000 CUR\",\"memo\":\"\"}"), abi_serializer_max_time);
+               act.data = actc_token_serializer.variant_to_binary("transfer", fc::json::from_string("{\"from\":\"txn.test.t\",\"to\":\"txn.test.a\",\"quantity\":\"200.0000 CUR\",\"memo\":\"\"}"), abi_serializer_max_time);
                trx.actions.push_back(act);
             }
             {
@@ -214,7 +214,7 @@ struct txn_test_gen_plugin_impl {
                act.account = N(txn.test.t);
                act.name = N(transfer);
                act.authorization = vector<permission_level>{{newaccountC,config::active_name}};
-               act.data = dccio_token_serializer.variant_to_binary("transfer", fc::json::from_string("{\"from\":\"txn.test.t\",\"to\":\"txn.test.b\",\"quantity\":\"200.0000 CUR\",\"memo\":\"\"}"), abi_serializer_max_time);
+               act.data = actc_token_serializer.variant_to_binary("transfer", fc::json::from_string("{\"from\":\"txn.test.t\",\"to\":\"txn.test.b\",\"quantity\":\"200.0000 CUR\",\"memo\":\"\"}"), abi_serializer_max_time);
                trx.actions.push_back(act);
             }
 
@@ -246,12 +246,12 @@ struct txn_test_gen_plugin_impl {
 
       controller& cc = app().get_plugin<chain_plugin>().chain();
       auto abi_serializer_max_time = app().get_plugin<chain_plugin>().get_abi_serializer_max_time();
-      abi_serializer dccio_token_serializer{fc::json::from_string(dccio_token_abi).as<abi_def>(), abi_serializer_max_time};
+      abi_serializer actc_token_serializer{fc::json::from_string(actc_token_abi).as<abi_def>(), abi_serializer_max_time};
       //create the actions here
       act_a_to_b.account = N(txn.test.t);
       act_a_to_b.name = N(transfer);
       act_a_to_b.authorization = vector<permission_level>{{name("txn.test.a"),config::active_name}};
-      act_a_to_b.data = dccio_token_serializer.variant_to_binary("transfer", 
+      act_a_to_b.data = actc_token_serializer.variant_to_binary("transfer",
                                                                   fc::json::from_string(fc::format_string("{\"from\":\"txn.test.a\",\"to\":\"txn.test.b\",\"quantity\":\"1.0000 CUR\",\"memo\":\"${l}\"}", 
                                                                   fc::mutable_variant_object()("l", salt))),
                                                                   abi_serializer_max_time);
@@ -259,7 +259,7 @@ struct txn_test_gen_plugin_impl {
       act_b_to_a.account = N(txn.test.t);
       act_b_to_a.name = N(transfer);
       act_b_to_a.authorization = vector<permission_level>{{name("txn.test.b"),config::active_name}};
-      act_b_to_a.data = dccio_token_serializer.variant_to_binary("transfer", 
+      act_b_to_a.data = actc_token_serializer.variant_to_binary("transfer",
                                                                   fc::json::from_string(fc::format_string("{\"from\":\"txn.test.b\",\"to\":\"txn.test.a\",\"quantity\":\"1.0000 CUR\",\"memo\":\"${l}\"}", 
                                                                   fc::mutable_variant_object()("l", salt))),
                                                                   abi_serializer_max_time);
@@ -302,7 +302,7 @@ struct txn_test_gen_plugin_impl {
          fc::crypto::private_key b_priv_key = fc::crypto::private_key::regenerate(fc::sha256(std::string(64, 'b')));
 
          static uint64_t nonce = static_cast<uint64_t>(fc::time_point::now().sec_since_epoch()) << 32;
-         abi_serializer dccio_serializer(cc.db().find<account_object, by_name>(config::system_account_name)->get_abi(), abi_serializer_max_time);
+         abi_serializer actc_serializer(cc.db().find<account_object, by_name>(config::system_account_name)->get_abi(), abi_serializer_max_time);
 
          uint32_t reference_block_num = cc.last_irreversible_block_num();
          if (txn_reference_block_lag >= 0) {

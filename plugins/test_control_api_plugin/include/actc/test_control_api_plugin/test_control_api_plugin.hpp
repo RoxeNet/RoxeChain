@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
-#include <dccio/test_control_plugin/test_control_plugin.hpp>
-#include <dccio/http_plugin/http_plugin.hpp>
+#include <actc/test_control_plugin/test_control_plugin.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
 
 #include <appbase/application.hpp>
-#include <dccio/chain/controller.hpp>
+#include <actc/chain/controller.hpp>
 
-namespace dccio {
-   using dccio::chain::controller;
+namespace actc {
+   using actc::chain::controller;
    using std::unique_ptr;
    using namespace appbase;
 
