@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
-#include <dccio/http_plugin/http_plugin.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
 
 #include <appbase/application.hpp>
 
-namespace dccio {
+namespace actc {
 
 using namespace appbase;
 
@@ -48,5 +48,5 @@ private:
 
 }
 
-FC_REFLECT( dccio::db_size_index_count, (index)(row_count) )
-FC_REFLECT( dccio::db_size_stats, (free_bytes)(used_bytes)(size)(indices) )
+FC_REFLECT( actc::db_size_index_count, (index)(row_count) )
+FC_REFLECT( actc::db_size_stats, (free_bytes)(used_bytes)(size)(indices) )
