@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
 
-namespace dccio {
+namespace actc {
 
 using namespace appbase;
 
