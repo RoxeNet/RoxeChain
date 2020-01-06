@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
 #include <chainbase/chainbase.hpp>
 #include <fc/array.hpp>
 
-namespace dccio {
+namespace actc {
 using chain::account_name;
 using chain::public_key_type;
 using chain::permission_name;
@@ -49,7 +49,7 @@ typedef chainbase::generic_index<public_key_history_multi_index> public_key_hist
 
 }
 
-CHAINBASE_SET_INDEX_TYPE( dccio::public_key_history_object, dccio::public_key_history_multi_index )
+CHAINBASE_SET_INDEX_TYPE( actc::public_key_history_object, actc::public_key_history_multi_index )
 
-FC_REFLECT( dccio::public_key_history_object, (public_key)(name)(permission) )
+FC_REFLECT( actc::public_key_history_object, (public_key)(name)(permission) )
 

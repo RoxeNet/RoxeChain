@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
 #include <chainbase/chainbase.hpp>
-#include <dccio/chain/types.hpp>
+#include <actc/chain/types.hpp>
 
-namespace dccio {
+namespace actc {
 using chain::account_name;
 using chain::permission_name;
 using chain::shared_vector;
@@ -50,7 +50,7 @@ typedef chainbase::generic_index<account_control_history_multi_index> account_co
 
 }
 
-CHAINBASE_SET_INDEX_TYPE( dccio::account_control_history_object, dccio::account_control_history_multi_index )
+CHAINBASE_SET_INDEX_TYPE( actc::account_control_history_object, actc::account_control_history_multi_index )
 
-FC_REFLECT( dccio::account_control_history_object, (controlled_account)(controlled_permission)(controlling_account) )
+FC_REFLECT( actc::account_control_history_object, (controlled_account)(controlled_permission)(controlling_account) )
 
