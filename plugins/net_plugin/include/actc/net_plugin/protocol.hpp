@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
-#include <dccio/chain/block.hpp>
-#include <dccio/chain/types.hpp>
+#include <actc/chain/block.hpp>
+#include <actc/chain/types.hpp>
 #include <chrono>
 
-namespace dccio {
+namespace actc {
    using namespace chain;
    using namespace fc;
 
@@ -142,23 +142,23 @@ namespace dccio {
                                       signed_block,
                                       packed_transaction>;
 
-} // namespace dccio
+} // namespace actc
 
-FC_REFLECT( dccio::select_ids<fc::sha256>, (mode)(pending)(ids) )
-FC_REFLECT( dccio::chain_size_message,
+FC_REFLECT( actc::select_ids<fc::sha256>, (mode)(pending)(ids) )
+FC_REFLECT( actc::chain_size_message,
             (last_irreversible_block_num)(last_irreversible_block_id)
             (head_num)(head_id))
-FC_REFLECT( dccio::handshake_message,
+FC_REFLECT( actc::handshake_message,
             (network_version)(chain_id)(node_id)(key)
             (time)(token)(sig)(p2p_address)
             (last_irreversible_block_num)(last_irreversible_block_id)
             (head_num)(head_id)
             (os)(agent)(generation) )
-FC_REFLECT( dccio::go_away_message, (reason)(node_id) )
-FC_REFLECT( dccio::time_message, (org)(rec)(xmt)(dst) )
-FC_REFLECT( dccio::notice_message, (known_trx)(known_blocks) )
-FC_REFLECT( dccio::request_message, (req_trx)(req_blocks) )
-FC_REFLECT( dccio::sync_request_message, (start_block)(end_block) )
+FC_REFLECT( actc::go_away_message, (reason)(node_id) )
+FC_REFLECT( actc::time_message, (org)(rec)(xmt)(dst) )
+FC_REFLECT( actc::notice_message, (known_trx)(known_blocks) )
+FC_REFLECT( actc::request_message, (req_trx)(req_blocks) )
+FC_REFLECT( actc::sync_request_message, (start_block)(end_block) )
 
 /**
  *

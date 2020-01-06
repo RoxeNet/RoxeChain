@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
-#include <dccio/net_plugin/protocol.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
+#include <actc/net_plugin/protocol.hpp>
 
-namespace dccio {
+namespace actc {
    using namespace appbase;
 
    struct connection_status {
@@ -44,4 +44,4 @@ namespace dccio {
 
 }
 
-FC_REFLECT( dccio::connection_status, (peer)(connecting)(syncing)(last_handshake) )
+FC_REFLECT( actc::connection_status, (peer)(connecting)(syncing)(last_handshake) )
