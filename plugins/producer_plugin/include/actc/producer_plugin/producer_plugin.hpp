@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
 #pragma once
 
-#include <dccio/chain_plugin/chain_plugin.hpp>
-#include <dccio/http_client_plugin/http_client_plugin.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
+#include <actc/http_client_plugin/http_client_plugin.hpp>
 
 #include <appbase/application.hpp>
 
-namespace dccio {
+namespace actc {
 
 using boost::signals2::signal;
 
@@ -86,11 +86,11 @@ private:
    std::shared_ptr<class producer_plugin_impl> my;
 };
 
-} //dccio
+} //actc
 
-FC_REFLECT(dccio::producer_plugin::runtime_options, (max_transaction_time)(max_irreversible_block_age)(produce_time_offset_us)(last_block_time_offset_us)(subjective_cpu_leeway_us)(incoming_defer_ratio));
-FC_REFLECT(dccio::producer_plugin::greylist_params, (accounts));
-FC_REFLECT(dccio::producer_plugin::whitelist_blacklist, (actor_whitelist)(actor_blacklist)(contract_whitelist)(contract_blacklist)(action_blacklist)(key_blacklist) )
-FC_REFLECT(dccio::producer_plugin::integrity_hash_information, (head_block_id)(integrity_hash))
-FC_REFLECT(dccio::producer_plugin::snapshot_information, (head_block_id)(snapshot_name))
+FC_REFLECT(actc::producer_plugin::runtime_options, (max_transaction_time)(max_irreversible_block_age)(produce_time_offset_us)(last_block_time_offset_us)(subjective_cpu_leeway_us)(incoming_defer_ratio));
+FC_REFLECT(actc::producer_plugin::greylist_params, (accounts));
+FC_REFLECT(actc::producer_plugin::whitelist_blacklist, (actor_whitelist)(actor_blacklist)(contract_whitelist)(contract_blacklist)(action_blacklist)(key_blacklist) )
+FC_REFLECT(actc::producer_plugin::integrity_hash_information, (head_block_id)(integrity_hash))
+FC_REFLECT(actc::producer_plugin::snapshot_information, (head_block_id)(snapshot_name))
 
