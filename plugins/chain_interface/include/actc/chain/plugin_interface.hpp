@@ -1,19 +1,19 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
 #include <appbase/channel.hpp>
 #include <appbase/method.hpp>
 
-#include <dccio/chain/block.hpp>
-#include <dccio/chain/block_state.hpp>
-#include <dccio/chain/transaction_metadata.hpp>
-#include <dccio/chain/trace.hpp>
+#include <actc/chain/block.hpp>
+#include <actc/chain/block_state.hpp>
+#include <actc/chain/transaction_metadata.hpp>
+#include <actc/chain/trace.hpp>
 
-namespace dccio { namespace chain { namespace plugin_interface {
-   using namespace dccio::chain;
+namespace actc { namespace chain { namespace plugin_interface {
+   using namespace actc::chain;
    using namespace appbase;
 
    template<typename T>
