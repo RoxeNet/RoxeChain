@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
@@ -8,8 +8,8 @@
 
 #include <fc/filesystem.hpp>
 
-namespace dccio { namespace utilities {
+namespace actc { namespace utilities {
 
 fc::path temp_directory_path();
 
-} } // dccio::utilities
+} } // actc::utilities

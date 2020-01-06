@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #ifndef RAND_HPP
 #define RAND_HPP 1
 
 #include <algorithm>
 
-namespace dccio { namespace utilities { namespace rand {
+namespace actc { namespace utilities { namespace rand {
 
 /// High performance random generator
 /// http://xorshift.di.unimi.it/
@@ -39,6 +39,6 @@ public:
     }
 };
 
-} } } //dccio::utilities::rand
+} } } //actc::utilities::rand
 
 #endif // RAND_HPP

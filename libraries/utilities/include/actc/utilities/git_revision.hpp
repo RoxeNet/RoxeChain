@@ -1,14 +1,14 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <stdint.h>
 
-namespace dccio { namespace utilities {
+namespace actc { namespace utilities {
 
 extern const char* const git_revision_sha;
 extern const uint32_t git_revision_unix_timestamp;
 extern const char* const git_revision_description;
 
-} } // end namespace dccio::utilities
+} } // end namespace actc::utilities

@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
-namespace dccio { namespace utilities {
+namespace actc { namespace utilities {
 
 template<size_t BlockSize=16, char PaddingChar=' '>
 class padding_ostream : public fc::buffered_ostream {
@@ -35,5 +35,5 @@ private:
    size_t bytes_out = 0;
 };
 
-} } //dccio::utilities
+} } //actc::utilities
 

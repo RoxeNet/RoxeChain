@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  *
  */
 #pragma once
@@ -8,7 +8,7 @@
 #ifndef COMMON_HPP
 #define COMMON_HPP
 
-namespace dccio { namespace utilities { namespace common {
+namespace actc { namespace utilities { namespace common {
   template<typename I>
   std::string itoh(I n, size_t hlen = sizeof(I)<<1) {
      static const char* digits = "0123456789abcdef";

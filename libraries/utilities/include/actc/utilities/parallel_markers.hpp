@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
@@ -8,7 +8,7 @@
 #include <boost/range/adaptor/filtered.hpp>
 #include <boost/range/adaptor/transformed.hpp>
 
-namespace dccio { namespace utilities {
+namespace actc { namespace utilities {
 
 /**
  * @brief Return values in DataRange corresponding to matching Markers
@@ -39,5 +39,5 @@ DataRange filter_data_by_marker(DataRange data, MarkerRange markers, const Marke
    return {range.begin(), range.end()};
 }
 
-}} // namespace dccio::utilities
+}} // namespace actc::utilities
 
