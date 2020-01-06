@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 #include <appbase/application.hpp>
-#include <dccio/http_plugin/http_plugin.hpp>
+#include <actc/http_plugin/http_plugin.hpp>
 
-namespace dccio {
+namespace actc {
 
 using namespace appbase;
 
