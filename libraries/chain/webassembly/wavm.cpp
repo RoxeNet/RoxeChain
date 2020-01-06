@@ -1,8 +1,8 @@
-#include <dccio/chain/webassembly/wavm.hpp>
-#include <dccio/chain/wasm_dccio_constraints.hpp>
-#include <dccio/chain/wasm_dccio_injection.hpp>
-#include <dccio/chain/apply_context.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/webassembly/wavm.hpp>
+#include <actc/chain/wasm_actc_constraints.hpp>
+#include <actc/chain/wasm_actc_injection.hpp>
+#include <actc/chain/apply_context.hpp>
+#include <actc/chain/exceptions.hpp>
 
 #include "IR/Module.h"
 #include "Platform/Platform.h"
@@ -17,7 +17,7 @@
 using namespace IR;
 using namespace Runtime;
 
-namespace dccio { namespace chain { namespace webassembly { namespace wavm {
+namespace actc { namespace chain { namespace webassembly { namespace wavm {
 
 running_instance_context the_running_instance_context;
 
@@ -44,7 +44,7 @@ class wavm_instantiated_module : public wasm_instantiated_module_interface {
             if( !call )
                return;
 
-            dcc_ASSERT( getFunctionType(call)->parameters.size() == args.size(), wasm_exception, "" );
+            actc_ASSERT( getFunctionType(call)->parameters.size() == args.size(), wasm_exception, "" );
 
             //The memory instance is reused across all wavm_instantiated_modules, but for wasm instances
             // that didn't declare "memory", getDefaultMemory() won't see it
@@ -114,15 +114,15 @@ std::unique_ptr<wasm_instantiated_module_interface> wavm_runtime::instantiate_mo
       Serialization::MemoryInputStream stream((const U8*)code_bytes, code_size);
       WASM::serialize(stream, *module);
    } catch(const Serialization::FatalSerializationException& e) {
-      dcc_ASSERT(false, wasm_serialization_error, e.message.c_str());
+      actc_ASSERT(false, wasm_serialization_error, e.message.c_str());
    } catch(const IR::ValidationException& e) {
-      dcc_ASSERT(false, wasm_serialization_error, e.message.c_str());
+      actc_ASSERT(false, wasm_serialization_error, e.message.c_str());
    }
 
-   dccio::chain::webassembly::common::root_resolver resolver;
+   actc::chain::webassembly::common::root_resolver resolver;
    LinkResult link_result = linkModule(*module, resolver);
    ModuleInstance *instance = instantiateModule(*module, std::move(link_result.resolvedImports));
-   dcc_ASSERT(instance != nullptr, wasm_exception, "Fail to Instantiate WAVM Module");
+   actc_ASSERT(instance != nullptr, wasm_exception, "Fail to Instantiate WAVM Module");
 
    return std::make_unique<wavm_instantiated_module>(instance, std::move(module), initial_memory);
 }

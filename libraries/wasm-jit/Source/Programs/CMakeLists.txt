@@ -1,7 +1,7 @@
-add_executable(dccio-wast2wasm Assemble.cpp CLI.h)
-target_link_libraries(dccio-wast2wasm Logging IR WAST WASM)
-set_target_properties(dccio-wast2wasm PROPERTIES FOLDER Programs)
-INSTALL(TARGETS dccio-wast2wasm DESTINATION ${CMAKE_INSTALL_BINDIR})
+add_executable(actc-wast2wasm Assemble.cpp CLI.h)
+target_link_libraries(actc-wast2wasm Logging IR WAST WASM)
+set_target_properties(actc-wast2wasm PROPERTIES FOLDER Programs)
+INSTALL(TARGETS actc-wast2wasm DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 add_executable(Disassemble Disassemble.cpp CLI.h)
 target_link_libraries(Disassemble Logging IR WAST WASM)

@@ -2,7 +2,7 @@
 find_package(LLVM 4.0 REQUIRED CONFIG)
 set( CMAKE_CXX_STANDARD 14 )
 
-file(GLOB HEADERS "include/dccio/abi_generator/*.hpp")
+file(GLOB HEADERS "include/actc/abi_generator/*.hpp")
 
 set(SOURCES ${HEADERS})
 
@@ -14,7 +14,7 @@ target_include_directories(abi_generator
                            PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include"
                                   "${LLVM_INCLUDE_DIRS}")
 
-target_link_libraries(abi_generator dccio_chain
+target_link_libraries(abi_generator actc_chain
   clangRewrite
   clangTooling
   clangToolingCore
@@ -60,5 +60,5 @@ target_link_libraries(abi_generator
 
 if (USE_PCH)
   set_target_properties(abi_generator PROPERTIES COTIRE_ADD_UNITY_BUILD FALSE)
-  cotire(dcc_utilities)
+  cotire(actc_utilities)
 endif(USE_PCH)

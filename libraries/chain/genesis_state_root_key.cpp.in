@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
-#include <dccio/chain/genesis_state.hpp>
+#include <actc/chain/genesis_state.hpp>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
-const string genesis_state::dccio_root_key = "${dccIO_ROOT_KEY}";
+const string genesis_state::actc_root_key = "${actc_ROOT_KEY}";
 
-} } // namespace dccio::chain
+} } // namespace actc::chain

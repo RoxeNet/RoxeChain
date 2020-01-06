@@ -1,20 +1,20 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
-#include <dccio/utilities/tempdir.hpp>
+#include <actc/utilities/tempdir.hpp>
 
 #include <cstdlib>
 
-namespace dccio { namespace utilities {
+namespace actc { namespace utilities {
 
 fc::path temp_directory_path()
 {
-   const char* dcc_tempdir = getenv("dcc_TEMPDIR");
-   if( dcc_tempdir != nullptr )
-      return fc::path( dcc_tempdir );
-   return fc::temp_directory_path() / "dcc-tmp";
+   const char* actc_tempdir = getenv("actc_TEMPDIR");
+   if( actc_tempdir != nullptr )
+      return fc::path( actc_tempdir );
+   return fc::temp_directory_path() / "actc-tmp";
 }
 
-} } // dccio::utilities
+} } // actc::utilities
