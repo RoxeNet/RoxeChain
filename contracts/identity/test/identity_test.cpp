@@ -1,21 +1,21 @@
-#include <dcciolib/action.h>
-#include <dcciolib/contract.hpp>
-#include <dcciolib/dispatcher.hpp>
+#include <actclib/action.h>
+#include <actclib/contract.hpp>
+#include <actclib/dispatcher.hpp>
 #include <identity/interface.hpp>
 
 namespace identity_test {
    
-   using dccio::action_meta;
-   using dccio::singleton;
+   using actc::action_meta;
+   using actc::singleton;
    using std::string;
    using std::vector;
 
-   class contract : public dccio::contract {
+   class contract : public actc::contract {
       public:
          static constexpr uint64_t code = N(identitytest);
          typedef singleton<N(result), uint64_t> result_table;
 
-         using dccio::contract::contract;
+         using actc::contract::contract;
 
          void getowner( const uint64_t identity ) {
             identity::interface iface( N(identity) );
@@ -32,4 +32,4 @@ namespace identity_test {
 
 } /// namespace identity
 
-dccIO_ABI( identity_test::contract, (getowner)(getidentity) );
+actc_ABI( identity_test::contract, (getowner)(getidentity) );
