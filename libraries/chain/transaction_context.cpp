@@ -1,11 +1,11 @@
-#include <dccio/chain/apply_context.hpp>
-#include <dccio/chain/transaction_context.hpp>
-#include <dccio/chain/authorization_manager.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/resource_limits.hpp>
-#include <dccio/chain/generated_transaction_object.hpp>
-#include <dccio/chain/transaction_object.hpp>
-#include <dccio/chain/global_property_object.hpp>
+#include <actc/chain/apply_context.hpp>
+#include <actc/chain/transaction_context.hpp>
+#include <actc/chain/authorization_manager.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/resource_limits.hpp>
+#include <actc/chain/generated_transaction_object.hpp>
+#include <actc/chain/transaction_object.hpp>
+#include <actc/chain/global_property_object.hpp>
 
 #pragma push_macro("N")
 #undef N
@@ -19,7 +19,7 @@
 
 #include <chrono>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
 namespace bacc = boost::accumulators;
 
@@ -166,12 +166,12 @@ namespace bacc = boost::accumulators;
       trace->block_time = c.pending_block_time();
       trace->producer_block_id = c.pending_producer_block_id();
       executed.reserve( trx.total_actions() );
-      dcc_ASSERT( trx.transaction_extensions.size() == 0, unsupported_feature, "we don't support any extensions yet" );
+      actc_ASSERT( trx.transaction_extensions.size() == 0, unsupported_feature, "we don't support any extensions yet" );
    }
 
    void transaction_context::init(uint64_t initial_net_usage)
    {
-      dcc_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
+      actc_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
       const static int64_t large_number_no_overflow = std::numeric_limits<int64_t>::max()/2;
 
       const auto& cfg = control.get_global_properties().configuration;
@@ -330,7 +330,7 @@ namespace bacc = boost::accumulators;
    }
 
    void transaction_context::exec() {
-      dcc_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      actc_ASSERT( is_initialized, transaction_exception, "must first initialize" );
 
       if( apply_context_free ) {
          for( const auto& act : trx.context_free_actions ) {
@@ -350,7 +350,7 @@ namespace bacc = boost::accumulators;
    }
 
    void transaction_context::finalize() {
-      dcc_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      actc_ASSERT( is_initialized, transaction_exception, "must first initialize" );
 
       if( is_input ) {
          auto& am = control.get_mutable_authorization_manager();
@@ -416,15 +416,15 @@ namespace bacc = boost::accumulators;
       if (!control.skip_trx_checks()) {
          if( BOOST_UNLIKELY(net_usage > eager_net_limit) ) {
             if ( net_limit_due_to_block ) {
-               dcc_THROW( block_net_usage_exceeded,
+               actc_THROW( block_net_usage_exceeded,
                           "not enough space left in block: ${net_usage} > ${net_limit}",
                           ("net_usage", net_usage)("net_limit", eager_net_limit) );
             }  else if (net_limit_due_to_greylist) {
-               dcc_THROW( greylist_net_usage_exceeded,
+               actc_THROW( greylist_net_usage_exceeded,
                           "greylisted transaction net usage is too high: ${net_usage} > ${net_limit}",
                           ("net_usage", net_usage)("net_limit", eager_net_limit) );
             } else {
-               dcc_THROW( tx_net_usage_exceeded,
+               actc_THROW( tx_net_usage_exceeded,
                           "transaction net usage is too high: ${net_usage} > ${net_limit}",
                           ("net_usage", net_usage)("net_limit", eager_net_limit) );
             }
@@ -439,28 +439,28 @@ namespace bacc = boost::accumulators;
       if( BOOST_UNLIKELY( now > _deadline ) ) {
          // edump((now-start)(now-pseudo_start));
          if( explicit_billed_cpu_time || deadline_exception_code == deadline_exception::code_value ) {
-            dcc_THROW( deadline_exception, "deadline exceeded", ("now", now)("deadline", _deadline)("start", start) );
+            actc_THROW( deadline_exception, "deadline exceeded", ("now", now)("deadline", _deadline)("start", start) );
          } else if( deadline_exception_code == block_cpu_usage_exceeded::code_value ) {
-            dcc_THROW( block_cpu_usage_exceeded,
+            actc_THROW( block_cpu_usage_exceeded,
                         "not enough time left in block to complete executing transaction",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
          } else if( deadline_exception_code == tx_cpu_usage_exceeded::code_value ) {
             if (cpu_limit_due_to_greylist) {
-               dcc_THROW( greylist_cpu_usage_exceeded,
+               actc_THROW( greylist_cpu_usage_exceeded,
                         "greylisted transaction was executing for too long",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
             } else {
-               dcc_THROW( tx_cpu_usage_exceeded,
+               actc_THROW( tx_cpu_usage_exceeded,
                         "transaction was executing for too long",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
             }
          } else if( deadline_exception_code == leeway_deadline_exception::code_value ) {
-            dcc_THROW( leeway_deadline_exception,
+            actc_THROW( leeway_deadline_exception,
                         "the transaction was unable to complete by deadline, "
                         "but it is possible it could have succeeded if it were allowed to run to completion",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
          }
-         dcc_ASSERT( false,  transaction_exception, "unexpected deadline exception code" );
+         actc_ASSERT( false,  transaction_exception, "unexpected deadline exception code" );
       }
    }
 
@@ -493,27 +493,27 @@ namespace bacc = boost::accumulators;
       if (!control.skip_trx_checks()) {
          if( check_minimum ) {
             const auto& cfg = control.get_global_properties().configuration;
-            dcc_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
+            actc_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
                         "cannot bill CPU time less than the minimum of ${min_billable} us",
                         ("min_billable", cfg.min_transaction_cpu_usage)("billed_cpu_time_us", billed_us)
                       );
          }
 
          if( billing_timer_exception_code == block_cpu_usage_exceeded::code_value ) {
-            dcc_ASSERT( billed_us <= objective_duration_limit.count(),
+            actc_ASSERT( billed_us <= objective_duration_limit.count(),
                         block_cpu_usage_exceeded,
                         "billed CPU time (${billed} us) is greater than the billable CPU time left in the block (${billable} us)",
                         ("billed", billed_us)("billable", objective_duration_limit.count())
                       );
          } else {
             if (cpu_limit_due_to_greylist) {
-               dcc_ASSERT( billed_us <= objective_duration_limit.count(),
+               actc_ASSERT( billed_us <= objective_duration_limit.count(),
                            greylist_cpu_usage_exceeded,
                            "billed CPU time (${billed} us) is greater than the maximum greylisted billable CPU time for the transaction (${billable} us)",
                            ("billed", billed_us)("billable", objective_duration_limit.count())
                );
             } else {
-               dcc_ASSERT( billed_us <= objective_duration_limit.count(),
+               actc_ASSERT( billed_us <= objective_duration_limit.count(),
                            tx_cpu_usage_exceeded,
                            "billed CPU time (${billed} us) is greater than the maximum billable CPU time for the transaction (${billable} us)",
                            ("billed", billed_us)("billable", objective_duration_limit.count())
@@ -610,10 +610,10 @@ namespace bacc = boost::accumulators;
       } catch( const boost::interprocess::bad_alloc& ) {
          throw;
       } catch ( ... ) {
-          dcc_ASSERT( false, tx_duplicate,
+          actc_ASSERT( false, tx_duplicate,
                      "duplicate transaction ${id}", ("id", id ) );
       }
    } /// record_transaction
 
 
-} } /// dccio::chain
+} } /// actc::chain

@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/wast_to_wasm.hpp>
+#include <actc/chain/wast_to_wasm.hpp>
 #include <Inline/BasicTypes.h>
 #include <IR/Module.h>
 #include <IR/Validate.h>
@@ -12,9 +12,9 @@
 #include <sstream>
 #include <iomanip>
 #include <fc/exception/exception.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/exceptions.hpp>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
    std::vector<uint8_t> wast_to_wasm( const std::string& wast ) 
    { 
@@ -34,7 +34,7 @@ namespace dccio { namespace chain {
             ss << error.locus.sourceLine << std::endl;
             ss << std::setw(error.locus.column(8)) << "^" << std::endl;
          }
-         dcc_ASSERT( false, wasm_exception, "error parsing wast: ${msg}", ("msg",ss.str()) );
+         actc_ASSERT( false, wasm_exception, "error parsing wast: ${msg}", ("msg",ss.str()) );
       }
 
       for(auto sectionIt = module.userSections.begin();sectionIt != module.userSections.end();++sectionIt)
@@ -53,11 +53,11 @@ namespace dccio { namespace chain {
       {
          ss << "Error serializing WebAssembly binary file:" << std::endl;
          ss << exception.message << std::endl;
-         dcc_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
+         actc_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
       } catch(const IR::ValidationException& e) {
          ss << "Error validating WebAssembly binary file:" << std::endl;
          ss << e.message << std::endl;
-         dcc_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
+         actc_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
       }
 
    } FC_CAPTURE_AND_RETHROW( (wast) ) }  /// wast_to_wasm
@@ -78,4 +78,4 @@ namespace dccio { namespace chain {
    } FC_CAPTURE_AND_RETHROW() } /// wasm_to_wast
 
 
-} } // dccio::chain
+} } // actc::chain

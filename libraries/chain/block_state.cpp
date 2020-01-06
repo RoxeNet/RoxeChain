@@ -1,7 +1,7 @@
-#include <dccio/chain/block_state.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/block_state.hpp>
+#include <actc/chain/exceptions.hpp>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
    block_state::block_state( const block_header_state& prev, block_timestamp_type when )
    :block_header_state( prev.generate_next( when ) ), 
@@ -16,4 +16,4 @@ namespace dccio { namespace chain {
 
 
 
-} } /// dccio::chain
+} } /// actc::chain

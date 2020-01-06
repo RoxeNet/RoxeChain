@@ -37,7 +37,7 @@ var android = /Android/.test(userAgent)
 // This is woefully incomplete. Suggestions for alternative methods welcome.
 var mobile = ios || android || /webOS|BlackBerry|Opera Mini|Opera Mobi|IEMobile/i.test(userAgent)
 var mac = ios || /Mac/.test(platform)
-var chromdcc = /\bCrOS\b/.test(userAgent)
+var chromactc = /\bCrOS\b/.test(userAgent)
 var windows = /win/i.test(platform)
 
 var presto_version = presto && userAgent.match(/Version\/(\d*\.\d*)/)
@@ -7046,7 +7046,7 @@ function leftButtonSelect(cm, e, start, type, addNew) {
     ourIndex = doc.sel.primIndex
   }
 
-  if (chromdcc ? e.shiftKey && e.metaKey : e.altKey) {
+  if (chromactc ? e.shiftKey && e.metaKey : e.altKey) {
     type = "rect"
     if (!addNew) { ourRange = new Range(start, start) }
     start = posFromMouse(cm, e, true, true)

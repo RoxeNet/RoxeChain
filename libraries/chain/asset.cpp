@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/asset.hpp>
+#include <actc/chain/asset.hpp>
 #include <boost/rational.hpp>
 #include <fc/reflect/variant.hpp>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
 uint8_t asset::decimals()const {
    return sym.decimals();
@@ -39,20 +39,20 @@ asset asset::from_string(const string& from)
 
       // Find space in order to split amount and symbol
       auto space_pos = s.find(' ');
-      dcc_ASSERT((space_pos != string::npos), asset_type_exception, "Asset's amount and symbol should be separated with space");
+      actc_ASSERT((space_pos != string::npos), asset_type_exception, "Asset's amount and symbol should be separated with space");
       auto symbol_str = fc::trim(s.substr(space_pos + 1));
       auto amount_str = s.substr(0, space_pos);
 
       // Ensure that if decimal point is used (.), decimal fraction is specified
       auto dot_pos = amount_str.find('.');
       if (dot_pos != string::npos) {
-         dcc_ASSERT((dot_pos != amount_str.size() - 1), asset_type_exception, "Missing decimal fraction after decimal point");
+         actc_ASSERT((dot_pos != amount_str.size() - 1), asset_type_exception, "Missing decimal fraction after decimal point");
       }
 
       // Parse symbol
       string precision_digit_str;
       if (dot_pos != string::npos) {
-         precision_digit_str = dccio::chain::to_string(amount_str.size() - dot_pos - 1);
+         precision_digit_str = actc::chain::to_string(amount_str.size() - dot_pos - 1);
       } else {
          precision_digit_str = "0";
       }
@@ -79,4 +79,4 @@ asset asset::from_string(const string& from)
    FC_CAPTURE_LOG_AND_RETHROW( (from) )
 }
 
-} }  // dccio::types
+} }  // actc::types
