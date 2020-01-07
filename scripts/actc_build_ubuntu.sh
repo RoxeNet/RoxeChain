@@ -33,21 +33,21 @@
 	case "${OS_NAME}" in
 		"Linux Mint")
 		   if [ "${OS_MAJ}" -lt 18 ]; then
-			   printf "\\tYou must be running Linux Mint 18.x or higher to install dccIO.\\n"
+			   printf "\\tYou must be running Linux Mint 18.x or higher to install actc.\\n"
 			   printf "\\tExiting now.\\n"
 			   exit 1
 		   fi
 		;;
 		"Ubuntu")
 			if [ "${OS_MAJ}" -lt 16 ]; then
-				printf "\\tYou must be running Ubuntu 16.04.x or higher to install dccIO.\\n"
+				printf "\\tYou must be running Ubuntu 16.04.x or higher to install actc.\\n"
 				printf "\\tExiting now.\\n"
 				exit 1
 			fi
 		;;
 		"Debian")
 			if [ $OS_MAJ -lt 10 ]; then
-				printf "\tYou must be running Debian 10 to install dccIO, and resolve missing dependencies from unstable (sid).\n"
+				printf "\tYou must be running Debian 10 to install actc, and resolve missing dependencies from unstable (sid).\n"
 				printf "\tExiting now.\n"
 				exit 1
 		fi
@@ -55,7 +55,7 @@
 	esac
 
 	if [ "${DISK_AVAIL%.*}" -lt "${DISK_MIN}" ]; then
-		printf "\\tYou must have at least %sGB of available storage to install dccIO.\\n" "${DISK_MIN}"
+		printf "\\tYou must have at least %sGB of available storage to install actc.\\n" "${DISK_MIN}"
 		printf "\\tExiting now.\\n"
 		exit 1
 	fi
@@ -88,7 +88,7 @@
 	done		
 
 	if [ "${COUNT}" -gt 1 ]; then
-		printf "\\n\\tThe following dependencies are required to install dccIO.\\n"
+		printf "\\n\\tThe following dependencies are required to install actc.\\n"
 		printf "\\n\\t${DISPLAY}\\n\\n" 
 		printf "\\tDo you wish to install these packages?\\n"
 		select yn in "Yes" "No"; do

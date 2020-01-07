@@ -30,13 +30,13 @@
 	fi
 
 	if [ "${OS_VER}" -lt 7 ]; then
-		printf "\\n\\tYou must be running Centos 7 or higher to install dccIO.\\n"
+		printf "\\n\\tYou must be running Centos 7 or higher to install actc.\\n"
 		printf "\\tExiting now.\\n\\n"
 		exit 1;
 	fi
 
 	if [ "${DISK_AVAIL%.*}" -lt "${DISK_MIN}" ]; then
-		printf "\\n\\tYou must have at least %sGB of available storage to install dccIO.\\n" "${DISK_MIN}"
+		printf "\\n\\tYou must have at least %sGB of available storage to install actc.\\n" "${DISK_MIN}"
 		printf "\\tExiting now.\\n\\n"
 		exit 1;
 	fi
@@ -45,7 +45,7 @@
 
         printf "\\tChecking Yum installation...\\n"
         if ! YUM=$( command -v yum 2>/dev/null ); then
-                printf "\\t!! Yum must be installed to compile dcc.IO !!\\n"
+                printf "\\t!! Yum must be installed to compile actc.IO !!\\n"
                 printf "\\tExiting now.\\n"
                 exit 1;
         fi
@@ -167,7 +167,7 @@
 	printf "\\n"
 
 	if [ "${COUNT}" -gt 1 ]; then
-		printf "\\tThe following dependencies are required to install dccIO.\\n"
+		printf "\\tThe following dependencies are required to install actc.\\n"
 		printf "\\t${DISPLAY}\\n\\n"
 		printf "\\tDo you wish to install these dependencies?\\n"
 		select yn in "Yes" "No"; do

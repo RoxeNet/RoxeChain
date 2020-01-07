@@ -1,18 +1,18 @@
 #!/bin/bash
 #
-# dccio-tn_down.sh is used by the dccio-tn_bounce.sh and dccio-tn_roll.sh scripts.
-# It is intended to terminate specific dcc.IO daemon processes.
+# actc-tn_down.sh is used by the actc-tn_bounce.sh and actc-tn_roll.sh scripts.
+# It is intended to terminate specific actc.IO daemon processes.
 #
 
 
-if [ "$PWD" != "$dccIO_HOME" ]; then
-    echo $0 must only be run from $dccIO_HOME
+if [ "$PWD" != "$actc_HOME" ]; then
+    echo $0 must only be run from $actc_HOME
     exit -1
 fi
 
-prog=noddcc
+prog=nodactc
 
-DD=var/lib/node_$dccIO_NODE
+DD=var/lib/node_$actc_NODE
 runtest=`cat $DD/$prog.pid`
 echo runtest = $runtest
 running=`ps -e | grep $runtest | grep -cv grep `
