@@ -37,7 +37,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
-		224A12A30E9EAactc00BD17FD /* gtest-test-part.h in Headers */ = {isa = PBXBuildFile; fileRef = 224A12A20E9EAactc00BD17FD /* gtest-test-part.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		224A12A30E9EADCC00BD17FD /* gtest-test-part.h in Headers */ = {isa = PBXBuildFile; fileRef = 224A12A20E9EADCC00BD17FD /* gtest-test-part.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		3BF6F2A00E79B5AD000F2EEE /* gtest-type-util.h in Copy Headers Internal */ = {isa = PBXBuildFile; fileRef = 3BF6F29F0E79B5AD000F2EEE /* gtest-type-util.h */; };
 		3BF6F2A50E79B616000F2EEE /* gtest-typed-test.h in Headers */ = {isa = PBXBuildFile; fileRef = 3BF6F2A40E79B616000F2EEE /* gtest-typed-test.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		404884380E2F799B00CF7658 /* gtest-death-test.h in Headers */ = {isa = PBXBuildFile; fileRef = 404883DB0E2F799B00CF7658 /* gtest-death-test.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -220,7 +220,7 @@
 
 /* Begin PBXFileReference section */
 		224A12A10E9EADA700BD17FD /* gtest-all.cc */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; path = "gtest-all.cc"; sourceTree = "<group>"; };
-		224A12A20E9EAactc00BD17FD /* gtest-test-part.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "gtest-test-part.h"; sourceTree = "<group>"; };
+		224A12A20E9EADCC00BD17FD /* gtest-test-part.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; path = "gtest-test-part.h"; sourceTree = "<group>"; };
 		3B238C120E7FE13C00846E11 /* gtest_unittest.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = gtest_unittest.cc; sourceTree = "<group>"; };
 		3B87D2100E96B92E000D1852 /* runtests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = runtests.sh; sourceTree = "<group>"; };
 		3BF6F29F0E79B5AD000F2EEE /* gtest-type-util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "gtest-type-util.h"; sourceTree = "<group>"; };
@@ -382,7 +382,7 @@
 			isa = PBXGroup;
 			children = (
 				404883E10E2F799B00CF7658 /* internal */,
-				224A12A20E9EAactc00BD17FD /* gtest-test-part.h */,
+				224A12A20E9EADCC00BD17FD /* gtest-test-part.h */,
 				404883DB0E2F799B00CF7658 /* gtest-death-test.h */,
 				404883DC0E2F799B00CF7658 /* gtest-message.h */,
 				4539C9330EC280AE00A70F4C /* gtest-param-test.h */,
@@ -486,7 +486,7 @@
 				4048843B0E2F799B00CF7658 /* gtest.h in Headers */,
 				4048843C0E2F799B00CF7658 /* gtest_pred_impl.h in Headers */,
 				4048843D0E2F799B00CF7658 /* gtest_prod.h in Headers */,
-				224A12A30E9EAactc00BD17FD /* gtest-test-part.h in Headers */,
+				224A12A30E9EADCC00BD17FD /* gtest-test-part.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
