@@ -1,6 +1,5 @@
 #pragma once
 #include <fc/variant.hpp>
-#include <fc/shared_ptr.hpp>
 #include <fc/unique_ptr.hpp>
 
 namespace fc
@@ -194,7 +193,9 @@ namespace fc
       ///@}
 
 
-      template<typename T>
+      template<typename T,
+               typename = std::enable_if_t<!std::is_base_of<mutable_variant_object,
+                                                            std::decay_t<T>>::value>>
       explicit mutable_variant_object( T&& v )
       :_key_value( new std::vector<entry>() )
       {

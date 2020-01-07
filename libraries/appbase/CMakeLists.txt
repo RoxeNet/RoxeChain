@@ -10,14 +10,12 @@ file(GLOB HEADERS "include/appbase/*.hpp")
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS "ON")
 set(BOOST_COMPONENTS)
-list(APPEND BOOST_COMPONENTS thread
-                             date_time
+list(APPEND BOOST_COMPONENTS date_time
                              filesystem
                              system
                              chrono
                              program_options
-                             unit_test_framework
-                             locale)
+                             unit_test_framework)
 
 find_package(Boost 1.60 REQUIRED COMPONENTS ${BOOST_COMPONENTS})
 set( Boost_USE_STATIC_LIBS ON CACHE STRING "ON or OFF" )

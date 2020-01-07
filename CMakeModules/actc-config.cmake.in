@@ -1,8 +1,9 @@
-if(actc_ROOT STREQUAL "" OR NOT actc_ROOT)
-   set(actc_ROOT "@actc_ROOT_DIR@")
+if(ACTC_ROOT STREQUAL "" OR NOT ACTC_ROOT)
+   set(ACTC_ROOT "@ACTC_ROOT_DIR@")
 endif()
-list(APPEND CMAKE_MODULE_PATH ${actc_ROOT}/lib/cmake/actc)
-include(actcTester)
+list(APPEND CMAKE_MODULE_PATH ${ACTC_ROOT}/lib/cmake/actc)
+list(APPEND CMAKE_MODULE_PATH ${ACTC_ROOT}/lib64/cmake/actc)
+include(ActcTester)
 
 function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    string(REGEX REPLACE "^([0-9]+)\\..+$" "\\1" _major "${version}")
@@ -22,7 +23,7 @@ function(EXTRACT_MAJOR_MINOR_FROM_VERSION version success major minor)
    set(${success} TRUE      PARENT_SCOPE)
 endfunction(EXTRACT_MAJOR_MINOR_FROM_VERSION)
 
-function(actc_CHECK_VERSION output version hard_min soft_max hard_max) # optional 6th argument for error message
+function(ACTC_CHECK_VERSION output version hard_min soft_max hard_max) # optional 6th argument for error message
    set(${output} "INVALID" PARENT_SCOPE)
 
    EXTRACT_MAJOR_MINOR_FROM_VERSION("${version}" success major minor)
@@ -93,4 +94,4 @@ function(actc_CHECK_VERSION output version hard_min soft_max hard_max) # optiona
    endif()
 
    set(${output} "MATCH" PARENT_SCOPE)
-endfunction(actc_CHECK_VERSION)
+endfunction(ACTC_CHECK_VERSION)
