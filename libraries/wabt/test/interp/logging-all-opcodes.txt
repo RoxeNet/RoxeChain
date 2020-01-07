@@ -3546,7 +3546,7 @@
 0001dc9: 00                                        ; local decl count
 0001dca: 41                                        ; i32.const
 0001dcb: 01                                        ; i32 literal
-0001actc: 41                                        ; i32.const
+0001dcc: 41                                        ; i32.const
 0001dcd: 02                                        ; i32 literal
 0001dce: 77                                        ; i32.rotl
 0001dcf: 1a                                        ; drop
@@ -5655,7 +5655,7 @@
 0002dc9: fd                                        ; prefix
 0002dca: 5d                                        ; i16x8.le_u
 0002dcb: 1a                                        ; drop
-0002actc: 0b                                        ; end
+0002dcc: 0b                                        ; end
 0002da3: 29                                        ; FIXUP func body size
 ; function body 278
 0002dcd: 00                                        ; func body size (guess)
