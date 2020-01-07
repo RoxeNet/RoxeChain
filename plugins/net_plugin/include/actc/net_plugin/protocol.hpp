@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 #include <actc/chain/block.hpp>
@@ -139,8 +139,8 @@ namespace actc {
                                       notice_message,
                                       request_message,
                                       sync_request_message,
-                                      signed_block,
-                                      packed_transaction>;
+                                      signed_block,         // which = 7
+                                      packed_transaction>;  // which = 8
 
 } // namespace actc
 
