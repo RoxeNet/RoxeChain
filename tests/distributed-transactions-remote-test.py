@@ -26,7 +26,7 @@ killAll=args.clean_run
 
 Utils.Debug=debug
 
-killactcInstances=not dontKill
+killActcInstances=not dontKill
 topo="mesh"
 delay=1
 prodCount=1 # producers per producer node
@@ -58,7 +58,7 @@ try:
     Print ("producing nodes: %s, non-producing nodes: %d, topology: %s, delay between nodes launch(seconds): %d" %
            (pnodes, total_nodes-pnodes, topo, delay))
     Print("Stand up cluster")
-    if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, prodCount=prodCount, topo=topo, delay=delay, dontKill=dontKill) is False:
+    if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, prodCount=prodCount, topo=topo, delay=delay) is False:
         errorExit("Failed to stand up actc cluster.")
 
     Print ("Wait for Cluster stabilization")
@@ -86,6 +86,6 @@ try:
     Print("\nEND")
 finally:
     os.remove(nodesFile)
-    TestHelper.shutdown(cluster, None, testSuccessful, killactcInstances, False, False, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, None, testSuccessful, killActcInstances, False, False, killAll, dumpErrorDetails)
 
 exit(0)

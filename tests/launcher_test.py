@@ -21,7 +21,7 @@ cmdError=Utils.cmdError
 from core_symbol import CORE_SYMBOL
 
 args = TestHelper.parse_args({"--defproducera_prvt_key","--dump-error-details","--dont-launch","--keep-logs",
-                              "-v","--leave-running","--clean-run","--p2p-plugin"})
+                              "-v","--leave-running","--clean-run"})
 debug=args.v
 defproduceraPrvtKey=args.defproducera_prvt_key
 dumpErrorDetails=args.dump_error_details
@@ -29,16 +29,15 @@ keepLogs=args.keep_logs
 dontLaunch=args.dont_launch
 dontKill=args.leave_running
 killAll=args.clean_run
-p2pPlugin=args.p2p_plugin
 
 Utils.Debug=debug
 cluster=Cluster(walletd=True, defproduceraPrvtKey=defproduceraPrvtKey)
 walletMgr=WalletMgr(True)
 testSuccessful=False
-killactcInstances=not dontKill
+killActcInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.actcWalletName
+WalletdName=Utils.ActcWalletName
 ClientName="clactc"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
@@ -52,14 +51,15 @@ try:
         cluster.killall(allInstances=killAll)
         cluster.cleanup()
         Print("Stand up cluster")
-        if cluster.launch(pnodes=4, p2pPlugin=p2pPlugin) is False:
+        pnodes=4
+        if cluster.launch(pnodes=pnodes, totalNodes=pnodes) is False:
             cmdError("launcher")
             errorExit("Failed to stand up actc cluster.")
     else:
         walletMgr.killall(allInstances=killAll)
         walletMgr.cleanup()
         cluster.initializeNodes(defproduceraPrvtKey=defproduceraPrvtKey)
-        killactcInstances=False
+        killActcInstances=False
 
         print("Stand up walletd")
         if walletMgr.launch() is False:
@@ -146,7 +146,7 @@ try:
 
     expectedAmount=transferAmount
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountActcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -158,7 +158,7 @@ try:
 
     expectedAmount="97.5421 {0}".format(CORE_SYMBOL)
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountActcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -175,7 +175,7 @@ try:
 
     expectedAmount="98.0311 {0}".format(CORE_SYMBOL) # 5000 initial deposit
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountactcBalanceStr(currencyAccount.name)
+    actualAmount=node.getAccountActcBalanceStr(currencyAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -243,6 +243,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killActcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

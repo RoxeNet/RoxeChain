@@ -4,6 +4,7 @@ from testUtils import Utils
 from Cluster import Cluster
 from WalletMgr import WalletMgr
 from Node import Node
+from Node import ReturnType
 from TestHelper import TestHelper
 
 import decimal
@@ -22,7 +23,7 @@ from core_symbol import CORE_SYMBOL
 
 args = TestHelper.parse_args({"--host","--port","--prod-count","--defproducera_prvt_key","--defproducerb_prvt_key","--mongodb"
                               ,"--dump-error-details","--dont-launch","--keep-logs","-v","--leave-running","--only-bios","--clean-run"
-                              ,"--sanity-test","--p2p-plugin","--wallet-port"})
+                              ,"--sanity-test","--wallet-port"})
 server=args.host
 port=args.port
 debug=args.v
@@ -37,19 +38,18 @@ prodCount=args.prod_count
 onlyBios=args.only_bios
 killAll=args.clean_run
 sanityTest=args.sanity_test
-p2pPlugin=args.p2p_plugin
 walletPort=args.wallet_port
 
 Utils.Debug=debug
 localTest=True if server == TestHelper.LOCAL_HOST else False
-cluster=Cluster(walletd=True, enableMongo=enableMongo, defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
+cluster=Cluster(host=server, port=port, walletd=True, enableMongo=enableMongo, defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killactcInstances=not dontKill
+killActcInstances=not dontKill
 killWallet=not dontKill
 dontBootstrap=sanityTest # intent is to limit the scope of the sanity test to just verifying that nodes can be started
 
-WalletdName=Utils.actcWalletName
+WalletdName=Utils.ActcWalletName
 ClientName="clactc"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
@@ -67,13 +67,13 @@ try:
         cluster.killall(allInstances=killAll)
         cluster.cleanup()
         Print("Stand up cluster")
-        if cluster.launch(prodCount=prodCount, onlyBios=onlyBios, dontBootstrap=dontBootstrap, p2pPlugin=p2pPlugin) is False:
+        if cluster.launch(prodCount=prodCount, onlyBios=onlyBios, dontBootstrap=dontBootstrap) is False:
             cmdError("launcher")
             errorExit("Failed to stand up actc cluster.")
     else:
         Print("Collecting cluster info.")
         cluster.initializeNodes(defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
-        killactcInstances=False
+        killActcInstances=False
         Print("Stand up %s" % (WalletdName))
         walletMgr.killall(allInstances=killAll)
         walletMgr.cleanup()
@@ -227,7 +227,7 @@ try:
 
     expectedAmount=transferAmount
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountActcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -239,7 +239,7 @@ try:
 
     expectedAmount="97.5421 {0}".format(CORE_SYMBOL)
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountActcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -266,7 +266,7 @@ try:
 
     expectedAmount="98.0311 {0}".format(CORE_SYMBOL) # 5000 initial deposit
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountactcBalanceStr(currencyAccount.name)
+    actualAmount=node.getAccountActcBalanceStr(currencyAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -320,9 +320,9 @@ try:
     if hashNum != 0:
         errorExit("FAILURE - get code currency1111 failed", raw=True)
 
-    contractDir="contracts/actc.token"
-    wasmFile="actc.token.wasm"
-    abiFile="actc.token.abi"
+    contractDir="unittests/contracts/aci.token"
+    wasmFile="aci.token.wasm"
+    abiFile="aci.token.abi"
     Print("Publish contract")
     trans=node.publishContract(currencyAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
     if trans is None:
@@ -340,12 +340,12 @@ try:
             errorExit("FAILURE - get code currency1111 failed", raw=True)
     else:
         Print("verify abi is set")
-        account=node.getactcAccountFromDb(currencyAccount.name)
+        account=node.getActcAccountFromDb(currencyAccount.name)
         abiName=account["abi"]["structs"][0]["name"]
         abiActionName=account["abi"]["actions"][0]["name"]
         abiType=account["abi"]["actions"][0]["type"]
-        if abiName != "transfer" or abiActionName != "transfer" or abiType != "transfer":
-            errorExit("FAILURE - get actc account failed", raw=True)
+        if abiName != "account" or abiActionName != "close" or abiType != "close":
+            errorExit("FAILURE - get ACTC account failed", raw=True)
 
     Print("push create action to currency1111 contract")
     contract="currency1111"
@@ -637,13 +637,19 @@ try:
         errorExit("Failed to unlock wallet %s" % (defproduceraWallet.name))
 
     Print("Get account defproducera")
-    account=node.getactcAccount(defproduceraAccount.name, exitOnError=True)
+    account=node.getActcAccount(defproduceraAccount.name, exitOnError=True)
 
     Print("Unlocking wallet \"%s\"." % (defproduceraWallet.name))
     if not walletMgr.unlockWallet(testWallet):
         cmdError("%s wallet unlock test" % (ClientName))
         errorExit("Failed to unlock wallet %s" % (testWallet.name))
 
+    if not enableMongo:
+        Print("Verify non-JSON call works")
+        rawAccount=node.getActcAccount(defproduceraAccount.name, exitOnError=True, returnType=ReturnType.raw)
+        coreLiquidBalance=account['core_liquid_balance']
+        match=re.search(r'\bliquid:\s*%s\s' % (coreLiquidBalance), rawAccount, re.MULTILINE | re.DOTALL)
+        assert match is not None, "did not find the core liquid balance (\"liquid:\") of %d in \"%s\"" % (coreLiquidBalance, rawAccount)
 
     Print("Get head block num.")
     currentBlockNum=node.getHeadBlockNum()
@@ -662,6 +668,7 @@ try:
                 errorExit("mongo get block by id %s" % blockId)
 
     Print("Request invalid block numbered %d. This will generate an expected error message." % (currentBlockNum+1000))
+    currentBlockNum=node.getHeadBlockNum() # If the tests take too long, we could be far beyond currentBlockNum+1000 and that'll cause a block to be found.
     block=node.getBlock(currentBlockNum+1000, silentErrors=True)
     if block is not None:
         errorExit("ERROR: Received block where not expected")
@@ -689,6 +696,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killActcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

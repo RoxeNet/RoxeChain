@@ -26,7 +26,7 @@ total_nodes = pnodes
 killCount=1
 killSignal=Utils.SigKillTag
 
-killactcInstances= not args.leave_running
+killActcInstances= not args.leave_running
 dumpErrorDetails=args.dump_error_details
 keepLogs=args.keep_logs
 killAll=args.clean_run
@@ -74,36 +74,41 @@ try:
         pnodes, topo, delay, chainSyncStrategyStr))
 
     Print("Stand up cluster")
-    if cluster.launch(pnodes, total_nodes, topo=topo, delay=delay, dontBootstrap=True) is False:
+    if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay, dontBootstrap=True) is False:
         errorExit("Failed to stand up actc cluster.")
 
     node=cluster.getNode(0)
 
     Print("Kill cluster nodes.")
     cluster.killall(allInstances=killAll)
-    
+
     Print("Restart nodactc repeatedly to ensure dirty database flag sticks.")
-    timeout=3
-    
+    timeout=6
+
     for i in range(1,4):
         Print("Attempt %d." % (i))
         ret = runNodactcAndGetOutput(timeout)
         assert(ret)
         assert(isinstance(ret, tuple))
-        assert(ret[0])
+        if not ret[0]:
+            errorExit("Failed to startup nodactc successfully on try number %d" % (i))
         assert(ret[1])
         assert(isinstance(ret[1], dict))
         # pylint: disable=unsubscriptable-object
         stderr= ret[1]["stderr"]
         retCode=ret[1]["returncode"]
-        assert retCode == 2, "actual return code: %s" % str(retCode)
-        assert("database dirty flag set" in stderr)
+        expectedRetCode=2
+        if retCode != expectedRetCode:
+            errorExit("Expected return code to be %d, but instead received %d." % (expectedRetCode, retCode))
+        db_dirty_msg="database dirty flag set"
+        if db_dirty_msg not in stderr:
+            errorExit("stderr should have contained \"%s\" but it did not. stderr=\n%s" % (db_dirty_msg, stderr))
 
     if debug: Print("Setting test result to success.")
     testSuccessful=True
 finally:
     if debug: Print("Cleanup in finally block.")
-    TestHelper.shutdown(cluster, None, testSuccessful, killactcInstances, False, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, None, testSuccessful, killActcInstances, False, keepLogs, killAll, dumpErrorDetails)
 
 if debug: Print("Exiting test, exit value 0.")
 exit(0)

@@ -1,7 +1,7 @@
 {
     "keys": {
-        "initaPrivateKey": "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3",
-        "initbPrivateKey": "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
+        "initaPrivateKey": "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU",
+        "initbPrivateKey": "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"
     },
     "nodes": [
         {"port": 8888, "host": "localhost"},
