@@ -10,8 +10,8 @@ import decimal
 import re
 
 ###############################################################
-# noddcc_run_test
-# --dump-error-details <Upon error print etc/dccio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodactc_run_test
+# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -45,12 +45,12 @@ localTest=True if server == TestHelper.LOCAL_HOST else False
 cluster=Cluster(walletd=True, enableMongo=enableMongo, defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killdccInstances=not dontKill
+killactcInstances=not dontKill
 killWallet=not dontKill
 dontBootstrap=sanityTest # intent is to limit the scope of the sanity test to just verifying that nodes can be started
 
-WalletdName=Utils.dccWalletName
-ClientName="cldcc"
+WalletdName=Utils.actcWalletName
+ClientName="clactc"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
 
@@ -69,18 +69,18 @@ try:
         Print("Stand up cluster")
         if cluster.launch(prodCount=prodCount, onlyBios=onlyBios, dontBootstrap=dontBootstrap, p2pPlugin=p2pPlugin) is False:
             cmdError("launcher")
-            errorExit("Failed to stand up dcc cluster.")
+            errorExit("Failed to stand up actc cluster.")
     else:
         Print("Collecting cluster info.")
         cluster.initializeNodes(defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
-        killdccInstances=False
+        killactcInstances=False
         Print("Stand up %s" % (WalletdName))
         walletMgr.killall(allInstances=killAll)
         walletMgr.cleanup()
         print("Stand up walletd")
         if walletMgr.launch() is False:
             cmdError("%s" % (WalletdName))
-            errorExit("Failed to stand up dcc walletd.")
+            errorExit("Failed to stand up actc walletd.")
 
     if sanityTest:
         testSuccessful=True
@@ -116,7 +116,7 @@ try:
     Print("Creating wallet \"%s\"." % (testWalletName))
     walletAccounts=[cluster.defproduceraAccount,cluster.defproducerbAccount]
     if not dontLaunch:
-        walletAccounts.append(cluster.dccioAccount)
+        walletAccounts.append(cluster.actcAccount)
     testWallet=walletMgr.create(testWalletName, walletAccounts)
 
     Print("Wallet \"%s\" password=%s." % (testWalletName, testWallet.password.encode("utf-8")))
@@ -227,7 +227,7 @@ try:
 
     expectedAmount=transferAmount
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountdccBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -239,7 +239,7 @@ try:
 
     expectedAmount="97.5421 {0}".format(CORE_SYMBOL)
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountdccBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -266,7 +266,7 @@ try:
 
     expectedAmount="98.0311 {0}".format(CORE_SYMBOL) # 5000 initial deposit
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountdccBalanceStr(currencyAccount.name)
+    actualAmount=node.getAccountactcBalanceStr(currencyAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -320,9 +320,9 @@ try:
     if hashNum != 0:
         errorExit("FAILURE - get code currency1111 failed", raw=True)
 
-    contractDir="contracts/dccio.token"
-    wasmFile="dccio.token.wasm"
-    abiFile="dccio.token.abi"
+    contractDir="contracts/actc.token"
+    wasmFile="actc.token.wasm"
+    abiFile="actc.token.abi"
     Print("Publish contract")
     trans=node.publishContract(currencyAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
     if trans is None:
@@ -340,12 +340,12 @@ try:
             errorExit("FAILURE - get code currency1111 failed", raw=True)
     else:
         Print("verify abi is set")
-        account=node.getdccAccountFromDb(currencyAccount.name)
+        account=node.getactcAccountFromDb(currencyAccount.name)
         abiName=account["abi"]["structs"][0]["name"]
         abiActionName=account["abi"]["actions"][0]["name"]
         abiType=account["abi"]["actions"][0]["type"]
         if abiName != "transfer" or abiActionName != "transfer" or abiType != "transfer":
-            errorExit("FAILURE - get dcc account failed", raw=True)
+            errorExit("FAILURE - get actc account failed", raw=True)
 
     Print("push create action to currency1111 contract")
     contract="currency1111"
@@ -637,7 +637,7 @@ try:
         errorExit("Failed to unlock wallet %s" % (defproduceraWallet.name))
 
     Print("Get account defproducera")
-    account=node.getdccAccount(defproduceraAccount.name, exitOnError=True)
+    account=node.getactcAccount(defproduceraAccount.name, exitOnError=True)
 
     Print("Unlocking wallet \"%s\"." % (defproduceraWallet.name))
     if not walletMgr.unlockWallet(testWallet):
@@ -689,6 +689,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killdccInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

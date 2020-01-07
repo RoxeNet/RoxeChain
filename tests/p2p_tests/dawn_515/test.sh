@@ -17,7 +17,7 @@ delay=1
 read -d '' genesis << EOF
 {
   "initial_timestamp": "2018-06-01T12:00:00.000",
-  "initial_key": "dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+  "initial_key": "actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
   "initial_configuration": {
     "max_block_net_usage": 1048576,
     "target_block_net_usage_pct": 1000,
@@ -41,20 +41,20 @@ EOF
 
 read -d '' configbios << EOF
 p2p-server-address = localhost:9876
-plugin = dccio::producer_plugin
-plugin = dccio::chain_api_plugin
-plugin = dccio::net_plugin
-plugin = dccio::history_api_plugin
+plugin = actc::producer_plugin
+plugin = actc::chain_api_plugin
+plugin = actc::net_plugin
+plugin = actc::history_api_plugin
 http-server-address = 127.0.0.1:8888
 blocks-dir = blocks
 p2p-listen-endpoint = 0.0.0.0:9876
 allowed-connection = any
-private-key = ['dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV','5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3']
+private-key = ['actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV','5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3']
 send-whole-blocks = true
 readonly = 0
 p2p-max-nodes-per-host = 10
 enable-stale-production = true
-producer-name = dccio
+producer-name = actc
 EOF
 
 read -d '' config00 << EOF
@@ -66,7 +66,7 @@ p2p-listen-endpoint = 0.0.0.0:9877
 p2p-server-address = localhost:9877
 allowed-connection = any
 p2p-peer-address = localhost:9876
-plugin = dccio::chain_api_plugin
+plugin = actc::chain_api_plugin
 EOF
 
 read -d '' config01 << EOF
@@ -78,7 +78,7 @@ p2p-listen-endpoint = 0.0.0.0:9878
 p2p-server-address = localhost:9877
 allowed-connection = any
 p2p-peer-address = localhost:9876
-plugin = dccio::chain_api_plugin
+plugin = actc::chain_api_plugin
 EOF
 
 read -d '' loggingbios << EOF
@@ -244,32 +244,32 @@ read -d '' logging01 << EOF
 EOF
 
 rm -rf staging
-rm -rf etc/dccio/node_*
+rm -rf etc/actc/node_*
 rm -rf var/lib
 cName=config.ini
 lName=logging.json
 gName=genesis.json
 
-path=staging/etc/dccio/node_bios
+path=staging/etc/actc/node_bios
 mkdir -p $path
 echo "$configbios" > $path/$cName
 echo "$loggingbios" > $path/$lName
 echo "$genesis" > $path/$gName
 
-path=staging/etc/dccio/node_00
+path=staging/etc/actc/node_00
 mkdir -p $path
 echo "$config00" > $path/$cName
 echo "$logging00" > $path/$lName
 echo "$genesis" > $path/$gName
 
-path=staging/etc/dccio/node_01
+path=staging/etc/actc/node_01
 mkdir -p $path
 echo "$config01" > $path/$cName
 echo "$logging01" > $path/$lName
 echo "$genesis" > $path/$gName
 
 
-programs/dccio-launcher/dccio-launcher -p $pnodes -n $total_nodes --nogen -d $delay
+programs/actc-launcher/actc-launcher -p $pnodes -n $total_nodes --nogen -d $delay
 
 sleep 5
 res=$(grep "reason = duplicate" var/lib/node_*/stderr.txt | wc -l)
@@ -280,9 +280,9 @@ if [ $res -ne 0 ]; then
     ret=1
 fi
 
-b5idbios=`./programs/cldcc/cldcc -u http://localhost:8888 get block 5 | grep "^ *\"id\""`
-b5id00=`./programs/cldcc/cldcc -u http://localhost:8889 get block 5 | grep "^ *\"id\""`
-b5id01=`./programs/cldcc/cldcc -u http://localhost:8890 get block 5 | grep "^ *\"id\""`
+b5idbios=`./programs/clactc/clactc -u http://localhost:8888 get block 5 | grep "^ *\"id\""`
+b5id00=`./programs/clactc/clactc -u http://localhost:8889 get block 5 | grep "^ *\"id\""`
+b5id01=`./programs/clactc/clactc -u http://localhost:8890 get block 5 | grep "^ *\"id\""`
 
 if [ "$b5idbios" != "$b5id00" ]; then
     echo FAILURE: nodes are not in sync
@@ -298,8 +298,8 @@ if [ $ret  -eq 0 ]; then
     echo SUCCESS
 fi
 
-programs/dccio-launcher/dccio-launcher -k 15
+programs/actc-launcher/actc-launcher -k 15
 rm -rf staging
 rm -rf var/lib/node_*
-rm -rf etc/dccio/node_*
+rm -rf etc/actc/node_*
 exit $ret

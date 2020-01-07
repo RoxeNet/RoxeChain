@@ -16,8 +16,8 @@ import re
 import signal
 
 ###############################################################
-# noddcc_forked_chain_test
-# --dump-error-details <Upon error print etc/dccio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodactc_forked_chain_test
+# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 Print=Utils.Print
@@ -128,11 +128,11 @@ walletPort=args.wallet_port
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killdccInstances=not dontKill
+killactcInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.dccWalletName
-ClientName="cldcc"
+WalletdName=Utils.actcWalletName
+ClientName="clactc"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -141,9 +141,9 @@ try:
     cluster.killall(allInstances=killAll)
     cluster.cleanup()
     Print("Stand up cluster")
-    specificExtraNoddccArgs={}
+    specificExtraNodactcArgs={}
     # producer nodes will be mapped to 0 through totalProducerNodes-1, so the number totalProducerNodes will be the non-producing node
-    specificExtraNoddccArgs[totalProducerNodes]="--plugin dccio::test_control_api_plugin"
+    specificExtraNodactcArgs[totalProducerNodes]="--plugin actc::test_control_api_plugin"
 
 
     # ***   setup topogrophy   ***
@@ -153,9 +153,9 @@ try:
 
     if cluster.launch(prodCount=prodCount, onlyBios=False, topo="bridge", pnodes=totalProducerNodes,
                       totalNodes=totalNodes, totalProducers=totalProducers, p2pPlugin=p2pPlugin,
-                      useBiosBootFile=False, specificExtraNoddccArgs=specificExtraNoddccArgs) is False:
+                      useBiosBootFile=False, specificExtraNodactcArgs=specificExtraNodactcArgs) is False:
         Utils.cmdError("launcher")
-        Utils.errorExit("Failed to stand up dcc cluster.")
+        Utils.errorExit("Failed to stand up actc cluster.")
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
 
@@ -174,7 +174,7 @@ try:
     testWalletName="test"
 
     Print("Creating wallet \"%s\"." % (testWalletName))
-    testWallet=walletMgr.create(testWalletName, [cluster.dccioAccount,accounts[0],accounts[1],accounts[2],accounts[3],accounts[4]])
+    testWallet=walletMgr.create(testWalletName, [cluster.actcAccount,accounts[0],accounts[1],accounts[2],accounts[3],accounts[4]])
 
     for _, account in cluster.defProducerAccounts.items():
         walletMgr.importKey(account, testWallet, ignoreDupKeyWarning=True)
@@ -209,13 +209,13 @@ try:
     # ***   delegate bandwidth to accounts   ***
 
     node=prodNodes[0]
-    # create accounts via dccio as otherwise a bid is needed
+    # create accounts via actc as otherwise a bid is needed
     for account in accounts:
-        Print("Create new account %s via %s" % (account.name, cluster.dccioAccount.name))
-        trans=node.createInitializeAccount(account, cluster.dccioAccount, stakedDeposit=0, waitForTransBlock=True, stakeNet=1000, stakeCPU=1000, buyRAM=1000, exitOnError=True)
+        Print("Create new account %s via %s" % (account.name, cluster.actcAccount.name))
+        trans=node.createInitializeAccount(account, cluster.actcAccount, stakedDeposit=0, waitForTransBlock=True, stakeNet=1000, stakeCPU=1000, buyRAM=1000, exitOnError=True)
         transferAmount="100000000.0000 {0}".format(CORE_SYMBOL)
-        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.dccioAccount.name, account.name))
-        node.transferFunds(cluster.dccioAccount, account, transferAmount, "test transfer", waitForTransBlock=True)
+        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.actcAccount.name, account.name))
+        node.transferFunds(cluster.actcAccount, account, transferAmount, "test transfer", waitForTransBlock=True)
         trans=node.delegatebw(account, 20000000.0000, 20000000.0000, waitForTransBlock=True, exitOnError=True)
 
 
@@ -411,6 +411,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killdccInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)
