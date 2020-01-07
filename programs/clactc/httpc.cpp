@@ -71,11 +71,11 @@ namespace actc { namespace client { namespace http {
       response_stream >> http_version;
       response_stream >> status_code;
 
-      actc_ASSERT( status_code != 400, invalid_http_request, "The server has rejected the request as invalid!");
+      ACTC_ASSERT( status_code != 400, invalid_http_request, "The server has rejected the request as invalid!");
 
       std::string status_message;
       std::getline(response_stream, status_message);
-      actc_ASSERT( !(!response_stream || http_version.substr(0, 5) != "HTTP/"), invalid_http_response, "Invalid Response" );
+      ACTC_ASSERT( !(!response_stream || http_version.substr(0, 5) != "HTTP/"), invalid_http_response, "Invalid Response" );
 
       // Read the response headers, which are terminated by a blank line.
       boost::asio::read_until(socket, response, "\r\n\r\n");
@@ -89,17 +89,21 @@ namespace actc { namespace client { namespace http {
          if(std::regex_search(header, match, clregex))
             response_content_length = std::stoi(match[1]);
       }
-      actc_ASSERT(response_content_length >= 0, invalid_http_response, "Invalid content-length response");
+
+      // Attempt to read the response body using the length indicated by the
+      // Content-length header. If the header was not present just read all available bytes.
+      if( response_content_length != -1 ) {
+         response_content_length -= response.size();
+         if( response_content_length > 0 )
+            boost::asio::read(socket, response, boost::asio::transfer_exactly(response_content_length));
+      } else {
+         boost::system::error_code ec;
+         boost::asio::read(socket, response, boost::asio::transfer_all(), ec);
+         ACTC_ASSERT(!ec || ec == boost::asio::ssl::error::stream_truncated, http_exception, "Unable to read http response: ${err}", ("err",ec.message()));
+      }
 
       std::stringstream re;
-      // Write whatever content we already have to output.
-      response_content_length -= response.size();
-      if (response.size() > 0)
-         re << &response;
-
-      boost::asio::read(socket, response, boost::asio::transfer_exactly(response_content_length));
       re << &response;
-
       return re.str();
    }
 
@@ -124,9 +128,9 @@ namespace actc { namespace client { namespace http {
          res.path = match[7];
       }
       if(res.scheme != "http" && res.scheme != "https")
-         actc_THROW(fail_to_resolve_host, "Unrecognized URL scheme (${s}) in URL \"${u}\"", ("s", res.scheme)("u", server_url));
+         ACTC_THROW(fail_to_resolve_host, "Unrecognized URL scheme (${s}) in URL \"${u}\"", ("s", res.scheme)("u", server_url));
       if(res.server.empty())
-         actc_THROW(fail_to_resolve_host, "No server parsed from URL \"${u}\"", ("u", server_url));
+         ACTC_THROW(fail_to_resolve_host, "No server parsed from URL \"${u}\"", ("u", server_url));
       if(res.port.empty())
          res.port = res.scheme == "http" ? "80" : "443";
       boost::trim_right_if(res.path, boost::is_any_of("/"));
@@ -141,7 +145,7 @@ namespace actc { namespace client { namespace http {
       boost::system::error_code ec;
       auto result = resolver.resolve(tcp::v4(), url.server, url.port, ec);
       if (ec) {
-         actc_THROW(fail_to_resolve_host, "Error resolving \"${server}:${port}\" : ${m}", ("server", url.server)("port",url.port)("m",ec.message()));
+         ACTC_THROW(fail_to_resolve_host, "Error resolving \"${server}:${port}\" : ${m}", ("server", url.server)("port",url.port)("m",ec.message()));
       }
 
       // non error results are guaranteed to return a non-empty range
@@ -158,7 +162,7 @@ namespace actc { namespace client { namespace http {
          is_loopback = is_loopback && addr.is_loopback();
 
          if (resolved_port) {
-            actc_ASSERT(*resolved_port == port, resolved_to_multiple_ports, "Service name \"${port}\" resolved to multiple ports and this is not supported!", ("port",url.port));
+            ACTC_ASSERT(*resolved_port == port, resolved_to_multiple_ports, "Service name \"${port}\" resolved to multiple ports and this is not supported!", ("port",url.port));
          } else {
             resolved_port = port;
          }
@@ -198,12 +202,12 @@ namespace actc { namespace client { namespace http {
    request_stream << "content-length: " << postjson.size() << "\r\n";
    request_stream << "Accept: */*\r\n";
    request_stream << "Connection: close\r\n";
-   request_stream << "\r\n";
    // append more customized headers
    std::vector<string>::iterator itr;
    for (itr = cp.headers.begin(); itr != cp.headers.end(); itr++) {
       request_stream << *itr << "\r\n";
    }
+   request_stream << "\r\n";
    request_stream << postjson;
 
    if ( print_request ) {
@@ -285,7 +289,7 @@ namespace actc { namespace client { namespace http {
       throw fc::exception(logs, error_info.code, error_info.name, error_info.what);
    }
 
-   actc_ASSERT( status_code == 200, http_request_fail, "Error code ${c}\n: ${msg}\n", ("c", status_code)("msg", re) );
+   ACTC_ASSERT( status_code == 200, http_request_fail, "Error code ${c}\n: ${msg}\n", ("c", status_code)("msg", re) );
    return response_result;
    }
 }}}
