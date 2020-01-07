@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/merkle.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/merkle.hpp>
 #include <fc/io/json.hpp>
 
 #ifdef NON_VALIDATING_TEST
@@ -9,9 +9,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 
 struct action_proof_data {
    account_name              receiver;

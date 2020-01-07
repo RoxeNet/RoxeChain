@@ -1,17 +1,17 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/fork_database.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/fork_database.hpp>
 
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
 
 #include <Runtime/Runtime.h>
 
 #include <fc/variant_object.hpp>
 
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc::chain;
+using namespace actc::testing;
 
 private_key_type get_private_key( name keyname, string role ) {
    return private_key_type::regenerate<fc::ecc::private_key_shim>(fc::sha256::hash(string(keyname)+role));
@@ -156,21 +156,21 @@ BOOST_AUTO_TEST_CASE( forking ) try {
    wlog("set producer schedule to [dan,sam,pam]");
    c.produce_blocks(30);
 
-   auto r2 = c.create_accounts( {N(dccio.token)} );
+   auto r2 = c.create_accounts( {N(actc.token)} );
    wdump((fc::json::to_pretty_string(r2)));
-   c.set_code( N(dccio.token), dccio_token_wast );
-   c.set_abi( N(dccio.token), dccio_token_abi );
+   c.set_code( N(actc.token), actc_token_wast );
+   c.set_abi( N(actc.token), actc_token_abi );
    c.produce_blocks(10);
 
 
-   auto cr = c.push_action( N(dccio.token), N(create), N(dccio.token), mutable_variant_object()
-              ("issuer",       "dccio" )
+   auto cr = c.push_action( N(actc.token), N(create), N(actc.token), mutable_variant_object()
+              ("issuer",       "actc" )
               ("maximum_supply", core_from_string("10000000.0000"))
       );
 
    wdump((fc::json::to_pretty_string(cr)));
 
-   cr = c.push_action( N(dccio.token), N(issue), config::system_account_name, mutable_variant_object()
+   cr = c.push_action( N(actc.token), N(issue), config::system_account_name, mutable_variant_object()
               ("to",       "dan" )
               ("quantity", core_from_string("100.0000"))
               ("memo", "")

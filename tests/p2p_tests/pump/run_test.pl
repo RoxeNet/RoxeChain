@@ -9,15 +9,15 @@ use File::Spec;
 use File::Path;
 use Cwd;
 
-my $dcc_home = defined $ENV{dcc_HOME} ? $ENV{dcc_HOME} : getcwd;
-my $dccd = $dcc_home . "/programs/dccd/dccd";
-my $dccc = $dcc_home . "/programs/dccc/dccc";
+my $actc_home = defined $ENV{actc_HOME} ? $ENV{actc_HOME} : getcwd;
+my $actcd = $actc_home . "/programs/actcd/actcd";
+my $actcc = $actc_home . "/programs/actcc/actcc";
 
-my $nodes = defined $ENV{dcc_TEST_RING} ? $ENV{dcc_TEST_RING} : "1";
-my $pnodes = defined $ENV{dcc_TEST_PRODUCERS} ? $ENV{dcc_TEST_PRODUCERS} : "1";
+my $nodes = defined $ENV{actc_TEST_RING} ? $ENV{actc_TEST_RING} : "1";
+my $pnodes = defined $ENV{actc_TEST_PRODUCERS} ? $ENV{actc_TEST_PRODUCERS} : "1";
 
 my $prods = 21;
-my $genesis = "$dcc_home/genesis.json";
+my $genesis = "$actc_home/genesis.json";
 my $http_port_base = 8888;
 my $p2p_port_base = 9876;
 my $data_dir_base = "tdn";
@@ -40,7 +40,7 @@ if (!GetOptions("nodes=i" => \$nodes,
                 "pnodes=i" => \$pnodes)) {
     print "usage: $ARGV[0] [--nodes=<n>] [--pnodes=<n>] [--topo=<ring|star>] [--first-pause=<n>] [--launch-pause=<n>] [--duration=<n>] [--time-stamp=<time> \n";
     print "where:\n";
-    print "--nodes=n (default = 1) sets the number of dccd instances to launch\n";
+    print "--nodes=n (default = 1) sets the number of actcd instances to launch\n";
     print "--pnodes=n (default = 1) sets the number nodes that will also be producers\n";
     print "--topo=s (default = ring) sets the network topology to either a ring shape or a star shape\n";
     print "--first-pause=n (default = 0) sets the seconds delay after starting the first instance\n";
@@ -112,10 +112,10 @@ sub write_config {
     if (defined $producer) {
         print $cfg "enable-stale-production = true\n";
         print $cfg "required-participation = true\n";
-        print $cfg "private-key = [\"dcc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV\",\"5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3\"]\n";
+        print $cfg "private-key = [\"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV\",\"5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3\"]\n";
 
-        print $cfg "plugin = dccio::producer_plugin\n";
-        print $cfg "plugin = dccio::chain_api_plugin\n";
+        print $cfg "plugin = actc::producer_plugin\n";
+        print $cfg "plugin = actc::chain_api_plugin\n";
 
         my $prod_ndx = ord('a') + $producer;
         my $num_prod = $pcount[$producer];
@@ -199,7 +199,7 @@ sub launch_nodes {
     }
 
     for (my $i = 0; $i < $nodes;  $i++) {
-        my @cmdline = ($dccd,
+        my @cmdline = ($actcd,
                        $gtsarg,
                        "--data-dir=$data_dir[$i]",
                        "--verbose-http-errors",
@@ -247,7 +247,7 @@ sub perform_work {
         my $stoptime = time () + $run_duration;
         my $counter = 0;
         while (time () < $stoptime) {
-            `$dccc transfer dcc inita 10 >> dccc.out 2>> dccc.err`;
+            `$actcc transfer actc inita 10 >> actcc.out 2>> actcc.err`;
             $counter++;
             if ($counter % 1000 == 0) {
                 print "$counter client iterations\n";

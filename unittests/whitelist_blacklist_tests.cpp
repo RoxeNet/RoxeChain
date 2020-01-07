@@ -1,11 +1,11 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/testing/tester_network.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/testing/tester_network.hpp>
 
 #include <fc/variant_object.hpp>
 
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
 
 #include <deferred_test/deferred_test.wast.hpp>
 #include <deferred_test/deferred_test.abi.hpp>
@@ -16,9 +16,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 
 using mvo = fc::mutable_variant_object;
 
@@ -66,15 +66,15 @@ class whitelist_blacklist_tester {
 
          if( !bootstrap ) return;
 
-         chain->create_accounts({N(dccio.token), N(alice), N(bob), N(charlie)});
-         chain->set_code(N(dccio.token), dccio_token_wast);
-         chain->set_abi(N(dccio.token), dccio_token_abi);
-         chain->push_action( N(dccio.token), N(create), N(dccio.token), mvo()
-              ( "issuer", "dccio.token" )
+         chain->create_accounts({N(actc.token), N(alice), N(bob), N(charlie)});
+         chain->set_code(N(actc.token), actc_token_wast);
+         chain->set_abi(N(actc.token), actc_token_abi);
+         chain->push_action( N(actc.token), N(create), N(actc.token), mvo()
+              ( "issuer", "actc.token" )
               ( "maximum_supply", "1000000.00 TOK" )
          );
-         chain->push_action( N(dccio.token), N(issue), N(dccio.token), mvo()
-              ( "to", "dccio.token" )
+         chain->push_action( N(actc.token), N(issue), N(actc.token), mvo()
+              ( "to", "actc.token" )
               ( "quantity", "1000000.00 TOK" )
               ( "memo", "issue" )
          );
@@ -89,7 +89,7 @@ class whitelist_blacklist_tester {
       }
 
       transaction_trace_ptr transfer( account_name from, account_name to, string quantity = "1.00 TOK" ) {
-         return chain->push_action( N(dccio.token), N(transfer), from, mvo()
+         return chain->push_action( N(actc.token), N(transfer), from, mvo()
             ( "from", from )
             ( "to", to )
             ( "quantity", quantity )
@@ -121,10 +121,10 @@ BOOST_AUTO_TEST_SUITE(whitelist_blacklist_tests)
 
 BOOST_AUTO_TEST_CASE( actor_whitelist ) { try {
    whitelist_blacklist_tester<> test;
-   test.actor_whitelist = {config::system_account_name, N(dccio.token), N(alice)};
+   test.actor_whitelist = {config::system_account_name, N(actc.token), N(alice)};
    test.init();
 
-   test.transfer( N(dccio.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
 
    test.transfer( N(alice), N(bob),  "100.00 TOK" );
 
@@ -134,7 +134,7 @@ BOOST_AUTO_TEST_CASE( actor_whitelist ) { try {
                        );
    signed_transaction trx;
    trx.actions.emplace_back( vector<permission_level>{{N(alice),config::active_name}, {N(bob),config::active_name}},
-                             N(dccio.token), N(transfer),
+                             N(actc.token), N(transfer),
                              fc::raw::pack(transfer_args{
                                .from  = N(alice),
                                .to    = N(bob),
@@ -157,7 +157,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
    test.actor_blacklist = {N(bob)};
    test.init();
 
-   test.transfer( N(dccio.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
 
    test.transfer( N(alice), N(bob),  "100.00 TOK" );
 
@@ -168,7 +168,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
 
    signed_transaction trx;
    trx.actions.emplace_back( vector<permission_level>{{N(alice),config::active_name}, {N(bob),config::active_name}},
-                             N(dccio.token), N(transfer),
+                             N(actc.token), N(transfer),
                              fc::raw::pack(transfer_args{
                                 .from  = N(alice),
                                 .to    = N(bob),
@@ -188,12 +188,12 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
 
 BOOST_AUTO_TEST_CASE( contract_whitelist ) { try {
    whitelist_blacklist_tester<> test;
-   test.contract_whitelist = {config::system_account_name, N(dccio.token), N(bob)};
+   test.contract_whitelist = {config::system_account_name, N(actc.token), N(bob)};
    test.init();
 
-   test.transfer( N(dccio.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
 
-   test.transfer( N(alice), N(dccio.token) );
+   test.transfer( N(alice), N(actc.token) );
 
    test.transfer( N(alice), N(bob) );
    test.transfer( N(alice), N(charlie), "100.00 TOK" );
@@ -202,13 +202,13 @@ BOOST_AUTO_TEST_CASE( contract_whitelist ) { try {
 
    test.chain->produce_blocks();
 
-   test.chain->set_code(N(bob), dccio_token_wast);
-   test.chain->set_abi(N(bob), dccio_token_abi);
+   test.chain->set_code(N(bob), actc_token_wast);
+   test.chain->set_abi(N(bob), actc_token_abi);
 
    test.chain->produce_blocks();
 
-   test.chain->set_code(N(charlie), dccio_token_wast);
-   test.chain->set_abi(N(charlie), dccio_token_abi);
+   test.chain->set_code(N(charlie), actc_token_wast);
+   test.chain->set_abi(N(charlie), actc_token_abi);
 
    test.chain->produce_blocks();
 
@@ -240,9 +240,9 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
    test.contract_blacklist = {N(charlie)};
    test.init();
 
-   test.transfer( N(dccio.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
 
-   test.transfer( N(alice), N(dccio.token) );
+   test.transfer( N(alice), N(actc.token) );
 
    test.transfer( N(alice), N(bob) );
    test.transfer( N(alice), N(charlie), "100.00 TOK" );
@@ -251,13 +251,13 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
 
    test.chain->produce_blocks();
 
-   test.chain->set_code(N(bob), dccio_token_wast);
-   test.chain->set_abi(N(bob), dccio_token_abi);
+   test.chain->set_code(N(bob), actc_token_wast);
+   test.chain->set_abi(N(bob), actc_token_abi);
 
    test.chain->produce_blocks();
 
-   test.chain->set_code(N(charlie), dccio_token_wast);
-   test.chain->set_abi(N(charlie), dccio_token_abi);
+   test.chain->set_code(N(charlie), actc_token_wast);
+   test.chain->set_abi(N(charlie), actc_token_abi);
 
    test.chain->produce_blocks();
 
@@ -286,21 +286,21 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
 
 BOOST_AUTO_TEST_CASE( action_blacklist ) { try {
    whitelist_blacklist_tester<> test;
-   test.contract_whitelist = {config::system_account_name, N(dccio.token), N(bob), N(charlie)};
+   test.contract_whitelist = {config::system_account_name, N(actc.token), N(bob), N(charlie)};
    test.action_blacklist = {{N(charlie), N(create)}};
    test.init();
 
-   test.transfer( N(dccio.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
 
    test.chain->produce_blocks();
 
-   test.chain->set_code(N(bob), dccio_token_wast);
-   test.chain->set_abi(N(bob), dccio_token_abi);
+   test.chain->set_code(N(bob), actc_token_wast);
+   test.chain->set_abi(N(bob), actc_token_abi);
 
    test.chain->produce_blocks();
 
-   test.chain->set_code(N(charlie), dccio_token_wast);
-   test.chain->set_abi(N(charlie), dccio_token_abi);
+   test.chain->set_code(N(charlie), actc_token_wast);
+   test.chain->set_abi(N(charlie), actc_token_abi);
 
    test.chain->produce_blocks();
 
@@ -323,11 +323,11 @@ BOOST_AUTO_TEST_CASE( action_blacklist ) { try {
    test.chain->produce_blocks();
 } FC_LOG_AND_RETHROW() }
 
-BOOST_AUTO_TEST_CASE( blacklist_dccio ) { try {
+BOOST_AUTO_TEST_CASE( blacklist_actc ) { try {
    whitelist_blacklist_tester<tester> tester1;
    tester1.init();
    tester1.chain->produce_blocks();
-   tester1.chain->set_code(config::system_account_name, dccio_token_wast);
+   tester1.chain->set_code(config::system_account_name, actc_token_wast);
    tester1.chain->produce_blocks();
    tester1.shutdown();
    tester1.contract_blacklist = {config::system_account_name};
@@ -431,7 +431,7 @@ BOOST_AUTO_TEST_CASE( blacklist_onerror ) { try {
    );
 
    BOOST_CHECK_EXCEPTION( tester1.chain->produce_blocks(), fc::exception,
-                          fc_exception_message_is("action 'dccio::onerror' is on the action blacklist")
+                          fc_exception_message_is("action 'actc::onerror' is on the action blacklist")
                         );
 
 } FC_LOG_AND_RETHROW() }

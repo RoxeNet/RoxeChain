@@ -3,8 +3,8 @@
 #include <boost/test/unit_test.hpp>
 #pragma GCC diagnostic pop
 #include <boost/algorithm/string/predicate.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
 
 #include <payloadless/payloadless.wast.hpp>
 #include <payloadless/payloadless.abi.hpp>
@@ -20,9 +20,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 class payloadless_tester : public TESTER {
@@ -42,7 +42,7 @@ BOOST_FIXTURE_TEST_CASE( test_doit, payloadless_tester ) {
    BOOST_CHECK_EQUAL(msg == "Im a payloadless action", true);
 }
 
-// test GH#3916 - contract api action with no parameters fails when called from cldcc
+// test GH#3916 - contract api action with no parameters fails when called from clactc
 // abi_serializer was failing when action data was empty.
 BOOST_FIXTURE_TEST_CASE( test_abi_serializer, payloadless_tester ) {
 

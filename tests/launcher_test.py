@@ -10,8 +10,8 @@ import decimal
 import re
 
 ###############################################################
-# noddcc_run_test
-# --dump-error-details <Upon error print etc/dccio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodactc_run_test
+# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -35,11 +35,11 @@ Utils.Debug=debug
 cluster=Cluster(walletd=True, defproduceraPrvtKey=defproduceraPrvtKey)
 walletMgr=WalletMgr(True)
 testSuccessful=False
-killdccInstances=not dontKill
+killactcInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.dccWalletName
-ClientName="cldcc"
+WalletdName=Utils.actcWalletName
+ClientName="clactc"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
 
@@ -54,17 +54,17 @@ try:
         Print("Stand up cluster")
         if cluster.launch(pnodes=4, p2pPlugin=p2pPlugin) is False:
             cmdError("launcher")
-            errorExit("Failed to stand up dcc cluster.")
+            errorExit("Failed to stand up actc cluster.")
     else:
         walletMgr.killall(allInstances=killAll)
         walletMgr.cleanup()
         cluster.initializeNodes(defproduceraPrvtKey=defproduceraPrvtKey)
-        killdccInstances=False
+        killactcInstances=False
 
         print("Stand up walletd")
         if walletMgr.launch() is False:
             cmdError("%s" % (WalletdName))
-            errorExit("Failed to stand up dcc walletd.")
+            errorExit("Failed to stand up actc walletd.")
 
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
@@ -94,7 +94,7 @@ try:
 
     testWalletName="test"
     Print("Creating wallet \"%s\"." % (testWalletName))
-    testWallet=walletMgr.create(testWalletName, [cluster.dccioAccount,cluster.defproduceraAccount])
+    testWallet=walletMgr.create(testWalletName, [cluster.actcAccount,cluster.defproduceraAccount])
 
     Print("Wallet \"%s\" password=%s." % (testWalletName, testWallet.password.encode("utf-8")))
 
@@ -122,15 +122,15 @@ try:
     Print("Validating accounts before user accounts creation")
     cluster.validateAccounts(None)
 
-    # create accounts via dccio as otherwise a bid is needed 
-    Print("Create new account %s via %s" % (testeraAccount.name, cluster.dccioAccount.name))
-    transId=node.createInitializeAccount(testeraAccount, cluster.dccioAccount, stakedDeposit=0, waitForTransBlock=False, exitOnError=True)
+    # create accounts via actc as otherwise a bid is needed
+    Print("Create new account %s via %s" % (testeraAccount.name, cluster.actcAccount.name))
+    transId=node.createInitializeAccount(testeraAccount, cluster.actcAccount, stakedDeposit=0, waitForTransBlock=False, exitOnError=True)
 
-    Print("Create new account %s via %s" % (currencyAccount.name, cluster.dccioAccount.name))
-    transId=node.createInitializeAccount(currencyAccount, cluster.dccioAccount, buyRAM=1000000, stakedDeposit=5000, exitOnError=True)
+    Print("Create new account %s via %s" % (currencyAccount.name, cluster.actcAccount.name))
+    transId=node.createInitializeAccount(currencyAccount, cluster.actcAccount, buyRAM=1000000, stakedDeposit=5000, exitOnError=True)
 
-    Print("Create new account %s via %s" % (exchangeAccount.name, cluster.dccioAccount.name))
-    transId=node.createInitializeAccount(exchangeAccount, cluster.dccioAccount, buyRAM=1000000, waitForTransBlock=True, exitOnError=True)
+    Print("Create new account %s via %s" % (exchangeAccount.name, cluster.actcAccount.name))
+    transId=node.createInitializeAccount(exchangeAccount, cluster.actcAccount, buyRAM=1000000, waitForTransBlock=True, exitOnError=True)
 
     Print("Validating accounts after user accounts creation")
     accounts=[testeraAccount, currencyAccount, exchangeAccount]
@@ -146,7 +146,7 @@ try:
 
     expectedAmount=transferAmount
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountdccBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -158,7 +158,7 @@ try:
 
     expectedAmount="97.5421 {0}".format(CORE_SYMBOL)
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountdccBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountactcBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -175,7 +175,7 @@ try:
 
     expectedAmount="98.0311 {0}".format(CORE_SYMBOL) # 5000 initial deposit
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountdccBalanceStr(currencyAccount.name)
+    actualAmount=node.getAccountactcBalanceStr(currencyAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -211,17 +211,17 @@ try:
     Print("Bouncing nodes #00 and #01")
     if cluster.bounce("00,01") is False:
         cmdError("launcher bounce")
-        errorExit("Failed to bounce dcc node.")
+        errorExit("Failed to bounce actc node.")
 
     Print("Taking down node #02")
     if cluster.down("02") is False:
         cmdError("launcher down command")
-        errorExit("Failed to take down dcc node.")
+        errorExit("Failed to take down actc node.")
 
     Print("Using bounce option to re-launch node #02")
     if cluster.bounce("02") is False:
         cmdError("launcher bounce")
-        errorExit("Failed to bounce dcc node.")
+        errorExit("Failed to bounce actc node.")
 
     p = re.compile('Assert')
     errFileName="var/lib/node_00/stderr.txt"
@@ -243,6 +243,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killdccInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

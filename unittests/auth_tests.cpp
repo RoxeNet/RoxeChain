@@ -1,14 +1,14 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/permission_object.hpp>
-#include <dccio/chain/authorization_manager.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/permission_object.hpp>
+#include <actc/chain/authorization_manager.hpp>
 
-#include <dccio/chain/resource_limits.hpp>
-#include <dccio/chain/resource_limits_private.hpp>
+#include <actc/chain/resource_limits.hpp>
+#include <actc/chain/resource_limits_private.hpp>
 
-#include <dccio/testing/tester_network.hpp>
-#include <dccio/chain/producer_object.hpp>
+#include <actc/testing/tester_network.hpp>
+#include <actc/chain/producer_object.hpp>
 
 #ifdef NON_VALIDATING_TEST
 #define TESTER tester
@@ -16,9 +16,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 
 BOOST_AUTO_TEST_SUITE(auth_tests)
 
@@ -240,18 +240,18 @@ BOOST_AUTO_TEST_CASE(link_auths) { try {
 
    // Send req auth action with alice's spending key, it should fail
    BOOST_CHECK_THROW(chain.push_reqauth("alice", { permission_level{N(alice), "spending"} }, { spending_priv_key }), irrelevant_auth_exception);
-   // Link authority for dccio reqauth action with alice's spending key
-   chain.link_authority("alice", "dccio", "spending",  "reqauth");
+   // Link authority for actc reqauth action with alice's spending key
+   chain.link_authority("alice", "actc", "spending",  "reqauth");
    // Now, req auth action with alice's spending key should succeed
    chain.push_reqauth("alice", { permission_level{N(alice), "spending"} }, { spending_priv_key });
 
    chain.produce_block();
 
    // Relink the same auth should fail
-   BOOST_CHECK_THROW( chain.link_authority("alice", "dccio", "spending",  "reqauth"), action_validate_exception);
+   BOOST_CHECK_THROW( chain.link_authority("alice", "actc", "spending",  "reqauth"), action_validate_exception);
 
-   // Unlink alice with dccio reqauth
-   chain.unlink_authority("alice", "dccio", "reqauth");
+   // Unlink alice with actc reqauth
+   chain.unlink_authority("alice", "actc", "reqauth");
    // Now, req auth action with alice's spending key should fail
    BOOST_CHECK_THROW(chain.push_reqauth("alice", { permission_level{N(alice), "spending"} }, { spending_priv_key }), irrelevant_auth_exception);
 
@@ -259,8 +259,8 @@ BOOST_AUTO_TEST_CASE(link_auths) { try {
 
    // Send req auth action with scud key, it should fail
    BOOST_CHECK_THROW(chain.push_reqauth("alice", { permission_level{N(alice), "scud"} }, { scud_priv_key }), irrelevant_auth_exception);
-   // Link authority for any dccio action with alice's scud key
-   chain.link_authority("alice", "dccio", "scud");
+   // Link authority for any actc action with alice's scud key
+   chain.link_authority("alice", "actc", "scud");
    // Now, req auth action with alice's scud key should succeed
    chain.push_reqauth("alice", { permission_level{N(alice), "scud"} }, { scud_priv_key });
    // req auth action with alice's spending key should also be fine, since it is the parent of alice's scud key
@@ -280,7 +280,7 @@ BOOST_AUTO_TEST_CASE(link_then_update_auth) { try {
 
    chain.set_authority("alice", "first", first_pub_key, "active");
 
-   chain.link_authority("alice", "dccio", "first",  "reqauth");
+   chain.link_authority("alice", "actc", "first",  "reqauth");
    chain.push_reqauth("alice", { permission_level{N(alice), "first"} }, { first_priv_key });
 
    chain.produce_blocks(13); // Wait at least 6 seconds for first push_reqauth transaction to expire.
@@ -324,12 +324,12 @@ try {
                          fc_exception_message_is("account names can only be 12 chars long"));
 
 
-   // Creating account with dccio. prefix with privileged account
-   chain.create_account("dccio.test1");
+   // Creating account with actc. prefix with privileged account
+   chain.create_account("actc.test1");
 
-   // Creating account with dccio. prefix with non-privileged account, should fail
-   BOOST_CHECK_EXCEPTION(chain.create_account("dccio.test2", "joe"), action_validate_exception,
-                         fc_exception_message_is("only privileged accounts can have names that start with 'dccio.'"));
+   // Creating account with actc. prefix with non-privileged account, should fail
+   BOOST_CHECK_EXCEPTION(chain.create_account("actc.test2", "joe"), action_validate_exception,
+                         fc_exception_message_is("only privileged accounts can have names that start with 'actc.'"));
 
 } FC_LOG_AND_RETHROW() }
 
@@ -354,10 +354,10 @@ BOOST_AUTO_TEST_CASE( any_auth ) { try {
 
    //test.push_reqauth( N(alice), { permission_level{N(alice),"spending"} }, { spending_priv_key });
 
-   chain.link_authority( "alice", "dccio", "dccio.any", "reqauth" );
-   chain.link_authority( "bob", "dccio", "dccio.any", "reqauth" );
+   chain.link_authority( "alice", "actc", "actc.any", "reqauth" );
+   chain.link_authority( "bob", "actc", "actc.any", "reqauth" );
 
-   /// this should succeed because dccio::reqauth is linked to any permission
+   /// this should succeed because actc::reqauth is linked to any permission
    chain.push_reqauth("alice", { permission_level{N(alice), "spending"} }, { spending_priv_key });
 
    /// this should fail because bob cannot authorize for alice, the permission given must be one-of alices
@@ -385,8 +385,8 @@ try {
 
    const chainbase::database &db = chain.control->db();
 
-   using resource_usage_object = dccio::chain::resource_limits::resource_usage_object;
-   using by_owner = dccio::chain::resource_limits::by_owner;
+   using resource_usage_object = actc::chain::resource_limits::resource_usage_object;
+   using by_owner = actc::chain::resource_limits::by_owner;
 
    auto create_acc = [&](account_name a) {
 
@@ -502,11 +502,11 @@ BOOST_AUTO_TEST_CASE( linkauth_special ) { try {
       BOOST_REQUIRE_EXCEPTION(
          chain.push_action(config::system_account_name, linkauth::get_name(), tester_account, fc::mutable_variant_object()
                ("account", "tester")
-               ("code", "dccio")
+               ("code", "actc")
                ("type", type)
                ("requirement", "first")),
          action_validate_exception,
-         fc_exception_message_is(std::string("Cannot link dccio::") + std::string(type) + std::string(" to a minimum permission"))
+         fc_exception_message_is(std::string("Cannot link actc::") + std::string(type) + std::string(" to a minimum permission"))
       );
    };
 

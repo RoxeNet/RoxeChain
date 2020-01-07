@@ -31,7 +31,7 @@ class Node(object):
 
     # pylint: disable=too-many-instance-attributes
     # pylint: disable=too-many-arguments
-    def __init__(self, host, port, pid=None, cmd=None, walletMgr=None, enableMongo=False, mongoHost="localhost", mongoPort=27017, mongoDb="dcctest"):
+    def __init__(self, host, port, pid=None, cmd=None, walletMgr=None, enableMongo=False, mongoHost="localhost", mongoPort=27017, mongoDb="actctest"):
         self.host=host
         self.port=port
         self.pid=pid
@@ -54,9 +54,9 @@ class Node(object):
         if self.enableMongo:
             self.mongoEndpointArgs += "--host %s --port %d %s" % (mongoHost, mongoPort, mongoDb)
 
-    def dccClientArgs(self):
+    def actcClientArgs(self):
         walletArgs=" " + self.walletMgr.getWalletEndpointArgs() if self.walletMgr is not None else ""
-        return self.endpointArgs + walletArgs + " " + Utils.MiscdccClientArgs
+        return self.endpointArgs + walletArgs + " " + Utils.MiscactcClientArgs
 
     def __str__(self):
         #return "Host: %s, Port:%d, Pid:%s, Cmd:\"%s\"" % (self.host, self.port, self.pid, self.cmd)
@@ -236,7 +236,7 @@ class Node(object):
             assert(account)
             assert(isinstance(account, Account))
             if Utils.Debug: Utils.Print("Validating account %s" % (account.name))
-            accountInfo=self.getdccAccount(account.name, exitOnError=True)
+            accountInfo=self.getactcAccount(account.name, exitOnError=True)
             try:
                 if not self.enableMongo:
                     assert(accountInfo["account_name"] == account.name)
@@ -254,7 +254,7 @@ class Node(object):
             cmdDesc="get block"
             cmd="%s %d" % (cmdDesc, blockNum)
             msg="(block number=%s)" % (blockNum);
-            return self.processCldccCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
+            return self.processClactcCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
         else:
             cmd="%s %s" % (Utils.MongoPath, self.mongoEndpointArgs)
             subcommand='db.blocks.findOne( { "block_num": %d } )' % (blockNum)
@@ -335,7 +335,7 @@ class Node(object):
             cmd="%s %s" % (cmdDesc, transId)
             msg="(transaction id=%s)" % (transId);
             for i in range(0,(int(60/timeout) - 1)):
-                trans=self.processCldccCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnErrorForDelayed, exitMsg=msg)
+                trans=self.processClactcCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnErrorForDelayed, exitMsg=msg)
                 if trans is not None or not delayedRetry:
                     return trans
                 if Utils.Debug: Utils.Print("Could not find transaction with id %s, delay and retry" % (transId))
@@ -343,7 +343,7 @@ class Node(object):
 
             self.missingTransaction=True
             # either it is there or the transaction has timed out
-            return self.processCldccCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
+            return self.processClactcCmd(cmd, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError, exitMsg=msg)
         else:
             for i in range(0,(int(60/timeout) - 1)):
                 trans=self.getTransactionMdb(transId, silentErrors=silentErrors, exitOnError=exitOnErrorForDelayed)
@@ -501,7 +501,7 @@ class Node(object):
             cmdDesc, creatorAccount.name, account.name, account.ownerPublicKey,
             account.activePublicKey, stakeNet, CORE_SYMBOL, stakeCPU, CORE_SYMBOL, buyRAM, CORE_SYMBOL)
         msg="(creator account=%s, account=%s)" % (creatorAccount.name, account.name);
-        trans=self.processCldccCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processClactcCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
         transId=Node.getTransId(trans)
 
@@ -519,7 +519,7 @@ class Node(object):
         cmd="%s -j %s %s %s %s" % (
             cmdDesc, creatorAccount.name, account.name, account.ownerPublicKey, account.activePublicKey)
         msg="(creator account=%s, account=%s)" % (creatorAccount.name, account.name);
-        trans=self.processCldccCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processClactcCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
         transId=Node.getTransId(trans)
 
@@ -531,17 +531,17 @@ class Node(object):
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
-    def getdccAccount(self, name, exitOnError=False):
+    def getactcAccount(self, name, exitOnError=False):
         assert(isinstance(name, str))
         if not self.enableMongo:
             cmdDesc="get account"
             cmd="%s -j %s" % (cmdDesc, name)
-            msg="( getdccAccount(name=%s) )" % (name);
-            return self.processCldccCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
+            msg="( getactcAccount(name=%s) )" % (name);
+            return self.processClactcCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError, exitMsg=msg)
         else:
-            return self.getdccAccountFromDb(name, exitOnError=exitOnError)
+            return self.getactcAccountFromDb(name, exitOnError=exitOnError)
 
-    def getdccAccountFromDb(self, name, exitOnError=False):
+    def getactcAccountFromDb(self, name, exitOnError=False):
         cmd="%s %s" % (Utils.MongoPath, self.mongoEndpointArgs)
         subcommand='db.accounts.findOne({"name" : "%s"})' % (name)
         if Utils.Debug: Utils.Print("cmd: echo '%s' | %s" % (subcommand, cmd))
@@ -566,7 +566,7 @@ class Node(object):
         cmdDesc = "get table"
         cmd="%s %s %s %s" % (cmdDesc, contract, scope, table)
         msg="contract=%s, scope=%s, table=%s" % (contract, scope, table);
-        return self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     def getTableAccountBalance(self, contract, scope):
         assert(isinstance(contract, str))
@@ -590,7 +590,7 @@ class Node(object):
         cmdDesc = "get currency balance"
         cmd="%s %s %s %s" % (cmdDesc, contract, account, symbol)
         msg="contract=%s, account=%s, symbol=%s" % (contract, account, symbol);
-        return self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg, returnType=ReturnType.raw)
+        return self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg, returnType=ReturnType.raw)
 
     def getCurrencyStats(self, contract, symbol=CORE_SYMBOL, exitOnError=False):
         """returns Json output from get currency stats."""
@@ -601,13 +601,13 @@ class Node(object):
         cmdDesc = "get currency stats"
         cmd="%s %s %s" % (cmdDesc, contract, symbol)
         msg="contract=%s, symbol=%s" % (contract, symbol);
-        return self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     # Verifies account. Returns "get account" json return object
     def verifyAccount(self, account):
         assert(account)
         if not self.enableMongo:
-            ret=self.getdccAccount(account.name)
+            ret=self.getactcAccount(account.name)
             if ret is not None:
                 account_name=ret["account_name"]
                 if account_name is None:
@@ -619,7 +619,7 @@ class Node(object):
 
     def verifyAccountMdb(self, account):
         assert(account)
-        ret=self.getdccAccountFromDb(account.name)
+        ret=self.getactcAccountFromDb(account.name)
         if ret is not None:
             account_name=ret["name"]
             if account_name is None:
@@ -666,7 +666,7 @@ class Node(object):
         assert(isinstance(destination, Account))
 
         cmd="%s %s -v transfer -j %s %s" % (
-            Utils.dccClientPath, self.dccClientArgs(), source.name, destination.name)
+            Utils.actcClientPath, self.actcClientArgs(), source.name, destination.name)
         cmdArr=cmd.split()
         cmdArr.append(amountStr)
         cmdArr.append(memo)
@@ -722,7 +722,7 @@ class Node(object):
         assert(isinstance(initialBalances, dict))
         assert(isinstance(transferAmount, int))
 
-        currentBalances=self.getdccBalances([source] + accounts)
+        currentBalances=self.getactcBalances([source] + accounts)
         assert(currentBalances)
         assert(isinstance(currentBalances, dict))
         assert(len(initialBalances) == len(currentBalances))
@@ -743,14 +743,14 @@ class Node(object):
                             (expectedInitialBalance, initialBalance, key.name))
                 return False
 
-    def getdccBalances(self, accounts):
+    def getactcBalances(self, accounts):
         """Returns a dictionary with account balances keyed by accounts"""
         assert(accounts)
         assert(isinstance(accounts, list))
 
         balances={}
         for account in accounts:
-            balance = self.getAccountdccBalance(account.name)
+            balance = self.getAccountactcBalance(account.name)
             balances[account]=balance
 
         return balances
@@ -760,9 +760,9 @@ class Node(object):
         cmdDesc = "get accounts"
         cmd="%s %s" % (cmdDesc, key)
         msg="key=%s" % (key);
-        return self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
-    # Get actions mapped to an account (cldcc get actions)
+    # Get actions mapped to an account (clactc get actions)
     def getActions(self, account, pos=-1, offset=-1, exitOnError=False):
         assert(isinstance(account, Account))
         assert(isinstance(pos, int))
@@ -772,7 +772,7 @@ class Node(object):
             cmdDesc = "get actions"
             cmd="%s -j %s %d %d" % (cmdDesc, account.name, pos, offset)
             msg="account=%s, pos=%d, offset=%d" % (account.name, pos, offset);
-            return self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+            return self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         else:
             return self.getActionsMdb(account, pos, offset, exitOnError=exitOnError)
 
@@ -810,29 +810,29 @@ class Node(object):
         cmdDesc = "get servants"
         cmd="%s %s" % (cmdDesc, name)
         msg="name=%s" % (name);
-        return self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        return self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
 
     def getServantsArr(self, name):
         trans=self.getServants(name, exitOnError=True)
         servants=trans["controlled_accounts"]
         return servants
 
-    def getAccountdccBalanceStr(self, scope):
-        """Returns SYS currency0000 account balance from cldcc get table command. Returned balance is string following syntax "98.0311 SYS". """
+    def getAccountactcBalanceStr(self, scope):
+        """Returns SYS currency0000 account balance from clactc get table command. Returned balance is string following syntax "98.0311 SYS". """
         assert isinstance(scope, str)
-        amount=self.getTableAccountBalance("dccio.token", scope)
-        if Utils.Debug: Utils.Print("getNodeAccountdccBalance %s %s" % (scope, amount))
+        amount=self.getTableAccountBalance("actc.token", scope)
+        if Utils.Debug: Utils.Print("getNodeAccountactcBalance %s %s" % (scope, amount))
         assert isinstance(amount, str)
         return amount
 
-    def getAccountdccBalance(self, scope):
-        """Returns SYS currency0000 account balance from cldcc get table command. Returned balance is an integer e.g. 980311. """
-        balanceStr=self.getAccountdccBalanceStr(scope)
+    def getAccountactcBalance(self, scope):
+        """Returns SYS currency0000 account balance from clactc get table command. Returned balance is an integer e.g. 980311. """
+        balanceStr=self.getAccountactcBalanceStr(scope)
         balance=Node.currencyStrToInt(balanceStr)
         return balance
 
     def getAccountCodeHash(self, account):
-        cmd="%s %s get code %s" % (Utils.dccClientPath, self.dccClientArgs(), account)
+        cmd="%s %s get code %s" % (Utils.actcClientPath, self.actcClientArgs(), account)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         try:
             retStr=Utils.checkOutput(cmd.split())
@@ -852,7 +852,7 @@ class Node(object):
 
     # publish contract and return transaction as json object
     def publishContract(self, account, contractDir, wasmFile, abiFile, waitForTransBlock=False, shouldFail=False):
-        cmd="%s %s -v set contract -j %s %s" % (Utils.dccClientPath, self.dccClientArgs(), account, contractDir)
+        cmd="%s %s -v set contract -j %s %s" % (Utils.actcClientPath, self.actcClientArgs(), account, contractDir)
         cmd += "" if wasmFile is None else (" "+ wasmFile)
         cmd += "" if abiFile is None else (" " + abiFile)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
@@ -907,7 +907,7 @@ class Node(object):
 
     # returns tuple with transaction and
     def pushMessage(self, account, action, data, opts, silentErrors=False):
-        cmd="%s %s push action -j %s %s" % (Utils.dccClientPath, self.dccClientArgs(), account, action)
+        cmd="%s %s push action -j %s %s" % (Utils.actcClientPath, self.actcClientArgs(), account, action)
         cmdArr=cmd.split()
         if data is not None:
             cmdArr.append(data)
@@ -928,7 +928,7 @@ class Node(object):
     def setPermission(self, account, code, pType, requirement, waitForTransBlock=False, exitOnError=False):
         cmdDesc="set action permission"
         cmd="%s -j %s %s %s %s" % (cmdDesc, account, code, pType, requirement)
-        trans=self.processCldccCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError)
+        trans=self.processClactcCmd(cmd, cmdDesc, silentErrors=False, exitOnError=exitOnError)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -942,7 +942,7 @@ class Node(object):
         cmd="%s -j %s %s \"%s %s\" \"%s %s\" %s" % (
             cmdDesc, fromAccount.name, toAccount.name, netQuantity, CORE_SYMBOL, cpuQuantity, CORE_SYMBOL, transferStr)
         msg="fromAccount=%s, toAccount=%s" % (fromAccount.name, toAccount.name);
-        trans=self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -952,7 +952,7 @@ class Node(object):
         cmd="%s -j %s %s %s %s" % (
             cmdDesc, producer.name, producer.activePublicKey, url, location)
         msg="producer=%s" % (producer.name);
-        trans=self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
@@ -962,14 +962,14 @@ class Node(object):
         cmd="%s -j %s %s" % (
             cmdDesc, account.name, " ".join(producers))
         msg="account=%s, producers=[ %s ]" % (account.name, ", ".join(producers));
-        trans=self.processCldccCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+        trans=self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
         self.trackCmdTransaction(trans)
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
-    def processCldccCmd(self, cmd, cmdDesc, silentErrors=True, exitOnError=False, exitMsg=None, returnType=ReturnType.json):
+    def processClactcCmd(self, cmd, cmdDesc, silentErrors=True, exitOnError=False, exitMsg=None, returnType=ReturnType.json):
         assert(isinstance(returnType, ReturnType))
-        cmd="%s %s %s" % (Utils.dccClientPath, self.dccClientArgs(), cmd)
+        cmd="%s %s %s" % (Utils.actcClientPath, self.actcClientArgs(), cmd)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if exitMsg is not None:
             exitMsg="Context: " + exitMsg
@@ -1052,7 +1052,7 @@ class Node(object):
 
     def getInfo(self, silentErrors=False, exitOnError=False):
         cmdDesc = "get info"
-        info=self.processCldccCmd(cmdDesc, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError)
+        info=self.processClactcCmd(cmdDesc, cmdDesc, silentErrors=silentErrors, exitOnError=exitOnError)
         if info is None:
             self.infoValid=False
         else:
@@ -1078,7 +1078,7 @@ class Node(object):
         return False if info is None else True
 
     def getHeadBlockNum(self):
-        """returns head block number(string) as returned by cldcc get info."""
+        """returns head block number(string) as returned by clactc get info."""
         if not self.enableMongo:
             info=self.getInfo(exitOnError=True)
             if info is not None:

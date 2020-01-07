@@ -1,25 +1,25 @@
 /**
  *  @file api_tests.cpp
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #include <boost/test/unit_test.hpp>
 #pragma GCC diagnostic pop
 
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/resource_limits.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/resource_limits.hpp>
 
 #include <fc/exception/exception.hpp>
 #include <fc/variant_object.hpp>
 
-#include "dccio_system_tester.hpp"
+#include "actc_system_tester.hpp"
 
 #include <test_ram_limit/test_ram_limit.abi.hpp>
 #include <test_ram_limit/test_ram_limit.wast.hpp>
 
-#define DISABLE_dccLIB_SERIALIZE
+#define DISABLE_actcLIB_SERIALIZE
 #include <test_api/test_api_common.hpp>
 
 /*
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_SUITE(ram_tests)
 /*************************************************************************************
  * ram_tests test case
  *************************************************************************************/
-BOOST_FIXTURE_TEST_CASE(ram_tests, dccio_system::dccio_system_tester) { try {
+BOOST_FIXTURE_TEST_CASE(ram_tests, actc_system::actc_system_tester) { try {
    auto init_request_bytes = 80000;
    const auto increment_contract_bytes = 10000;
    const auto table_allocation_bytes = 12000;
@@ -42,7 +42,7 @@ BOOST_FIXTURE_TEST_CASE(ram_tests, dccio_system::dccio_system_tester) { try {
    create_account_with_resources(N(testram11111),config::system_account_name, init_request_bytes + 40);
    create_account_with_resources(N(testram22222),config::system_account_name, init_request_bytes + 1190);
    produce_blocks(10);
-   BOOST_REQUIRE_EQUAL( success(), stake( "dccio.stake", "testram11111", core_from_string("10.0000"), core_from_string("5.0000") ) );
+   BOOST_REQUIRE_EQUAL( success(), stake( "actc.stake", "testram11111", core_from_string("10.0000"), core_from_string("5.0000") ) );
    produce_blocks(10);
 
    for (auto i = 0; i < 10; ++i) {

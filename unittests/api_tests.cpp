@@ -1,6 +1,6 @@
 /**
  *  @file api_tests.cpp
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <algorithm>
 #include <random>
@@ -18,14 +18,14 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/account_object.hpp>
-#include <dccio/chain/contract_table_objects.hpp>
-#include <dccio/chain/block_summary_object.hpp>
-#include <dccio/chain/global_property_object.hpp>
-#include <dccio/chain/wasm_interface.hpp>
-#include <dccio/chain/resource_limits.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/account_object.hpp>
+#include <actc/chain/contract_table_objects.hpp>
+#include <actc/chain/block_summary_object.hpp>
+#include <actc/chain/global_property_object.hpp>
+#include <actc/chain/wasm_interface.hpp>
+#include <actc/chain/resource_limits.hpp>
 
 #include <fc/crypto/digest.hpp>
 #include <fc/crypto/sha256.hpp>
@@ -44,10 +44,10 @@
 #include <test_api_db/test_api_db.wast.hpp>
 #include <test_api_multi_index/test_api_multi_index.wast.hpp>
 
-#include <dccio.bios/dccio.bios.wast.hpp>
-#include <dccio.bios/dccio.bios.abi.hpp>
+#include <actc.bios/actc.bios.wast.hpp>
+#include <actc.bios/actc.bios.abi.hpp>
 
-#define DISABLE_dccLIB_SERIALIZE
+#define DISABLE_actcLIB_SERIALIZE
 #include <test_api/test_api_common.hpp>
 
 FC_REFLECT( dummy_action, (a)(b)(c) )
@@ -62,8 +62,8 @@ FC_REFLECT( invalid_access_action, (code)(val)(index)(store) )
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::testing;
 using namespace chain;
 using namespace fc;
 
@@ -197,7 +197,7 @@ bool is_access_violation(fc::unhandled_exception const & e) {
    try {
       std::rethrow_exception(e.get_inner_exception());
     }
-    catch (const dccio::chain::wasm_execution_error& e) {
+    catch (const actc::chain::wasm_execution_error& e) {
        return true;
     } catch (...) {
 
@@ -209,7 +209,7 @@ bool is_access_violation(const Runtime::Exception& e) { return true; }
 bool is_assert_exception(fc::assert_exception const & e) { return true; }
 bool is_page_memory_error(page_memory_error const &e) { return true; }
 bool is_unsatisfied_authorization(unsatisfied_authorization const & e) { return true;}
-bool is_wasm_execution_error(dccio::chain::wasm_execution_error const& e) {return true;}
+bool is_wasm_execution_error(actc::chain::wasm_execution_error const& e) {return true;}
 bool is_tx_net_usage_exceeded(const tx_net_usage_exceeded& e) { return true; }
 bool is_block_net_usage_exceeded(const tx_cpu_usage_exceeded& e) { return true; }
 bool is_tx_cpu_usage_exceeded(const tx_cpu_usage_exceeded& e) { return true; }
@@ -273,10 +273,10 @@ BOOST_FIXTURE_TEST_CASE(action_receipt_tests, TESTER) { try {
       BOOST_REQUIRE_EQUAL(uint32_t(res->action_traces[0].receipt.code_sequence), 2);
       BOOST_REQUIRE_EQUAL(uint32_t(res->action_traces[0].receipt.abi_sequence), 1);
    }
-   set_code( config::system_account_name, dccio_bios_wast );
+   set_code( config::system_account_name, actc_bios_wast );
 
-	set_code( N(testapi), dccio_bios_wast );
-   set_abi(N(testapi), dccio_bios_abi);
+	set_code( N(testapi), actc_bios_wast );
+   set_abi(N(testapi), actc_bios_abi);
 	set_code( N(testapi), test_api_wast );
 	res = CALL_TEST_FUNCTION( *this, "test_action", "assert_true", {});
    BOOST_REQUIRE_EQUAL(uint32_t(res->action_traces[0].receipt.code_sequence), 4);
@@ -303,7 +303,7 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
 
    //test assert_false
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "assert_false", {} ),
-                          dccio_assert_message_exception, dccio_assert_message_is("test_action::assert_false") );
+                          actc_assert_message_exception, actc_assert_message_is("test_action::assert_false") );
 
    // test read_action_normal
    dummy_action dummy13{DUMMY_ACTION_DEFAULT_A, DUMMY_ACTION_DEFAULT_B, DUMMY_ACTION_DEFAULT_C};
@@ -315,8 +315,8 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
 
    // test read_action_to_0
    raw_bytes.resize((1<<16)+1);
-   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_0", raw_bytes), dccio::chain::wasm_execution_error,
-         [](const dccio::chain::wasm_execution_error& e) {
+   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_0", raw_bytes), actc::chain::wasm_execution_error,
+         [](const actc::chain::wasm_execution_error& e) {
             return expect_assert_message(e, "access violation");
          }
       );
@@ -327,8 +327,8 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
 
    // test read_action_to_64k
    raw_bytes.resize(3);
-	BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_64k", raw_bytes ), dccio::chain::wasm_execution_error,
-         [](const dccio::chain::wasm_execution_error& e) {
+	BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_64k", raw_bytes ), actc::chain::wasm_execution_error,
+         [](const actc::chain::wasm_execution_error& e) {
             return expect_assert_message(e, "access violation");
          }
       );
@@ -411,7 +411,7 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
    // test current_time
    produce_block();
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "test_current_time", fc::raw::pack(now) ),
-                          dccio_assert_message_exception, dccio_assert_message_is("tmp == current_time()")     );
+                          actc_assert_message_exception, actc_assert_message_is("tmp == current_time()")     );
 
    // test test_current_receiver
    CALL_TEST_FUNCTION( *this, "test_action", "test_current_receiver", fc::raw::pack(N(testapi)));
@@ -587,8 +587,8 @@ BOOST_FIXTURE_TEST_CASE(cf_action_tests, TESTER) { try {
       BOOST_CHECK_EQUAL(ttrace->action_traces[0].inline_traces[0].act.authorization.size(), 0);
 
       BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_transaction", "send_cf_action_fail", {} ),
-                             dccio_assert_message_exception,
-                             dccio_assert_message_is("context free actions cannot have authorizations") );
+                             actc_assert_message_exception,
+                             actc_assert_message_is("context free actions cannot have authorizations") );
 
       BOOST_REQUIRE_EQUAL( validate(), true );
 } FC_LOG_AND_RETHROW() }
@@ -999,8 +999,8 @@ BOOST_FIXTURE_TEST_CASE(transaction_tests, TESTER) { try {
 
    // test send_action_inline_fail
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION(*this, "test_transaction", "send_action_inline_fail", {}),
-                          dccio_assert_message_exception,
-                          dccio_assert_message_is("test_action::assert_false")                          );
+                          actc_assert_message_exception,
+                          actc_assert_message_is("test_action::assert_false")                          );
 
    //   test send_transaction
       CALL_TEST_FUNCTION(*this, "test_transaction", "send_transaction", {});
@@ -1040,8 +1040,8 @@ BOOST_FIXTURE_TEST_CASE(transaction_tests, TESTER) { try {
    CALL_TEST_FUNCTION(*this, "test_transaction", "test_tapos_block_prefix", fc::raw::pack(control->head_block_id()._hash[1]) );
 
    // test send_action_recurse
-   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION(*this, "test_transaction", "send_action_recurse", {}), dccio::chain::transaction_exception,
-         [](const dccio::chain::transaction_exception& e) {
+   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION(*this, "test_transaction", "send_action_recurse", {}), actc::chain::transaction_exception,
+         [](const actc::chain::transaction_exception& e) {
             return expect_assert_message(e, "max inline action depth per transaction reached");
          }
       );
@@ -1180,7 +1180,7 @@ BOOST_FIXTURE_TEST_CASE(deferred_transaction_tests, TESTER) { try {
    dtt_act2.delay_sec = 5;
 
    auto auth = authority(get_public_key("testapi", name(dtt_act2.permission_name).to_string()), 10);
-   auth.accounts.push_back( permission_level_weight{{N(testapi), config::dccio_code_name}, 1} );
+   auth.accounts.push_back( permission_level_weight{{N(testapi), config::actc_code_name}, 1} );
 
    push_action(config::system_account_name, updateauth::get_name(), "testapi", fc::mutable_variant_object()
            ("account", "testapi")
@@ -1392,41 +1392,41 @@ BOOST_FIXTURE_TEST_CASE(multi_index_tests, TESTER) { try {
    CALL_TEST_FUNCTION( *this, "test_multi_index", "idx_double_general", {});
    CALL_TEST_FUNCTION( *this, "test_multi_index", "idx_long_double_general", {});
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pk_iterator_exceed_end", {},
-                                           dccio_assert_message_exception, "cannot increment end iterator");
+                                           actc_assert_message_exception, "cannot increment end iterator");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_sk_iterator_exceed_end", {},
-                                           dccio_assert_message_exception, "cannot increment end iterator");
+                                           actc_assert_message_exception, "cannot increment end iterator");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pk_iterator_exceed_begin", {},
-                                           dccio_assert_message_exception, "cannot decrement iterator at beginning of table");
+                                           actc_assert_message_exception, "cannot decrement iterator at beginning of table");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_sk_iterator_exceed_begin", {},
-                                           dccio_assert_message_exception, "cannot decrement iterator at beginning of index");
+                                           actc_assert_message_exception, "cannot decrement iterator at beginning of index");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_pk_ref_to_other_table", {},
-                                           dccio_assert_message_exception, "object passed to iterator_to is not in multi_index");
+                                           actc_assert_message_exception, "object passed to iterator_to is not in multi_index");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_sk_ref_to_other_table", {},
-                                           dccio_assert_message_exception, "object passed to iterator_to is not in multi_index");
+                                           actc_assert_message_exception, "object passed to iterator_to is not in multi_index");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_pk_end_itr_to_iterator_to", {},
-                                           dccio_assert_message_exception, "object passed to iterator_to is not in multi_index");
+                                           actc_assert_message_exception, "object passed to iterator_to is not in multi_index");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_pk_end_itr_to_modify", {},
-                                           dccio_assert_message_exception, "cannot pass end iterator to modify");
+                                           actc_assert_message_exception, "cannot pass end iterator to modify");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_pk_end_itr_to_erase", {},
-                                           dccio_assert_message_exception, "cannot pass end iterator to erase");
+                                           actc_assert_message_exception, "cannot pass end iterator to erase");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_sk_end_itr_to_iterator_to", {},
-                                           dccio_assert_message_exception, "object passed to iterator_to is not in multi_index");
+                                           actc_assert_message_exception, "object passed to iterator_to is not in multi_index");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_sk_end_itr_to_modify", {},
-                                           dccio_assert_message_exception, "cannot pass end iterator to modify");
+                                           actc_assert_message_exception, "cannot pass end iterator to modify");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_pass_sk_end_itr_to_erase", {},
-                                           dccio_assert_message_exception, "cannot pass end iterator to erase");
+                                           actc_assert_message_exception, "cannot pass end iterator to erase");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_modify_primary_key", {},
-                                           dccio_assert_message_exception, "updater cannot change primary key when modifying an object");
+                                           actc_assert_message_exception, "updater cannot change primary key when modifying an object");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_run_out_of_avl_pk", {},
-                                           dccio_assert_message_exception, "next primary key in table is at autoincrement limit");
+                                           actc_assert_message_exception, "next primary key in table is at autoincrement limit");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_require_find_fail", {},
-                                           dccio_assert_message_exception, "unable to find key");
+                                           actc_assert_message_exception, "unable to find key");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_require_find_fail_with_msg", {},
-                                           dccio_assert_message_exception, "unable to find primary key in require_find");
+                                           actc_assert_message_exception, "unable to find primary key in require_find");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_require_find_sk_fail", {},
-                                           dccio_assert_message_exception, "unable to find secondary key");
+                                           actc_assert_message_exception, "unable to find secondary key");
    CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_multi_index", "idx64_require_find_sk_fail_with_msg", {},
-                                           dccio_assert_message_exception, "unable to find sec key");
+                                           actc_assert_message_exception, "unable to find sec key");
    CALL_TEST_FUNCTION( *this, "test_multi_index", "idx64_sk_cache_pk_lookup", {});
    CALL_TEST_FUNCTION( *this, "test_multi_index", "idx64_pk_cache_sk_lookup", {});
 
@@ -1449,7 +1449,7 @@ BOOST_FIXTURE_TEST_CASE(fixedpoint_tests, TESTER) { try {
 	CALL_TEST_FUNCTION( *this, "test_fixedpoint", "test_multiplication", {});
 	CALL_TEST_FUNCTION( *this, "test_fixedpoint", "test_division", {});
 	CALL_TEST_FUNCTION_AND_CHECK_EXCEPTION( *this, "test_fixedpoint", "test_division_by_0", {},
-                                          dccio_assert_message_exception, "divide by zero"     );
+                                          actc_assert_message_exception, "divide by zero"     );
 
    BOOST_REQUIRE_EQUAL( validate(), true );
 } FC_LOG_AND_RETHROW() }
@@ -1796,7 +1796,7 @@ BOOST_FIXTURE_TEST_CASE(permission_tests, TESTER) { try {
          .account    = N(testapi),
          .permission = N(active),
          .pubkeys    = {
-            public_key_type(string("dcc7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
+            public_key_type(string("actc7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
          }
       })
    );
@@ -1808,7 +1808,7 @@ BOOST_FIXTURE_TEST_CASE(permission_tests, TESTER) { try {
          .permission = N(active),
          .pubkeys    = {
             get_public_key(N(testapi), "active"),
-            public_key_type(string("dcc7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
+            public_key_type(string("actc7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
          }
       })
    );
@@ -2004,7 +2004,7 @@ BOOST_FIXTURE_TEST_CASE(permission_usage_tests, TESTER) { try {
                                        N(testapi), config::active_name,
                                        control->head_block_time() + fc::milliseconds(config::block_interval_ms)
                                      })
-   ), dccio_assert_message_exception );
+   ), actc_assert_message_exception );
 
    produce_blocks(5);
 
@@ -2012,7 +2012,7 @@ BOOST_FIXTURE_TEST_CASE(permission_usage_tests, TESTER) { try {
 
    push_action(config::system_account_name, linkauth::get_name(), N(bob), fc::mutable_variant_object()
            ("account", "bob")
-           ("code", "dccio")
+           ("code", "actc")
            ("type", "reqauth")
            ("requirement", "perm1")
    );
@@ -2046,7 +2046,7 @@ BOOST_FIXTURE_TEST_CASE(permission_usage_tests, TESTER) { try {
                                                             N(bob), N(perm1),
                                                             permission_creation_time
                                           })
-   ), dccio_assert_message_exception );
+   ), actc_assert_message_exception );
 
    CALL_TEST_FUNCTION( *this, "test_permission", "test_permission_last_used",
                        fc::raw::pack(test_permission_last_used_action{
@@ -2088,9 +2088,9 @@ BOOST_FIXTURE_TEST_CASE(account_creation_time_tests, TESTER) { try {
 } FC_LOG_AND_RETHROW() }
 
 /*************************************************************************************
- * dccio_assert_code_tests test cases
+ * actc_assert_code_tests test cases
  *************************************************************************************/
-BOOST_FIXTURE_TEST_CASE(dccio_assert_code_tests, TESTER) { try {
+BOOST_FIXTURE_TEST_CASE(actc_assert_code_tests, TESTER) { try {
    produce_block();
    create_account( N(testapi) );
    produce_block();
@@ -2098,7 +2098,7 @@ BOOST_FIXTURE_TEST_CASE(dccio_assert_code_tests, TESTER) { try {
 
    const char* abi_string = R"=====(
 {
-   "version": "dccio::abi/1.0",
+   "version": "actc::abi/1.0",
    "types": [],
    "structs": [],
    "actions": [],
@@ -2120,7 +2120,7 @@ BOOST_FIXTURE_TEST_CASE(dccio_assert_code_tests, TESTER) { try {
    produce_blocks(10);
 
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "test_assert_code", fc::raw::pack((uint64_t)42) ),
-                          dccio_assert_code_exception, dccio_assert_code_is(42)                                        );
+                          actc_assert_code_exception, actc_assert_code_is(42)                                        );
 
    produce_block();
 
