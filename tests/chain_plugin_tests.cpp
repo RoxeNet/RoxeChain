@@ -1,13 +1,13 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/wasm_dccio_constraints.hpp>
-#include <dccio/chain/resource_limits.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/wast_to_wasm.hpp>
-#include <dccio/chain_plugin/chain_plugin.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/wasm_actc_constraints.hpp>
+#include <actc/chain/resource_limits.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/wast_to_wasm.hpp>
+#include <actc/chain_plugin/chain_plugin.hpp>
 
 #include <asserter/asserter.wast.hpp>
 #include <asserter/asserter.abi.hpp>
@@ -18,8 +18,8 @@
 #include <noop/noop.wast.hpp>
 #include <noop/noop.abi.hpp>
 
-#include <dccio.system/dccio.system.wast.hpp>
-#include <dccio.system/dccio.system.abi.hpp>
+#include <actc.system/actc.system.wast.hpp>
+#include <actc.system/actc.system.abi.hpp>
 
 #include <fc/io/fstream.hpp>
 
@@ -37,9 +37,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 BOOST_AUTO_TEST_SUITE(chain_plugin_tests)

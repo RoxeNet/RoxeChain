@@ -3,12 +3,12 @@
 #include <boost/test/unit_test.hpp>
 #pragma GCC diagnostic pop
 #include <boost/algorithm/string/predicate.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/generated_transaction_object.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/generated_transaction_object.hpp>
 
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
 
 #include <proxy/proxy.wast.hpp>
 #include <proxy/proxy.abi.hpp>
@@ -24,9 +24,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 class currency_tester : public TESTER {
@@ -36,7 +36,7 @@ class currency_tester : public TESTER {
          string action_type_name = abi_ser.get_action_type(name);
 
          action act;
-         act.account = N(dccio.token);
+         act.account = N(actc.token);
          act.name = name;
          act.authorization = vector<permission_level>{{signer, config::active_name}};
          act.data = abi_ser.variant_to_binary(action_type_name, data, abi_serializer_max_time);
@@ -50,7 +50,7 @@ class currency_tester : public TESTER {
       }
 
       asset get_balance(const account_name& account) const {
-         return get_currency_balance(N(dccio.token), symbol(SY(4,CUR)), account);
+         return get_currency_balance(N(actc.token), symbol(SY(4,CUR)), account);
       }
 
       auto transfer(const account_name& from, const account_name& to, const std::string& quantity, const std::string& memo = "") {
@@ -65,7 +65,7 @@ class currency_tester : public TESTER {
       }
 
       auto issue(const account_name& to, const std::string& quantity, const std::string& memo = "") {
-         auto trace = push_action(N(dccio.token), N(issue), mutable_variant_object()
+         auto trace = push_action(N(actc.token), N(issue), mutable_variant_object()
                                   ("to",       to)
                                   ("quantity", quantity)
                                   ("memo",     memo)
@@ -75,13 +75,13 @@ class currency_tester : public TESTER {
       }
 
       currency_tester()
-      :TESTER(),abi_ser(json::from_string(dccio_token_abi).as<abi_def>(), abi_serializer_max_time)
+      :TESTER(),abi_ser(json::from_string(actc_token_abi).as<abi_def>(), abi_serializer_max_time)
       {
-         create_account( N(dccio.token));
-         set_code( N(dccio.token), dccio_token_wast );
+         create_account( N(actc.token));
+         set_code( N(actc.token), actc_token_wast );
 
-         auto result = push_action(N(dccio.token), N(create), mutable_variant_object()
-                 ("issuer",       dccio_token)
+         auto result = push_action(N(actc.token), N(create), mutable_variant_object()
+                 ("issuer",       actc_token)
                  ("maximum_supply", "1000000000.0000 CUR")
                  ("can_freeze", 0)
                  ("can_recall", 0)
@@ -89,8 +89,8 @@ class currency_tester : public TESTER {
          );
          wdump((result));
 
-         result = push_action(N(dccio.token), N(issue), mutable_variant_object()
-                 ("to",       dccio_token)
+         result = push_action(N(actc.token), N(issue), mutable_variant_object()
+                 ("to",       actc_token)
                  ("quantity", "1000000.0000 CUR")
                  ("memo", "gggggggggggg")
          );
@@ -99,17 +99,17 @@ class currency_tester : public TESTER {
       }
 
       abi_serializer abi_ser;
-      static const std::string dccio_token;
+      static const std::string actc_token;
 };
 
-const std::string currency_tester::dccio_token = name(N(dccio.token)).to_string();
+const std::string currency_tester::actc_token = name(N(actc.token)).to_string();
 
 BOOST_AUTO_TEST_SUITE(currency_tests)
 
 BOOST_AUTO_TEST_CASE( bootstrap ) try {
    auto expected = asset::from_string( "1000000.0000 CUR" );
    currency_tester t;
-   auto actual = t.get_currency_balance(N(dccio.token), expected.get_symbol(), N(dccio.token));
+   auto actual = t.get_currency_balance(N(actc.token), expected.get_symbol(), N(actc.token));
    BOOST_REQUIRE_EQUAL(expected, actual);
 } FC_LOG_AND_RETHROW() /// test_api_bootstrap
 
@@ -118,8 +118,8 @@ BOOST_FIXTURE_TEST_CASE( test_transfer, currency_tester ) try {
 
    // make a transfer from the contract to a user
    {
-      auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-         ("from", dccio_token)
+      auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+         ("from", actc_token)
          ("to",   "alice")
          ("quantity", "100.0000 CUR")
          ("memo", "fund Alice")
@@ -135,15 +135,15 @@ BOOST_FIXTURE_TEST_CASE( test_transfer, currency_tester ) try {
 BOOST_FIXTURE_TEST_CASE( test_duplicate_transfer, currency_tester ) {
    create_accounts( {N(alice)} );
 
-   auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-      ("from", dccio_token)
+   auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+      ("from", actc_token)
       ("to",   "alice")
       ("quantity", "100.0000 CUR")
       ("memo", "fund Alice")
    );
 
-   BOOST_REQUIRE_THROW(push_action(N(dccio.token), N(transfer), mutable_variant_object()
-                                    ("from", dccio_token)
+   BOOST_REQUIRE_THROW(push_action(N(actc.token), N(transfer), mutable_variant_object()
+                                    ("from", actc_token)
                                     ("to",   "alice")
                                     ("quantity", "100.0000 CUR")
                                     ("memo", "fund Alice")),
@@ -160,8 +160,8 @@ BOOST_FIXTURE_TEST_CASE( test_addtransfer, currency_tester ) try {
 
    // make a transfer from the contract to a user
    {
-      auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-         ("from", dccio_token)
+      auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+         ("from", actc_token)
          ("to",   "alice")
          ("quantity", "100.0000 CUR")
          ("memo", "fund Alice")
@@ -175,8 +175,8 @@ BOOST_FIXTURE_TEST_CASE( test_addtransfer, currency_tester ) try {
 
    // make a transfer from the contract to a user
    {
-      auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-         ("from", dccio_token)
+      auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+         ("from", actc_token)
          ("to",   "alice")
          ("quantity", "10.0000 CUR")
          ("memo", "add Alice")
@@ -195,8 +195,8 @@ BOOST_FIXTURE_TEST_CASE( test_overspend, currency_tester ) try {
 
    // make a transfer from the contract to a user
    {
-      auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-         ("from", dccio_token)
+      auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+         ("from", actc_token)
          ("to",   "alice")
          ("quantity", "100.0000 CUR")
          ("memo", "fund Alice")
@@ -217,7 +217,7 @@ BOOST_FIXTURE_TEST_CASE( test_overspend, currency_tester ) try {
          ("memo", "overspend! Alice");
 
       BOOST_CHECK_EXCEPTION( push_action(N(alice), N(transfer), data),
-                             dccio_assert_message_exception, dccio_assert_message_is("overdrawn balance") );
+                             actc_assert_message_exception, actc_assert_message_is("overdrawn balance") );
       produce_block();
 
       BOOST_REQUIRE_EQUAL(get_balance(N(alice)), asset::from_string( "100.0000 CUR" ));
@@ -230,8 +230,8 @@ BOOST_FIXTURE_TEST_CASE( test_fullspend, currency_tester ) try {
 
    // make a transfer from the contract to a user
    {
-      auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-         ("from", dccio_token)
+      auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+         ("from", actc_token)
          ("to",   "alice")
          ("quantity", "100.0000 CUR")
          ("memo", "fund Alice")
@@ -316,13 +316,13 @@ BOOST_FIXTURE_TEST_CASE(test_symbol, TESTER) try {
 
    // invalid - contains lower case characters, no validation
    {
-      BOOST_CHECK_EXCEPTION(symbol malformed(SY(6,dcc)),
-                            symbol_type_exception, fc_exception_message_is("invalid symbol: dcc"));
+      BOOST_CHECK_EXCEPTION(symbol malformed(SY(6,actc)),
+                            symbol_type_exception, fc_exception_message_is("invalid symbol: actc"));
    }
 
    // invalid - contains lower case characters, exception thrown
    {
-      BOOST_CHECK_EXCEPTION(symbol(5,"dcc"),
+      BOOST_CHECK_EXCEPTION(symbol(5,"actc"),
                             symbol_type_exception, fc_exception_message_is("invalid character in symbol name"));
    }
 
@@ -435,8 +435,8 @@ BOOST_FIXTURE_TEST_CASE( test_proxy, currency_tester ) try {
    // for now wasm "time" is in seconds, so we have to truncate off any parts of a second that may have applied
    fc::time_point expected_delivery(fc::seconds(control->head_block_time().sec_since_epoch()) + fc::seconds(10));
    {
-      auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-         ("from", dccio_token)
+      auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+         ("from", actc_token)
          ("to",   "proxy")
          ("quantity", "5.0000 CUR")
          ("memo", "fund Proxy")
@@ -490,8 +490,8 @@ BOOST_FIXTURE_TEST_CASE( test_deferred_failure, currency_tester ) try {
    const auto& index = control->db().get_index<generated_transaction_multi_index,by_trx_id>();
    BOOST_REQUIRE_EQUAL(0, index.size());
 
-   auto trace = push_action(N(dccio.token), N(transfer), mutable_variant_object()
-      ("from", dccio_token)
+   auto trace = push_action(N(actc.token), N(transfer), mutable_variant_object()
+      ("from", actc_token)
       ("to",   "proxy")
       ("quantity", "5.0000 CUR")
       ("memo", "fund Proxy")
@@ -574,7 +574,7 @@ BOOST_FIXTURE_TEST_CASE( test_input_quantity, currency_tester ) try {
 
    // transfer to alice using right precision
    {
-      auto trace = transfer(dccio_token, N(alice), "100.0000 CUR");
+      auto trace = transfer(actc_token, N(alice), "100.0000 CUR");
 
       BOOST_CHECK_EQUAL(true, chain_has_transaction(trace->id));
       BOOST_CHECK_EQUAL(asset::from_string( "100.0000 CUR"), get_balance(N(alice)));
@@ -584,7 +584,7 @@ BOOST_FIXTURE_TEST_CASE( test_input_quantity, currency_tester ) try {
 
    // transfer using different symbol name fails
    {
-      BOOST_REQUIRE_THROW(transfer(N(alice), N(carl), "20.50 USD"), dccio_assert_message_exception);
+      BOOST_REQUIRE_THROW(transfer(N(alice), N(carl), "20.50 USD"), actc_assert_message_exception);
    }
 
    // issue to alice using right precision

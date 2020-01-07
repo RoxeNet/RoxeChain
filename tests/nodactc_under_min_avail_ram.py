@@ -50,8 +50,8 @@ class NamedAccounts:
 
 
 ###############################################################
-# noddcc_voting_test
-# --dump-error-details <Upon error print etc/dccio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodactc_voting_test
+# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -67,11 +67,11 @@ walletPort=args.wallet_port
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killdccInstances=not dontKill
+killactcInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.dccWalletName
-ClientName="cldcc"
+WalletdName=Utils.actcWalletName
+ClientName="clactc"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -84,10 +84,10 @@ try:
     minRAMValue=1002
     maxRAMFlag="--chain-state-db-size-mb"
     maxRAMValue=1010
-    extraNoddccArgs=" %s %d %s %d " % (minRAMFlag, minRAMValue, maxRAMFlag, maxRAMValue)
-    if cluster.launch(onlyBios=False, pnodes=totalNodes, totalNodes=totalNodes, totalProducers=totalNodes, extraNoddccArgs=extraNoddccArgs, useBiosBootFile=False) is False:
+    extraNodactcArgs=" %s %d %s %d " % (minRAMFlag, minRAMValue, maxRAMFlag, maxRAMValue)
+    if cluster.launch(onlyBios=False, pnodes=totalNodes, totalNodes=totalNodes, totalProducers=totalNodes, extraNodactcArgs=extraNodactcArgs, useBiosBootFile=False) is False:
         Utils.cmdError("launcher")
-        errorExit("Failed to stand up dcc cluster.")
+        errorExit("Failed to stand up actc cluster.")
 
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
@@ -99,7 +99,7 @@ try:
     testWalletName="test"
 
     Print("Creating wallet \"%s\"." % (testWalletName))
-    testWallet=walletMgr.create(testWalletName, [cluster.dccioAccount])
+    testWallet=walletMgr.create(testWalletName, [cluster.actcAccount])
 
     for _, account in cluster.defProducerAccounts.items():
         walletMgr.importKey(account, testWallet, ignoreDupKeyWarning=True)
@@ -116,23 +116,23 @@ try:
     for account in accounts:
         walletMgr.importKey(account, testWallet)
 
-    # create accounts via dccio as otherwise a bid is needed
+    # create accounts via actc as otherwise a bid is needed
     for account in accounts:
-        Print("Create new account %s via %s" % (account.name, cluster.dccioAccount.name))
-        trans=nodes[0].createInitializeAccount(account, cluster.dccioAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
+        Print("Create new account %s via %s" % (account.name, cluster.actcAccount.name))
+        trans=nodes[0].createInitializeAccount(account, cluster.actcAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
         transferAmount="70000000.0000 {0}".format(CORE_SYMBOL)
-        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.dccioAccount.name, account.name))
-        nodes[0].transferFunds(cluster.dccioAccount, account, transferAmount, "test transfer")
+        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.actcAccount.name, account.name))
+        nodes[0].transferFunds(cluster.actcAccount, account, transferAmount, "test transfer")
         trans=nodes[0].delegatebw(account, 1000000.0000, 68000000.0000, waitForTransBlock=True, exitOnError=True)
 
     contractAccount=cluster.createAccountKeys(1)[0]
     contractAccount.name="contracttest"
     walletMgr.importKey(contractAccount, testWallet)
-    Print("Create new account %s via %s" % (contractAccount.name, cluster.dccioAccount.name))
-    trans=nodes[0].createInitializeAccount(contractAccount, cluster.dccioAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
+    Print("Create new account %s via %s" % (contractAccount.name, cluster.actcAccount.name))
+    trans=nodes[0].createInitializeAccount(contractAccount, cluster.actcAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
     transferAmount="90000000.0000 {0}".format(CORE_SYMBOL)
-    Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.dccioAccount.name, contractAccount.name))
-    nodes[0].transferFunds(cluster.dccioAccount, contractAccount, transferAmount, "test transfer")
+    Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.actcAccount.name, contractAccount.name))
+    nodes[0].transferFunds(cluster.actcAccount, contractAccount, transferAmount, "test transfer")
     trans=nodes[0].delegatebw(contractAccount, 1000000.0000, 88000000.0000, waitForTransBlock=True, exitOnError=True)
 
     contractDir="contracts/integration_test"
@@ -167,10 +167,10 @@ try:
                 if trans is None or not trans[0]:
                     timeOutCount+=1
                     if timeOutCount>=3:
-                       Print("Failed to push create action to dccio contract for %d consecutive times, looks like noddcc already exited." % (timeOutCount))
+                       Print("Failed to push create action to actc contract for %d consecutive times, looks like nodactc already exited." % (timeOutCount))
                        keepProcessing=False
                        break
-                    Print("Failed to push create action to dccio contract. sleep for 60 seconds")
+                    Print("Failed to push create action to actc contract. sleep for 60 seconds")
                     time.sleep(60)
                 else:
                     timeOutCount=0
@@ -250,7 +250,7 @@ try:
             try:
                 trans=nodes[0].pushMessage(contract, action, data, opts)
                 if trans is None or not trans[0]:
-                    Print("Failed to push create action to dccio contract. sleep for 60 seconds")
+                    Print("Failed to push create action to actc contract. sleep for 60 seconds")
                     time.sleep(60)
                 time.sleep(1)
             except TypeError as ex:
@@ -310,7 +310,7 @@ try:
         try:
             trans=nodes[0].pushMessage(contract, action, data, opts)
             if trans is None or not trans[0]:
-                Print("Failed to push create action to dccio contract. sleep for 60 seconds")
+                Print("Failed to push create action to actc contract. sleep for 60 seconds")
                 time.sleep(60)
                 continue
             time.sleep(1)
@@ -328,6 +328,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killdccInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

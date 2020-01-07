@@ -1,14 +1,14 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
 #include <boost/test/unit_test.hpp>
-#include <dccio/chain/block_timestamp.hpp>
+#include <actc/chain/block_timestamp.hpp>
 #include <fc/time.hpp>
 #include <fc/exception/exception.hpp>
 
-using namespace dccio;
+using namespace actc;
 using namespace chain;
 
 

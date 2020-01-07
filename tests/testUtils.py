@@ -18,21 +18,21 @@ class Utils:
     Debug=False
     FNull = open(os.devnull, 'w')
 
-    dccClientPath="programs/cldcc/cldcc"
-    MiscdccClientArgs="--no-auto-kdccd"
+    actcClientPath="programs/clactc/clactc"
+    MiscactcClientArgs="--no-auto-kactcd"
 
-    dccWalletName="kdccd"
-    dccWalletPath="programs/kdccd/"+ dccWalletName
+    actcWalletName="kactcd"
+    actcWalletPath="programs/kactcd/"+ actcWalletName
 
-    dccServerName="noddcc"
-    dccServerPath="programs/noddcc/"+ dccServerName
+    actcServerName="nodactc"
+    actcServerPath="programs/nodactc/"+ actcServerName
 
-    dccLauncherPath="programs/dccio-launcher/dccio-launcher"
+    actcLauncherPath="programs/actc-launcher/actc-launcher"
     MongoPath="mongo"
     ShuttingDown=False
     CheckOutputDeque=deque(maxlen=10)
 
-    dccBlockLogPath="programs/dccio-blocklog/dccio-blocklog"
+    actcBlockLogPath="programs/actc-blocklog/actc-blocklog"
 
     @staticmethod
     def Print(*args, **kwargs):
@@ -227,7 +227,7 @@ class Utils:
     @staticmethod
     def getBlockLog(blockLogLocation, silentErrors=False, exitOnError=False):
         assert(isinstance(blockLogLocation, str))
-        cmd="%s --blocks-dir %s --as-json-array" % (Utils.dccBlockLogPath, blockLogLocation)
+        cmd="%s --blocks-dir %s --as-json-array" % (Utils.actcBlockLogPath, blockLogLocation)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         rtn=None
         try:

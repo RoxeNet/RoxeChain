@@ -1,25 +1,25 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
 
-#include <dccio.system/dccio.system.wast.hpp>
-#include <dccio.system/dccio.system.abi.hpp>
+#include <actc.system/actc.system.wast.hpp>
+#include <actc.system/actc.system.abi.hpp>
 
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
 
-#include <dccio.msig/dccio.msig.wast.hpp>
-#include <dccio.msig/dccio.msig.abi.hpp>
+#include <actc.msig/actc.msig.wast.hpp>
+#include <actc.msig/actc.msig.abi.hpp>
 
 #include <fc/variant_object.hpp>
 
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 using mvo = fc::mutable_variant_object;
@@ -32,42 +32,42 @@ using mvo = fc::mutable_variant_object;
 #endif
 #endif
 
-namespace dccio_system {
+namespace actc_system {
 
-class dccio_system_tester : public TESTER {
+class actc_system_tester : public TESTER {
 public:
 
-   dccio_system_tester()
-   : dccio_system_tester([](TESTER& ) {}){}
+   actc_system_tester()
+   : actc_system_tester([](TESTER& ) {}){}
 
    template<typename Lambda>
-   dccio_system_tester(Lambda setup) {
+   actc_system_tester(Lambda setup) {
       setup(*this);
 
       produce_blocks( 2 );
 
-      create_accounts({ N(dccio.token), N(dccio.ram), N(dccio.ramfee), N(dccio.stake),
-               N(dccio.bpay), N(dccio.vpay), N(dccio.saving), N(dccio.names) });
+      create_accounts({ N(actc.token), N(actc.ram), N(actc.ramfee), N(actc.stake),
+               N(actc.bpay), N(actc.vpay), N(actc.saving), N(actc.names) });
 
 
       produce_blocks( 100 );
 
-      set_code( N(dccio.token), dccio_token_wast );
-      set_abi( N(dccio.token), dccio_token_abi );
+      set_code( N(actc.token), actc_token_wast );
+      set_abi( N(actc.token), actc_token_abi );
 
       {
-         const auto& accnt = control->db().get<account_object,by_name>( N(dccio.token) );
+         const auto& accnt = control->db().get<account_object,by_name>( N(actc.token) );
          abi_def abi;
          BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
          token_abi_ser.set_abi(abi, abi_serializer_max_time);
       }
 
-      create_currency( N(dccio.token), config::system_account_name, core_from_string("10000000000.0000") );
+      create_currency( N(actc.token), config::system_account_name, core_from_string("10000000000.0000") );
       issue(config::system_account_name,      core_from_string("1000000000.0000"));
-      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "dccio" ) );
+      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "actc" ) );
 
-      set_code( config::system_account_name, dccio_system_wast );
-      set_abi( config::system_account_name, dccio_system_abi );
+      set_code( config::system_account_name, actc_system_wast );
+      set_abi( config::system_account_name, actc_system_abi );
 
       {
          const auto& accnt = control->db().get<account_object,by_name>( config::system_account_name );
@@ -82,7 +82,7 @@ public:
       create_account_with_resources( N(bob111111111), config::system_account_name, core_from_string("0.4500"), false );
       create_account_with_resources( N(carol1111111), config::system_account_name, core_from_string("1.0000"), false );
 
-      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("dccio")  + get_balance("dccio.ramfee") + get_balance("dccio.stake") + get_balance("dccio.ram") );
+      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("actc")  + get_balance("actc.ramfee") + get_balance("actc.stake") + get_balance("actc.ram") );
    }
 
 
@@ -212,8 +212,8 @@ public:
       return push_transaction( trx );
    }
 
-   action_result buyram( const account_name& payer, account_name receiver, const asset& dccin ) {
-      return push_action( payer, N(buyram), mvo()( "payer",payer)("receiver",receiver)("quant",dccin) );
+   action_result buyram( const account_name& payer, account_name receiver, const asset& actcin ) {
+      return push_action( payer, N(buyram), mvo()( "payer",payer)("receiver",receiver)("quant",actcin) );
    }
    action_result buyrambytes( const account_name& payer, account_name receiver, uint32_t numbytes ) {
       return push_action( payer, N(buyrambytes), mvo()( "payer",payer)("receiver",receiver)("bytes",numbytes) );
@@ -329,7 +329,7 @@ public:
    }
 
    asset get_balance( const account_name& act ) {
-      vector<char> data = get_row_by_account( N(dccio.token), act, N(accounts), symbol(CORE_SYMBOL).to_symbol_code().value );
+      vector<char> data = get_row_by_account( N(actc.token), act, N(accounts), symbol(CORE_SYMBOL).to_symbol_code().value );
       return data.empty() ? asset(0, symbol(CORE_SYMBOL)) : token_abi_ser.binary_to_variant("account", data, abi_serializer_max_time)["balance"].as<asset>();
    }
 
@@ -357,14 +357,14 @@ public:
    }
 
    void issue( name to, const asset& amount, name manager = config::system_account_name ) {
-      base_tester::push_action( N(dccio.token), N(issue), manager, mutable_variant_object()
+      base_tester::push_action( N(actc.token), N(issue), manager, mutable_variant_object()
                                 ("to",      to )
                                 ("quantity", amount )
                                 ("memo", "")
                                 );
    }
    void transfer( name from, name to, const asset& amount, name manager = config::system_account_name ) {
-      base_tester::push_action( N(dccio.token), N(transfer), manager, mutable_variant_object()
+      base_tester::push_action( N(actc.token), N(transfer), manager, mutable_variant_object()
                                 ("from",    from)
                                 ("to",      to )
                                 ("quantity", amount)
@@ -382,9 +382,9 @@ public:
    }
 
    fc::variant get_stats( const string& symbolname ) {
-      auto symb = dccio::chain::symbol::from_string(symbolname);
+      auto symb = actc::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account( N(dccio.token), symbol_code, N(stat), symbol_code );
+      vector<char> data = get_row_by_account( N(actc.token), symbol_code, N(stat), symbol_code );
       return data.empty() ? fc::variant() : token_abi_ser.binary_to_variant( "currency_stats", data, abi_serializer_max_time );
    }
 
@@ -395,7 +395,7 @@ public:
    fc::variant get_global_state() {
       vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(global), N(global) );
       if (data.empty()) std::cout << "\nData is empty\n" << std::endl;
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "dccio_global_state", data, abi_serializer_max_time );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "actc_global_state", data, abi_serializer_max_time );
 
    }
 
@@ -407,21 +407,21 @@ public:
    abi_serializer initialize_multisig() {
       abi_serializer msig_abi_ser;
       {
-         create_account_with_resources( N(dccio.msig), config::system_account_name );
-         BOOST_REQUIRE_EQUAL( success(), buyram( "dccio", "dccio.msig", core_from_string("5000.0000") ) );
+         create_account_with_resources( N(actc.msig), config::system_account_name );
+         BOOST_REQUIRE_EQUAL( success(), buyram( "actc", "actc.msig", core_from_string("5000.0000") ) );
          produce_block();
 
          auto trace = base_tester::push_action(config::system_account_name, N(setpriv),
                                                config::system_account_name,  mutable_variant_object()
-                                               ("account", "dccio.msig")
+                                               ("account", "actc.msig")
                                                ("is_priv", 1)
          );
 
-         set_code( N(dccio.msig), dccio_msig_wast );
-         set_abi( N(dccio.msig), dccio_msig_abi );
+         set_code( N(actc.msig), actc_msig_wast );
+         set_abi( N(actc.msig), actc_msig_abi );
 
          produce_blocks();
-         const auto& accnt = control->db().get<account_object,by_name>( N(dccio.msig) );
+         const auto& accnt = control->db().get<account_object,by_name>( N(actc.msig) );
          abi_def msig_abi;
          BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, msig_abi), true);
          msig_abi_ser.set_abi(msig_abi, abi_serializer_max_time);
@@ -430,8 +430,8 @@ public:
    }
 
    vector<name> active_and_vote_producers() {
-      //stake more than 15% of total dcc supply to activate chain
-      transfer( "dccio", "alice1111111", core_from_string("650000000.0000"), "dccio" );
+      //stake more than 15% of total actc supply to activate chain
+      transfer( "actc", "alice1111111", core_from_string("650000000.0000"), "actc" );
       BOOST_REQUIRE_EQUAL( success(), stake( "alice1111111", "alice1111111", core_from_string("300000000.0000"), core_from_string("300000000.0000") ) );
 
       // create accounts {defproducera, defproducerb, ..., defproducerz} and register as producers
@@ -455,7 +455,7 @@ public:
                                             ("permission", name(config::active_name).to_string())
                                             ("parent", name(config::owner_name).to_string())
                                             ("auth",  authority(1, {key_weight{get_public_key( config::system_account_name, "active" ), 1}}, {
-                                                  permission_level_weight{{config::system_account_name, config::dccio_code_name}, 1},
+                                                  permission_level_weight{{config::system_account_name, config::actc_code_name}, 1},
                                                      permission_level_weight{{config::producers_account_name,  config::active_name}, 1}
                                                }
                                             ))
@@ -553,8 +553,8 @@ inline fc::mutable_variant_object proxy( account_name acct ) {
    return voter( acct )( "is_proxy", 1 );
 }
 
-inline uint64_t M( const string& dcc_str ) {
-   return core_from_string( dcc_str ).get_amount();
+inline uint64_t M( const string& actc_str ) {
+   return core_from_string( actc_str ).get_amount();
 }
 
 }

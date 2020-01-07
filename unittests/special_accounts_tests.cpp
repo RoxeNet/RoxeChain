@@ -1,20 +1,20 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <algorithm>
 #include <vector>
 #include <iterator>
 #include <boost/test/unit_test.hpp>
 
-#include <dccio/chain/controller.hpp>
-#include <dccio/chain/exceptions.hpp>
-#include <dccio/chain/permission_object.hpp>
-#include <dccio/chain/global_property_object.hpp>
+#include <actc/chain/controller.hpp>
+#include <actc/chain/exceptions.hpp>
+#include <actc/chain/permission_object.hpp>
+#include <actc/chain/global_property_object.hpp>
 
-#include <dccio/testing/tester.hpp>
+#include <actc/testing/tester.hpp>
 
-#include <dccio/utilities/tempdir.hpp>
+#include <actc/utilities/tempdir.hpp>
 
 #include <fc/crypto/digest.hpp>
 
@@ -23,9 +23,9 @@
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/range/algorithm/permutation.hpp>
 
-using namespace dccio;
+using namespace actc;
 using namespace chain;
-using tester = dccio::testing::tester;
+using tester = actc::testing::tester;
 
 BOOST_AUTO_TEST_SUITE(special_account_tests)
 
