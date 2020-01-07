@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/utilities/key_conversion.hpp>
+#include <actc/utilities/key_conversion.hpp>
 #include <fc/crypto/base58.hpp>
 #include <fc/variant.hpp>
 
-namespace dccio { namespace utilities {
+namespace actc { namespace utilities {
 
 std::string key_to_wif(const fc::sha256& secret )
 {
@@ -50,4 +50,4 @@ fc::optional<fc::ecc::private_key> wif_to_key( const std::string& wif_key )
   return fc::optional<fc::ecc::private_key>();
 }
 
-} } // end namespace dccio::utilities
+} } // end namespace actc::utilities

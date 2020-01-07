@@ -12,7 +12,7 @@ if [ -z "$biosport" ]; then
     biosport=9776
 fi
 
-wddir=dccio-ignition-wd
+wddir=actc-ignition-wd
 wdaddr=localhost:8899
 wdurl=http://$wdaddr
 # Manual deployers, add a line below this block that looks like:
@@ -21,7 +21,7 @@ wdurl=http://$wdaddr
 #    cnt_dir=$CONTRACT_DIR
 #    sys=$SYS_CONTRACT
 # where $BIOS_HOSTNAME is replaced by the hostname portion of the http-server-address configured
-# for the noddcc instance running to bios producer
+# for the nodactc instance running to bios producer
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT envars
 
@@ -37,16 +37,16 @@ echo Initializing ignition sequence  at $(date) | tee $logfile
 
 echo "http-server-address = $wdaddr" > $wddir/config.ini
 
-programs/kdccd/kdccd --config-dir $wddir --data-dir $wddir 2> $wddir/wdlog.txt &
+programs/kactcd/kactcd --config-dir $wddir --data-dir $wddir 2> $wddir/wdlog.txt &
 echo $$ > ignition_wallet.pid
-echo kdccd log in $wddir/wdlog.txt >> $logfile
+echo kactcd log in $wddir/wdlog.txt >> $logfile
 sleep 1
 
 ecmd () {
     echo ===== Start: $step ============ >> $logfile
-    echo executing: cldcc --wallet-url $wdurl --url http://$bioshost:$biosport $* | tee -a $logfile
+    echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport $* | tee -a $logfile
     echo ----------------------- >> $logfile
-    programs/cldcc/cldcc  --wallet-url $wdurl --url http://$bioshost:$biosport $* >> $logfile 2>&1
+    programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport $* >> $logfile 2>&1
     echo ==== End: $step ============== >> $logfile
     step=$(($step + 1))
 }
@@ -56,7 +56,7 @@ wcmd () {
 }
 
 cacmd () {
-    programs/cldcc/cldcc  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 SYS" --stake-cpu "10000000.0000 SYS"  --buy-ram "10000000.0000 SYS" dccio $* >> $logfile 2>&1
+    programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 SYS" --stake-cpu "10000000.0000 SYS"  --buy-ram "10000000.0000 SYS" actc $* >> $logfile 2>&1
     ecmd system regproducer $1 $2
     ecmd system voteproducer prods $1 $1
 }
@@ -75,39 +75,39 @@ wcmd create --to-console -n ignition
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT prodkeys
 
-ecmd set contract dccio contracts/dccio.bios dccio.bios.wasm dccio.bios.abi
+ecmd set contract actc contracts/actc.bios actc.bios.wasm actc.bios.abi
 
 # Create required system accounts
 ecmd create key --to-console
 pubsyskey=`grep "^Public key:" $logfile | tail -1 | sed "s/^Public key://"`
 prisyskey=`grep "^Private key:" $logfile | tail -1 | sed "s/^Private key://"`
-echo dccio.* keys: $prisyskey $pubsyskey >> $logfile
+echo actc.* keys: $prisyskey $pubsyskey >> $logfile
 wcmd import -n ignition --private-key $prisyskey
-ecmd create account dccio dccio.bpay $pubsyskey $pubsyskey
-ecmd create account dccio dccio.msig $pubsyskey $pubsyskey
-ecmd create account dccio dccio.names $pubsyskey $pubsyskey
-ecmd create account dccio dccio.ram $pubsyskey $pubsyskey
-ecmd create account dccio dccio.ramfee $pubsyskey $pubsyskey
-ecmd create account dccio dccio.saving $pubsyskey $pubsyskey
-ecmd create account dccio dccio.stake $pubsyskey $pubsyskey
-ecmd create account dccio dccio.token $pubsyskey $pubsyskey
-ecmd create account dccio dccio.vpay $pubsyskey $pubsyskey
-ecmd create account dccio dccio.sudo $pubsyskey $pubsyskey
+ecmd create account actc actc.bpay $pubsyskey $pubsyskey
+ecmd create account actc actc.msig $pubsyskey $pubsyskey
+ecmd create account actc actc.names $pubsyskey $pubsyskey
+ecmd create account actc actc.ram $pubsyskey $pubsyskey
+ecmd create account actc actc.ramfee $pubsyskey $pubsyskey
+ecmd create account actc actc.saving $pubsyskey $pubsyskey
+ecmd create account actc actc.stake $pubsyskey $pubsyskey
+ecmd create account actc actc.token $pubsyskey $pubsyskey
+ecmd create account actc actc.vpay $pubsyskey $pubsyskey
+ecmd create account actc actc.sudo $pubsyskey $pubsyskey
 
-ecmd set contract dccio.token contracts/dccio.token dccio.token.wasm dccio.token.abi
-ecmd set contract dccio.msig contracts/dccio.msig dccio.msig.wasm dccio.msig.abi
-ecmd set contract dccio.sudo contracts/dccio.sudo dccio.sudo.wasm dccio.sudo.abi
+ecmd set contract actc.token contracts/actc.token actc.token.wasm actc.token.abi
+ecmd set contract actc.msig contracts/actc.msig actc.msig.wasm actc.msig.abi
+ecmd set contract actc.sudo contracts/actc.sudo actc.sudo.wasm actc.sudo.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: cldcc --wallet-url $wdurl --url http://$bioshost:$biosport push action dccio.token create '[ "dccio", "10000000000.0000 SYS" ]' -p dccio.token | tee -a $logfile
-echo executing: cldcc --wallet-url $wdurl --url http://$bioshost:$biosport push action dccio.token issue '[ "dccio", "1000000000.0000 SYS", "memo" ]' -p dccio | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 SYS" ]' -p actc.token | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 SYS", "memo" ]' -p actc | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/cldcc/cldcc --wallet-url $wdurl --url http://$bioshost:$biosport push action dccio.token create '[ "dccio", "10000000000.0000 SYS" ]' -p dccio.token >> $logfile 2>&1
-programs/cldcc/cldcc --wallet-url $wdurl --url http://$bioshost:$biosport push action dccio.token issue '[ "dccio", "1000000000.0000 SYS", "memo" ]' -p dccio >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 SYS" ]' -p actc.token >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 SYS", "memo" ]' -p actc >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
-ecmd set contract dccio contracts/dccio.system dccio.system.wasm dccio.system.abi
+ecmd set contract actc contracts/actc.system actc.system.wasm actc.system.abi
 
 # Manual deployers, add a series of lines below this block that looks like:
 #    cacmd $PRODNAME[0] $OWNERKEY[0] $ACTIVEKEY[0]
@@ -119,4 +119,4 @@ ecmd set contract dccio contracts/dccio.system dccio.system.wasm dccio.system.ab
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT cacmd
 
-pkill -15 kdccd
+pkill -15 kactcd

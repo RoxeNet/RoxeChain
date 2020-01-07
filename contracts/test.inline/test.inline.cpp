@@ -1,3 +1,3 @@
 #include <test.inline/test.inline.hpp>
 
-dccIO_ABI( dccio::testinline, (reqauth)(forward) )
+actc_ABI( actc::testinline, (reqauth)(forward) )

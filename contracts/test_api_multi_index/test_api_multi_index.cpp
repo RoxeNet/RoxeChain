@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 #include "../test_api/test_api.hpp"
 
 #include "test_multi_index.cpp"
@@ -45,7 +45,7 @@ extern "C" {
       WASM_TEST_HANDLER_EX(test_multi_index, idx64_pk_cache_sk_lookup);
 
       //unhandled test call
-      dccio_assert(false, "Unknown Test");
+      actc_assert(false, "Unknown Test");
    }
 
 }

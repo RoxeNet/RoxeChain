@@ -1,30 +1,30 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #include <utility>
 #include <vector>
 #include <string>
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/contract.hpp>
+#include <actclib/actc.hpp>
+#include <actclib/contract.hpp>
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #pragma clang diagnostic ignored "-Wshorten-64-to-32"
 #pragma clang diagnostic ignored "-Wsign-compare"
 
-class test_ram_limit : public dccio::contract {
+class test_ram_limit : public actc::contract {
    public:
       const uint32_t FIVE_MINUTES = 5*60;
 
       test_ram_limit(account_name self)
-      :dccio::contract(self)
+      :actc::contract(self)
       {}
 
       //@abi action
       void setentry(account_name payer, uint64_t from, uint64_t to, uint64_t size) {
          const auto self = get_self();
-         dccio::print("test_ram_limit::setentry ", dccio::name{self}, "\n");
+         actc::print("test_ram_limit::setentry ", actc::name{self}, "\n");
          test_table table(self, self);
          for (int key = from; key <=to; ++key) {
             auto itr = table.find(key);
@@ -44,11 +44,11 @@ class test_ram_limit : public dccio::contract {
       //@abi action
       void rmentry(uint64_t from, uint64_t to) {
          const auto self = get_self();
-         dccio::print("test_ram_limit::rmentry ", dccio::name{self}, "\n");
+         actc::print("test_ram_limit::rmentry ", actc::name{self}, "\n");
          test_table table(self, self);
          for (int key = from; key <=to; ++key) {
             auto itr = table.find(key);
-            dccio_assert (itr != table.end(), "could not find test_table entry");
+            actc_assert (itr != table.end(), "could not find test_table entry");
             table.erase(itr);
          }
       }
@@ -56,13 +56,13 @@ class test_ram_limit : public dccio::contract {
       //@abi action
       void printentry(uint64_t from, uint64_t to) {
          const auto self = get_self();
-         dccio::print("test_ram_limit::printout ", dccio::name{self}, ":");
+         actc::print("test_ram_limit::printout ", actc::name{self}, ":");
          test_table table(self, self);
          for (int key = from; key <=to; ++key) {
             auto itr = table.find(key);
-            dccio::print("\nkey=", key);
-            dccio_assert (itr != table.end(), "could not find test_table entry");
-            dccio::print(" size=", itr->data.size());
+            actc::print("\nkey=", key);
+            actc_assert (itr != table.end(), "could not find test_table entry");
+            actc::print(" size=", itr->data.size());
          }
       }
 
@@ -73,11 +73,11 @@ class test_ram_limit : public dccio::contract {
 
          uint64_t primary_key()const { return key; }
 
-         dccLIB_SERIALIZE( test, (key)(data) )
+         actcLIB_SERIALIZE( test, (key)(data) )
       };
-      typedef dccio::multi_index< N(test.table), test> test_table;
+      typedef actc::multi_index< N(test.table), test> test_table;
 };
 
 #pragma clang diagnostic pop
 
-dccIO_ABI( test_ram_limit, (setentry)(rmentry)(printentry) )
+actc_ABI( test_ram_limit, (setentry)(rmentry)(printentry) )

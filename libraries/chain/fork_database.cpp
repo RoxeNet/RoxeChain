@@ -1,5 +1,5 @@
-#include <dccio/chain/fork_database.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/fork_database.hpp>
+#include <actc/chain/exceptions.hpp>
 #include <boost/multi_index_container.hpp>
 #include <boost/multi_index/member.hpp>
 #include <boost/multi_index/ordered_index.hpp>
@@ -9,7 +9,7 @@
 #include <fc/io/fstream.hpp>
 #include <fstream>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
    using boost::multi_index_container;
    using namespace boost::multi_index;
 
@@ -110,12 +110,12 @@ namespace dccio { namespace chain {
 
    void fork_database::set( block_state_ptr s ) {
       auto result = my->index.insert( s );
-      dcc_ASSERT( s->id == s->header.id(), fork_database_exception, 
+      actc_ASSERT( s->id == s->header.id(), fork_database_exception,
                   "block state id (${id}) is different from block state header id (${hid})", ("id", string(s->id))("hid", string(s->header.id())) );
 
          //FC_ASSERT( s->block_num == s->header.block_num() );
 
-      dcc_ASSERT( result.second, fork_database_exception, "unable to insert block state, duplicate state detected" );
+      actc_ASSERT( result.second, fork_database_exception, "unable to insert block state, duplicate state detected" );
       if( !my->head ) {
          my->head =  s;
       } else if( my->head->block_num < s->block_num ) {
@@ -125,7 +125,7 @@ namespace dccio { namespace chain {
 
    block_state_ptr fork_database::add( block_state_ptr n ) {
       auto inserted = my->index.insert(n);
-      dcc_ASSERT( inserted.second, fork_database_exception, "duplicate block added?" );
+      actc_ASSERT( inserted.second, fork_database_exception, "duplicate block added?" );
 
       my->head = *my->index.get<by_lib_block_num>().begin();
 
@@ -140,18 +140,18 @@ namespace dccio { namespace chain {
    }
 
    block_state_ptr fork_database::add( signed_block_ptr b, bool trust ) {
-      dcc_ASSERT( b, fork_database_exception, "attempt to add null block" );
-      dcc_ASSERT( my->head, fork_db_block_not_found, "no head block set" );
+      actc_ASSERT( b, fork_database_exception, "attempt to add null block" );
+      actc_ASSERT( my->head, fork_db_block_not_found, "no head block set" );
 
       const auto& by_id_idx = my->index.get<by_block_id>();
       auto existing = by_id_idx.find( b->id() );
-      dcc_ASSERT( existing == by_id_idx.end(), fork_database_exception, "we already know about this block" );
+      actc_ASSERT( existing == by_id_idx.end(), fork_database_exception, "we already know about this block" );
 
       auto prior = by_id_idx.find( b->previous );
-      dcc_ASSERT( prior != by_id_idx.end(), unlinkable_block_exception, "unlinkable block", ("id", string(b->id()))("previous", string(b->previous)) );
+      actc_ASSERT( prior != by_id_idx.end(), unlinkable_block_exception, "unlinkable block", ("id", string(b->id()))("previous", string(b->previous)) );
 
       auto result = std::make_shared<block_state>( **prior, move(b), trust );
-      dcc_ASSERT( result, fork_database_exception , "fail to add new block state" );
+      actc_ASSERT( result, fork_database_exception , "fail to add new block state" );
       return add(result);
    }
 
@@ -171,14 +171,14 @@ namespace dccio { namespace chain {
       {
          result.first.push_back(first_branch);
          first_branch = get_block( first_branch->header.previous );
-         dcc_ASSERT( first_branch, fork_db_block_not_found, "block ${id} does not exist", ("id", string(first_branch->header.previous)) );
+         actc_ASSERT( first_branch, fork_db_block_not_found, "block ${id} does not exist", ("id", string(first_branch->header.previous)) );
       }
 
       while( second_branch->block_num > first_branch->block_num )
       {
          result.second.push_back( second_branch );
          second_branch = get_block( second_branch->header.previous );
-         dcc_ASSERT( second_branch, fork_db_block_not_found, "block ${id} does not exist", ("id", string(second_branch->header.previous)) );
+         actc_ASSERT( second_branch, fork_db_block_not_found, "block ${id} does not exist", ("id", string(second_branch->header.previous)) );
       }
 
       while( first_branch->header.previous != second_branch->header.previous )
@@ -187,7 +187,7 @@ namespace dccio { namespace chain {
          result.second.push_back(second_branch);
          first_branch = get_block( first_branch->header.previous );
          second_branch = get_block( second_branch->header.previous );
-         dcc_ASSERT( first_branch && second_branch, fork_db_block_not_found, 
+         actc_ASSERT( first_branch && second_branch, fork_db_block_not_found,
                      "either block ${fid} or ${sid} does not exist", 
                      ("fid", string(first_branch->header.previous))("sid", string(second_branch->header.previous)) );
       }
@@ -235,7 +235,7 @@ namespace dccio { namespace chain {
 
       auto& by_id_idx = my->index.get<by_block_id>();
       auto itr = by_id_idx.find( h->id );
-      dcc_ASSERT( itr != by_id_idx.end(), fork_db_block_not_found, "could not find block in fork database" );
+      actc_ASSERT( itr != by_id_idx.end(), fork_db_block_not_found, "could not find block in fork database" );
 
       by_id_idx.modify( itr, [&]( auto& bsp ) { // Need to modify this way rather than directly so that Boost MultiIndex can re-sort
          bsp->in_current_chain = in_current_chain;
@@ -290,7 +290,7 @@ namespace dccio { namespace chain {
 
    void fork_database::add( const header_confirmation& c ) {
       auto b = get_block( c.block_id );
-      dcc_ASSERT( b, fork_db_block_not_found, "unable to find block id ${id}", ("id",c.block_id));
+      actc_ASSERT( b, fork_db_block_not_found, "unable to find block id ${id}", ("id",c.block_id));
       b->add_confirmation( c );
 
       if( b->bft_irreversible_blocknum < b->block_num &&
@@ -346,4 +346,4 @@ namespace dccio { namespace chain {
       }
    }
 
-} } /// dccio::chain
+} } /// actc::chain

@@ -3,6 +3,6 @@ configure_file("${ABI_FILES}" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
 
 add_wast_executable(TARGET asserter
   INCLUDE_FOLDERS "${STANDARD_INCLUDE_FOLDERS}"
-  LIBRARIES libc libc++ dcciolib
+  LIBRARIES libc libc++ actclib
   DESTINATION_FOLDER ${CMAKE_CURRENT_BINARY_DIR}
 )

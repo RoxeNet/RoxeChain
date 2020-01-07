@@ -1,9 +1,9 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/transaction.hpp>
+#include <actclib/actc.hpp>
+#include <actclib/transaction.hpp>
 
 #include "test_api.hpp"
 #include "test_action.cpp"
@@ -22,9 +22,9 @@ account_name global_receiver;
 
 extern "C" {
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-      if( code == N(dccio) && action == N(onerror) ) {
-         auto error = dccio::onerror::from_current_action();
-         dccio::print("onerror called\n");
+      if( code == N(actc) && action == N(onerror) ) {
+         auto error = actc::onerror::from_current_action();
+         actc::print("onerror called\n");
          auto error_trx = error.unpack_sent_trx();
          auto error_action = error_trx.actions.at(0).name;
 
@@ -183,7 +183,7 @@ extern "C" {
       WASM_TEST_HANDLER_EX(test_permission, test_account_creation_time);
 
       //unhandled test call
-      dccio_assert(false, "Unknown Test");
+      actc_assert(false, "Unknown Test");
 
    }
 }

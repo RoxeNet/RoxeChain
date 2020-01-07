@@ -1,14 +1,14 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/block.hpp>
-#include <dccio/chain/merkle.hpp>
+#include <actc/chain/block.hpp>
+#include <actc/chain/merkle.hpp>
 #include <fc/io/raw.hpp>
 #include <fc/bitutil.hpp>
 #include <algorithm>
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
    digest_type block_header::digest()const
    {
       return digest_type::hash(*this);

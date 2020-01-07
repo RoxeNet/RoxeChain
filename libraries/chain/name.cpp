@@ -1,16 +1,16 @@
-#include <dccio/chain/name.hpp>
+#include <actc/chain/name.hpp>
 #include <fc/variant.hpp>
 #include <boost/algorithm/string.hpp>
 #include <fc/exception/exception.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/exceptions.hpp>
 
-namespace dccio { namespace chain { 
+namespace actc { namespace chain {
 
    void name::set( const char* str ) {
       const auto len = strnlen(str, 14);
-      dcc_ASSERT(len <= 13, name_type_exception, "Name is longer than 13 characters (${name}) ", ("name", string(str)));
+      actc_ASSERT(len <= 13, name_type_exception, "Name is longer than 13 characters (${name}) ", ("name", string(str)));
       value = string_to_name(str);
-      dcc_ASSERT(to_string() == string(str), name_type_exception,
+      actc_ASSERT(to_string() == string(str), name_type_exception,
                  "Name not properly normalized (name: ${name}, normalized: ${normalized}) ",
                  ("name", string(str))("normalized", to_string()));
    }
@@ -32,9 +32,9 @@ namespace dccio { namespace chain {
       return str;
    }
 
-} } /// dccio::chain
+} } /// actc::chain
 
 namespace fc {
-  void to_variant(const dccio::chain::name& c, fc::variant& v) { v = std::string(c); }
-  void from_variant(const fc::variant& v, dccio::chain::name& check) { check = v.get_string(); }
+  void to_variant(const actc::chain::name& c, fc::variant& v) { v = std::string(c); }
+  void from_variant(const fc::variant& v, actc::chain::name& check) { check = v.get_string(); }
 } // fc

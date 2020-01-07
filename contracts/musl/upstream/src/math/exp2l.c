@@ -78,7 +78,7 @@ static const double tbl[TBLSIZE * 2] = {
 	0x1.a799e1330b358p-1,    0x1.bcb7ecac564p-55,
 	0x1.a9e6b5579fdbfp-1,    0x1.0fac90ef7fdp-55,
 	0x1.ac36bbfd3f37ap-1,   -0x1.f9234cae76dp-56,
-	0x1.ae89f995ad3adp-1,    0x1.7a1cd345dcc8p-55,
+	0x1.ae89f995ad3adp-1,    0x1.7a1cd345actc8p-55,
 	0x1.b0e07298db666p-1,   -0x1.bdef54c80e4p-55,
 	0x1.b33a2b84f15fbp-1,   -0x1.2805e3084d8p-58,
 	0x1.b59728de5593ap-1,   -0x1.c71dfbbba6ep-55,

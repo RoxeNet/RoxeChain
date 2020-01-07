@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/print.hpp> /// defines transfer struct (abi)
+#include <actclib/print.hpp> /// defines transfer struct (abi)
 
 extern "C" {
 
@@ -10,7 +10,7 @@ extern "C" {
     void apply( uint64_t, uint64_t, uint64_t ) {
        int idx = 0;
        while(true) {
-          dccio::print(idx++);
+          actc::print(idx++);
        }
     }
 }

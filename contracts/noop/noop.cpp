@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 
-namespace dccio {
+namespace actc {
 
    class noop: public contract {
       public:
@@ -18,6 +18,6 @@ namespace dccio {
          }
    };
 
-   dccIO_ABI( noop, ( anyaction ) )
+   actc_ABI( noop, ( anyaction ) )
 
-} /// dccio     
+} /// actc

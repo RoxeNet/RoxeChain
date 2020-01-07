@@ -1,6 +1,6 @@
 #include "common.hpp"
 
-#include <dcciolib/chain.h>
+#include <actclib/chain.h>
 
 namespace identity {
 

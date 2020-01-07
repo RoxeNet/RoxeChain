@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 #include "../test_api/test_api.hpp"
 
 #include "test_extended_memory.cpp"
@@ -43,7 +43,7 @@ extern "C" {
       WASM_TEST_HANDLER(test_memory, test_outofbound_13);
       
       //unhandled test call
-      dccio_assert(false, "Unknown Test");
+      actc_assert(false, "Unknown Test");
    }
 
 }

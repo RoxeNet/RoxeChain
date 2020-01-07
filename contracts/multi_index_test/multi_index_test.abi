@@ -1,5 +1,5 @@
 {
-  "version": "dccio::abi/1.0",
+  "version": "actc::abi/1.0",
   "types": [],
   "structs": [{
       "name": "trigger",

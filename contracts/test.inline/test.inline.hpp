@@ -1,8 +1,8 @@
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/privileged.h>
-#include <dcciolib/producer_schedule.hpp>
+#include <actclib/actc.hpp>
+#include <actclib/privileged.h>
+#include <actclib/producer_schedule.hpp>
 
-namespace dccio {
+namespace actc {
 
    class testinline : public contract {
       public:
@@ -16,8 +16,8 @@ namespace dccio {
             require_auth( reqauth );
             INLINE_ACTION_SENDER(testinline, reqauth)( forward_code, {forward_auth,N(active)}, {forward_auth} );
             //SEND_INLINE_ACTION( testinline(forward_code), reqauth, {forward_auth,N(active)}, {forward_auth} );
-            //dccio::dispatch_inline<account_name>( N(forward_code), N(reqauth), {{forward_auth, N(active)}}, {forward_auth} );
+            //actc::dispatch_inline<account_name>( N(forward_code), N(reqauth), {{forward_auth, N(active)}}, {forward_auth} );
          }
    };
 
-} /// namespace dccio
+} /// namespace actc

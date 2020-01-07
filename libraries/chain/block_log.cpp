@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/block_log.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/chain/block_log.hpp>
+#include <actc/chain/exceptions.hpp>
 #include <fstream>
 #include <fc/io/raw.hpp>
 
 #define LOG_READ  (std::ios::in | std::ios::binary)
 #define LOG_WRITE (std::ios::out | std::ios::binary | std::ios::app)
 
-namespace dccio { namespace chain {
+namespace actc { namespace chain {
 
    const uint32_t block_log::min_supported_version = 1;
 
@@ -136,8 +136,8 @@ namespace dccio { namespace chain {
          my->block_stream.seekg( 0 );
          my->version = 0;
          my->block_stream.read( (char*)&my->version, sizeof(my->version) );
-         dcc_ASSERT( my->version > 0, block_log_exception, "Block log was not setup properly" );
-         dcc_ASSERT( my->version >= min_supported_version && my->version <= max_supported_version, block_log_unsupported_version,
+         actc_ASSERT( my->version > 0, block_log_exception, "Block log was not setup properly" );
+         actc_ASSERT( my->version >= min_supported_version && my->version <= max_supported_version, block_log_unsupported_version,
                  "Unsupported version of block log. Block log version is ${version} while code supports version(s) [${min},${max}]",
                  ("version", my->version)("min", block_log::min_supported_version)("max", block_log::max_supported_version) );
 
@@ -146,7 +146,7 @@ namespace dccio { namespace chain {
          if (my->version > 1){
             my->first_block_num = 0;
             my->block_stream.read( (char*)&my->first_block_num, sizeof(my->first_block_num) );
-            dcc_ASSERT(my->first_block_num > 0, block_log_exception, "Block log is malformed, first recorded block number is 0 but must be greater than or equal to 1");
+            actc_ASSERT(my->first_block_num > 0, block_log_exception, "Block log is malformed, first recorded block number is 0 but must be greater than or equal to 1");
          } else {
             my->first_block_num = 1;
          }
@@ -189,13 +189,13 @@ namespace dccio { namespace chain {
 
    uint64_t block_log::append(const signed_block_ptr& b) {
       try {
-         dcc_ASSERT( my->genesis_written_to_block_log, block_log_append_fail, "Cannot append to block log until the genesis is first written" );
+         actc_ASSERT( my->genesis_written_to_block_log, block_log_append_fail, "Cannot append to block log until the genesis is first written" );
 
          my->check_block_write();
          my->check_index_write();
 
          uint64_t pos = my->block_stream.tellp();
-         dcc_ASSERT(my->index_stream.tellp() == sizeof(uint64_t) * (b->block_num() - my->first_block_num),
+         actc_ASSERT(my->index_stream.tellp() == sizeof(uint64_t) * (b->block_num() - my->first_block_num),
                    block_log_append_fail,
                    "Append to index file occuring at wrong position.",
                    ("position", (uint64_t) my->index_stream.tellp())
@@ -282,7 +282,7 @@ namespace dccio { namespace chain {
          uint64_t pos = get_block_pos(block_num);
          if (pos != npos) {
             b = read_block(pos).first;
-            dcc_ASSERT(b->block_num() == block_num, reversible_blocks_exception,
+            actc_ASSERT(b->block_num() == block_num, reversible_blocks_exception,
                       "Wrong block was read from block log.", ("returned", b->block_num())("expected", block_num));
          }
          return b;
@@ -366,7 +366,7 @@ namespace dccio { namespace chain {
 
    fc::path block_log::repair_log( const fc::path& data_dir, uint32_t truncate_at_block ) {
       ilog("Recovering Block Log...");
-      dcc_ASSERT( fc::is_directory(data_dir) && fc::is_regular_file(data_dir / "blocks.log"), block_log_not_found,
+      actc_ASSERT( fc::is_directory(data_dir) && fc::is_regular_file(data_dir / "blocks.log"), block_log_not_found,
                  "Block log not found in '${blocks_dir}'", ("blocks_dir", data_dir)          );
 
       auto now = fc::time_point::now();
@@ -377,10 +377,10 @@ namespace dccio { namespace chain {
       }
       auto backup_dir = blocks_dir.parent_path();
       auto blocks_dir_name = blocks_dir.filename();
-      dcc_ASSERT( blocks_dir_name.generic_string() != ".", block_log_exception, "Invalid path to blocks directory" );
+      actc_ASSERT( blocks_dir_name.generic_string() != ".", block_log_exception, "Invalid path to blocks directory" );
       backup_dir = backup_dir / blocks_dir_name.generic_string().append("-").append( now );
 
-      dcc_ASSERT( !fc::exists(backup_dir), block_log_backup_dir_exist,
+      actc_ASSERT( !fc::exists(backup_dir), block_log_backup_dir_exist,
                  "Cannot move existing blocks directory to already existing directory '${new_blocks_dir}'",
                  ("new_blocks_dir", backup_dir) );
 
@@ -404,8 +404,8 @@ namespace dccio { namespace chain {
 
       uint32_t version = 0;
       old_block_stream.read( (char*)&version, sizeof(version) );
-      dcc_ASSERT( version > 0, block_log_exception, "Block log was not setup properly" );
-      dcc_ASSERT( version >= min_supported_version && version <= max_supported_version, block_log_unsupported_version,
+      actc_ASSERT( version > 0, block_log_exception, "Block log was not setup properly" );
+      actc_ASSERT( version >= min_supported_version && version <= max_supported_version, block_log_unsupported_version,
                  "Unsupported version of block log. Block log version is ${version} while code supports version(s) [${min},${max}]",
                  ("version", version)("min", block_log::min_supported_version)("max", block_log::max_supported_version) );
 
@@ -428,7 +428,7 @@ namespace dccio { namespace chain {
          std::decay_t<decltype(npos)> actual_totem;
          old_block_stream.read ( (char*)&actual_totem, sizeof(actual_totem) );
 
-         dcc_ASSERT(actual_totem == expected_totem, block_log_exception,
+         actc_ASSERT(actual_totem == expected_totem, block_log_exception,
                     "Expected separator between block log header and blocks was not found( expected: ${e}, actual: ${a} )",
                     ("e", fc::to_hex((char*)&expected_totem, sizeof(expected_totem) ))("a", fc::to_hex((char*)&actual_totem, sizeof(actual_totem) )));
 
@@ -526,7 +526,7 @@ namespace dccio { namespace chain {
    }
 
    genesis_state block_log::extract_genesis_state( const fc::path& data_dir ) {
-      dcc_ASSERT( fc::is_directory(data_dir) && fc::is_regular_file(data_dir / "blocks.log"), block_log_not_found,
+      actc_ASSERT( fc::is_directory(data_dir) && fc::is_regular_file(data_dir / "blocks.log"), block_log_not_found,
                  "Block log not found in '${blocks_dir}'", ("blocks_dir", data_dir)          );
 
       std::fstream  block_stream;
@@ -534,8 +534,8 @@ namespace dccio { namespace chain {
 
       uint32_t version = 0;
       block_stream.read( (char*)&version, sizeof(version) );
-      dcc_ASSERT( version > 0, block_log_exception, "Block log was not setup properly." );
-      dcc_ASSERT( version >= min_supported_version && version <= max_supported_version, block_log_unsupported_version,
+      actc_ASSERT( version > 0, block_log_exception, "Block log was not setup properly." );
+      actc_ASSERT( version >= min_supported_version && version <= max_supported_version, block_log_unsupported_version,
                  "Unsupported version of block log. Block log version is ${version} while code supports version(s) [${min},${max}]",
                  ("version", version)("min", block_log::min_supported_version)("max", block_log::max_supported_version) );
 
@@ -549,4 +549,4 @@ namespace dccio { namespace chain {
       return gs;
    }
 
-} } /// dccio::chain
+} } /// actc::chain

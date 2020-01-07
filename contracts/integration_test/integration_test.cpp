@@ -1,7 +1,7 @@
-#include <dcciolib/dccio.hpp>
-using namespace dccio;
+#include <actclib/actc.hpp>
+using namespace actc;
 
-struct integration_test : public dccio::contract {
+struct integration_test : public actc::contract {
       using contract::contract;
 
       struct payload {
@@ -10,15 +10,15 @@ struct integration_test : public dccio::contract {
 
          uint64_t primary_key()const { return key; }
       };
-      typedef dccio::multi_index<N(payloads), payload> payloads;
+      typedef actc::multi_index<N(payloads), payload> payloads;
 
       /// @abi action 
       void store( account_name from,
                   account_name to,
                   uint64_t     num ) {
          require_auth( from );
-         dccio_assert( is_account( to ), "to account does not exist");
-         dccio_assert( num < std::numeric_limits<size_t>::max(), "num to large");
+         actc_assert( is_account( to ), "to account does not exist");
+         actc_assert( num < std::numeric_limits<size_t>::max(), "num to large");
          payloads data ( _self, from );
          uint64_t key = 0;
          const uint64_t num_keys = 5;
@@ -34,4 +34,4 @@ struct integration_test : public dccio::contract {
       }
 };
 
-dccIO_ABI( integration_test, (store) )
+actc_ABI( integration_test, (store) )

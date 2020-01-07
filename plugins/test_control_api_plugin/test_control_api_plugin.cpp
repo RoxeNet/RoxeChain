@@ -1,17 +1,17 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/test_control_api_plugin/test_control_api_plugin.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/test_control_api_plugin/test_control_api_plugin.hpp>
+#include <actc/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _test_control_api_plugin = app().register_plugin<test_control_api_plugin>();
 
-using namespace dccio;
+using namespace actc;
 
 class test_control_api_plugin_impl {
 public:

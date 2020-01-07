@@ -1,32 +1,32 @@
 [submodule "libraries/chainbase"]
 	path = libraries/chainbase
-	url = https://github.com/dccio/chainbase
+	url = https://github.com/actc/chainbase
         ignore = dirty
 [submodule "libraries/appbase"]
 	path = libraries/appbase
-	url = https://github.com/dccio/appbase
+	url = https://github.com/actc/appbase
         ignore = dirty
 [submodule "contracts/musl/upstream"]
 	path = contracts/musl/upstream
-	url = https://github.com/dccIO/musl.git
-	branch = dccio
+	url = https://github.com/actc/musl.git
+	branch = actc
 [submodule "contracts/libc++/upstream"]
 	path = contracts/libc++/upstream
-	url = https://github.com/dccIO/libcxx.git
-	branch = dccio
+	url = https://github.com/actc/libcxx.git
+	branch = actc
 [submodule "externals/binaryen"]
 	path = externals/binaryen
-	url = https://github.com/dccIO/binaryen
+	url = https://github.com/actc/binaryen
 
 [submodule "libraries/softfloat"]
 	path = libraries/softfloat
-	url = https://github.com/dccio/berkeley-softfloat-3
+	url = https://github.com/actc/berkeley-softfloat-3
 [submodule "externals/magic_get"]
 	path = externals/magic_get
-	url = https://github.com/dccIO/magic_get
+	url = https://github.com/actc/magic_get
 [submodule "libraries/fc"]
 	path = libraries/fc
-	url = https://github.com/dccIO/fc
+	url = https://github.com/actc/fc
 [submodule "libraries/wabt"]
 	path = libraries/wabt
-	url = http://github.com/dccIO/wabt
+	url = http://github.com/actc/wabt

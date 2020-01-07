@@ -1,17 +1,17 @@
 # txn\_test\_gen\_plugin
 
-This plugin provides a way to generate a given amount of transactions per second against the currency contract. It runs internally to dccd to reduce overhead.
+This plugin provides a way to generate a given amount of transactions per second against the currency contract. It runs internally to actcd to reduce overhead.
 
-This general procedure was used when doing Dawn 3.0 performance testing as mentioned in https://github.com/dccIO/dcc/issues/2078.
+This general procedure was used when doing Dawn 3.0 performance testing as mentioned in https://github.com/actc/actc/issues/2078.
 
 ## Performance testing
 
-The following instructions describe how to use the `txn_test_gen_plugin` plugin to generate 1,000 transaction per second load on a simple dccIO node.
+The following instructions describe how to use the `txn_test_gen_plugin` plugin to generate 1,000 transaction per second load on a simple actc node.
 
 ### Create config and data directories
-Make an empty directory for our configs and data, `mkdir ~/dcc.data`, and define a logging.json that doesn't print debug information (which occurs for each txn) to the console:
+Make an empty directory for our configs and data, `mkdir ~/actc.data`, and define a logging.json that doesn't print debug information (which occurs for each txn) to the console:
 ```bash
-cat << EOF > ~/dcc.data/logging.json
+cat << EOF > ~/actc.data/logging.json
 {
   "includes": [],
   "appenders": [{
@@ -51,24 +51,24 @@ EOF
 
 ### Launch producer
 ```bash
-$ ./noddcc -d ~/dcc.data/producer_node --config-dir ~/dcc.data/producer_node -l ~/dcc.data/logging.json --http-server-address "" -p dccio -e
+$ ./nodactc -d ~/actc.data/producer_node --config-dir ~/actc.data/producer_node -l ~/actc.data/logging.json --http-server-address "" -p actc -e
 ```
 
 ### Launch non-producer that will generate transactions
 ```bash
-$ ./noddcc -d ~/dcc.data/generator_node --config-dir ~/dcc.data/generator_node -l ~/dcc.data/logging.json --plugin dccio::txn_test_gen_plugin --plugin dccio::chain_api_plugin --p2p-peer-address localhost:9876 --p2p-listen-endpoint localhost:5555
+$ ./nodactc -d ~/actc.data/generator_node --config-dir ~/actc.data/generator_node -l ~/actc.data/logging.json --plugin actc::txn_test_gen_plugin --plugin actc::chain_api_plugin --p2p-peer-address localhost:9876 --p2p-listen-endpoint localhost:5555
 ```
 
 ### Create a wallet on the non-producer and set bios contract
 ```bash
-$ ./cldcc wallet create --to-console
-$ ./cldcc wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
-$ ./cldcc set contract dccio ~/dcc/build.release/contracts/dccio.bios/ 
+$ ./clactc wallet create --to-console
+$ ./clactc wallet import --private-key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+$ ./clactc set contract actc ~/actc/build.release/contracts/actc.bios/
 ```
 
 ### Initialize the accounts txn_test_gen_plugin uses
 ```bash
-$ curl --data-binary '["dccio", "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]' http://127.0.0.1:8888/v1/txn_test_gen/create_test_accounts
+$ curl --data-binary '["actc", "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]' http://127.0.0.1:8888/v1/txn_test_gen/create_test_accounts
 ```
 
 ### Start transaction generation, this will submit 20 transactions evey 20ms (total of 1000TPS)
@@ -78,9 +78,9 @@ $ curl --data-binary '["", 20, 20]' http://127.0.0.1:8888/v1/txn_test_gen/start_
 
 ### Note the producer console prints
 ```bash
-dccio generated block 9b8b851d... #3219 @ 2018-04-25T16:07:47.000 with 500 trxs, lib: 3218
-dccio generated block e5b3cd5d... #3220 @ 2018-04-25T16:07:47.500 with 500 trxs, lib: 3219
-dccio generated block b243aeaa... #3221 @ 2018-04-25T16:07:48.000 with 500 trxs, lib: 3220
+actc generated block 9b8b851d... #3219 @ 2018-04-25T16:07:47.000 with 500 trxs, lib: 3218
+actc generated block e5b3cd5d... #3220 @ 2018-04-25T16:07:47.500 with 500 trxs, lib: 3219
+actc generated block b243aeaa... #3221 @ 2018-04-25T16:07:48.000 with 500 trxs, lib: 3220
 ```
 
 Note in the console output there are 500 transactions in each of the blocks which are produced every 500 ms yielding 1,000 transactions / second.

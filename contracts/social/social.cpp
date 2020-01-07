@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcc.hpp>
+#include <actc.hpp>
 
 /**
- *  The purpose of this contract is to implement something like Steem on dcc, this
+ *  The purpose of this contract is to implement something like Steem on actc, this
  *  means this contract defines its own currency, allows people to create posts, vote
  *  on posts, and stake their voting power.
  *
@@ -62,7 +62,7 @@ void apply_social_post() {
    const auto& post   = current_action<post_action>();
    require_auth( post.author );
 
-   dccio_assert( current_context() == post.author, "cannot call from any other context" );
+   actc_assert( current_context() == post.author, "cannot call from any other context" );
    
    static post_record& existing;
    if( !Db::get( post.postid, existing ) )
@@ -84,8 +84,8 @@ void apply_social_vote() {
 
    if( context == vote.author ) {
       static post_record post;
-      dccio_assert( Db::get( vote.postid, post ) > 0, "unable to find post" );
-      dccio_assert( now() - post.created < days(7), "cannot vote after 7 days" );
+      actc_assert( Db::get( vote.postid, post ) > 0, "unable to find post" );
+      actc_assert( now() - post.created < days(7), "cannot vote after 7 days" );
       post.votes += vote.vote_power;
       Db::store( vote.postid, post );
    } 
@@ -95,13 +95,13 @@ void apply_social_vote() {
       auto abs_vote = abs(vote.vote_power);
       vote_account.vote_power = min( vote_account.social_power,
                                      vote_account.vote_power + (vote_account.social_power * (now()-last_vote)) / days(7));
-      dccio_assert( abs_vote <= vote_account.vote_power, "insufficient vote power" );
+      actc_assert( abs_vote <= vote_account.vote_power, "insufficient vote power" );
       post.votes += vote.vote_power;
       vote_account.vote_power -= abs_vote;
       vote_account.last_vote  = now();
       Db::store( "account", vote_account );
    } else {
-      dccio_assert( false, "invalid context for execution of this vote" );
+      actc_assert( false, "invalid context for execution of this vote" );
    }
 }
 

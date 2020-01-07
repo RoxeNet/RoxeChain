@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 #include "../test_api/test_api.hpp"
 
 #include "test_db.cpp"
@@ -23,7 +23,7 @@ extern "C" {
       WASM_TEST_HANDLER_EX(test_db, misaligned_secondary_key256_tests);
 
       //unhandled test call
-      dccio_assert(false, "Unknown Test");
+      actc_assert(false, "Unknown Test");
    }
 
 }

@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 #pragma once
 
-#include <dcciolib/dccio.hpp>
+#include <actclib/actc.hpp>
 
 namespace proxy {
 
@@ -13,7 +13,7 @@ namespace proxy {
       account_name owner;
       uint32_t     delay;
 
-      dccLIB_SERIALIZE( set_owner, (owner)(delay) )
+      actcLIB_SERIALIZE( set_owner, (owner)(delay) )
    };
 
    //@abi table

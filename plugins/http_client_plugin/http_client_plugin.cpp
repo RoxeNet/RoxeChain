@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/http_client_plugin/http_client_plugin.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/http_client_plugin/http_client_plugin.hpp>
+#include <actc/chain/exceptions.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <fstream>
 
-namespace dccio {
+namespace actc {
 
 http_client_plugin::http_client_plugin():my(new http_client()){}
 http_client_plugin::~http_client_plugin(){}
@@ -34,7 +34,7 @@ void http_client_plugin::plugin_initialize(const variables_map& options) {
                   std::stringstream sstr;
                   sstr << infile.rdbuf();
                   pem_str = sstr.str();
-                  dcc_ASSERT( boost::algorithm::starts_with( pem_str, "-----BEGIN CERTIFICATE-----\n" ),
+                  actc_ASSERT( boost::algorithm::starts_with( pem_str, "-----BEGIN CERTIFICATE-----\n" ),
                               chain::invalid_http_client_root_cert,
                              "File does not appear to be a PEM encoded certificate" );
                } catch ( const fc::exception& e ) {

@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/wallet_plugin/wallet_plugin.hpp>
-#include <dccio/wallet_plugin/wallet_manager.hpp>
-#include <dccio/wallet_plugin/yubihsm_wallet.hpp>
-#include <dccio/chain/exceptions.hpp>
+#include <actc/wallet_plugin/wallet_plugin.hpp>
+#include <actc/wallet_plugin/wallet_manager.hpp>
+#include <actc/wallet_plugin/yubihsm_wallet.hpp>
+#include <actc/chain/exceptions.hpp>
 #include <boost/filesystem/path.hpp>
 #include <chrono>
 
@@ -13,7 +13,7 @@
 
 namespace fc { class variant; }
 
-namespace dccio {
+namespace actc {
 
 static appbase::abstract_plugin& _wallet_plugin = app().register_plugin<wallet_plugin>();
 
@@ -52,7 +52,7 @@ void wallet_plugin::plugin_initialize(const variables_map& options) {
       }
       if (options.count("unlock-timeout")) {
          auto timeout = options.at("unlock-timeout").as<int64_t>();
-         dcc_ASSERT(timeout > 0, chain::invalid_lock_timeout_exception, "Please specify a positive timeout ${t}", ("t", timeout));
+         actc_ASSERT(timeout > 0, chain::invalid_lock_timeout_exception, "Please specify a positive timeout ${t}", ("t", timeout));
          std::chrono::seconds t(timeout);
          wallet_manager_ptr->set_timeout(t);
       }
@@ -68,4 +68,4 @@ void wallet_plugin::plugin_initialize(const variables_map& options) {
    } FC_LOG_AND_RETHROW()
 }
 
-} // namespace dccio
+} // namespace actc
