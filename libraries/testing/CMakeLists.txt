@@ -7,14 +7,12 @@ add_library( actc_testing
              ${HEADERS}
         )
 
-target_link_libraries( actc_testing actc_chain actc_utilities fc chainbase Logging IR WAST WASM Runtime )
+target_link_libraries( actc_testing actc_chain fc chainbase Logging IR WAST WASM Runtime )
 target_include_directories( actc_testing
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../wasm-jit/Include"
-                                   "${CMAKE_BINARY_DIR}/contracts"
+                                   "${CMAKE_BINARY_DIR}/unittests/include"
                             )
-
-add_dependencies( actc_testing actc.bios )
 
 if(MSVC)
   set_source_files_properties( db_init.cpp db_block.cpp database.cpp block_log.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
