@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/http_client_plugin/http_client_plugin.hpp>
 #include <actc/chain/exceptions.hpp>
@@ -34,7 +34,7 @@ void http_client_plugin::plugin_initialize(const variables_map& options) {
                   std::stringstream sstr;
                   sstr << infile.rdbuf();
                   pem_str = sstr.str();
-                  actc_ASSERT( boost::algorithm::starts_with( pem_str, "-----BEGIN CERTIFICATE-----\n" ),
+                  ACTC_ASSERT( boost::algorithm::starts_with( pem_str, "-----BEGIN CERTIFICATE-----\n" ),
                               chain::invalid_http_client_root_cert,
                              "File does not appear to be a PEM encoded certificate" );
                } catch ( const fc::exception& e ) {

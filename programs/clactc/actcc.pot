@@ -3,8 +3,8 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: actc 1.0\n"
-"Report-Msgid-Bugs-To: https://github.com/actc/actc/issues"
+"Project-Id-Version: ACTC 1.0\n"
+"Report-Msgid-Bugs-To: https://github.com/ACTC/actc/issues"
 "POT-Creation-Date: 2017-09-28 11:40-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
@@ -343,16 +343,16 @@ msgstr ""
 msgid "set or update blockchain action state"
 msgstr ""
 
-msgid "Transfer actc from account to account"
+msgid "Transfer tokens from account to account"
 msgstr ""
 
-msgid "The account sending actc"
+msgid "The account sending tokens"
 msgstr ""
 
-msgid "The account receiving actc"
+msgid "The account receiving tokens"
 msgstr ""
 
-msgid "The amount of actc to send"
+msgid "The amount of tokens to send"
 msgstr ""
 
 msgid "The memo for the transfer"

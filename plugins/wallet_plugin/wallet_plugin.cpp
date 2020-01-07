@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/wallet_plugin/wallet_plugin.hpp>
 #include <actc/wallet_plugin/wallet_manager.hpp>
@@ -52,7 +52,7 @@ void wallet_plugin::plugin_initialize(const variables_map& options) {
       }
       if (options.count("unlock-timeout")) {
          auto timeout = options.at("unlock-timeout").as<int64_t>();
-         actc_ASSERT(timeout > 0, chain::invalid_lock_timeout_exception, "Please specify a positive timeout ${t}", ("t", timeout));
+         ACTC_ASSERT(timeout > 0, chain::invalid_lock_timeout_exception, "Please specify a positive timeout ${t}", ("t", timeout));
          std::chrono::seconds t(timeout);
          wallet_manager_ptr->set_timeout(t);
       }

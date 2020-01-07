@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 #include <actc/test_control_plugin/test_control_plugin.hpp>
