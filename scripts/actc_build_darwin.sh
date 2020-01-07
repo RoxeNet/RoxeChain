@@ -32,13 +32,13 @@
 	fi
 
 	if [ "${OS_MIN}" -lt 12 ]; then
-		echo "You must be running Mac OS 10.12.x or higher to install dccIO."
+		echo "You must be running Mac OS 10.12.x or higher to install actc."
 		echo "Exiting now."
 		exit 1
 	fi
 
 	if [ "${DISK_AVAIL}" -lt "$DISK_MIN" ]; then
-		echo "You must have at least ${DISK_MIN}GB of available storage to install dccIO."
+		echo "You must have at least ${DISK_MIN}GB of available storage to install actc."
 		echo "Exiting now."
 		exit 1
 	fi
@@ -68,7 +68,7 @@
 	printf "\\tChecking Home Brew installation\\n"
 	if ! BREW=$( command -v brew )
 	then
-		printf "\\tHomebrew must be installed to compile dcc.IO\\n\\n"
+		printf "\\tHomebrew must be installed to compile actc.IO\\n\\n"
 		printf "\\tDo you wish to install Home Brew?\\n"
 		select yn in "Yes" "No"; do
 			case "${yn}" in
@@ -121,7 +121,7 @@
 		DISPLAY="${DISPLAY}${COUNT}. ${name}\\n\\t"
 		printf "\\t\\t %s ${bldred}NOT${txtrst} found.\\n" "${name}"
 		(( COUNT++ ))
-	done < "${SOURCE_DIR}/scripts/dccio_build_dep"
+	done < "${SOURCE_DIR}/scripts/actc_build_dep"
 	IFS="${var_ifs}"
 
 	printf "\\tChecking Python3 ... "
@@ -135,7 +135,7 @@
 	fi
 
 	if [ $COUNT -gt 1 ]; then
-		printf "\\n\\tThe following dependencies are required to install dccIO.\\n"
+		printf "\\n\\tThe following dependencies are required to install actc.\\n"
 		printf "\\n\\t${DISPLAY}\\n\\n"
 		echo "Do you wish to install these packages?"
 		select yn in "Yes" "No"; do
@@ -180,7 +180,7 @@
 	if [ "${BVERSION}" != "106700" ]; then
 		if [ ! -z "${BVERSION}" ]; then
 			printf "\\tFound Boost Version %s.\\n" "${BVERSION}"
-			printf "\\tdcc.IO requires Boost version 1.67.\\n"
+			printf "\\tactc.IO requires Boost version 1.67.\\n"
 			printf "\\tWould you like to uninstall version %s and install Boost version 1.67.\\n" "${BVERSION}"
 			select yn in "Yes" "No"; do
 				case $yn in

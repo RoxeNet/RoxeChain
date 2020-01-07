@@ -1,35 +1,35 @@
 #!/bin/bash
 #
-# dccio-tn_roll is used to have all of the instances of the dcc daemon on a host brought down
+# actc-tn_roll is used to have all of the instances of the actc daemon on a host brought down
 # so that the underlying executable image file (the "text file") can be replaced. Then
 # all instances are restarted.
-# usage: dccio-tn_roll.sh [arglist]
+# usage: actc-tn_roll.sh [arglist]
 # arglist will be passed to the node's command line. First with no modifiers
 # then with --hard-replay-blockchain and then a third time with --delete-all-blocks
 #
 # The data directory and log file are set by this script. Do not pass them on
 # the command line.
 #
-# In most cases, simply running ./dccio-tn_roll.sh is sufficient.
+# In most cases, simply running ./actc-tn_roll.sh is sufficient.
 #
 
-if [ -z "$dccIO_HOME" ]; then
-    echo dccIO_HOME not set - $0 unable to proceed.
+if [ -z "$actc_HOME" ]; then
+    echo actc_HOME not set - $0 unable to proceed.
     exit -1
 fi
 
-cd $dccIO_HOME
+cd $actc_HOME
 
-if [ -z "$dccIO_NODE" ]; then
+if [ -z "$actc_NODE" ]; then
     DD=`ls -d var/lib/node_[012]?`
     ddcount=`echo $DD | wc -w`
     if [ $ddcount -gt 1 ]; then
         DD="all"
     fi
     OFS=$((${#DD}-2))
-    export dccIO_NODE=${DD:$OFS}
+    export actc_NODE=${DD:$OFS}
 else
-    DD=var/lib/node_$dccIO_NODE
+    DD=var/lib/node_$actc_NODE
     if [ ! \( -d $DD \) ]; then
         echo no directory named $PWD/$DD
         cd -
@@ -39,7 +39,7 @@ fi
 
 prog=""
 RD=""
-for p in dccd dcciod noddcc; do
+for p in actcd actcd nodactc; do
     prog=$p
     RD=bin
     if [ -f $RD/$prog ]; then
@@ -55,11 +55,11 @@ for p in dccd dcciod noddcc; do
 done
 
 if [ \( -z "$prog" \) -o \( -z "$RD" \) ]; then
-    echo unable to locate binary for dccd or dcciod or noddcc
+    echo unable to locate binary for actcd or actcd or nodactc
     exit 1
 fi
 
-SDIR=staging/dcc
+SDIR=staging/actc
 if [ ! -e $SDIR/$RD/$prog ]; then
     echo $SDIR/$RD/$prog does not exist
     exit 1
@@ -76,17 +76,17 @@ fi
 
 echo DD = $DD
 
-bash $dccIO_HOME/scripts/dccio-tn_down.sh
+bash $actc_HOME/scripts/actc-tn_down.sh
 
 cp $SDIR/$RD/$prog $RD/$prog
 
 if [ $DD = "all" ]; then
-    for dccIO_RESTART_DATA_DIR in `ls -d var/lib/node_??`; do
-        bash $dccIO_HOME/scripts/dccio-tn_up.sh "$*"
+    for actc_RESTART_DATA_DIR in `ls -d var/lib/node_??`; do
+        bash $actc_HOME/scripts/actc-tn_up.sh "$*"
     done
 else
-    bash $dccIO_HOME/scripts/dccio-tn_up.sh "$*"
+    bash $actc_HOME/scripts/actc-tn_up.sh "$*"
 fi
-unset dccIO_RESTART_DATA_DIR
+unset actc_RESTART_DATA_DIR
 
 cd -

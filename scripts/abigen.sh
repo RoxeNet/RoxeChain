@@ -19,4 +19,4 @@ shift; shift
 
 #echo "Source directory: ${SOURCE_DIR}"
 
-eval "${BUILD_DIR}/programs/dccio-abigen/dccio-abigen -extra-arg=--std=c++14 -extra-arg=--target=wasm32 -extra-arg=\"-I${SOURCE_DIR}/contracts/libc++/upstream/include\" -extra-arg=\"-I${SOURCE_DIR}/contracts/musl/upstream/include\" -extra-arg=\"-I${SOURCE_DIR}/externals/magic_get/include\" -extra-arg=\"-I${SOURCE_DIR}/contracts\" $@"
+eval "${BUILD_DIR}/programs/actc-abigen/actc-abigen -extra-arg=--std=c++14 -extra-arg=--target=wasm32 -extra-arg=\"-I${SOURCE_DIR}/contracts/libc++/upstream/include\" -extra-arg=\"-I${SOURCE_DIR}/contracts/musl/upstream/include\" -extra-arg=\"-I${SOURCE_DIR}/externals/magic_get/include\" -extra-arg=\"-I${SOURCE_DIR}/contracts\" $@"
