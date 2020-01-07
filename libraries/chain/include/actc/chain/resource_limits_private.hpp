@@ -16,7 +16,7 @@ namespace actc { namespace chain { namespace resource_limits {
 
       template<typename T>
       T operator* (T value, const ratio<T>& r) {
-         actc_ASSERT(r.numerator == T(0) || std::numeric_limits<T>::max() / r.numerator >= value, rate_limiting_state_inconsistent, "Usage exceeds maximum value representable after extending for precision");
+         ACTC_ASSERT(r.numerator == T(0) || std::numeric_limits<T>::max() / r.numerator >= value, rate_limiting_state_inconsistent, "Usage exceeds maximum value representable after extending for precision");
          return (value * r.numerator) / r.denominator;
       }
 
@@ -41,7 +41,7 @@ namespace actc { namespace chain { namespace resource_limits {
       {
          const GreaterIntType max = std::numeric_limits<LesserIntType>::max();
          const GreaterIntType min = std::numeric_limits<LesserIntType>::min();
-         actc_ASSERT( val >= min && val <= max, rate_limiting_state_inconsistent, "Casting a higher bit integer value ${v} to a lower bit integer value which cannot contain the value, valid range is [${min}, ${max}]", ("v", val)("min", min)("max",max) );
+         ACTC_ASSERT( val >= min && val <= max, rate_limiting_state_inconsistent, "Casting a higher bit integer value ${v} to a lower bit integer value which cannot contain the value, valid range is [${min}, ${max}]", ("v", val)("min", min)("max",max) );
          return LesserIntType(val);
       };
 
@@ -54,7 +54,7 @@ namespace actc { namespace chain { namespace resource_limits {
       {
          const GreaterIntType max = std::numeric_limits<LesserIntType>::max();
          const GreaterIntType min = 0;
-         actc_ASSERT( val >= min && val <= max, rate_limiting_state_inconsistent, "Casting a higher bit integer value ${v} to a lower bit integer value which cannot contain the value, valid range is [${min}, ${max}]", ("v", val)("min", min)("max",max) );
+         ACTC_ASSERT( val >= min && val <= max, rate_limiting_state_inconsistent, "Casting a higher bit integer value ${v} to a lower bit integer value which cannot contain the value, valid range is [${min}, ${max}]", ("v", val)("min", min)("max",max) );
          return LesserIntType(val);
       };
 
@@ -91,14 +91,14 @@ namespace actc { namespace chain { namespace resource_limits {
          void add( uint64_t units, uint32_t ordinal, uint32_t window_size /* must be positive */ )
          {
             // check for some numerical limits before doing any state mutations
-            actc_ASSERT(units <= max_raw_value, rate_limiting_state_inconsistent, "Usage exceeds maximum value representable after extending for precision");
-            actc_ASSERT(std::numeric_limits<decltype(consumed)>::max() - consumed >= units, rate_limiting_state_inconsistent, "Overflow in tracked usage when adding usage!");
+            ACTC_ASSERT(units <= max_raw_value, rate_limiting_state_inconsistent, "Usage exceeds maximum value representable after extending for precision");
+            ACTC_ASSERT(std::numeric_limits<decltype(consumed)>::max() - consumed >= units, rate_limiting_state_inconsistent, "Overflow in tracked usage when adding usage!");
 
             auto value_ex_contrib = downgrade_cast<uint64_t>(integer_divide_ceil((uint128_t)units * Precision, (uint128_t)window_size));
-            actc_ASSERT(std::numeric_limits<decltype(value_ex)>::max() - value_ex >= value_ex_contrib, rate_limiting_state_inconsistent, "Overflow in accumulated value when adding usage!");
+            ACTC_ASSERT(std::numeric_limits<decltype(value_ex)>::max() - value_ex >= value_ex_contrib, rate_limiting_state_inconsistent, "Overflow in accumulated value when adding usage!");
 
             if( last_ordinal != ordinal ) {
-               actc_ASSERT( ordinal > last_ordinal, resource_limit_exception, "new ordinal cannot be less than the previous ordinal" );
+               ACTC_ASSERT( ordinal > last_ordinal, resource_limit_exception, "new ordinal cannot be less than the previous ordinal" );
                if( (uint64_t)last_ordinal + window_size > (uint64_t)ordinal ) {
                   const auto delta = ordinal - last_ordinal; // clearly 0 < delta < window_size
                   const auto decay = make_ratio(
@@ -133,8 +133,8 @@ namespace actc { namespace chain { namespace resource_limits {
       OBJECT_CTOR(resource_limits_object)
 
       id_type id;
-      account_name owner;
-      bool pending = false;
+      account_name owner; //< owner should not be changed within a chainbase modifier lambda
+      bool pending = false; //< pending should not be changed within a chainbase modifier lambda
 
       int64_t net_weight = -1;
       int64_t cpu_weight = -1;
@@ -162,7 +162,7 @@ namespace actc { namespace chain { namespace resource_limits {
       OBJECT_CTOR(resource_usage_object)
 
       id_type id;
-      account_name owner;
+      account_name owner; //< owner should not be changed within a chainbase modifier lambda
 
       usage_accumulator        net_usage;
       usage_accumulator        cpu_usage;
@@ -189,8 +189,8 @@ namespace actc { namespace chain { namespace resource_limits {
                      "config::block_size_average_window_ms cannot be less than config::block_interval_ms" );
 
 
-      elastic_limit_parameters cpu_limit_parameters = {actc_PERCENT(config::default_max_block_cpu_usage, config::default_target_block_cpu_usage_pct), config::default_max_block_cpu_usage, config::block_cpu_usage_average_window_ms / config::block_interval_ms, 1000, {99, 100}, {1000, 999}};
-      elastic_limit_parameters net_limit_parameters = {actc_PERCENT(config::default_max_block_net_usage, config::default_target_block_net_usage_pct), config::default_max_block_net_usage, config::block_size_average_window_ms / config::block_interval_ms, 1000, {99, 100}, {1000, 999}};
+      elastic_limit_parameters cpu_limit_parameters = {ACTC_PERCENT(config::default_max_block_cpu_usage, config::default_target_block_cpu_usage_pct), config::default_max_block_cpu_usage, config::block_cpu_usage_average_window_ms / config::block_interval_ms, 1000, {99, 100}, {1000, 999}};
+      elastic_limit_parameters net_limit_parameters = {ACTC_PERCENT(config::default_max_block_net_usage, config::default_target_block_net_usage_pct), config::default_max_block_net_usage, config::block_size_average_window_ms / config::block_interval_ms, 1000, {99, 100}, {1000, 999}};
 
       uint32_t account_cpu_usage_average_window = config::account_cpu_usage_average_window_ms / config::block_interval_ms;
       uint32_t account_net_usage_average_window = config::account_net_usage_average_window_ms / config::block_interval_ms;
@@ -233,7 +233,7 @@ namespace actc { namespace chain { namespace resource_limits {
        * real maximum block is less, this virtual number is only used for rate limiting users.
        *
        * It's lowest possible value is max_block_size * blocksize_average_window_ms / block_interval
-       * It's highest possible value is 1000 times its lowest possible value
+       * It's highest possible value is config::maximum_elastic_resource_multiplier (1000) times its lowest possible value
        *
        * This means that the most an account can consume during idle periods is 1000x the bandwidth
        * it is gauranteed under congestion.
@@ -267,6 +267,7 @@ CHAINBASE_SET_INDEX_TYPE(actc::chain::resource_limits::resource_limits_state_obj
 
 FC_REFLECT(actc::chain::resource_limits::usage_accumulator, (last_ordinal)(value_ex)(consumed))
 
+// @ignore pending
 FC_REFLECT(actc::chain::resource_limits::resource_limits_object, (owner)(net_weight)(cpu_weight)(ram_bytes))
 FC_REFLECT(actc::chain::resource_limits::resource_usage_object,  (owner)(net_usage)(cpu_usage)(ram_usage))
 FC_REFLECT(actc::chain::resource_limits::resource_limits_config_object, (cpu_limit_parameters)(net_limit_parameters)(account_cpu_usage_average_window)(account_net_usage_average_window))

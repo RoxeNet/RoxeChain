@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 #include <actc/chain/controller.hpp>
@@ -42,36 +42,37 @@ class apply_context {
 
             const table_id_object& get_table( table_id_object::id_type i )const {
                auto itr = _table_cache.find(i);
-               actc_ASSERT( itr != _table_cache.end(), table_not_in_cache, "an invariant was broken, table should be in cache" );
+               ACTC_ASSERT( itr != _table_cache.end(), table_not_in_cache, "an invariant was broken, table should be in cache" );
                return *itr->second.first;
             }
 
             int get_end_iterator_by_table_id( table_id_object::id_type i )const {
                auto itr = _table_cache.find(i);
-               actc_ASSERT( itr != _table_cache.end(), table_not_in_cache, "an invariant was broken, table should be in cache" );
+               ACTC_ASSERT( itr != _table_cache.end(), table_not_in_cache, "an invariant was broken, table should be in cache" );
                return itr->second.second;
             }
 
             const table_id_object* find_table_by_end_iterator( int ei )const {
-               actc_ASSERT( ei < -1, invalid_table_iterator, "not an end iterator" );
+               ACTC_ASSERT( ei < -1, invalid_table_iterator, "not an end iterator" );
                auto indx = end_iterator_to_index(ei);
                if( indx >= _end_iterator_to_table.size() ) return nullptr;
                return _end_iterator_to_table[indx];
             }
 
             const T& get( int iterator ) {
-               actc_ASSERT( iterator != -1, invalid_table_iterator, "invalid iterator" );
-               actc_ASSERT( iterator >= 0, table_operation_not_permitted, "dereference of end iterator" );
-               actc_ASSERT( iterator < _iterator_to_object.size(), invalid_table_iterator, "iterator out of range" );
+               ACTC_ASSERT( iterator != -1, invalid_table_iterator, "invalid iterator" );
+               ACTC_ASSERT( iterator >= 0, table_operation_not_permitted, "dereference of end iterator" );
+               ACTC_ASSERT( (size_t)iterator < _iterator_to_object.size(), invalid_table_iterator, "iterator out of range" );
                auto result = _iterator_to_object[iterator];
-               actc_ASSERT( result, table_operation_not_permitted, "dereference of deleted object" );
+               ACTC_ASSERT( result, table_operation_not_permitted, "dereference of deleted object" );
                return *result;
             }
 
             void remove( int iterator ) {
-               actc_ASSERT( iterator != -1, invalid_table_iterator, "invalid iterator" );
-               actc_ASSERT( iterator >= 0, table_operation_not_permitted, "cannot call remove on end iterators" );
-               actc_ASSERT( iterator < _iterator_to_object.size(), invalid_table_iterator, "iterator out of range" );
+               ACTC_ASSERT( iterator != -1, invalid_table_iterator, "invalid iterator" );
+               ACTC_ASSERT( iterator >= 0, table_operation_not_permitted, "cannot call remove on end iterators" );
+               ACTC_ASSERT( (size_t)iterator < _iterator_to_object.size(), invalid_table_iterator, "iterator out of range" );
+
                auto obj_ptr = _iterator_to_object[iterator];
                if( !obj_ptr ) return;
                _iterator_to_object[iterator] = nullptr;
@@ -179,7 +180,7 @@ class apply_context {
             int store( uint64_t scope, uint64_t table, const account_name& payer,
                        uint64_t id, secondary_key_proxy_const_type value )
             {
-               actc_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+               ACTC_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
 
 //               context.require_write_lock( scope );
 
@@ -207,7 +208,7 @@ class apply_context {
                context.update_db_usage( obj.payer, -( config::billable_size_v<ObjectType> ) );
 
                const auto& table_obj = itr_cache.get_table( obj.t_id );
-               actc_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
+               ACTC_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
 
 //               context.require_write_lock( table_obj.scope );
 
@@ -227,7 +228,7 @@ class apply_context {
                const auto& obj = itr_cache.get( iterator );
 
                const auto& table_obj = itr_cache.get_table( obj.t_id );
-               actc_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
+               ACTC_ASSERT( table_obj.code == context.receiver, table_access_violation, "db access violation" );
 
 //               context.require_write_lock( table_obj.scope );
 
@@ -322,7 +323,7 @@ class apply_context {
                if( iterator < -1 ) // is end iterator
                {
                   auto tab = itr_cache.find_table_by_end_iterator(iterator);
-                  actc_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+                  ACTC_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
                   auto itr = idx.upper_bound(tab->id);
                   if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty index
@@ -411,7 +412,7 @@ class apply_context {
                if( iterator < -1 ) // is end iterator
                {
                   auto tab = itr_cache.find_table_by_end_iterator(iterator);
-                  actc_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+                  ACTC_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
                   auto itr = idx.upper_bound(tab->id);
                   if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty table
@@ -451,34 +452,22 @@ class apply_context {
 
    /// Constructor
    public:
-      apply_context(controller& con, transaction_context& trx_ctx, const action& a, uint32_t depth=0)
-      :control(con)
-      ,db(con.mutable_db())
-      ,trx_context(trx_ctx)
-      ,act(a)
-      ,receiver(act.account)
-      ,used_authorizations(act.authorization.size(), false)
-      ,recurse_depth(depth)
-      ,idx64(*this)
-      ,idx128(*this)
-      ,idx256(*this)
-      ,idx_double(*this)
-      ,idx_long_double(*this)
-      {
-         reset_console();
-      }
-
+      apply_context(controller& con, transaction_context& trx_ctx, uint32_t action_ordinal, uint32_t depth=0);
 
    /// Execution methods:
    public:
 
-      void exec_one( action_trace& trace );
-      void exec( action_trace& trace );
+      void exec_one();
+      void exec();
       void execute_inline( action&& a );
       void execute_context_free_inline( action&& a );
       void schedule_deferred_transaction( const uint128_t& sender_id, account_name payer, transaction&& trx, bool replace_existing );
       bool cancel_deferred_transaction( const uint128_t& sender_id, account_name sender );
       bool cancel_deferred_transaction( const uint128_t& sender_id ) { return cancel_deferred_transaction(sender_id, receiver); }
+
+   protected:
+      uint32_t schedule_action( uint32_t ordinal_of_action_to_schedule, account_name receiver, bool context_free );
+      uint32_t schedule_action( action&& act_to_schedule, account_name receiver, bool context_free );
 
 
    /// Authorization methods:
@@ -516,23 +505,8 @@ class apply_context {
    /// Console methods:
    public:
 
-      void reset_console();
-      std::ostringstream& get_console_stream()            { return _pending_console_output; }
-      const std::ostringstream& get_console_stream()const { return _pending_console_output; }
-
-      template<typename T>
-      void console_append(T val) {
-         _pending_console_output << val;
-      }
-
-      template<typename T, typename ...Ts>
-      void console_append(T val, Ts ...rest) {
-         console_append(val);
-         console_append(rest...);
-      };
-
-      inline void console_append_formatted(const string& fmt, const variant_object& vo) {
-         console_append(fc::format_string(fmt, vo));
+      void console_append( const string& val ) {
+         _pending_console_output += val;
       }
 
    /// Database methods:
@@ -569,17 +543,18 @@ class apply_context {
       bytes  get_packed_transaction();
 
       uint64_t next_global_sequence();
-      uint64_t next_recv_sequence( account_name receiver );
+      uint64_t next_recv_sequence( const account_metadata_object& receiver_account );
       uint64_t next_auth_sequence( account_name actor );
 
       void add_ram_usage( account_name account, int64_t ram_delta );
       void finalize_trace( action_trace& trace, const fc::time_point& start );
 
-   private:
+      bool is_context_free()const { return context_free; }
+      bool is_privileged()const { return privileged; }
+      action_name get_receiver()const { return receiver; }
+      const action& get_action()const { return *act; }
 
-      void validate_referenced_accounts( const transaction& t )const;
-      void validate_expiration( const transaction& t )const;
-
+      action_name get_sender() const;
 
    /// Fields:
    public:
@@ -587,14 +562,18 @@ class apply_context {
       controller&                   control;
       chainbase::database&          db;  ///< database where state is stored
       transaction_context&          trx_context; ///< transaction context in which the action is running
-      const action&                 act; ///< message being applied
+
+   private:
+      const action*                 act = nullptr; ///< action being applied
+      // act pointer may be invalidated on call to trx_context.schedule_action
       account_name                  receiver; ///< the code that is currently running
-      vector<bool> used_authorizations; ///< Parallel to act.authorization; tracks which permissions have been used while processing the message
       uint32_t                      recurse_depth; ///< how deep inline actions can recurse
+      uint32_t                      first_receiver_action_ordinal = 0;
+      uint32_t                      action_ordinal = 0;
       bool                          privileged   = false;
       bool                          context_free = false;
-      bool                          used_context_free_api = false;
 
+   public:
       generic_index<index64_object>                                  idx64;
       generic_index<index128_object>                                 idx128;
       generic_index<index256_object, uint128_t*, const uint128_t*>   idx256;
@@ -604,10 +583,10 @@ class apply_context {
    private:
 
       iterator_cache<key_value_object>    keyval_cache;
-      vector<account_name>                _notified; ///< keeps track of new accounts to be notifed of current message
-      vector<action>                      _inline_actions; ///< queued inline messages
-      vector<action>                      _cfa_inline_actions; ///< queued inline messages
-      std::ostringstream                  _pending_console_output;
+      vector< std::pair<account_name, uint32_t> > _notified; ///< keeps track of new accounts to be notifed of current message
+      vector<uint32_t>                    _inline_actions; ///< action_ordinals of queued inline actions
+      vector<uint32_t>                    _cfa_inline_actions; ///< action_ordinals of queued inline context-free actions
+      std::string                         _pending_console_output;
       flat_set<account_delta>             _account_ram_deltas; ///< flat_set of account_delta so json is an array of objects
 
       //bytes                               _cached_trx;

@@ -3,7 +3,7 @@
 #include <actc/chain/wasm_interface.hpp>
 #include <actc/chain/wasm_actc_constraints.hpp>
 
-#define actc_INJECTED_MODULE_NAME "actc_injection"
+#define ACTC_INJECTED_MODULE_NAME "actc_injection"
 
 using namespace fc;
 

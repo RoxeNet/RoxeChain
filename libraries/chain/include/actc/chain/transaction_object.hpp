@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 #include <fc/io/raw.hpp>
@@ -27,7 +27,7 @@ namespace actc { namespace chain {
 
          id_type             id;
          time_point_sec      expiration;
-         transaction_id_type trx_id;
+         transaction_id_type trx_id; //< trx_id should not be changed within a chainbase modifier lambda
    };
 
    struct by_expiration;
