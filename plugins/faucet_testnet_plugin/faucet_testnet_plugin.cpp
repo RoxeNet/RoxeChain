@@ -1,10 +1,9 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/faucet_testnet_plugin/faucet_testnet_plugin.hpp>
 #include <actc/chain_plugin/chain_plugin.hpp>
-#include <actc/utilities/key_conversion.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
@@ -61,7 +60,7 @@ using results_pair = std::pair<uint32_t,fc::variant>;
           try { \
              if (body.empty()) body = "{}"; \
              const auto result = api_handle->invoke_cb(body); \
-             response_cb(result.first, fc::json::to_string(result.second)); \
+             response_cb(result.first, fc::variant(result.second)); \
           } catch (...) { \
              http_plugin::handle_exception(#api_name, #call_name, body, response_cb); \
           } \
@@ -195,7 +194,7 @@ struct faucet_testnet_plugin_impl {
    results_pair create_account(const std::string& new_account_name, const fc::crypto::public_key& owner_pub_key, const fc::crypto::public_key& active_pub_key) {
 
       auto creating_account = database().find<account_object, by_name>(_create_account_name);
-      actc_ASSERT(creating_account != nullptr, transaction_exception,
+      ACTC_ASSERT(creating_account != nullptr, transaction_exception,
                  "To create account using the faucet, must already have created account \"${a}\"",("a",_create_account_name));
 
       auto existing_account = database().find<account_object, by_name>(new_account_name);
@@ -277,7 +276,7 @@ const uint32_t faucet_testnet_plugin_impl::_default_create_interval_msec = 1000;
 const uint32_t faucet_testnet_plugin_impl::_default_create_alternates_to_return = 3;
 const std::string faucet_testnet_plugin_impl::_default_create_account_name = "faucet";
 // defaults to the public/private key of init accounts in private testnet genesis.json
-const key_pair faucet_testnet_plugin_impl::_default_key_pair = {"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"};
+const key_pair faucet_testnet_plugin_impl::_default_key_pair = {"ACI7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"};
 
 
 faucet_testnet_plugin::faucet_testnet_plugin()

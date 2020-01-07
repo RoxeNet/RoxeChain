@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/net_api_plugin/net_api_plugin.hpp>
 #include <actc/chain/exceptions.hpp>
@@ -29,7 +29,7 @@ using namespace actc;
           try { \
              if (body.empty()) body = "{}"; \
              INVOKE \
-             cb(http_response_code, fc::json::to_string(result)); \
+             cb(http_response_code, fc::variant(result)); \
           } catch (...) { \
              http_plugin::handle_exception(#api_name, #call_name, body, cb); \
           } \

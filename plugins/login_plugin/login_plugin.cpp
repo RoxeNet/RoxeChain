@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/chain/authorization_manager.hpp>
 #include <actc/chain/exceptions.hpp>
@@ -68,8 +68,8 @@ void login_plugin::plugin_initialize(const variables_map& options) {
          try {                                                                                                         \
             if (body.empty())                                                                                          \
                body = "{}";                                                                                            \
-            auto result = call_name(fc::json::from_string(body).as<login_plugin::call_name##_params>());               \
-            cb(http_response_code, fc::json::to_string(result));                                                       \
+            fc::variant result( call_name(fc::json::from_string(body).as<login_plugin::call_name##_params>()) );       \
+            cb(http_response_code, std::move(result));                                                                 \
          } catch (...) {                                                                                               \
             http_plugin::handle_exception("login", #call_name, body, cb);                                              \
          }                                                                                                             \
@@ -92,10 +92,10 @@ void login_plugin::plugin_shutdown() {}
 login_plugin::start_login_request_results
 login_plugin::start_login_request(const login_plugin::start_login_request_params& params) {
    my->expire_requests();
-   actc_ASSERT(params.expiration_time > fc::time_point::now(), fc::timeout_exception,
+   ACTC_ASSERT(params.expiration_time > fc::time_point::now(), fc::timeout_exception,
               "Requested expiration time ${expiration_time} is in the past",
               ("expiration_time", params.expiration_time));
-   actc_ASSERT(my->requests.size() < my->max_login_requests, fc::timeout_exception, "Too many pending login requests");
+   ACTC_ASSERT(my->requests.size() < my->max_login_requests, fc::timeout_exception, "Too many pending login requests");
    login_request request;
    request.server_ephemeral_priv_key = chain::private_key_type::generate_r1();
    request.server_ephemeral_pub_key = request.server_ephemeral_priv_key.get_public_key();

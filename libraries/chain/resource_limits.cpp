@@ -31,9 +31,9 @@ static uint64_t update_elastic_limit(uint64_t current_limit, uint64_t average_us
 void elastic_limit_parameters::validate()const {
    // At the very least ensure parameters are not set to values that will cause divide by zero errors later on.
    // Stricter checks for sensible values can be added later.
-   actc_ASSERT( periods > 0, resource_limit_exception, "elastic limit parameter 'periods' cannot be zero" );
-   actc_ASSERT( contract_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'contract_rate' is not a well-defined ratio" );
-   actc_ASSERT( expand_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'expand_rate' is not a well-defined ratio" );
+   ACTC_ASSERT( periods > 0, resource_limit_exception, "elastic limit parameter 'periods' cannot be zero" );
+   ACTC_ASSERT( contract_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'contract_rate' is not a well-defined ratio" );
+   ACTC_ASSERT( expand_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'expand_rate' is not a well-defined ratio" );
 }
 
 
@@ -102,6 +102,8 @@ void resource_limits_manager::set_block_parameters(const elastic_limit_parameter
    cpu_limit_parameters.validate();
    net_limit_parameters.validate();
    const auto& config = _db.get<resource_limits_config_object>();
+   if( config.cpu_limit_parameters == cpu_limit_parameters && config.net_limit_parameters == net_limit_parameters )
+      return;
    _db.modify(config, [&](resource_limits_config_object& c){
       c.cpu_limit_parameters = cpu_limit_parameters;
       c.net_limit_parameters = net_limit_parameters;
@@ -146,7 +148,7 @@ void resource_limits_manager::add_transaction_usage(const flat_set<account_name>
 
          auto max_user_use_in_window = (virtual_network_capacity_in_window * user_weight) / all_user_weight;
 
-         actc_ASSERT( cpu_used_in_window <= max_user_use_in_window,
+         ACTC_ASSERT( cpu_used_in_window <= max_user_use_in_window,
                      tx_cpu_usage_exceeded,
                      "authorizing account '${n}' has insufficient cpu resources for this transaction",
                      ("n", name(a))
@@ -165,7 +167,7 @@ void resource_limits_manager::add_transaction_usage(const flat_set<account_name>
 
          auto max_user_use_in_window = (virtual_network_capacity_in_window * user_weight) / all_user_weight;
 
-         actc_ASSERT( net_used_in_window <= max_user_use_in_window,
+         ACTC_ASSERT( net_used_in_window <= max_user_use_in_window,
                      tx_net_usage_exceeded,
                      "authorizing account '${n}' has insufficient net resources for this transaction",
                      ("n", name(a))
@@ -181,8 +183,8 @@ void resource_limits_manager::add_transaction_usage(const flat_set<account_name>
       rls.pending_net_usage += net_usage;
    });
 
-   actc_ASSERT( state.pending_cpu_usage <= config.cpu_limit_parameters.max, block_resource_exhausted, "Block has insufficient cpu resources" );
-   actc_ASSERT( state.pending_net_usage <= config.net_limit_parameters.max, block_resource_exhausted, "Block has insufficient net resources" );
+   ACTC_ASSERT( state.pending_cpu_usage <= config.cpu_limit_parameters.max, block_resource_exhausted, "Block has insufficient cpu resources" );
+   ACTC_ASSERT( state.pending_net_usage <= config.net_limit_parameters.max, block_resource_exhausted, "Block has insufficient net resources" );
 }
 
 void resource_limits_manager::add_pending_ram_usage( const account_name account, int64_t ram_delta ) {
@@ -192,9 +194,9 @@ void resource_limits_manager::add_pending_ram_usage( const account_name account,
 
    const auto& usage  = _db.get<resource_usage_object,by_owner>( account );
 
-   actc_ASSERT( ram_delta <= 0 || UINT64_MAX - usage.ram_usage >= (uint64_t)ram_delta, transaction_exception,
+   ACTC_ASSERT( ram_delta <= 0 || UINT64_MAX - usage.ram_usage >= (uint64_t)ram_delta, transaction_exception,
               "Ram usage delta would overflow UINT64_MAX");
-   actc_ASSERT(ram_delta >= 0 || usage.ram_usage >= (uint64_t)(-ram_delta), transaction_exception,
+   ACTC_ASSERT(ram_delta >= 0 || usage.ram_usage >= (uint64_t)(-ram_delta), transaction_exception,
               "Ram usage delta would underflow UINT64_MAX");
 
    _db.modify( usage, [&]( auto& u ) {
@@ -208,7 +210,7 @@ void resource_limits_manager::verify_account_ram_usage( const account_name accou
    const auto& usage  = _db.get<resource_usage_object,by_owner>( account );
 
    if( ram_bytes >= 0 ) {
-      actc_ASSERT( usage.ram_usage <= ram_bytes, ram_usage_exceeded,
+      ACTC_ASSERT( usage.ram_usage <= static_cast<uint64_t>(ram_bytes), ram_usage_exceeded,
                   "account ${account} has insufficient ram; needs ${needs} bytes has ${available} bytes",
                   ("account", account)("needs",usage.ram_usage)("available",ram_bytes)              );
    }
@@ -253,9 +255,9 @@ bool resource_limits_manager::set_account_limits( const account_name& account, i
 
       /*
       if( limits.ram_bytes < 0 ) {
-         actc_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "converting unlimited account would result in overcommitment [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
+         ACTC_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "converting unlimited account would result in overcommitment [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
       } else {
-         actc_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "attempting to release committed ram resources [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
+         ACTC_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "attempting to release committed ram resources [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
       }
       */
    }
@@ -291,12 +293,12 @@ void resource_limits_manager::process_account_limit_updates() {
    // convenience local lambda to reduce clutter
    auto update_state_and_value = [](uint64_t &total, int64_t &value, int64_t pending_value, const char* debug_which) -> void {
       if (value > 0) {
-         actc_ASSERT(total >= value, rate_limiting_state_inconsistent, "underflow when reverting old value to ${which}", ("which", debug_which));
+         ACTC_ASSERT(total >= static_cast<uint64_t>(value), rate_limiting_state_inconsistent, "underflow when reverting old value to ${which}", ("which", debug_which));
          total -= value;
       }
 
       if (pending_value > 0) {
-         actc_ASSERT(UINT64_MAX - total >= pending_value, rate_limiting_state_inconsistent, "overflow when applying new value to ${which}", ("which", debug_which));
+         ACTC_ASSERT(UINT64_MAX - total >= static_cast<uint64_t>(pending_value), rate_limiting_state_inconsistent, "overflow when applying new value to ${which}", ("which", debug_which));
          total += pending_value;
       }
 
@@ -363,12 +365,12 @@ uint64_t resource_limits_manager::get_block_net_limit() const {
    return config.net_limit_parameters.max - state.pending_net_usage;
 }
 
-int64_t resource_limits_manager::get_account_cpu_limit( const account_name& name, bool elastic ) const {
-   auto arl = get_account_cpu_limit_ex(name, elastic);
-   return arl.available;
+std::pair<int64_t, bool> resource_limits_manager::get_account_cpu_limit( const account_name& name, uint32_t greylist_limit ) const {
+   auto [arl, greylisted] = get_account_cpu_limit_ex(name, greylist_limit);
+   return {arl.available, greylisted};
 }
 
-account_resource_limit resource_limits_manager::get_account_cpu_limit_ex( const account_name& name, bool elastic) const {
+std::pair<account_resource_limit, bool> resource_limits_manager::get_account_cpu_limit_ex( const account_name& name, uint32_t greylist_limit ) const {
 
    const auto& state = _db.get<resource_limits_state_object>();
    const auto& usage = _db.get<resource_usage_object, by_owner>(name);
@@ -378,14 +380,23 @@ account_resource_limit resource_limits_manager::get_account_cpu_limit_ex( const 
    get_account_limits( name, x, y, cpu_weight );
 
    if( cpu_weight < 0 || state.total_cpu_weight == 0 ) {
-      return { -1, -1, -1 };
+      return {{ -1, -1, -1 }, false};
    }
 
    account_resource_limit arl;
 
    uint128_t window_size = config.account_cpu_usage_average_window;
+   uint64_t  greylisted_virtual_cpu_limit = config.cpu_limit_parameters.max * greylist_limit;
 
-   uint128_t virtual_cpu_capacity_in_window = (uint128_t)(elastic ? state.virtual_cpu_limit : config.cpu_limit_parameters.max) * window_size;
+   bool greylisted = false;
+   uint128_t virtual_cpu_capacity_in_window = window_size;
+   if( greylisted_virtual_cpu_limit < state.virtual_cpu_limit ) {
+      virtual_cpu_capacity_in_window *= greylisted_virtual_cpu_limit;
+      greylisted = true;
+   } else {
+      virtual_cpu_capacity_in_window *= state.virtual_cpu_limit;
+   }
+
    uint128_t user_weight     = (uint128_t)cpu_weight;
    uint128_t all_user_weight = (uint128_t)state.total_cpu_weight;
 
@@ -399,15 +410,15 @@ account_resource_limit resource_limits_manager::get_account_cpu_limit_ex( const 
 
    arl.used = impl::downgrade_cast<int64_t>(cpu_used_in_window);
    arl.max = impl::downgrade_cast<int64_t>(max_user_use_in_window);
-   return arl;
+   return {arl, greylisted};
 }
 
-int64_t resource_limits_manager::get_account_net_limit( const account_name& name, bool elastic) const {
-   auto arl = get_account_net_limit_ex(name, elastic);
-   return arl.available;
+std::pair<int64_t, bool> resource_limits_manager::get_account_net_limit( const account_name& name, uint32_t greylist_limit ) const {
+   auto [arl, greylisted] = get_account_net_limit_ex(name, greylist_limit);
+   return {arl.available, greylisted};
 }
 
-account_resource_limit resource_limits_manager::get_account_net_limit_ex( const account_name& name, bool elastic) const {
+std::pair<account_resource_limit, bool> resource_limits_manager::get_account_net_limit_ex( const account_name& name, uint32_t greylist_limit ) const {
    const auto& config = _db.get<resource_limits_config_object>();
    const auto& state  = _db.get<resource_limits_state_object>();
    const auto& usage  = _db.get<resource_usage_object, by_owner>(name);
@@ -416,17 +427,25 @@ account_resource_limit resource_limits_manager::get_account_net_limit_ex( const 
    get_account_limits( name, x, net_weight, y );
 
    if( net_weight < 0 || state.total_net_weight == 0) {
-      return { -1, -1, -1 };
+      return {{ -1, -1, -1 }, false};
    }
 
    account_resource_limit arl;
 
    uint128_t window_size = config.account_net_usage_average_window;
+   uint64_t  greylisted_virtual_net_limit = config.net_limit_parameters.max * greylist_limit;
 
-   uint128_t virtual_network_capacity_in_window = (uint128_t)(elastic ? state.virtual_net_limit : config.net_limit_parameters.max) * window_size;
+   bool greylisted = false;
+   uint128_t virtual_network_capacity_in_window = window_size;
+   if( greylisted_virtual_net_limit < state.virtual_net_limit ) {
+      virtual_network_capacity_in_window *= greylisted_virtual_net_limit;
+      greylisted = true;
+   } else {
+      virtual_network_capacity_in_window *= state.virtual_net_limit;
+   }
+
    uint128_t user_weight     = (uint128_t)net_weight;
    uint128_t all_user_weight = (uint128_t)state.total_net_weight;
-
 
    auto max_user_use_in_window = (virtual_network_capacity_in_window * user_weight) / all_user_weight;
    auto net_used_in_window  = impl::integer_divide_ceil((uint128_t)usage.net_usage.value_ex * window_size, (uint128_t)config::rate_limiting_precision);
@@ -438,7 +457,7 @@ account_resource_limit resource_limits_manager::get_account_net_limit_ex( const 
 
    arl.used = impl::downgrade_cast<int64_t>(net_used_in_window);
    arl.max = impl::downgrade_cast<int64_t>(max_user_use_in_window);
-   return arl;
+   return {arl, greylisted};
 }
 
 } } } /// actc::chain::resource_limits
