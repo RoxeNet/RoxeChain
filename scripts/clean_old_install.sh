@@ -1,7 +1,7 @@
 #! /bin/bash
 
-if [ -d "/usr/local/include/dccio" ]; then
-   printf "\n\tOld dccio install needs to be removed.\n\n"
+if [ -d "/usr/local/include/actc" ]; then
+   printf "\n\tOld actc install needs to be removed.\n\n"
    printf "\tDo you wish to remove this install? (requires sudo)\n"
    select yn in "Yes" "No"; do
       case $yn in
@@ -13,15 +13,15 @@ if [ -d "/usr/local/include/dccio" ]; then
             pushd /usr/local &> /dev/null
 
             pushd include &> /dev/null
-            rm -rf appbase chainbase dccio dccio.system dcciolib fc libc++ musl &> /dev/null
+            rm -rf appbase chainbase actc actc.system actclib fc libc++ musl &> /dev/null
             popd &> /dev/null
 
             pushd bin &> /dev/null
-            rm cldcc dccio-abigen dccio-applesdemo dccio-launcher dccio-s2wasm dccio-wast2wasm dcciocpp kdccd noddcc &> /dev/null
+            rm clactc actc-abigen actc-applesdemo actc-launcher actc-s2wasm actc-wast2wasm actccpp kactcd nodactc &> /dev/null
             popd &> /dev/null
 
-            libraries=(libdccio_testing
-            libdccio_chain
+            libraries=(libactc_testing
+            libactc_chain
             libfc
             libbinaryen
             libWAST
@@ -41,23 +41,23 @@ if [ -d "/usr/local/include/dccio" ]; then
             popd &> /dev/null
 
             pushd etc &> /dev/null
-            rm dccio &> /dev/null
+            rm actc &> /dev/null
             popd &> /dev/null
 
             pushd share &> /dev/null
-            rm dccio &> /dev/null
+            rm actc &> /dev/null
             popd &> /dev/null
 
             pushd usr/share &> /dev/null
-            rm dccio &> /dev/null
+            rm actc &> /dev/null
             popd &> /dev/null
 
             pushd var/lib &> /dev/null
-            rm dccio &> /dev/null
+            rm actc &> /dev/null
             popd &> /dev/null
 
             pushd var/log &> /dev/null
-            rm dccio &> /dev/null
+            rm actc &> /dev/null
             popd &> /dev/null
 
             popd &> /dev/null
