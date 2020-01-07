@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
-#include <dccio/chain/chain_config.hpp>
-#include <dccio/chain/authority_checker.hpp>
-#include <dccio/chain/authority.hpp>
-#include <dccio/chain/types.hpp>
-#include <dccio/chain/asset.hpp>
-#include <dccio/testing/tester.hpp>
+#include <actc/chain/chain_config.hpp>
+#include <actc/chain/authority_checker.hpp>
+#include <actc/chain/authority.hpp>
+#include <actc/chain/types.hpp>
+#include <actc/chain/asset.hpp>
+#include <actc/testing/tester.hpp>
 
-#include <dccio/utilities/key_conversion.hpp>
-#include <dccio/utilities/rand.hpp>
+#include <actc/utilities/key_conversion.hpp>
+#include <actc/utilities/rand.hpp>
 
 #include <fc/io/json.hpp>
 
@@ -22,13 +22,13 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc::chain;
+using namespace actc::testing;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
 
-namespace dccio
+namespace actc
 {
 using namespace chain;
 using namespace std;
@@ -593,22 +593,22 @@ BOOST_AUTO_TEST_CASE(transaction_test) { try {
    variant pretty_trx = fc::mutable_variant_object()
       ("actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "dccio")
+            ("account", "actc")
             ("name", "reqauth")
             ("authorization", fc::variants({
                fc::mutable_variant_object()
-                  ("actor", "dccio")
+                  ("actor", "actc")
                   ("permission", "active")
             }))
             ("data", fc::mutable_variant_object()
-               ("from", "dccio")
+               ("from", "actc")
             )
          })
       )
       // lets also push a context free action, the multi chain test will then also include a context free action
       ("context_free_actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "dccio")
+            ("account", "actc")
             ("name", "nonce")
             ("data", fc::raw::pack(std::string("dummy")))
          })
@@ -647,4 +647,4 @@ BOOST_AUTO_TEST_CASE(transaction_test) { try {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // namespace dccio
+} // namespace actc

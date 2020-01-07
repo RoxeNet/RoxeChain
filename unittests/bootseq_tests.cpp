@@ -1,16 +1,16 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
 
-#include <dccio.system/dccio.system.wast.hpp>
-#include <dccio.system/dccio.system.abi.hpp>
+#include <actc.system/actc.system.wast.hpp>
+#include <actc.system/actc.system.abi.hpp>
 // These contracts are still under dev
-#include <dccio.bios/dccio.bios.wast.hpp>
-#include <dccio.bios/dccio.bios.abi.hpp>
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
-#include <dccio.msig/dccio.msig.wast.hpp>
-#include <dccio.msig/dccio.msig.abi.hpp>
+#include <actc.bios/actc.bios.wast.hpp>
+#include <actc.bios/actc.bios.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
+#include <actc.msig/actc.msig.wast.hpp>
+#include <actc.msig/actc.msig.abi.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -23,9 +23,9 @@
 #endif
 
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 using mvo = fc::mutable_variant_object;
@@ -76,7 +76,7 @@ public:
    fc::variant get_global_state() {
       vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(global), N(global) );
       if (data.empty()) std::cout << "\nData is empty\n" << std::endl;
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "dccio_global_state", data, abi_serializer_max_time );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "actc_global_state", data, abi_serializer_max_time );
 
    }
 
@@ -156,7 +156,7 @@ public:
     }
 
     asset get_balance( const account_name& act ) {
-         return get_currency_balance(N(dccio.token), symbol(CORE_SYMBOL), act);
+         return get_currency_balance(N(actc.token), symbol(CORE_SYMBOL), act);
     }
 
     void set_code_abi(const account_name& account, const char* wast, const char* abi, const private_key_type* signer = nullptr) {
@@ -181,33 +181,33 @@ BOOST_AUTO_TEST_SUITE(bootseq_tests)
 BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
     try {
 
-        // Create dccio.msig and dccio.token
-        create_accounts({N(dccio.msig), N(dccio.token), N(dccio.ram), N(dccio.ramfee), N(dccio.stake), N(dccio.vpay), N(dccio.bpay), N(dccio.saving) });
+        // Create actc.msig and actc.token
+        create_accounts({N(actc.msig), N(actc.token), N(actc.ram), N(actc.ramfee), N(actc.stake), N(actc.vpay), N(actc.bpay), N(actc.saving) });
 
         // Set code for the following accounts:
-        //  - dccio (code: dccio.bios) (already set by tester constructor)
-        //  - dccio.msig (code: dccio.msig)
-        //  - dccio.token (code: dccio.token)
-        set_code_abi(N(dccio.msig), dccio_msig_wast, dccio_msig_abi);//, &dccio_active_pk);
-        set_code_abi(N(dccio.token), dccio_token_wast, dccio_token_abi); //, &dccio_active_pk);
+        //  - actc (code: actc.bios) (already set by tester constructor)
+        //  - actc.msig (code: actc.msig)
+        //  - actc.token (code: actc.token)
+        set_code_abi(N(actc.msig), actc_msig_wast, actc_msig_abi);//, &actc_active_pk);
+        set_code_abi(N(actc.token), actc_token_wast, actc_token_abi); //, &actc_active_pk);
 
-        // Set privileged for dccio.msig and dccio.token
-        set_privileged(N(dccio.msig));
-        set_privileged(N(dccio.token));
+        // Set privileged for actc.msig and actc.token
+        set_privileged(N(actc.msig));
+        set_privileged(N(actc.token));
 
-        // Verify dccio.msig and dccio.token is privileged
-        const auto& dccio_msig_acc = get<account_object, by_name>(N(dccio.msig));
-        BOOST_TEST(dccio_msig_acc.privileged == true);
-        const auto& dccio_token_acc = get<account_object, by_name>(N(dccio.token));
-        BOOST_TEST(dccio_token_acc.privileged == true);
+        // Verify actc.msig and actc.token is privileged
+        const auto& actc_msig_acc = get<account_object, by_name>(N(actc.msig));
+        BOOST_TEST(actc_msig_acc.privileged == true);
+        const auto& actc_token_acc = get<account_object, by_name>(N(actc.token));
+        BOOST_TEST(actc_token_acc.privileged == true);
 
 
-        // Create SYS tokens in dccio.token, set its manager as dccio
+        // Create SYS tokens in actc.token, set its manager as actc
         auto max_supply = core_from_string("10000000000.0000"); /// 1x larger than 1B initial tokens
         auto initial_supply = core_from_string("1000000000.0000"); /// 1x larger than 1B initial tokens
-        create_currency(N(dccio.token), config::system_account_name, max_supply);
-        // Issue the genesis supply of 1 billion SYS tokens to dccio.system
-        issue(N(dccio.token), config::system_account_name, config::system_account_name, initial_supply);
+        create_currency(N(actc.token), config::system_account_name, max_supply);
+        // Issue the genesis supply of 1 billion SYS tokens to actc.system
+        issue(N(actc.token), config::system_account_name, config::system_account_name, initial_supply);
 
         auto actual = get_balance(config::system_account_name);
         BOOST_REQUIRE_EQUAL(initial_supply, actual);
@@ -217,8 +217,8 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            create_account( a.aname, config::system_account_name );
         }
 
-        // Set dccio.system to dccio
-        set_code_abi(config::system_account_name, dccio_system_wast, dccio_system_abi);
+        // Set actc.system to actc
+        set_code_abi(config::system_account_name, actc_system_wast, actc_system_abi);
 
         // Buy ram and stake cpu and net for each genesis accounts
         for( const auto& a : test_genesis ) {
@@ -230,7 +230,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            auto r = buyram(config::system_account_name, a.aname, asset(ram));
            BOOST_REQUIRE( !r->except_ptr );
 
-           r = delegate_bandwidth(N(dccio.stake), a.aname, asset(net), asset(cpu));
+           r = delegate_bandwidth(N(actc.stake), a.aname, asset(net), asset(cpu));
            BOOST_REQUIRE( !r->except_ptr );
         }
 
@@ -268,12 +268,12 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         produce_blocks_for_n_rounds(2); // 2 rounds since new producer schedule is set when the first block of next round is irreversible
         auto active_schedule = control->head_block_state()->active_schedule;
         BOOST_TEST(active_schedule.producers.size() == 1);
-        BOOST_TEST(active_schedule.producers.front().producer_name == "dccio");
+        BOOST_TEST(active_schedule.producers.front().producer_name == "actc");
 
         // Spend some time so the producer pay pool is filled by the inflation rate
         produce_min_num_of_blocks_to_spend_time_wo_inactive_prod(fc::seconds(30 * 24 * 3600)); // 30 days
         // Since the total activated stake is less than 150,000,000, it shouldn't be possible to claim rewards
-        BOOST_REQUIRE_THROW(claim_rewards(N(runnerup1)), dccio_assert_message_exception);
+        BOOST_REQUIRE_THROW(claim_rewards(N(runnerup1)), actc_assert_message_exception);
 
         // This will increase the total vote stake by (40,000,000 - 1,000)
         votepro( N(whale4), {N(prodq), N(prodr), N(prods), N(prodt), N(produ)} );
@@ -318,7 +318,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
 
         // This should thrown an error, since block one can only unstake all his stake after 10 years
 
-        BOOST_REQUIRE_THROW(undelegate_bandwidth(N(b1), N(b1), core_from_string("49999500.0000"), core_from_string("49999500.0000")), dccio_assert_message_exception);
+        BOOST_REQUIRE_THROW(undelegate_bandwidth(N(b1), N(b1), core_from_string("49999500.0000"), core_from_string("49999500.0000")), actc_assert_message_exception);
 
         // Skip 10 years
         produce_block(first_june_2028 - control->head_block_time().time_since_epoch());
