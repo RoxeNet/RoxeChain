@@ -10,7 +10,7 @@ import random
 Print=Utils.Print
 errorExit=Utils.errorExit
 
-args=TestHelper.parse_args({"-p","-n","-d","-s","--nodes-file","--seed","--p2p-plugin"
+args=TestHelper.parse_args({"-p","-n","-d","-s","--nodes-file","--seed"
                            ,"--dump-error-details","-v","--leave-running","--clean-run","--keep-logs"})
 
 pnodes=args.p
@@ -25,12 +25,11 @@ dontKill=args.leave_running
 dumpErrorDetails=args.dump_error_details
 killAll=args.clean_run
 keepLogs=args.keep_logs
-p2pPlugin=args.p2p_plugin
 
 killWallet=not dontKill
-killactcInstances=not dontKill
+killActcInstances=not dontKill
 if nodesFile is not None:
-    killactcInstances=False
+    killActcInstances=False
 
 Utils.Debug=debug
 testSuccessful=False
@@ -63,7 +62,7 @@ try:
                (pnodes, total_nodes-pnodes, topo, delay))
 
         Print("Stand up cluster")
-        if cluster.launch(pnodes, total_nodes, topo=topo, delay=delay, p2pPlugin=p2pPlugin) is False:
+        if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay) is False:
             errorExit("Failed to stand up actc cluster.")
 
         Print ("Wait for Cluster stabilization")
@@ -108,6 +107,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killactcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killActcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

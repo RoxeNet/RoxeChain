@@ -99,7 +99,7 @@ p2p-server-address = localhost:9876
 allowed-connection = any
 p2p-peer-address = localhost:9877
 required-participation = true
-private-key = ["actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]
+private-key = ["ACI7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"]
 producer-name = initu
 plugin = actc::producer_plugin
 plugin = actc::chain_api_plugin
@@ -119,7 +119,7 @@ p2p-server-address = localhost:9877
 allowed-connection = any
 p2p-peer-address = localhost:9876
 required-participation = true
-private-key = ["actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"]
+private-key = ["ACI7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"]
 producer-name = defproducerb
 plugin = actc::producer_plugin
 plugin = actc::chain_api_plugin
@@ -217,7 +217,7 @@ waitTimeout=args.w
 dumpErrorDetails=args.dump-error-details
 keepLogs=args.keep-logs
 amINoon=not args.not_noon
-killactcInstances= not args.dont-kill
+killActcInstances= not args.dont-kill
 killWallet= not args.dont-kill
 
 testUtils.Utils.Debug=debug
@@ -246,7 +246,7 @@ def myTest(transWillEnterBlock):
         topo="mesh"
         delay=0
         Print("Stand up cluster")
-        if cluster.launch(pnodes, total_nodes, topo, delay) is False:
+        if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay) is False:
             error("Failed to stand up actc cluster.")
             return False
 
@@ -358,7 +358,7 @@ def myTest(transWillEnterBlock):
             walletMgr.dumpErrorDetails()
             Print("== Errors see above ==")
 
-        if killactcInstances:
+        if killActcInstances:
             Print("Shut down the cluster%s" % (" and cleanup." if (testSuccessful and not keepLogs) else "."))
             cluster.killall()
             walletMgr.killall()
