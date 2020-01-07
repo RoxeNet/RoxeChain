@@ -1,32 +1,20 @@
 [submodule "libraries/chainbase"]
 	path = libraries/chainbase
-	url = https://github.com/actc/chainbase
+	url = https://github.com/eosio/chainbase
         ignore = dirty
 [submodule "libraries/appbase"]
 	path = libraries/appbase
-	url = https://github.com/actc/appbase
+	url = https://github.com/eosio/appbase
         ignore = dirty
-[submodule "contracts/musl/upstream"]
-	path = contracts/musl/upstream
-	url = https://github.com/actc/musl.git
-	branch = actc
-[submodule "contracts/libc++/upstream"]
-	path = contracts/libc++/upstream
-	url = https://github.com/actc/libcxx.git
-	branch = actc
-[submodule "externals/binaryen"]
-	path = externals/binaryen
-	url = https://github.com/actc/binaryen
-
 [submodule "libraries/softfloat"]
 	path = libraries/softfloat
-	url = https://github.com/actc/berkeley-softfloat-3
-[submodule "externals/magic_get"]
-	path = externals/magic_get
-	url = https://github.com/actc/magic_get
+	url = https://github.com/eosio/berkeley-softfloat-3
 [submodule "libraries/fc"]
 	path = libraries/fc
-	url = https://github.com/actc/fc
+	url = https://github.com/EOSIO/fc
 [submodule "libraries/wabt"]
 	path = libraries/wabt
-	url = http://github.com/actc/wabt
+	url = https://github.com/EOSIO/wabt
+[submodule "libraries/yubihsm"]
+	path = libraries/yubihsm
+	url = https://github.com/Yubico/yubihsm-shell
