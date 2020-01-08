@@ -1,9 +1,13 @@
+add_contract(actc.msig actc.msig ${CMAKE_CURRENT_SOURCE_DIR}/src/actc.msig.cpp)
 
-file(GLOB ABI_FILES "*.abi")
-configure_file("${ABI_FILES}" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
+target_include_directories(actc.msig
+   PUBLIC
+   ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
-add_wast_executable(TARGET actc.msig
-  INCLUDE_FOLDERS "${STANDARD_INCLUDE_FOLDERS}"
-  LIBRARIES libc++ libc actclib
-  DESTINATION_FOLDER ${CMAKE_CURRENT_BINARY_DIR}
-)
+set_target_properties(actc.msig
+   PROPERTIES
+   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/ricardian/actc.msig.contracts.md.in ${CMAKE_CURRENT_BINARY_DIR}/ricardian/actc.msig.contracts.md @ONLY )
+
+target_compile_options( actc.msig PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian )
