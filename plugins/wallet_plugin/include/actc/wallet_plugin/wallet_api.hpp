@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 
@@ -77,7 +77,7 @@ class wallet_api
 
       /** Imports a WIF Private Key into the wallet to be used to sign transactions by an account.
        *
-       * example: import_key 5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3
+       * example: import_key 5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU
        *
        * @param wif_key the WIF Private Key to import
        */
@@ -85,7 +85,7 @@ class wallet_api
 
       /** Removes a key from the wallet.
        *
-       * example: remove_key actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+       * example: remove_keyACI7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt
        *
        * @param key the Public Key to remove
        */
@@ -101,7 +101,7 @@ class wallet_api
 
       /** Returns a signature given the digest and public_key, if this wallet can sign via that public key
        */
-      virtual optional<signature_type> try_sign_digest( const digest_type digest, const public_key_type public_key ) = 0;
+      virtual fc::optional<signature_type> try_sign_digest( const digest_type digest, const public_key_type public_key ) = 0;
 };
 
 }}

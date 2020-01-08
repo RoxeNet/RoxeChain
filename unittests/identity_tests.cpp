@@ -1,9 +1,9 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/contract_table_objects.hpp>
-#include <dccio/chain/fixed_key.hpp>
-#include <dccio/chain/global_property_object.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/contract_table_objects.hpp>
+#include <actc/chain/fixed_key.hpp>
+#include <actc/chain/global_property_object.hpp>
 #include <chainbase/chainbase.hpp>
 
 #include <identity/identity.wast.hpp>
@@ -24,9 +24,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 class identity_tester : public TESTER {

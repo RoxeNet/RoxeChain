@@ -66,12 +66,12 @@ verifyErrorCode()
 
 killAll()
 {
-  programs/dccio-launcher/dccio-launcher -k 15
+  programs/actc-launcher/actc-launcher -k 15
 }
 
 cleanup()
 {
-    rm -rf etc/dccio/node_*
+    rm -rf etc/actc/node_*
     rm -rf var/lib/node_*
 }
 
@@ -79,8 +79,8 @@ cleanup()
 # result stored in HEAD_BLOCK_NUM
 getHeadBlockNum()
 {
-  INFO="$(programs/cldcc/cldcc get info)"
-  verifyErrorCode "cldcc get info"
+  INFO="$(programs/clactc/clactc get info)"
+  verifyErrorCode "clactc get info"
   HEAD_BLOCK_NUM="$(echo "$INFO" | awk '/head_block_num/ {print $2}')"
   # remove trailing coma
   HEAD_BLOCK_NUM=${HEAD_BLOCK_NUM%,}
@@ -106,15 +106,15 @@ getTransactionId()
   TRANS_ID=${TRANS_ID%\",}
 }
 
-INITA_PRV_KEY="5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
+INITA_PRV_KEY="5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"
 
 # cleanup from last run
 cleanup
 
-# stand up noddcc cluster
+# stand up nodactc cluster
 launcherOpts="-p $pnodes -n $total_nodes -s $topo -d $delay"
-echo Launcher options: --noddcc \"--plugin dccio::wallet_api_plugin\" $launcherOpts
-programs/dccio-launcher/dccio-launcher --noddcc "--plugin dccio::wallet_api_plugin" $launcherOpts
+echo Launcher options: --nodactc \"--plugin actc::wallet_api_plugin\" $launcherOpts
+programs/actc-launcher/actc-launcher --nodactc "--plugin actc::wallet_api_plugin" $launcherOpts
 sleep 7
 
 startPort=8888
@@ -126,22 +126,22 @@ echo endPort: $endPort
 port2=$startPort
 while [ $port2  -ne $endport ]; do
     echo Request block 1 from node on port $port2
-    TRANS_INFO="$(programs/cldcc/cldcc --port $port2 get block 1)"
-    verifyErrorCode "cldcc get block"
+    TRANS_INFO="$(programs/clactc/clactc --port $port2 get block 1)"
+    verifyErrorCode "clactc get block"
     port2=`expr $port2 + 1`
 done
 
 # create 3 keys
-KEYS="$(programs/cldcc/cldcc create key)"
-verifyErrorCode "cldcc create key"
+KEYS="$(programs/clactc/clactc create key)"
+verifyErrorCode "clactc create key"
 PRV_KEY1="$(echo "$KEYS" | awk '/Private/ {print $3}')"
 PUB_KEY1="$(echo "$KEYS" | awk '/Public/ {print $3}')"
-KEYS="$(programs/cldcc/cldcc create key)"
-verifyErrorCode "cldcc create key"
+KEYS="$(programs/clactc/clactc create key)"
+verifyErrorCode "clactc create key"
 PRV_KEY2="$(echo "$KEYS" | awk '/Private/ {print $3}')"
 PUB_KEY2="$(echo "$KEYS" | awk '/Public/ {print $3}')"
-KEYS="$(programs/cldcc/cldcc create key)"
-verifyErrorCode "cldcc create key"
+KEYS="$(programs/clactc/clactc create key)"
+verifyErrorCode "clactc create key"
 PRV_KEY3="$(echo "$KEYS" | awk '/Private/ {print $3}')"
 PUB_KEY3="$(echo "$KEYS" | awk '/Public/ {print $3}')"
 if [ -z "$PRV_KEY1" ] || [ -z "$PRV_KEY2" ] || [ -z "$PRV_KEY3" ] || [ -z "$PUB_KEY1" ] || [ -z "$PUB_KEY2" ] || [ -z "$PUB_KEY3" ]; then
@@ -150,21 +150,21 @@ fi
 
 
 # create wallet for inita
-PASSWORD_INITA="$(programs/cldcc/cldcc wallet create --name inita)"
-verifyErrorCode "cldcc wallet create"
+PASSWORD_INITA="$(programs/clactc/clactc wallet create --name inita)"
+verifyErrorCode "clactc wallet create"
 # strip out password from output
 PASSWORD_INITA="$(echo "$PASSWORD_INITA" | awk '/PW/ {print $1}')"
 # remove leading/trailing quotes
 PASSWORD_INITA=${PASSWORD_INITA#\"}
 PASSWORD_INITA=${PASSWORD_INITA%\"}
-programs/cldcc/cldcc wallet import --name inita --private-key $INITA_PRV_KEY
-verifyErrorCode "cldcc wallet import"
-programs/cldcc/cldcc wallet import --name inita --private-key $PRV_KEY1
-verifyErrorCode "cldcc wallet import"
-programs/cldcc/cldcc wallet import --name inita --private-key $PRV_KEY2
-verifyErrorCode "cldcc wallet import"
-programs/cldcc/cldcc wallet import --name inita --private-key $PRV_KEY3
-verifyErrorCode "cldcc wallet import"
+programs/clactc/clactc wallet import --name inita --private-key $INITA_PRV_KEY
+verifyErrorCode "clactc wallet import"
+programs/clactc/clactc wallet import --name inita --private-key $PRV_KEY1
+verifyErrorCode "clactc wallet import"
+programs/clactc/clactc wallet import --name inita --private-key $PRV_KEY2
+verifyErrorCode "clactc wallet import"
+programs/clactc/clactc wallet import --name inita --private-key $PRV_KEY3
+verifyErrorCode "clactc wallet import"
 
 #
 # Account and Transfer Tests
@@ -172,12 +172,12 @@ verifyErrorCode "cldcc wallet import"
 
 # create new account
 echo Creating account testera
-ACCOUNT_INFO="$(programs/cldcc/cldcc create account inita testera $PUB_KEY1 $PUB_KEY3)"
-verifyErrorCode "cldcc create account"
+ACCOUNT_INFO="$(programs/clactc/clactc create account inita testera $PUB_KEY1 $PUB_KEY3)"
+verifyErrorCode "clactc create account"
 waitForNextBlock
 # verify account created
-ACCOUNT_INFO="$(programs/cldcc/cldcc get account testera)"
-verifyErrorCode "cldcc get account"
+ACCOUNT_INFO="$(programs/clactc/clactc get account testera)"
+verifyErrorCode "clactc get account"
 count=`echo $ACCOUNT_INFO | grep -c "staked_balance"`
 if [ $count == 0 ]; then
   error "FAILURE - account creation failed: $ACCOUNT_INFO"
@@ -189,8 +189,8 @@ echo Producing node port: $pPort
 while [ $port  -ne $endport ]; do
 
     echo Sending transfer request to node on port $port.
-    TRANSFER_INFO="$(programs/cldcc/cldcc transfer inita testera 975321 "test transfer")"
-    verifyErrorCode "cldcc transfer"
+    TRANSFER_INFO="$(programs/clactc/clactc transfer inita testera 975321 "test transfer")"
+    verifyErrorCode "clactc transfer"
     getTransactionId "$TRANSFER_INFO"
     echo Transaction id: $TRANS_ID
 
@@ -200,8 +200,8 @@ while [ $port  -ne $endport ]; do
     port2=$startPort
     while [ $port2  -ne $endport ]; do
 	echo Verifying transaction exists on node on port $port2
-   TRANS_INFO="$(programs/cldcc/cldcc --port $port2 get transaction $TRANS_ID)"
-   verifyErrorCode "cldcc get transaction trans_id of <$TRANS_INFO> from node on port $port2"
+   TRANS_INFO="$(programs/clactc/clactc --port $port2 get transaction $TRANS_ID)"
+   verifyErrorCode "clactc get transaction trans_id of <$TRANS_INFO> from node on port $port2"
 	port2=`expr $port2 + 1`
     done
 

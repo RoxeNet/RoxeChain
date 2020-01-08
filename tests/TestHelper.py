@@ -22,6 +22,11 @@ class AppArgs:
         arg=self.AppArg(flag, type, help, default, choices)
         self.args.append(arg)
 
+
+    def add_bool(self, flag, help, action='store_true'):
+        arg=self.AppArg(flag=flag, help=help, action=action)
+        self.args.append(arg)
+
 # pylint: disable=too-many-instance-attributes
 class TestHelper(object):
     LOCAL_HOST="localhost"
@@ -59,23 +64,21 @@ class TestHelper(object):
             parser.add_argument("--kill-sig", type=str, choices=[Utils.SigKillTag, Utils.SigTermTag], help="kill signal.",
                     default=Utils.SigKillTag)
         if "--kill-count" in includeArgs:
-            parser.add_argument("--kill-count", type=int, help="noddcc instances to kill", default=-1)
-        if "--p2p-plugin" in includeArgs:
-            parser.add_argument("--p2p-plugin", choices=["net", "bnet"], help="select a p2p plugin to use. Defaults to net.", default="net")
+            parser.add_argument("--kill-count", type=int, help="nodactc instances to kill", default=-1)
         if "--seed" in includeArgs:
             parser.add_argument("--seed", type=int, help="random seed", default=1)
 
         if "--host" in includeArgs:
-            parser.add_argument("-h", "--host", type=str, help="%s host name" % (Utils.dccServerName),
+            parser.add_argument("-h", "--host", type=str, help="%s host name" % (Utils.ActcServerName),
                                      default=TestHelper.LOCAL_HOST)
         if "--port" in includeArgs:
-            parser.add_argument("-p", "--port", type=int, help="%s host port" % Utils.dccServerName,
+            parser.add_argument("-p", "--port", type=int, help="%s host port" % Utils.ActcServerName,
                                      default=TestHelper.DEFAULT_PORT)
         if "--wallet-host" in includeArgs:
-            parser.add_argument("--wallet-host", type=str, help="%s host" % Utils.dccWalletName,
+            parser.add_argument("--wallet-host", type=str, help="%s host" % Utils.ActcWalletName,
                                      default=TestHelper.LOCAL_HOST)
         if "--wallet-port" in includeArgs:
-            parser.add_argument("--wallet-port", type=int, help="%s port" % Utils.dccWalletName,
+            parser.add_argument("--wallet-port", type=int, help="%s port" % Utils.ActcWalletName,
                                      default=TestHelper.DEFAULT_WALLET_PORT)
         if "--prod-count" in includeArgs:
             parser.add_argument("-c", "--prod-count", type=int, help="Per node producer count", default=1)
@@ -87,7 +90,7 @@ class TestHelper(object):
             parser.add_argument("--mongodb", help="Configure a MongoDb instance", action='store_true')
         if "--dump-error-details" in includeArgs:
             parser.add_argument("--dump-error-details",
-                                     help="Upon error print etc/dccio/node_*/config.ini and var/lib/node_*/stderr.log to stdout",
+                                     help="Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout",
                                      action='store_true')
         if "--dont-launch" in includeArgs:
             parser.add_argument("--dont-launch", help="Don't launch own node. Assume node is already running.",
@@ -102,9 +105,11 @@ class TestHelper(object):
         if "--only-bios" in includeArgs:
             parser.add_argument("--only-bios", help="Limit testing to bios node.", action='store_true')
         if "--clean-run" in includeArgs:
-            parser.add_argument("--clean-run", help="Kill all noddcc and kldcc instances", action='store_true')
+            parser.add_argument("--clean-run", help="Kill all nodactc and klactc instances", action='store_true')
         if "--sanity-test" in includeArgs:
-            parser.add_argument("--sanity-test", help="Validates noddcc and kldcc are in path and can be started up.", action='store_true')
+            parser.add_argument("--sanity-test", help="Validates nodactc and klactc are in path and can be started up.", action='store_true')
+        if "--alternate-version-labels-file" in includeArgs:
+            parser.add_argument("--alternate-version-labels-file", type=str, help="Provide a file to define the labels that can be used in the test and the path to the version installation associated with that.")
 
         for arg in applicationSpecificArgs.args:
             parser.add_argument(arg.flag, type=arg.type, help=arg.help, choices=arg.choices, default=arg.default)
@@ -119,20 +124,20 @@ class TestHelper(object):
             Utils.Print(str(prefix))
         clientVersion=Cluster.getClientVersion()
         Utils.Print("UTC time: %s" % str(datetime.utcnow()))
-        Utils.Print("dcc Client version: %s" % (clientVersion))
+        Utils.Print("ACTC Client version: %s" % (clientVersion))
         Utils.Print("Processor: %s" % (platform.processor()))
         Utils.Print("OS name: %s" % (platform.platform()))
     
     @staticmethod
     # pylint: disable=too-many-arguments
-    def shutdown(cluster, walletMgr, testSuccessful=True, killdccInstances=True, killWallet=True, keepLogs=False, cleanRun=True, dumpErrorDetails=False):
+    def shutdown(cluster, walletMgr, testSuccessful=True, killActcInstances=True, killWallet=True, keepLogs=False, cleanRun=True, dumpErrorDetails=False):
         """Cluster and WalletMgr shutdown and cleanup."""
         assert(cluster)
         assert(isinstance(cluster, Cluster))
         if walletMgr:
             assert(isinstance(walletMgr, WalletMgr))
         assert(isinstance(testSuccessful, bool))
-        assert(isinstance(killdccInstances, bool))
+        assert(isinstance(killActcInstances, bool))
         assert(isinstance(killWallet, bool))
         assert(isinstance(cleanRun, bool))
         assert(isinstance(dumpErrorDetails, bool))
@@ -145,6 +150,9 @@ class TestHelper(object):
             Utils.Print("Test failed.")
         if not testSuccessful and dumpErrorDetails:
             cluster.reportStatus()
+            Utils.Print(Utils.FileDivider)
+            psOut=Cluster.pgrepActcServers(timeout=60)
+            Utils.Print("pgrep output:\n%s" % (psOut))
             cluster.dumpErrorDetails()
             if walletMgr:
                 walletMgr.dumpErrorDetails()
@@ -158,7 +166,7 @@ class TestHelper(object):
                     Utils.Print("cerr={%s}\n" % (err))
                 Utils.Print("== cmd/cout/cerr pairs done. ==")
 
-        if killdccInstances:
+        if killActcInstances:
             Utils.Print("Shut down the cluster.")
             cluster.killall(allInstances=cleanRun)
             if testSuccessful and not keepLogs:

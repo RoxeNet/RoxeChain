@@ -1,20 +1,20 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
 #include <boost/test/unit_test.hpp>
 #include <boost/mpl/list.hpp>
-#include <dccio/testing/tester.hpp>
+#include <actc/testing/tester.hpp>
 
-#include <dccio/chain/snapshot.hpp>
+#include <actc/chain/snapshot.hpp>
 
 #include <snapshot_test/snapshot_test.wast.hpp>
 #include <snapshot_test/snapshot_test.abi.hpp>
 
 #include <sstream>
 
-using namespace dccio;
+using namespace actc;
 using namespace testing;
 using namespace chain;
 

@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 
@@ -216,4 +216,3 @@ DataStream& operator >> ( DataStream& ds, float128_t& v ) {
    fc::raw::unpack(ds, *reinterpret_cast<actc::chain::uint128_t*>(&v));
    return ds;
 }
-

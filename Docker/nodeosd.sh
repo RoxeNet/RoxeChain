@@ -1,20 +1,20 @@
 #!/bin/sh
-cd /opt/dccio/bin
+cd /opt/actc/bin
 
-if [ ! -d "/opt/dccio/bin/data-dir" ]; then
-    mkdir /opt/dccio/bin/data-dir
+if [ ! -d "/opt/actc/bin/data-dir" ]; then
+    mkdir /opt/actc/bin/data-dir
 fi
 
-if [ -f '/opt/dccio/bin/data-dir/config.ini' ]; then
+if [ -f '/opt/actc/bin/data-dir/config.ini' ]; then
     echo
   else
-    cp /config.ini /opt/dccio/bin/data-dir
+    cp /config.ini /opt/actc/bin/data-dir
 fi
 
-if [ -d '/opt/dccio/bin/data-dir/contracts' ]; then
+if [ -d '/opt/actc/bin/data-dir/contracts' ]; then
     echo
   else
-    cp -r /contracts /opt/dccio/bin/data-dir
+    cp -r /contracts /opt/actc/bin/data-dir
 fi
 
 while :; do
@@ -29,9 +29,9 @@ while :; do
 done
 
 if [ ! "$CONFIG_DIR" ]; then
-    CONFIG_DIR="--config-dir=/opt/dccio/bin/data-dir"
+    CONFIG_DIR="--config-dir=/opt/actc/bin/data-dir"
 else
     CONFIG_DIR=""
 fi
 
-exec /opt/dccio/bin/noddcc $CONFIG_DIR "$@"
+exec /opt/actc/bin/nodactc $CONFIG_DIR "$@"

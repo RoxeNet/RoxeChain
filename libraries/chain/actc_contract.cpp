@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/chain/actc_contract.hpp>
 #include <actc/chain/contract_table_objects.hpp>
@@ -12,11 +12,11 @@
 #include <actc/chain/exceptions.hpp>
 
 #include <actc/chain/account_object.hpp>
+#include <actc/chain/code_object.hpp>
 #include <actc/chain/permission_object.hpp>
 #include <actc/chain/permission_link_object.hpp>
 #include <actc/chain/global_property_object.hpp>
 #include <actc/chain/contract_types.hpp>
-#include <actc/chain/producer_object.hpp>
 
 #include <actc/chain/wasm_interface.hpp>
 #include <actc/chain/abi_serializer.hpp>
@@ -36,7 +36,7 @@ uint128_t transaction_id_to_sender_id( const transaction_id_type& tid ) {
 void validate_authority_precondition( const apply_context& context, const authority& auth ) {
    for(const auto& a : auth.accounts) {
       auto* acct = context.db.find<account_object, by_name>(a.permission.actor);
-      actc_ASSERT( acct != nullptr, action_validate_exception,
+      ACTC_ASSERT( acct != nullptr, action_validate_exception,
                   "account '${account}' does not exist",
                   ("account", a.permission.actor)
                 );
@@ -50,14 +50,14 @@ void validate_authority_precondition( const apply_context& context, const author
       try {
          context.control.get_authorization_manager().get_permission({a.permission.actor, a.permission.permission});
       } catch( const permission_query_exception& ) {
-         actc_THROW( action_validate_exception,
+         ACTC_THROW( action_validate_exception,
                     "permission '${perm}' does not exist",
                     ("perm", a.permission)
                   );
       }
    }
 
-   if( context.control.is_producing_block() ) {
+   if( context.trx_context.enforce_whiteblacklist && context.control.is_producing_block() ) {
       for( const auto& p : auth.keys ) {
          context.control.check_key_list( p.key );
       }
@@ -68,31 +68,31 @@ void validate_authority_precondition( const apply_context& context, const author
  *  This method is called assuming precondition_system_newaccount succeeds a
  */
 void apply_actc_newaccount(apply_context& context) {
-   auto create = context.act.data_as<newaccount>();
+   auto create = context.get_action().data_as<newaccount>();
    try {
    context.require_authorization(create.creator);
 //   context.require_write_lock( config::actc_auth_scope );
    auto& authorization = context.control.get_mutable_authorization_manager();
 
-   actc_ASSERT( validate(create.owner), action_validate_exception, "Invalid owner authority");
-   actc_ASSERT( validate(create.active), action_validate_exception, "Invalid active authority");
+   ACTC_ASSERT( validate(create.owner), action_validate_exception, "Invalid owner authority");
+   ACTC_ASSERT( validate(create.active), action_validate_exception, "Invalid active authority");
 
    auto& db = context.db;
 
    auto name_str = name(create.name).to_string();
 
-   actc_ASSERT( !create.name.empty(), action_validate_exception, "account name cannot be empty" );
-   actc_ASSERT( name_str.size() <= 12, action_validate_exception, "account names can only be 12 chars long" );
+   ACTC_ASSERT( !create.name.empty(), action_validate_exception, "account name cannot be empty" );
+   ACTC_ASSERT( name_str.size() <= 12, action_validate_exception, "account names can only be 12 chars long" );
 
    // Check if the creator is privileged
-   const auto &creator = db.get<account_object, by_name>(create.creator);
-   if( !creator.privileged ) {
-      actc_ASSERT( name_str.find( "actc." ) != 0, action_validate_exception,
+   const auto &creator = db.get<account_metadata_object, by_name>(create.creator);
+   if( !creator.is_privileged() ) {
+      ACTC_ASSERT( name_str.find( "actc." ) != 0, action_validate_exception,
                   "only privileged accounts can have names that start with 'actc.'" );
    }
 
    auto existing_account = db.find<account_object, by_name>(create.name);
-   actc_ASSERT(existing_account == nullptr, account_name_exists_exception,
+   ACTC_ASSERT(existing_account == nullptr, account_name_exists_exception,
               "Cannot create account named ${name}, as that name is already taken",
               ("name", create.name));
 
@@ -101,7 +101,7 @@ void apply_actc_newaccount(apply_context& context) {
       a.creation_date = context.control.pending_block_time();
    });
 
-   db.create<account_sequence_object>([&](auto& a) {
+   db.create<account_metadata_object>([&](auto& a) {
       a.name = create.name;
    });
 
@@ -129,41 +129,69 @@ void apply_actc_setcode(apply_context& context) {
    const auto& cfg = context.control.get_global_properties().configuration;
 
    auto& db = context.db;
-   auto  act = context.act.data_as<setcode>();
+   auto  act = context.get_action().data_as<setcode>();
    context.require_authorization(act.account);
 
-   actc_ASSERT( act.vmtype == 0, invalid_contract_vm_type, "code should be 0" );
-   actc_ASSERT( act.vmversion == 0, invalid_contract_vm_version, "version should be 0" );
+   ACTC_ASSERT( act.vmtype == 0, invalid_contract_vm_type, "code should be 0" );
+   ACTC_ASSERT( act.vmversion == 0, invalid_contract_vm_version, "version should be 0" );
 
-   fc::sha256 code_id; /// default ID == 0
+   fc::sha256 code_hash; /// default is the all zeros hash
 
-   if( act.code.size() > 0 ) {
-     code_id = fc::sha256::hash( act.code.data(), (uint32_t)act.code.size() );
+   int64_t code_size = (int64_t)act.code.size();
+
+   if( code_size > 0 ) {
+     code_hash = fc::sha256::hash( act.code.data(), (uint32_t)act.code.size() );
      wasm_interface::validate(context.control, act.code);
    }
 
-   const auto& account = db.get<account_object,by_name>(act.account);
+   const auto& account = db.get<account_metadata_object,by_name>(act.account);
+   bool existing_code = (account.code_hash != digest_type());
 
-   int64_t code_size = (int64_t)act.code.size();
-   int64_t old_size  = (int64_t)account.code.size() * config::setcode_ram_bytes_multiplier;
+   ACTC_ASSERT( code_size > 0 || existing_code, set_exact_code, "contract is already cleared" );
+
+   int64_t old_size  = 0;
    int64_t new_size  = code_size * config::setcode_ram_bytes_multiplier;
 
-   actc_ASSERT( account.code_version != code_id, set_exact_code, "contract is already running this version of code" );
+   if( existing_code ) {
+      const code_object& old_code_entry = db.get<code_object, by_code_hash>(boost::make_tuple(account.code_hash, account.vm_type, account.vm_version));
+      ACTC_ASSERT( old_code_entry.code_hash != code_hash, set_exact_code,
+                  "contract is already running this version of code" );
+      old_size  = (int64_t)old_code_entry.code.size() * config::setcode_ram_bytes_multiplier;
+      if( old_code_entry.code_ref_count == 1 ) {
+         db.remove(old_code_entry);
+         context.control.get_wasm_interface().code_block_num_last_used(account.code_hash, account.vm_type, account.vm_version, context.control.head_block_num() + 1);
+      } else {
+         db.modify(old_code_entry, [](code_object& o) {
+            --o.code_ref_count;
+         });
+      }
+   }
+
+   if( code_size > 0 ) {
+      const code_object* new_code_entry = db.find<code_object, by_code_hash>(
+                                             boost::make_tuple(code_hash, act.vmtype, act.vmversion) );
+      if( new_code_entry ) {
+         db.modify(*new_code_entry, [&](code_object& o) {
+            ++o.code_ref_count;
+         });
+      } else {
+         db.create<code_object>([&](code_object& o) {
+            o.code_hash = code_hash;
+            o.code.assign(act.code.data(), code_size);
+            o.code_ref_count = 1;
+            o.first_block_used = context.control.head_block_num() + 1;
+            o.vm_type = act.vmtype;
+            o.vm_version = act.vmversion;
+         });
+      }
+   }
 
    db.modify( account, [&]( auto& a ) {
-      /** TODO: consider whether a microsecond level local timestamp is sufficient to detect code version changes*/
-      // TODO: update setcode message to include the hash, then validate it in validate
+      a.code_sequence += 1;
+      a.code_hash = code_hash;
+      a.vm_type = act.vmtype;
+      a.vm_version = act.vmversion;
       a.last_code_update = context.control.pending_block_time();
-      a.code_version = code_id;
-      a.code.resize( code_size );
-      if( code_size > 0 )
-         memcpy( a.code.data(), act.code.data(), code_size );
-
-   });
-
-   const auto& account_sequence = db.get<account_sequence_object, by_name>(act.account);
-   db.modify( account_sequence, [&]( auto& aso ) {
-      aso.code_sequence += 1;
    });
 
    if (new_size != old_size) {
@@ -173,7 +201,7 @@ void apply_actc_setcode(apply_context& context) {
 
 void apply_actc_setabi(apply_context& context) {
    auto& db  = context.db;
-   auto  act = context.act.data_as<setabi>();
+   auto  act = context.get_action().data_as<setabi>();
 
    context.require_authorization(act.account);
 
@@ -185,14 +213,16 @@ void apply_actc_setabi(apply_context& context) {
    int64_t new_size = abi_size;
 
    db.modify( account, [&]( auto& a ) {
-      a.abi.resize( abi_size );
-      if( abi_size > 0 )
-         memcpy( a.abi.data(), act.abi.data(), abi_size );
+      if (abi_size > 0) {
+         a.abi.assign(act.abi.data(), abi_size);
+      } else {
+         a.abi.resize(0);
+      }
    });
 
-   const auto& account_sequence = db.get<account_sequence_object, by_name>(act.account);
-   db.modify( account_sequence, [&]( auto& aso ) {
-      aso.abi_sequence += 1;
+   const auto& account_metadata = db.get<account_metadata_object, by_name>(act.account);
+   db.modify( account_metadata, [&]( auto& a ) {
+      a.abi_sequence += 1;
    });
 
    if (new_size != old_size) {
@@ -202,29 +232,29 @@ void apply_actc_setabi(apply_context& context) {
 
 void apply_actc_updateauth(apply_context& context) {
 
-   auto update = context.act.data_as<updateauth>();
+   auto update = context.get_action().data_as<updateauth>();
    context.require_authorization(update.account); // only here to mark the single authority on this action as used
 
    auto& authorization = context.control.get_mutable_authorization_manager();
    auto& db = context.db;
 
-   actc_ASSERT(!update.permission.empty(), action_validate_exception, "Cannot create authority with empty name");
-   actc_ASSERT( update.permission.to_string().find( "actc." ) != 0, action_validate_exception,
+   ACTC_ASSERT(!update.permission.empty(), action_validate_exception, "Cannot create authority with empty name");
+   ACTC_ASSERT( update.permission.to_string().find( "actc." ) != 0, action_validate_exception,
                "Permission names that start with 'actc.' are reserved" );
-   actc_ASSERT(update.permission != update.parent, action_validate_exception, "Cannot set an authority as its own parent");
+   ACTC_ASSERT(update.permission != update.parent, action_validate_exception, "Cannot set an authority as its own parent");
    db.get<account_object, by_name>(update.account);
-   actc_ASSERT(validate(update.auth), action_validate_exception,
+   ACTC_ASSERT(validate(update.auth), action_validate_exception,
               "Invalid authority: ${auth}", ("auth", update.auth));
    if( update.permission == config::active_name )
-      actc_ASSERT(update.parent == config::owner_name, action_validate_exception, "Cannot change active authority's parent from owner", ("update.parent", update.parent) );
+      ACTC_ASSERT(update.parent == config::owner_name, action_validate_exception, "Cannot change active authority's parent from owner", ("update.parent", update.parent) );
    if (update.permission == config::owner_name)
-      actc_ASSERT(update.parent.empty(), action_validate_exception, "Cannot change owner authority's parent");
+      ACTC_ASSERT(update.parent.empty(), action_validate_exception, "Cannot change owner authority's parent");
    else
-      actc_ASSERT(!update.parent.empty(), action_validate_exception, "Only owner permission can have empty parent" );
+      ACTC_ASSERT(!update.parent.empty(), action_validate_exception, "Only owner permission can have empty parent" );
 
    if( update.auth.waits.size() > 0 ) {
       auto max_delay = context.control.get_global_properties().configuration.max_transaction_delay;
-      actc_ASSERT( update.auth.waits.back().wait_sec <= max_delay, action_validate_exception,
+      ACTC_ASSERT( update.auth.waits.back().wait_sec <= max_delay, action_validate_exception,
                   "Cannot set delay longer than max_transacton_delay, which is ${max_delay} seconds",
                   ("max_delay", max_delay) );
    }
@@ -244,7 +274,7 @@ void apply_actc_updateauth(apply_context& context) {
    }
 
    if( permission ) {
-      actc_ASSERT(parent_id == permission->parent, action_validate_exception,
+      ACTC_ASSERT(parent_id == permission->parent, action_validate_exception,
                  "Changing parent authority is not currently supported");
 
 
@@ -267,11 +297,11 @@ void apply_actc_updateauth(apply_context& context) {
 void apply_actc_deleteauth(apply_context& context) {
 //   context.require_write_lock( config::actc_auth_scope );
 
-   auto remove = context.act.data_as<deleteauth>();
+   auto remove = context.get_action().data_as<deleteauth>();
    context.require_authorization(remove.account); // only here to mark the single authority on this action as used
 
-   actc_ASSERT(remove.permission != config::active_name, action_validate_exception, "Cannot delete active authority");
-   actc_ASSERT(remove.permission != config::owner_name, action_validate_exception, "Cannot delete owner authority");
+   ACTC_ASSERT(remove.permission != config::active_name, action_validate_exception, "Cannot delete active authority");
+   ACTC_ASSERT(remove.permission != config::owner_name, action_validate_exception, "Cannot delete owner authority");
 
    auto& authorization = context.control.get_mutable_authorization_manager();
    auto& db = context.db;
@@ -281,8 +311,8 @@ void apply_actc_deleteauth(apply_context& context) {
    { // Check for links to this permission
       const auto& index = db.get_index<permission_link_index, by_permission_name>();
       auto range = index.equal_range(boost::make_tuple(remove.account, remove.permission));
-      actc_ASSERT(range.first == range.second, action_validate_exception,
-                 "Cannot delete a linked authority. Unlink the authority first. This authority is linked to ${code}::${type}.", 
+      ACTC_ASSERT(range.first == range.second, action_validate_exception,
+                 "Cannot delete a linked authority. Unlink the authority first. This authority is linked to ${code}::${type}.",
                  ("code", string(range.first->code))("type", string(range.first->message_type)));
    }
 
@@ -298,22 +328,30 @@ void apply_actc_deleteauth(apply_context& context) {
 void apply_actc_linkauth(apply_context& context) {
 //   context.require_write_lock( config::actc_auth_scope );
 
-   auto requirement = context.act.data_as<linkauth>();
+   auto requirement = context.get_action().data_as<linkauth>();
    try {
-      actc_ASSERT(!requirement.requirement.empty(), action_validate_exception, "Required permission cannot be empty");
+      ACTC_ASSERT(!requirement.requirement.empty(), action_validate_exception, "Required permission cannot be empty");
 
       context.require_authorization(requirement.account); // only here to mark the single authority on this action as used
 
       auto& db = context.db;
       const auto *account = db.find<account_object, by_name>(requirement.account);
-      actc_ASSERT(account != nullptr, account_query_exception,
+      ACTC_ASSERT(account != nullptr, account_query_exception,
                  "Failed to retrieve account: ${account}", ("account", requirement.account)); // Redundant?
       const auto *code = db.find<account_object, by_name>(requirement.code);
-      actc_ASSERT(code != nullptr, account_query_exception,
+      ACTC_ASSERT(code != nullptr, account_query_exception,
                  "Failed to retrieve code for account: ${account}", ("account", requirement.code));
       if( requirement.requirement != config::actc_any_name ) {
-         const auto *permission = db.find<permission_object, by_name>(requirement.requirement);
-         actc_ASSERT(permission != nullptr, permission_query_exception,
+         const permission_object* permission = nullptr;
+         if( context.control.is_builtin_activated( builtin_protocol_feature_t::only_link_to_existing_permission ) ) {
+            permission = db.find<permission_object, by_owner>(
+                           boost::make_tuple( requirement.account, requirement.requirement )
+                         );
+         } else {
+            permission = db.find<permission_object, by_name>(requirement.requirement);
+         }
+
+         ACTC_ASSERT(permission != nullptr, permission_query_exception,
                     "Failed to retrieve permission: ${permission}", ("permission", requirement.requirement));
       }
 
@@ -321,7 +359,7 @@ void apply_actc_linkauth(apply_context& context) {
       auto link = db.find<permission_link_object, by_action_name>(link_key);
 
       if( link ) {
-         actc_ASSERT(link->required_permission != requirement.requirement, action_validate_exception,
+         ACTC_ASSERT(link->required_permission != requirement.requirement, action_validate_exception,
                     "Attempting to update required authority, but new requirement is same as old");
          db.modify(*link, [requirement = requirement.requirement](permission_link_object& link) {
              link.required_permission = requirement;
@@ -347,13 +385,13 @@ void apply_actc_unlinkauth(apply_context& context) {
 //   context.require_write_lock( config::actc_auth_scope );
 
    auto& db = context.db;
-   auto unlink = context.act.data_as<unlinkauth>();
+   auto unlink = context.get_action().data_as<unlinkauth>();
 
    context.require_authorization(unlink.account); // only here to mark the single authority on this action as used
 
    auto link_key = boost::make_tuple(unlink.account, unlink.code, unlink.type);
    auto link = db.find<permission_link_object, by_action_name>(link_key);
-   actc_ASSERT(link != nullptr, action_validate_exception, "Attempting to unlink authority, but no link found");
+   ACTC_ASSERT(link != nullptr, action_validate_exception, "Attempting to unlink authority, but no link found");
    context.add_ram_usage(
       link->account,
       -(int64_t)(config::billable_size_v<permission_link_object>)
@@ -363,7 +401,7 @@ void apply_actc_unlinkauth(apply_context& context) {
 }
 
 void apply_actc_canceldelay(apply_context& context) {
-   auto cancel = context.act.data_as<canceldelay>();
+   auto cancel = context.get_action().data_as<canceldelay>();
    context.require_authorization(cancel.canceling_auth.actor); // only here to mark the single authority on this action as used
 
    const auto& trx_id = cancel.trx_id;

@@ -24,8 +24,9 @@ systemAccounts = [
     'actc.ramfee',
     'actc.saving',
     'actc.stake',
-    'actc.token',
+    'aci.token',
     'actc.vpay',
+    'actc.rex',
 ]
 
 def jsonArg(a):
@@ -40,7 +41,7 @@ def run(args):
 
 def retry(args):
     while True:
-        print('bios-boot-tutorial.py:', args)
+        print('bios-boot-tutorial.py: ', args)
         logFile.write(args + '\n')
         if subprocess.call(args, shell=True):
             print('*** Retry')
@@ -59,10 +60,7 @@ def getOutput(args):
     return proc.communicate()[0].decode('utf-8')
 
 def getJsonOutput(args):
-    print('bios-boot-tutorial.py:', args)
-    logFile.write(args + '\n')
-    proc = subprocess.Popen(args, shell=True, stdout=subprocess.PIPE)
-    return json.loads(proc.communicate()[0])
+    return json.loads(getOutput(args))
 
 def sleep(t):
     print('sleep', t, '...')
@@ -105,6 +103,7 @@ def startNode(nodeIndex, account):
     cmd = (
         args.nodactc +
         '    --max-irreversible-block-age -1'
+        '    --max-transaction-time=1000'
         '    --contracts-console'
         '    --genesis-json ' + os.path.abspath(args.genesis) +
         '    --blocks-dir ' + os.path.abspath(dir) + '/blocks'
@@ -120,6 +119,8 @@ def startNode(nodeIndex, account):
         '    --private-key \'["' + account['pub'] + '","' + account['pvt'] + '"]\''
         '    --plugin actc::http_plugin'
         '    --plugin actc::chain_api_plugin'
+        '    --plugin actc::chain_plugin'
+        '    --plugin actc::producer_api_plugin'
         '    --plugin actc::producer_plugin' +
         otherOpts)
     with open(dir + 'stderr', mode='w') as f:
@@ -187,7 +188,10 @@ def listProducers():
 def vote(b, e):
     for i in range(b, e):
         voter = accounts[i]['name']
-        prods = random.sample(range(firstProducer, firstProducer + numProducers), args.num_producers_vote)
+        k = args.num_producers_vote
+        if k > numProducers:
+            k = numProducers - 1
+        prods = random.sample(range(firstProducer, firstProducer + numProducers), k)
         prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
         retry(args.clactc + 'system voteproducer prods ' + voter + ' ' + prods)
 
@@ -284,17 +288,54 @@ def stepStartBoot():
     startNode(0, {'name': 'actc', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(1.5)
 def stepInstallSystemContracts():
-    run(args.clactc + 'set contract actc.token ' + args.contracts_dir + 'actc.token/')
-    run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + 'actc.msig/')
+    run(args.clactc + 'set contract aci.token ' + args.contracts_dir + '/aci.token/')
+    run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + '/actc.msig/')
 def stepCreateTokens():
-    run(args.clactc + 'push action actc.token create \'["actc", "10000000000.0000 %s"]\' -p actc.token' % (args.symbol))
+    run(args.clactc + 'push action aci.token create \'["actc", "10000000000.0000 %s"]\' -p aci.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
-    run(args.clactc + 'push action actc.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
+    run(args.clactc + 'push action aci.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
     sleep(1)
 def stepSetSystemContract():
-    retry(args.clactc + 'set contract actc ' + args.contracts_dir + 'actc.system/')
+    # All of the protocol upgrade features introduced in v1.8 first require a special protocol 
+    # feature (codename PREACTIVATE_FEATURE) to be activated and for an updated version of the system 
+    # contract that makes use of the functionality introduced by that feature to be deployed. 
+
+    # activate PREACTIVATE_FEATURE before installing actc.system
+    retry('curl -X POST http://127.0.0.1:%d' % args.http_port + 
+        '/v1/producer/schedule_protocol_feature_activations ' +
+        '-d \'{"protocol_features_to_activate": ["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]}\'')
+    sleep(5)
+
+    # install actc.system
+    retry(args.clactc + 'set contract actc ' + args.contracts_dir + '/actc.system/')
     sleep(1)
+
+    # activate remaining features
+    # GET_SENDER
+    retry(args.clactc + 'push action actc activate \'["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]\' -p actc')
+    # FORWARD_SETCODE
+    retry(args.clactc + 'push action actc activate \'["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]\' -p actc')
+    # ONLY_BILL_FIRST_AUTHORIZER
+    retry(args.clactc + 'push action actc activate \'["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]\' -p actc')
+    # RESTRICT_ACTION_TO_SELF
+    retry(args.clactc + 'push action actc activate \'["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]\' -p actc')
+    # DISALLOW_EMPTY_PRODUCER_SCHEDULE
+    retry(args.clactc + 'push action actc activate \'["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]\' -p actc')
+     # FIX_LINKAUTH_RESTRICTION
+    retry(args.clactc + 'push action actc activate \'["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]\' -p actc')
+     # REPLACE_DEFERRED
+    retry(args.clactc + 'push action actc activate \'["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]\' -p actc')
+    # NO_DUPLICATE_DEFERRED_ID
+    retry(args.clactc + 'push action actc activate \'["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]\' -p actc')
+    # ONLY_LINK_TO_EXISTING_PERMISSION
+    retry(args.clactc + 'push action actc activate \'["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]\' -p actc')
+    # RAM_RESTRICTIONS
+    retry(args.clactc + 'push action actc activate \'["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]\' -p actc')
     run(args.clactc + 'push action actc setpriv' + jsonArg(['actc.msig', 1]) + '-p actc@active')
+
+def stepInitSystemContract():
+    run(args.clactc + 'push action actc init' + jsonArg(['0', '4,' + args.symbol]) + '-p actc@active')
+    sleep(1)
 def stepCreateStakedAccounts():
     createStakedAccounts(0, len(accounts))
 def stepRegProducers():
@@ -326,27 +367,28 @@ def stepLog():
 parser = argparse.ArgumentParser()
 
 commands = [
-    ('k', 'kill',           stepKillAll,                True,    "Kill all nodactc and kactcd processes"),
-    ('w', 'wallet',         stepStartWallet,            True,    "Start kactcd, create wallet, fill with keys"),
-    ('b', 'boot',           stepStartBoot,              True,    "Start boot node"),
-    ('s', 'sys',            createSystemAccounts,       True,    "Create system accounts (actc.*)"),
-    ('c', 'contracts',      stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
-    ('t', 'tokens',         stepCreateTokens,           True,    "Create tokens"),
-    ('S', 'sys-contract',   stepSetSystemContract,      True,    "Set system contract"),
-    ('T', 'stake',          stepCreateStakedAccounts,   True,    "Create staked accounts"),
-    ('p', 'reg-prod',       stepRegProducers,           True,    "Register producers"),
-    ('P', 'start-prod',     stepStartProducers,         True,    "Start producers"),
-    ('v', 'vote',           stepVote,                   True,    "Vote for producers"),
-    ('R', 'claim',          claimRewards,               True,    "Claim rewards"),
-    ('x', 'proxy',          stepProxyVotes,             True,    "Proxy votes"),
-    ('q', 'resign',         stepResign,                 True,    "Resign actc"),
-    ('m', 'msg-replace',    msigReplaceSystem,          False,   "Replace system contract using msig"),
-    ('X', 'xfer',           stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
-    ('l', 'log',            stepLog,                    True,    "Show tail of node's log"),
+    ('k', 'kill',               stepKillAll,                True,    "Kill all nodactc and kactcd processes"),
+    ('w', 'wallet',             stepStartWallet,            True,    "Start kactcd, create wallet, fill with keys"),
+    ('b', 'boot',               stepStartBoot,              True,    "Start boot node"),
+    ('s', 'sys',                createSystemAccounts,       True,    "Create system accounts (actc.*)"),
+    ('c', 'contracts',          stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
+    ('t', 'tokens',             stepCreateTokens,           True,    "Create tokens"),
+    ('S', 'sys-contract',       stepSetSystemContract,      True,    "Set system contract"),
+    ('I', 'init-sys-contract',  stepInitSystemContract,     True,    "Initialiaze system contract"),
+    ('T', 'stake',              stepCreateStakedAccounts,   True,    "Create staked accounts"),
+    ('p', 'reg-prod',           stepRegProducers,           True,    "Register producers"),
+    ('P', 'start-prod',         stepStartProducers,         True,    "Start producers"),
+    ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
+    ('R', 'claim',              claimRewards,               True,    "Claim rewards"),
+    ('x', 'proxy',              stepProxyVotes,             True,    "Proxy votes"),
+    ('q', 'resign',             stepResign,                 True,    "Resign actc"),
+    ('m', 'msg-replace',        msigReplaceSystem,          False,   "Replace system contract using msig"),
+    ('X', 'xfer',               stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
+    ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="actc Public Key", default='actc8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
-parser.add_argument('--private-Key', metavar='', help="actc Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
+parser.add_argument('--public-key', metavar='', help="ACTC Public Key", default='ACI8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--private-Key', metavar='', help="ACTC Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
 parser.add_argument('--clactc', metavar='', help="Clactc command", default='../../build/programs/clactc/clactc --wallet-url http://127.0.0.1:6666 ')
 parser.add_argument('--nodactc', metavar='', help="Path to nodactc binary", default='../../build/programs/nodactc/nodactc')
 parser.add_argument('--kactcd', metavar='', help="Path to kactcd binary", default='../../build/programs/kactcd/kactcd')
@@ -355,7 +397,7 @@ parser.add_argument('--nodes-dir', metavar='', help="Path to nodes directory", d
 parser.add_argument('--genesis', metavar='', help="Path to genesis.json", default="./genesis.json")
 parser.add_argument('--wallet-dir', metavar='', help="Path to wallet directory", default='./wallet/')
 parser.add_argument('--log-path', metavar='', help="Path to log file", default='./output.log')
-parser.add_argument('--symbol', metavar='', help="The actc.system symbol", default='SYS')
+parser.add_argument('--symbol', metavar='', help="The actc.system symbol", default='ACI')
 parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=3000)
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=10)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)

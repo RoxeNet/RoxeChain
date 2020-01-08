@@ -41,8 +41,8 @@ struct blocklog {
 void blocklog::read_log() {
    block_log block_logger(blocks_dir);
    const auto end = block_logger.read_head();
-   actc_ASSERT( end, block_log_exception, "No blocks found in block log" );
-   actc_ASSERT( end->block_num() > 1, block_log_exception, "Only one block found in block log" );
+   ACTC_ASSERT( end, block_log_exception, "No blocks found in block log" );
+   ACTC_ASSERT( end->block_num() > 1, block_log_exception, "Only one block found in block log" );
 
    ilog( "existing block log contains block num 1 through block num ${n}", ("n",end->block_num()) );
 
@@ -60,7 +60,7 @@ void blocklog::read_log() {
          reversible_blocks.reset();
       }
    } catch( const std::runtime_error& e ) {
-      if( std::string(e.what()) == "database dirty flag set" ) {
+      if( std::string(e.what()).find("database dirty flag set") != std::string::npos ) {
          elog( "database dirty flag set (likely due to unclean shutdown): only block_log blocks are available" );
       } else if( std::string(e.what()) == "database metadata dirty flag set" ) {
          elog( "database metadata dirty flag set (likely due to unclean shutdown): only block_log blocks are available" );

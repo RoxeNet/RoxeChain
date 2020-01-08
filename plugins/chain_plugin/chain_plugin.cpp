@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/chain_plugin/chain_plugin.hpp>
 #include <actc/chain/fork_database.hpp>
 #include <actc/chain/block_log.hpp>
 #include <actc/chain/exceptions.hpp>
 #include <actc/chain/authorization_manager.hpp>
-#include <actc/chain/producer_object.hpp>
+#include <actc/chain/code_object.hpp>
 #include <actc/chain/config.hpp>
 #include <actc/chain/wasm_interface.hpp>
 #include <actc/chain/resource_limits.hpp>
@@ -17,10 +17,6 @@
 #include <actc/chain/snapshot.hpp>
 
 #include <actc/chain/actc_contract.hpp>
-
-#include <actc/utilities/key_conversion.hpp>
-#include <actc/utilities/common.hpp>
-#include <actc/chain/wast_to_wasm.hpp>
 
 #include <boost/signals2/connection.hpp>
 #include <boost/algorithm/string.hpp>
@@ -150,7 +146,6 @@ public:
    ,irreversible_block_channel(app().get_channel<channels::irreversible_block>())
    ,accepted_transaction_channel(app().get_channel<channels::accepted_transaction>())
    ,applied_transaction_channel(app().get_channel<channels::applied_transaction>())
-   ,accepted_confirmation_channel(app().get_channel<channels::accepted_confirmation>())
    ,incoming_block_channel(app().get_channel<incoming::channels::block>())
    ,incoming_block_sync_method(app().get_method<incoming::methods::block_sync>())
    ,incoming_transaction_async_method(app().get_method<incoming::methods::transaction_async>())
@@ -178,7 +173,6 @@ public:
    channels::irreversible_block::channel_type&     irreversible_block_channel;
    channels::accepted_transaction::channel_type&   accepted_transaction_channel;
    channels::applied_transaction::channel_type&    applied_transaction_channel;
-   channels::accepted_confirmation::channel_type&  accepted_confirmation_channel;
    incoming::channels::block::channel_type&         incoming_block_channel;
 
    // retained references to methods for easy calling
@@ -198,13 +192,14 @@ public:
    fc::optional<scoped_connection>                                   irreversible_block_connection;
    fc::optional<scoped_connection>                                   accepted_transaction_connection;
    fc::optional<scoped_connection>                                   applied_transaction_connection;
-   fc::optional<scoped_connection>                                   accepted_confirmation_connection;
-
 
 };
 
 chain_plugin::chain_plugin()
 :my(new chain_plugin_impl()) {
+   app().register_config_type<actc::chain::db_read_mode>();
+   app().register_config_type<actc::chain::validation_mode>();
+   app().register_config_type<chainbase::pinnable_mapped_file::map_mode>();
 }
 
 chain_plugin::~chain_plugin(){}
@@ -214,6 +209,8 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
    cfg.add_options()
          ("blocks-dir", bpo::value<bfs::path>()->default_value("blocks"),
           "the location of the blocks directory (absolute path or relative to application data dir)")
+         ("protocol-features-dir", bpo::value<bfs::path>()->default_value("protocol_features"),
+          "the location of the protocol_features directory (absolute path or relative to application config dir)")
          ("checkpoint", bpo::value<vector<string>>()->composing(), "Pairs of [BLOCK_NUM,BLOCK_ID] that should be enforced as checkpoints.")
          ("wasm-runtime", bpo::value<actc::chain::wasm_interface::vm_type>()->value_name("wavm/wabt"), "Override default WASM runtime")
          ("abi-serializer-max-time-ms", bpo::value<uint32_t>()->default_value(config::default_abi_serializer_max_time_ms),
@@ -222,6 +219,10 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
          ("chain-state-db-guard-size-mb", bpo::value<uint64_t>()->default_value(config::default_state_guard_size / (1024  * 1024)), "Safely shut down node when free space remaining in the chain state database drops below this size (in MiB).")
          ("reversible-blocks-db-size-mb", bpo::value<uint64_t>()->default_value(config::default_reversible_cache_size / (1024  * 1024)), "Maximum size (in MiB) of the reversible blocks database")
          ("reversible-blocks-db-guard-size-mb", bpo::value<uint64_t>()->default_value(config::default_reversible_guard_size / (1024  * 1024)), "Safely shut down node when free space remaining in the reverseible blocks database drops below this size (in MiB).")
+         ("signature-cpu-billable-pct", bpo::value<uint32_t>()->default_value(config::default_sig_cpu_bill_pct / config::percent_1),
+          "Percentage of actual signature recovery cpu to bill. Whole number percentages, e.g. 50 for 50%")
+         ("chain-threads", bpo::value<uint16_t>()->default_value(config::default_controller_thread_pool_size),
+          "Number of worker threads in controller thread pool")
          ("contracts-console", bpo::bool_switch()->default_value(false),
           "print contract's output to console")
          ("actor-whitelist", boost::program_options::value<vector<string>>()->composing()->multitoken(),
@@ -236,19 +237,35 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "Action (in the form code::action) added to action blacklist (may specify multiple times)")
          ("key-blacklist", boost::program_options::value<vector<string>>()->composing()->multitoken(),
           "Public key added to blacklist of keys that should not be included in authorities (may specify multiple times)")
+         ("sender-bypass-whiteblacklist", boost::program_options::value<vector<string>>()->composing()->multitoken(),
+          "Deferred transactions sent by accounts in this list do not have any of the subjective whitelist/blacklist checks applied to them (may specify multiple times)")
          ("read-mode", boost::program_options::value<actc::chain::db_read_mode>()->default_value(actc::chain::db_read_mode::SPECULATIVE),
-          "Database read mode (\"speculative\", \"head\", or \"read-only\").\n"// or \"irreversible\").\n"
+          "Database read mode (\"speculative\", \"head\", \"read-only\", \"irreversible\").\n"
           "In \"speculative\" mode database contains changes done up to the head block plus changes made by transactions not yet included to the blockchain.\n"
           "In \"head\" mode database contains changes done up to the current head block.\n"
-          "In \"read-only\" mode database contains incoming block changes but no speculative transaction processing.\n"
+          "In \"read-only\" mode database contains changes done up to the current head block and transactions cannot be pushed to the chain API.\n"
+          "In \"irreversible\" mode database contains changes done up to the last irreversible block and transactions cannot be pushed to the chain API.\n"
           )
-          //"In \"irreversible\" mode database contains changes done up the current irreversible block.\n")
          ("validation-mode", boost::program_options::value<actc::chain::validation_mode>()->default_value(actc::chain::validation_mode::FULL),
           "Chain validation mode (\"full\" or \"light\").\n"
           "In \"full\" mode all incoming blocks will be fully validated.\n"
           "In \"light\" mode all incoming blocks headers will be fully validated; transactions in those validated blocks will be trusted \n")
          ("disable-ram-billing-notify-checks", bpo::bool_switch()->default_value(false),
           "Disable the check which subjectively fails a transaction if a contract bills more RAM to another account within the context of a notification handler (i.e. when the receiver is not the code of the action).")
+         ("trusted-producer", bpo::value<vector<string>>()->composing(), "Indicate a producer whose blocks headers signed by it will be fully validated, but transactions in those validated blocks will be trusted.")
+         ("database-map-mode", bpo::value<chainbase::pinnable_mapped_file::map_mode>()->default_value(chainbase::pinnable_mapped_file::map_mode::mapped),
+          "Database map mode (\"mapped\", \"heap\", or \"locked\").\n"
+          "In \"mapped\" mode database is memory mapped as a file.\n"
+          "In \"heap\" mode database is preloaded in to swappable memory.\n"
+#ifdef __linux__
+          "In \"locked\" mode database is preloaded, locked in to memory, and optionally can use huge pages.\n"
+#else
+          "In \"locked\" mode database is preloaded and locked in to memory.\n"
+#endif
+         )
+#ifdef __linux__
+         ("database-hugepage-path", bpo::value<vector<string>>()->composing(), "Optional path for database hugepages when in \"locked\" mode (may specify multiple times)")
+#endif
          ;
 
 // TODO: rate limiting
@@ -286,7 +303,6 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "replace reversible block database with blocks imported from specified file and then exit")
          ("export-reversible-blocks", bpo::value<bfs::path>(),
            "export reversible block database in portable format into specified file and then exit")
-         ("trusted-producer", bpo::value<vector<string>>()->composing(), "Indicate a producer whose blocks headers signed by it will be fully validated, but transactions in those validated blocks will be trusted.")
          ("snapshot", bpo::value<bfs::path>(), "File to read Snapshot State from")
          ;
 
@@ -329,20 +345,228 @@ void clear_directory_contents( const fc::path& p ) {
    }
 }
 
+void clear_chainbase_files( const fc::path& p ) {
+   if( !fc::is_directory( p ) )
+      return;
+
+   fc::remove( p / "shared_memory.bin" );
+   fc::remove( p / "shared_memory.meta" );
+}
+
+optional<builtin_protocol_feature> read_builtin_protocol_feature( const fc::path& p  ) {
+   try {
+      return fc::json::from_file<builtin_protocol_feature>( p );
+   } catch( const fc::exception& e ) {
+      wlog( "problem encountered while reading '${path}':\n${details}",
+            ("path", p.generic_string())("details",e.to_detail_string()) );
+   } catch( ... ) {
+      dlog( "unknown problem encountered while reading '${path}'",
+            ("path", p.generic_string()) );
+   }
+   return {};
+}
+
+protocol_feature_set initialize_protocol_features( const fc::path& p, bool populate_missing_builtins = true ) {
+   using boost::filesystem::directory_iterator;
+
+   protocol_feature_set pfs;
+
+   bool directory_exists = true;
+
+   if( fc::exists( p ) ) {
+      ACTC_ASSERT( fc::is_directory( p ), plugin_exception,
+                  "Path to protocol-features is not a directory: ${path}",
+                  ("path", p.generic_string())
+      );
+   } else {
+      if( populate_missing_builtins )
+         bfs::create_directories( p );
+      else
+         directory_exists = false;
+   }
+
+   auto log_recognized_protocol_feature = []( const builtin_protocol_feature& f, const digest_type& feature_digest ) {
+      if( f.subjective_restrictions.enabled ) {
+         if( f.subjective_restrictions.preactivation_required ) {
+            if( f.subjective_restrictions.earliest_allowed_activation_time == time_point{} ) {
+               ilog( "Support for builtin protocol feature '${codename}' (with digest of '${digest}') is enabled with preactivation required",
+                     ("codename", builtin_protocol_feature_codename(f.get_codename()))
+                     ("digest", feature_digest)
+               );
+            } else {
+               ilog( "Support for builtin protocol feature '${codename}' (with digest of '${digest}') is enabled with preactivation required and with an earliest allowed activation time of ${earliest_time}",
+                     ("codename", builtin_protocol_feature_codename(f.get_codename()))
+                     ("digest", feature_digest)
+                     ("earliest_time", f.subjective_restrictions.earliest_allowed_activation_time)
+               );
+            }
+         } else {
+            if( f.subjective_restrictions.earliest_allowed_activation_time == time_point{} ) {
+               ilog( "Support for builtin protocol feature '${codename}' (with digest of '${digest}') is enabled without activation restrictions",
+                     ("codename", builtin_protocol_feature_codename(f.get_codename()))
+                     ("digest", feature_digest)
+               );
+            } else {
+               ilog( "Support for builtin protocol feature '${codename}' (with digest of '${digest}') is enabled without preactivation required but with an earliest allowed activation time of ${earliest_time}",
+                     ("codename", builtin_protocol_feature_codename(f.get_codename()))
+                     ("digest", feature_digest)
+                     ("earliest_time", f.subjective_restrictions.earliest_allowed_activation_time)
+               );
+            }
+         }
+      } else {
+         ilog( "Recognized builtin protocol feature '${codename}' (with digest of '${digest}') but support for it is not enabled",
+               ("codename", builtin_protocol_feature_codename(f.get_codename()))
+               ("digest", feature_digest)
+         );
+      }
+   };
+
+   map<builtin_protocol_feature_t, fc::path>  found_builtin_protocol_features;
+   map<digest_type, std::pair<builtin_protocol_feature, bool> > builtin_protocol_features_to_add;
+   // The bool in the pair is set to true if the builtin protocol feature has already been visited to add
+   map< builtin_protocol_feature_t, optional<digest_type> > visited_builtins;
+
+   // Read all builtin protocol features
+   if( directory_exists ) {
+      for( directory_iterator enditr, itr{p}; itr != enditr; ++itr ) {
+         auto file_path = itr->path();
+         if( !fc::is_regular_file( file_path ) || file_path.extension().generic_string().compare( ".json" ) != 0 )
+            continue;
+
+         auto f = read_builtin_protocol_feature( file_path );
+
+         if( !f ) continue;
+
+         auto res = found_builtin_protocol_features.emplace( f->get_codename(), file_path );
+
+         ACTC_ASSERT( res.second, plugin_exception,
+                     "Builtin protocol feature '${codename}' was already included from a previous_file",
+                     ("codename", builtin_protocol_feature_codename(f->get_codename()))
+                     ("current_file", file_path.generic_string())
+                     ("previous_file", res.first->second.generic_string())
+         );
+
+         const auto feature_digest = f->digest();
+
+         builtin_protocol_features_to_add.emplace( std::piecewise_construct,
+                                                   std::forward_as_tuple( feature_digest ),
+                                                   std::forward_as_tuple( *f, false ) );
+      }
+   }
+
+   // Add builtin protocol features to the protocol feature manager in the right order (to satisfy dependencies)
+   using itr_type = map<digest_type, std::pair<builtin_protocol_feature, bool>>::iterator;
+   std::function<void(const itr_type&)> add_protocol_feature =
+   [&pfs, &builtin_protocol_features_to_add, &visited_builtins, &log_recognized_protocol_feature, &add_protocol_feature]( const itr_type& itr ) -> void {
+      if( itr->second.second ) {
+         return;
+      } else {
+         itr->second.second = true;
+         visited_builtins.emplace( itr->second.first.get_codename(), itr->first );
+      }
+
+      for( const auto& d : itr->second.first.dependencies ) {
+         auto itr2 = builtin_protocol_features_to_add.find( d );
+         if( itr2 != builtin_protocol_features_to_add.end() ) {
+            add_protocol_feature( itr2 );
+         }
+      }
+
+      pfs.add_feature( itr->second.first );
+
+      log_recognized_protocol_feature( itr->second.first, itr->first );
+   };
+
+   for( auto itr = builtin_protocol_features_to_add.begin(); itr != builtin_protocol_features_to_add.end(); ++itr ) {
+      add_protocol_feature( itr );
+   }
+
+   auto output_protocol_feature = [&p]( const builtin_protocol_feature& f, const digest_type& feature_digest ) {
+      static constexpr int max_tries = 10;
+
+      string filename( "BUILTIN-" );
+      filename += builtin_protocol_feature_codename( f.get_codename() );
+      filename += ".json";
+
+      auto file_path = p / filename;
+
+      ACTC_ASSERT( !fc::exists( file_path ), plugin_exception,
+                  "Could not save builtin protocol feature with codename '${codename}' because a file at the following path already exists: ${path}",
+                  ("codename", builtin_protocol_feature_codename( f.get_codename() ))
+                  ("path", file_path.generic_string())
+      );
+
+      if( fc::json::save_to_file( f, file_path ) ) {
+         ilog( "Saved default specification for builtin protocol feature '${codename}' (with digest of '${digest}') to: ${path}",
+               ("codename", builtin_protocol_feature_codename(f.get_codename()))
+               ("digest", feature_digest)
+               ("path", file_path.generic_string())
+         );
+      } else {
+         elog( "Error occurred while writing default specification for builtin protocol feature '${codename}' (with digest of '${digest}') to: ${path}",
+               ("codename", builtin_protocol_feature_codename(f.get_codename()))
+               ("digest", feature_digest)
+               ("path", file_path.generic_string())
+         );
+      }
+   };
+
+   std::function<digest_type(builtin_protocol_feature_t)> add_missing_builtins =
+   [&pfs, &visited_builtins, &output_protocol_feature, &log_recognized_protocol_feature, &add_missing_builtins, populate_missing_builtins]
+   ( builtin_protocol_feature_t codename ) -> digest_type {
+      auto res = visited_builtins.emplace( codename, optional<digest_type>() );
+      if( !res.second ) {
+         ACTC_ASSERT( res.first->second, protocol_feature_exception,
+                     "invariant failure: cycle found in builtin protocol feature dependencies"
+         );
+         return *res.first->second;
+      }
+
+      auto f = protocol_feature_set::make_default_builtin_protocol_feature( codename,
+      [&add_missing_builtins]( builtin_protocol_feature_t d ) {
+         return add_missing_builtins( d );
+      } );
+
+      if( !populate_missing_builtins )
+         f.subjective_restrictions.enabled = false;
+
+      const auto& pf = pfs.add_feature( f );
+      res.first->second = pf.feature_digest;
+
+      log_recognized_protocol_feature( f, pf.feature_digest );
+
+      if( populate_missing_builtins )
+         output_protocol_feature( f, pf.feature_digest );
+
+      return pf.feature_digest;
+   };
+
+   for( const auto& p : builtin_protocol_feature_codenames ) {
+      auto itr = found_builtin_protocol_features.find( p.first );
+      if( itr != found_builtin_protocol_features.end() ) continue;
+
+      add_missing_builtins( p.first );
+   }
+
+   return pfs;
+}
+
 void chain_plugin::plugin_initialize(const variables_map& options) {
    ilog("initializing chain plugin");
 
    try {
       try {
-         genesis_state gs; // Check if actc_ROOT_KEY is bad
+         genesis_state gs; // Check if ACTC_ROOT_KEY is bad
       } catch ( const fc::exception& ) {
-         elog( "actc_ROOT_KEY ('${root_key}') is invalid. Recompile with a valid public key.",
+         elog( "ACTC_ROOT_KEY ('${root_key}') is invalid. Recompile with a valid public key.",
                ("root_key", genesis_state::actc_root_key));
          throw;
       }
 
       my->chain_config = controller::config();
 
+      LOAD_VALUE_SET( options, "sender-bypass-whiteblacklist", my->chain_config->sender_bypass_whiteblacklist );
       LOAD_VALUE_SET( options, "actor-whitelist", my->chain_config->actor_whitelist );
       LOAD_VALUE_SET( options, "actor-blacklist", my->chain_config->actor_blacklist );
       LOAD_VALUE_SET( options, "contract-whitelist", my->chain_config->contract_whitelist );
@@ -355,7 +579,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          auto& list = my->chain_config->action_blacklist;
          for( const auto& a : acts ) {
             auto pos = a.find( "::" );
-            actc_ASSERT( pos != std::string::npos, plugin_config_exception, "Invalid entry in action-blacklist: '${a}'", ("a", a));
+            ACTC_ASSERT( pos != std::string::npos, plugin_config_exception, "Invalid entry in action-blacklist: '${a}'", ("a", a));
             account_name code( a.substr( 0, pos ));
             action_name act( a.substr( pos + 2 ));
             list.emplace( code.value, act.value );
@@ -378,6 +602,18 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             my->blocks_dir = bld;
       }
 
+      protocol_feature_set pfs;
+      {
+         fc::path protocol_features_dir;
+         auto pfd = options.at( "protocol-features-dir" ).as<bfs::path>();
+         if( pfd.is_relative())
+            protocol_features_dir = app().config_dir() / pfd;
+         else
+            protocol_features_dir = pfd;
+
+         pfs = initialize_protocol_features( protocol_features_dir );
+      }
+
       if( options.count("checkpoint") ) {
          auto cps = options.at("checkpoint").as<vector<string>>();
          my->loaded_checkpoints.reserve(cps.size());
@@ -385,7 +621,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             auto item = fc::json::from_string(cp).as<std::pair<uint32_t,block_id_type>>();
             auto itr = my->loaded_checkpoints.find(item.first);
             if( itr != my->loaded_checkpoints.end() ) {
-               actc_ASSERT( itr->second == item.second,
+               ACTC_ASSERT( itr->second == item.second,
                            plugin_config_exception,
                           "redefining existing checkpoint at block number ${num}: original: ${orig} new: ${new}",
                           ("num", item.first)("orig", itr->second)("new", item.second)
@@ -419,6 +655,17 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
       if( options.count( "reversible-blocks-db-guard-size-mb" ))
          my->chain_config->reversible_guard_size = options.at( "reversible-blocks-db-guard-size-mb" ).as<uint64_t>() * 1024 * 1024;
 
+      if( options.count( "chain-threads" )) {
+         my->chain_config->thread_pool_size = options.at( "chain-threads" ).as<uint16_t>();
+         ACTC_ASSERT( my->chain_config->thread_pool_size > 0, plugin_config_exception,
+                     "chain-threads ${num} must be greater than 0", ("num", my->chain_config->thread_pool_size) );
+      }
+
+      my->chain_config->sig_cpu_bill_pct = options.at("signature-cpu-billable-pct").as<uint32_t>();
+      ACTC_ASSERT( my->chain_config->sig_cpu_bill_pct >= 0 && my->chain_config->sig_cpu_bill_pct <= 100, plugin_config_exception,
+                  "signature-cpu-billable-pct must be 0 - 100, ${pct}", ("pct", my->chain_config->sig_cpu_bill_pct) );
+      my->chain_config->sig_cpu_bill_pct *= config::percent_1;
+
       if( my->wasm_runtime )
          my->chain_config->wasm_runtime = *my->wasm_runtime;
 
@@ -448,11 +695,16 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                p = bfs::current_path() / p;
             }
 
-            fc::json::save_to_file( gs, p, true );
-            ilog( "Saved genesis JSON to '${path}'", ("path", p.generic_string()));
+            ACTC_ASSERT( fc::json::save_to_file( gs, p, true ),
+                        misc_exception,
+                        "Error occurred while writing genesis JSON to '${path}'",
+                        ("path", p.generic_string())
+            );
+
+            ilog( "Saved genesis JSON to '${path}'", ("path", p.generic_string()) );
          }
 
-         actc_THROW( extract_genesis_state_exception, "extracted genesis state from blocks.log" );
+         ACTC_THROW( extract_genesis_state_exception, "extracted genesis state from blocks.log" );
       }
 
       if( options.count("export-reversible-blocks") ) {
@@ -467,7 +719,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          else
             ilog( "Saved recovered blocks from reversible block database into '${path}'", ("path", p.generic_string()) );
 
-         actc_THROW( node_management_success, "exported reversible blocks" );
+         ACTC_THROW( node_management_success, "exported reversible blocks" );
       }
 
       if( options.at( "delete-all-blocks" ).as<bool>()) {
@@ -492,15 +744,13 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                          my->chain_config->blocks_dir / config::reversible_blocks_dir_name );
                fc::copy( backup_dir / config::reversible_blocks_dir_name / "shared_memory.bin",
                          my->chain_config->blocks_dir / config::reversible_blocks_dir_name / "shared_memory.bin" );
-               fc::copy( backup_dir / config::reversible_blocks_dir_name / "shared_memory.meta",
-                         my->chain_config->blocks_dir / config::reversible_blocks_dir_name / "shared_memory.meta" );
             }
          }
       } else if( options.at( "replay-blockchain" ).as<bool>()) {
          ilog( "Replay requested: deleting state database" );
          if( options.at( "truncate-at-block" ).as<uint32_t>() > 0 )
             wlog( "The --truncate-at-block option does not work for a regular replay of the blockchain." );
-         clear_directory_contents( my->chain_config->state_dir );
+         clear_chainbase_files( my->chain_config->state_dir );
          if( options.at( "fix-reversible-blocks" ).as<bool>()) {
             if( !recover_reversible_blocks( my->chain_config->blocks_dir / config::reversible_blocks_dir_name,
                                             my->chain_config->reversible_cache_size )) {
@@ -516,7 +766,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          } else {
             ilog( "Exiting after fixing reversible blocks database..." );
          }
-         actc_THROW( fixed_reversible_db_exception, "fixed corrupted reversible blocks database" );
+         ACTC_THROW( fixed_reversible_db_exception, "fixed corrupted reversible blocks database" );
       } else if( options.at( "truncate-at-block" ).as<uint32_t>() > 0 ) {
          wlog( "The --truncate-at-block option can only be used with --fix-reversible-blocks without a replay or with --hard-replay-blockchain." );
       } else if( options.count("import-reversible-blocks") ) {
@@ -527,7 +777,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          import_reversible_blocks( my->chain_config->blocks_dir/config::reversible_blocks_dir_name,
                                    my->chain_config->reversible_cache_size, reversible_blocks_file );
 
-         actc_THROW( node_management_success, "imported reversible blocks" );
+         ACTC_THROW( node_management_success, "imported reversible blocks" );
       }
 
       if( options.count("import-reversible-blocks") ) {
@@ -536,7 +786,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       if (options.count( "snapshot" )) {
          my->snapshot_path = options.at( "snapshot" ).as<bfs::path>();
-         actc_ASSERT( fc::exists(*my->snapshot_path), plugin_config_exception,
+         ACTC_ASSERT( fc::exists(*my->snapshot_path), plugin_config_exception,
                      "Cannot load snapshot, ${name} does not exist", ("name", my->snapshot_path->generic_string()) );
 
          // recover genesis information from the snapshot
@@ -548,74 +798,103 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          });
          infile.close();
 
-         actc_ASSERT( options.count( "genesis-json" ) == 0 &&  options.count( "genesis-timestamp" ) == 0,
+         ACTC_ASSERT( options.count( "genesis-timestamp" ) == 0,
                  plugin_config_exception,
-                 "--snapshot is incompatible with --genesis-json and --genesis-timestamp as the snapshot contains genesis information");
+                 "--snapshot is incompatible with --genesis-timestamp as the snapshot contains genesis information");
 
+         if( options.count( "genesis-json" )) {
+            auto genesis_path = options.at( "genesis-json" ).as<bfs::path>();
+            if( genesis_path.is_relative() ) {
+               genesis_path = bfs::current_path() / genesis_path;
+            }
+            ACTC_ASSERT( fc::is_regular_file( genesis_path ),
+                        plugin_config_exception,
+                        "Specified genesis file '${genesis}' does not exist.",
+                        ("genesis", genesis_path.generic_string()));
+            auto genesis_file = fc::json::from_file( genesis_path ).as<genesis_state>();
+            ACTC_ASSERT( my->chain_config->genesis == genesis_file, plugin_config_exception,
+                        "Genesis state provided via command line arguments does not match the existing genesis state in the snapshot. "
+                        "It is not necessary to provide a genesis state argument when loading a snapshot."
+                      );
+         }
          auto shared_mem_path = my->chain_config->state_dir / "shared_memory.bin";
-         actc_ASSERT( !fc::exists(shared_mem_path),
+         ACTC_ASSERT( !fc::exists(shared_mem_path),
                  plugin_config_exception,
                  "Snapshot can only be used to initialize an empty database." );
 
          if( fc::is_regular_file( my->blocks_dir / "blocks.log" )) {
             auto log_genesis = block_log::extract_genesis_state(my->blocks_dir);
-            actc_ASSERT( log_genesis.compute_chain_id() == my->chain_config->genesis.compute_chain_id(),
+            ACTC_ASSERT( log_genesis.compute_chain_id() == my->chain_config->genesis.compute_chain_id(),
                     plugin_config_exception,
                     "Genesis information in blocks.log does not match genesis information in the snapshot");
          }
 
       } else {
-         if( options.count( "genesis-json" )) {
-            actc_ASSERT( !fc::exists( my->blocks_dir / "blocks.log" ),
-                        plugin_config_exception,
-                       "Genesis state can only be set on a fresh blockchain." );
+         bfs::path genesis_file;
+         bool genesis_timestamp_specified = false;
+         fc::optional<genesis_state> existing_genesis;
 
-            auto genesis_file = options.at( "genesis-json" ).as<bfs::path>();
+         if( fc::exists( my->blocks_dir / "blocks.log" ) ) {
+            my->chain_config->genesis = block_log::extract_genesis_state( my->blocks_dir );
+            existing_genesis = my->chain_config->genesis;
+         }
+
+         if( options.count( "genesis-json" )) {
+            genesis_file = options.at( "genesis-json" ).as<bfs::path>();
             if( genesis_file.is_relative()) {
                genesis_file = bfs::current_path() / genesis_file;
             }
 
-            actc_ASSERT( fc::is_regular_file( genesis_file ),
+            ACTC_ASSERT( fc::is_regular_file( genesis_file ),
                         plugin_config_exception,
                        "Specified genesis file '${genesis}' does not exist.",
                        ("genesis", genesis_file.generic_string()));
 
             my->chain_config->genesis = fc::json::from_file( genesis_file ).as<genesis_state>();
+         }
 
-            ilog( "Using genesis state provided in '${genesis}'", ("genesis", genesis_file.generic_string()));
+         if( options.count( "genesis-timestamp" ) ) {
+            my->chain_config->genesis.initial_timestamp = calculate_genesis_timestamp( options.at( "genesis-timestamp" ).as<string>() );
+            genesis_timestamp_specified = true;
+         }
 
-            if( options.count( "genesis-timestamp" )) {
-               my->chain_config->genesis.initial_timestamp = calculate_genesis_timestamp(
-                     options.at( "genesis-timestamp" ).as<string>());
+         if( !existing_genesis ) {
+            if( !genesis_file.empty() ) {
+               if( genesis_timestamp_specified ) {
+                  ilog( "Using genesis state provided in '${genesis}' but with adjusted genesis timestamp",
+                        ("genesis", genesis_file.generic_string()) );
+               } else {
+                  ilog( "Using genesis state provided in '${genesis}'", ("genesis", genesis_file.generic_string()));
+               }
+               wlog( "Starting up fresh blockchain with provided genesis state." );
+            } else if( genesis_timestamp_specified ) {
+               wlog( "Starting up fresh blockchain with default genesis state but with adjusted genesis timestamp." );
+            } else {
+               wlog( "Starting up fresh blockchain with default genesis state." );
             }
-
-            wlog( "Starting up fresh blockchain with provided genesis state." );
-         } else if( options.count( "genesis-timestamp" )) {
-            actc_ASSERT( !fc::exists( my->blocks_dir / "blocks.log" ),
-                        plugin_config_exception,
-                       "Genesis state can only be set on a fresh blockchain." );
-
-            my->chain_config->genesis.initial_timestamp = calculate_genesis_timestamp(
-                  options.at( "genesis-timestamp" ).as<string>());
-
-            wlog( "Starting up fresh blockchain with default genesis state but with adjusted genesis timestamp." );
-         } else if( fc::is_regular_file( my->blocks_dir / "blocks.log" )) {
-            my->chain_config->genesis = block_log::extract_genesis_state( my->blocks_dir );
          } else {
-            wlog( "Starting up fresh blockchain with default genesis state." );
+            ACTC_ASSERT( my->chain_config->genesis == *existing_genesis, plugin_config_exception,
+                        "Genesis state provided via command line arguments does not match the existing genesis state in blocks.log. "
+                        "It is not necessary to provide genesis state arguments when a blocks.log file already exists."
+                      );
          }
       }
 
       if ( options.count("read-mode") ) {
          my->chain_config->read_mode = options.at("read-mode").as<db_read_mode>();
-         actc_ASSERT( my->chain_config->read_mode != db_read_mode::IRREVERSIBLE, plugin_config_exception, "irreversible mode not currently supported." );
       }
 
       if ( options.count("validation-mode") ) {
          my->chain_config->block_validation_mode = options.at("validation-mode").as<validation_mode>();
       }
 
-      my->chain.emplace( *my->chain_config );
+      my->chain_config->db_map_mode = options.at("database-map-mode").as<pinnable_mapped_file::map_mode>();
+#ifdef __linux__
+      if( options.count("database-hugepage-path") )
+         my->chain_config->db_hugepage_paths = options.at("database-hugepage-path").as<std::vector<std::string>>();
+#endif
+
+      my->chain.emplace( *my->chain_config, std::move(pfs) );
       my->chain_id.emplace( my->chain->get_chain_id());
 
       // set up method providers
@@ -643,41 +922,36 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          auto itr = my->loaded_checkpoints.find( blk->block_num() );
          if( itr != my->loaded_checkpoints.end() ) {
             auto id = blk->id();
-            actc_ASSERT( itr->second == id, checkpoint_exception,
+            ACTC_ASSERT( itr->second == id, checkpoint_exception,
                         "Checkpoint does not match for block number ${num}: expected: ${expected} actual: ${actual}",
                         ("num", blk->block_num())("expected", itr->second)("actual", id)
             );
          }
 
-         my->pre_accepted_block_channel.publish(blk);
+         my->pre_accepted_block_channel.publish(priority::medium, blk);
       });
 
       my->accepted_block_header_connection = my->chain->accepted_block_header.connect(
             [this]( const block_state_ptr& blk ) {
-               my->accepted_block_header_channel.publish( blk );
+               my->accepted_block_header_channel.publish( priority::medium, blk );
             } );
 
       my->accepted_block_connection = my->chain->accepted_block.connect( [this]( const block_state_ptr& blk ) {
-         my->accepted_block_channel.publish( blk );
+         my->accepted_block_channel.publish( priority::high, blk );
       } );
 
       my->irreversible_block_connection = my->chain->irreversible_block.connect( [this]( const block_state_ptr& blk ) {
-         my->irreversible_block_channel.publish( blk );
+         my->irreversible_block_channel.publish( priority::low, blk );
       } );
 
       my->accepted_transaction_connection = my->chain->accepted_transaction.connect(
             [this]( const transaction_metadata_ptr& meta ) {
-               my->accepted_transaction_channel.publish( meta );
+               my->accepted_transaction_channel.publish( priority::low, meta );
             } );
 
       my->applied_transaction_connection = my->chain->applied_transaction.connect(
-            [this]( const transaction_trace_ptr& trace ) {
-               my->applied_transaction_channel.publish( trace );
-            } );
-
-      my->accepted_confirmation_connection = my->chain->accepted_confirmation.connect(
-            [this]( const header_confirmation& conf ) {
-               my->accepted_confirmation_channel.publish( conf );
+            [this]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> t ) {
+               my->applied_transaction_channel.publish( priority::low, std::get<0>(t) );
             } );
 
       my->chain->add_indices();
@@ -688,13 +962,14 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 void chain_plugin::plugin_startup()
 { try {
    try {
+      auto shutdown = [](){ return app().is_quiting(); };
       if (my->snapshot_path) {
          auto infile = std::ifstream(my->snapshot_path->generic_string(), (std::ios::in | std::ios::binary));
          auto reader = std::make_shared<istream_snapshot_reader>(infile);
-         my->chain->startup(reader);
+         my->chain->startup(shutdown, reader);
          infile.close();
       } else {
-         my->chain->startup();
+         my->chain->startup(shutdown);
       }
    } catch (const database_guard_exception& e) {
       log_guard_exception(e);
@@ -720,7 +995,8 @@ void chain_plugin::plugin_shutdown() {
    my->irreversible_block_connection.reset();
    my->accepted_transaction_connection.reset();
    my->applied_transaction_connection.reset();
-   my->accepted_confirmation_connection.reset();
+   if(app().is_quiting())
+      my->chain->get_wasm_interface().indicate_shutting_down();
    my->chain.reset();
 }
 
@@ -731,11 +1007,7 @@ chain_apis::read_write::read_write(controller& db, const fc::microseconds& abi_s
 }
 
 void chain_apis::read_write::validate() const {
-   actc_ASSERT( db.get_read_mode() != chain::db_read_mode::READ_ONLY, missing_chain_api_plugin_exception, "Not allowed, node in read-only mode" );
-}
-
-chain_apis::read_write chain_plugin::get_read_write_api() {
-   return chain_apis::read_write(chain(), get_abi_serializer_max_time());
+   ACTC_ASSERT( db.get_read_mode() != chain::db_read_mode::READ_ONLY, missing_chain_api_plugin_exception, "Not allowed, node in read-only mode" );
 }
 
 void chain_plugin::accept_block(const signed_block_ptr& block ) {
@@ -743,7 +1015,11 @@ void chain_plugin::accept_block(const signed_block_ptr& block ) {
 }
 
 void chain_plugin::accept_transaction(const chain::packed_transaction& trx, next_function<chain::transaction_trace_ptr> next) {
-   my->incoming_transaction_async_method(std::make_shared<packed_transaction>(trx), false, std::forward<decltype(next)>(next));
+   my->incoming_transaction_async_method(std::make_shared<transaction_metadata>(std::make_shared<packed_transaction>(trx)), false, std::forward<decltype(next)>(next));
+}
+
+void chain_plugin::accept_transaction(const chain::transaction_metadata_ptr& trx, next_function<chain::transaction_trace_ptr> next) {
+   my->incoming_transaction_async_method(trx, false, std::forward<decltype(next)>(next));
 }
 
 bool chain_plugin::block_is_on_preferred_chain(const block_id_type& block_id) {
@@ -785,10 +1061,10 @@ bool chain_plugin::recover_reversible_blocks( const fc::path& db_dir, uint32_t c
       reversible_dir = *new_db_dir;
    } else {
       auto reversible_dir_name = reversible_dir.filename().generic_string();
-      actc_ASSERT( reversible_dir_name != ".", invalid_reversible_blocks_dir, "Invalid path to reversible directory" );
+      ACTC_ASSERT( reversible_dir_name != ".", invalid_reversible_blocks_dir, "Invalid path to reversible directory" );
       backup_dir = reversible_dir.parent_path() / reversible_dir_name.append("-").append( now );
 
-      actc_ASSERT( !fc::exists(backup_dir),
+      ACTC_ASSERT( !fc::exists(backup_dir),
                   reversible_blocks_backup_dir_exist,
                  "Cannot move existing reversible directory to already existing directory '${backup_dir}'",
                  ("backup_dir", backup_dir) );
@@ -824,7 +1100,7 @@ bool chain_plugin::recover_reversible_blocks( const fc::path& db_dir, uint32_t c
    }
    try {
       for( ; itr != ubi.end(); ++itr ) {
-         actc_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
+         ACTC_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
                      "gap in reversible block database between ${end} and ${blocknum}",
                      ("end", end)("blocknum", itr->blocknum)
                    );
@@ -864,7 +1140,7 @@ bool chain_plugin::import_reversible_blocks( const fc::path& reversible_dir,
    reversible_blocks.open( reversible_blocks_file.generic_string().c_str(), std::ios::in | std::ios::binary );
 
    reversible_blocks.seekg( 0, std::ios::end );
-   uint64_t end_pos = reversible_blocks.tellg();
+   auto end_pos = reversible_blocks.tellg();
    reversible_blocks.seekg( 0 );
 
    uint32_t num = 0;
@@ -880,7 +1156,7 @@ bool chain_plugin::import_reversible_blocks( const fc::path& reversible_dir,
          if( start == 0 ) {
             start = num;
          } else {
-            actc_ASSERT( num == end + 1, gap_in_reversible_blocks_db,
+            ACTC_ASSERT( num == end + 1, gap_in_reversible_blocks_db,
                         "gap in reversible block database between ${end} and ${num}",
                         ("end", end)("num", num)
                       );
@@ -888,7 +1164,7 @@ bool chain_plugin::import_reversible_blocks( const fc::path& reversible_dir,
 
          new_reversible.create<reversible_block_object>( [&]( auto& ubo ) {
             ubo.blocknum = num;
-            ubo.set_block( std::make_shared<signed_block>(tmp) );
+            ubo.set_block( std::make_shared<signed_block>(std::move(tmp)) );
          });
          end = num;
       }
@@ -923,7 +1199,7 @@ bool chain_plugin::export_reversible_blocks( const fc::path& reversible_dir,
    }
    try {
       for( ; itr != ubi.end(); ++itr ) {
-         actc_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
+         ACTC_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
                      "gap in reversible block database between ${end} and ${blocknum}",
                      ("end", end)("blocknum", itr->blocknum)
                    );
@@ -955,7 +1231,7 @@ controller& chain_plugin::chain() { return *my->chain; }
 const controller& chain_plugin::chain() const { return *my->chain; }
 
 chain::chain_id_type chain_plugin::get_chain_id()const {
-   actc_ASSERT( my->chain_id.valid(), chain_id_type_exception, "chain ID has not been initialized yet" );
+   ACTC_ASSERT( my->chain_id.valid(), chain_id_type_exception, "chain ID has not been initialized yet" );
    return *my->chain_id;
 }
 
@@ -963,7 +1239,7 @@ fc::microseconds chain_plugin::get_abi_serializer_max_time() const {
    return my->abi_serializer_max_time_ms;
 }
 
-void chain_plugin::log_guard_exception(const chain::guard_exception&e ) const {
+void chain_plugin::log_guard_exception(const chain::guard_exception&e ) {
    if (e.code() == chain::database_guard_exception::code_value) {
       elog("Database has reached an unsafe level of usage, shutting down to avoid corrupting the database.  "
            "Please increase the value set for \"chain-state-db-size-mb\" and restart the process!");
@@ -975,7 +1251,7 @@ void chain_plugin::log_guard_exception(const chain::guard_exception&e ) const {
    dlog("Details: ${details}", ("details", e.to_detail_string()));
 }
 
-void chain_plugin::handle_guard_exception(const chain::guard_exception& e) const {
+void chain_plugin::handle_guard_exception(const chain::guard_exception& e) {
    log_guard_exception(e);
 
    // quit the app
@@ -988,21 +1264,36 @@ void chain_plugin::handle_db_exhaustion() {
    std::_Exit(1);
 }
 
+void chain_plugin::handle_bad_alloc() {
+   elog("std::bad_alloc - memory exhausted");
+   //return -2 -- it's what programs/nodactc/main.cpp reports for std::exception
+   std::_Exit(-2);
+}
+
 namespace chain_apis {
 
 const string read_only::KEYi64 = "i64";
 
+template<typename I>
+std::string itoh(I n, size_t hlen = sizeof(I)<<1) {
+   static const char* digits = "0123456789abcdef";
+   std::string r(hlen, '0');
+   for(size_t i = 0, j = (hlen - 1) * 4 ; i < hlen; ++i, j -= 4)
+      r[i] = digits[(n>>j) & 0x0f];
+   return r;
+}
+
 read_only::get_info_results read_only::get_info(const read_only::get_info_params&) const {
    const auto& rm = db.get_resource_limits_manager();
    return {
-      actc::utilities::common::itoh(static_cast<uint32_t>(app().version())),
+      itoh(static_cast<uint32_t>(app().version())),
       db.get_chain_id(),
-      db.fork_db_head_block_num(),
+      db.head_block_num(),
       db.last_irreversible_block_num(),
       db.last_irreversible_block_id(),
-      db.fork_db_head_block_id(),
-      db.fork_db_head_block_time(),
-      db.fork_db_head_block_producer(),
+      db.head_block_id(),
+      db.head_block_time(),
+      db.head_block_producer(),
       rm.get_virtual_block_cpu_limit(),
       rm.get_virtual_block_net_limit(),
       rm.get_block_cpu_limit(),
@@ -1010,7 +1301,77 @@ read_only::get_info_results read_only::get_info(const read_only::get_info_params
       //std::bitset<64>(db.get_dynamic_global_properties().recent_slots_filled).to_string(),
       //__builtin_popcountll(db.get_dynamic_global_properties().recent_slots_filled) / 64.0,
       app().version_string(),
+      db.fork_db_pending_head_block_num(),
+      db.fork_db_pending_head_block_id()
    };
+}
+
+read_only::get_activated_protocol_features_results
+read_only::get_activated_protocol_features( const read_only::get_activated_protocol_features_params& params )const {
+   read_only::get_activated_protocol_features_results result;
+   const auto& pfm = db.get_protocol_feature_manager();
+
+   uint32_t lower_bound_value = std::numeric_limits<uint32_t>::lowest();
+   uint32_t upper_bound_value = std::numeric_limits<uint32_t>::max();
+
+   if( params.lower_bound ) {
+      lower_bound_value = *params.lower_bound;
+   }
+
+   if( params.upper_bound ) {
+      upper_bound_value = *params.upper_bound;
+   }
+
+   if( upper_bound_value < lower_bound_value )
+      return result;
+
+   auto walk_range = [&]( auto itr, auto end_itr, auto&& convert_iterator ) {
+      fc::mutable_variant_object mvo;
+      mvo( "activation_ordinal", 0 );
+      mvo( "activation_block_num", 0 );
+
+      auto& activation_ordinal_value   = mvo["activation_ordinal"];
+      auto& activation_block_num_value = mvo["activation_block_num"];
+
+      auto cur_time = fc::time_point::now();
+      auto end_time = cur_time + fc::microseconds(1000 * 10); /// 10ms max time
+      for( unsigned int count = 0;
+           cur_time <= end_time && count < params.limit && itr != end_itr;
+           ++itr, cur_time = fc::time_point::now() )
+      {
+         const auto& conv_itr = convert_iterator( itr );
+         activation_ordinal_value   = conv_itr.activation_ordinal();
+         activation_block_num_value = conv_itr.activation_block_num();
+
+         result.activated_protocol_features.emplace_back( conv_itr->to_variant( false, &mvo ) );
+         ++count;
+      }
+      if( itr != end_itr ) {
+         result.more = convert_iterator( itr ).activation_ordinal() ;
+      }
+   };
+
+   auto get_next_if_not_end = [&pfm]( auto&& itr ) {
+      if( itr == pfm.cend() ) return itr;
+
+      ++itr;
+      return itr;
+   };
+
+   auto lower = ( params.search_by_block_num ? pfm.lower_bound( lower_bound_value )
+                                             : pfm.at_activation_ordinal( lower_bound_value ) );
+
+   auto upper = ( params.search_by_block_num ? pfm.upper_bound( lower_bound_value )
+                                             : get_next_if_not_end( pfm.at_activation_ordinal( upper_bound_value ) ) );
+
+   if( params.reverse ) {
+      walk_range( std::make_reverse_iterator(upper), std::make_reverse_iterator(lower),
+                  []( auto&& ritr ) { return --(ritr.base()); } );
+   } else {
+      walk_range( lower, upper, []( auto&& itr ) { return itr; } );
+   }
+
+   return result;
 }
 
 uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params& p, bool& primary) {
@@ -1018,7 +1379,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
    // see multi_index packing of index name
    const uint64_t table = p.table;
    uint64_t index = table & 0xFFFFFFFFFFFFFFF0ULL;
-   actc_ASSERT( index == table, chain::contract_table_query_exception, "Unsupported table name: ${n}", ("n", p.table) );
+   ACTC_ASSERT( index == table, chain::contract_table_query_exception, "Unsupported table name: ${n}", ("n", p.table) );
 
    primary = false;
    uint64_t pos = 0;
@@ -1045,7 +1406,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
       try {
          pos = fc::to_uint64( p.index_position );
       } catch(...) {
-         actc_ASSERT( false, chain::contract_table_query_exception, "Invalid index_position: ${p}", ("p", p.index_position));
+         ACTC_ASSERT( false, chain::contract_table_query_exception, "Invalid index_position: ${p}", ("p", p.index_position));
       }
       if (pos < 2) {
          primary = true;
@@ -1060,37 +1421,51 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
 
 template<>
 uint64_t convert_to_type(const string& str, const string& desc) {
-   uint64_t value = 0;
+
    try {
-      value = boost::lexical_cast<uint64_t>(str.c_str(), str.size());
-   } catch( ... ) {
+      return boost::lexical_cast<uint64_t>(str.c_str(), str.size());
+   } catch( ... ) { }
+
+   try {
+      auto trimmed_str = str;
+      boost::trim(trimmed_str);
+      name s(trimmed_str);
+      return s.value;
+   } catch( ... ) { }
+
+   if (str.find(',') != string::npos) { // fix #6274 only match formats like 4,ACTC
       try {
-         auto trimmed_str = str;
-         boost::trim(trimmed_str);
-         name s(trimmed_str);
-         value = s.value;
-      } catch( ... ) {
-         try {
-            auto symb = actc::chain::symbol::from_string(str);
-            value = symb.value();
-         } catch( ... ) {
-            try {
-               value = ( actc::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
-            } catch( ... ) {
-               actc_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
-                                 "uint64_t, valid name, or valid symbol (with or without the precision)",
-                          ("desc", desc)("str", str));
-            }
-         }
-      }
+         auto symb = actc::chain::symbol::from_string(str);
+         return symb.value();
+      } catch( ... ) { }
    }
-   return value;
+
+   try {
+      return ( actc::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
+   } catch( ... ) {
+      ACTC_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
+                        "uint64_t, valid name, or valid symbol (with or without the precision)",
+                  ("desc", desc)("str", str));
+   }
+}
+
+template<>
+double convert_to_type(const string& str, const string& desc) {
+   double val{};
+   try {
+      val = fc::variant(str).as<double>();
+   } FC_RETHROW_EXCEPTIONS(warn, "Could not convert ${desc} string '${str}' to key type.", ("desc", desc)("str",str) )
+
+   ACTC_ASSERT( !std::isnan(val), chain::contract_table_query_exception,
+               "Converted ${desc} string '${str}' to NaN which is not a permitted value for the key type", ("desc", desc)("str",str) );
+
+   return val;
 }
 
 abi_def get_abi( const controller& db, const name& account ) {
    const auto &d = db.db();
    const account_object *code_accnt = d.find<account_object, by_name>(account);
-   actc_ASSERT(code_accnt != nullptr, chain::account_query_exception, "Fail to retrieve account for ${account}", ("account", account) );
+   ACTC_ASSERT(code_accnt != nullptr, chain::account_query_exception, "Fail to retrieve account for ${account}", ("account", account) );
    abi_def abi;
    abi_serializer::to_abi(code_accnt->abi, abi);
    return abi;
@@ -1102,23 +1477,24 @@ string get_table_type( const abi_def& abi, const name& table_name ) {
          return t.index_type;
       }
    }
-   actc_ASSERT( false, chain::contract_table_query_exception, "Table ${table} is not specified in the ABI", ("table",table_name) );
+   ACTC_ASSERT( false, chain::contract_table_query_exception, "Table ${table} is not specified in the ABI", ("table",table_name) );
 }
 
 read_only::get_table_rows_result read_only::get_table_rows( const read_only::get_table_rows_params& p )const {
    const abi_def abi = actc::chain_apis::get_abi( db, p.code );
-
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wstrict-aliasing"
    bool primary = false;
    auto table_with_index = get_table_index_name( p, primary );
    if( primary ) {
-      actc_ASSERT( p.table == table_with_index, chain::contract_table_query_exception, "Invalid table name ${t}", ( "t", p.table ));
+      ACTC_ASSERT( p.table == table_with_index, chain::contract_table_query_exception, "Invalid table name ${t}", ( "t", p.table ));
       auto table_type = get_table_type( abi, p.table );
       if( table_type == KEYi64 || p.key_type == "i64" || p.key_type == "name" ) {
          return get_table_rows_ex<key_value_index>(p,abi);
       }
-      actc_ASSERT( false, chain::contract_table_query_exception,  "Invalid table type ${type}", ("type",table_type)("abi",abi));
+      ACTC_ASSERT( false, chain::contract_table_query_exception,  "Invalid table type ${type}", ("type",table_type)("abi",abi));
    } else {
-      actc_ASSERT( !p.key_type.empty(), chain::contract_table_query_exception, "key type required for non-primary index" );
+      ACTC_ASSERT( !p.key_type.empty(), chain::contract_table_query_exception, "key type required for non-primary index" );
 
       if (p.key_type == chain_apis::i64 || p.key_type == "name") {
          return get_table_rows_by_seckey<index64_index, uint64_t>(p, abi, [](uint64_t v)->uint64_t {
@@ -1160,66 +1536,73 @@ read_only::get_table_rows_result read_only::get_table_rows( const read_only::get
          using  conv = keytype_converter<chain_apis::ripemd160,chain_apis::hex>;
          return get_table_rows_by_seckey<conv::index_type, conv::input_type>(p, abi, conv::function());
       }
-      actc_ASSERT(false, chain::contract_table_query_exception,  "Unsupported secondary index type: ${t}", ("t", p.key_type));
+      ACTC_ASSERT(false, chain::contract_table_query_exception,  "Unsupported secondary index type: ${t}", ("t", p.key_type));
    }
+#pragma GCC diagnostic pop
 }
 
 read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_only::get_table_by_scope_params& p )const {
-   const auto& d = db.db();
-   const auto& idx = d.get_index<chain::table_id_multi_index, chain::by_code_scope_table>();
-   decltype(idx.lower_bound(boost::make_tuple(0, 0, 0))) lower;
-   decltype(idx.upper_bound(boost::make_tuple(0, 0, 0))) upper;
-
-   if (p.lower_bound.size()) {
-      uint64_t scope = convert_to_type<uint64_t>(p.lower_bound, "lower_bound scope");
-      lower = idx.lower_bound( boost::make_tuple(p.code, scope, p.table));
-   } else {
-      lower = idx.lower_bound(boost::make_tuple(p.code, 0, p.table));
-   }
-   if (p.upper_bound.size()) {
-      uint64_t scope = convert_to_type<uint64_t>(p.upper_bound, "upper_bound scope");
-      upper = idx.lower_bound( boost::make_tuple(p.code, scope, 0));
-   } else {
-      upper = idx.lower_bound(boost::make_tuple((uint64_t)p.code + 1, 0, 0));
-   }
-
-   auto end = fc::time_point::now() + fc::microseconds(1000 * 10); /// 10ms max time
-   unsigned int count = 0;
-   auto itr = lower;
    read_only::get_table_by_scope_result result;
-   for (; itr != upper; ++itr) {
-      if (p.table && itr->table != p.table) {
-         if (fc::time_point::now() > end) {
-            break;
-         }
-         continue;
-      }
-      result.rows.push_back({itr->code, itr->scope, itr->table, itr->payer, itr->count});
-      if (++count == p.limit || fc::time_point::now() > end) {
-         ++itr;
-         break;
-      }
+   const auto& d = db.db();
+
+   const auto& idx = d.get_index<chain::table_id_multi_index, chain::by_code_scope_table>();
+   auto lower_bound_lookup_tuple = std::make_tuple( p.code.value, std::numeric_limits<uint64_t>::lowest(), p.table.value );
+   auto upper_bound_lookup_tuple = std::make_tuple( p.code.value, std::numeric_limits<uint64_t>::max(),
+                                                    (p.table.empty() ? std::numeric_limits<uint64_t>::max() : p.table.value) );
+
+   if( p.lower_bound.size() ) {
+      uint64_t scope = convert_to_type<uint64_t>(p.lower_bound, "lower_bound scope");
+      std::get<1>(lower_bound_lookup_tuple) = scope;
    }
-   if (itr != upper) {
-      result.more = (string)itr->scope;
+
+   if( p.upper_bound.size() ) {
+      uint64_t scope = convert_to_type<uint64_t>(p.upper_bound, "upper_bound scope");
+      std::get<1>(upper_bound_lookup_tuple) = scope;
    }
+
+   if( upper_bound_lookup_tuple < lower_bound_lookup_tuple )
+      return result;
+
+   auto walk_table_range = [&]( auto itr, auto end_itr ) {
+      auto cur_time = fc::time_point::now();
+      auto end_time = cur_time + fc::microseconds(1000 * 10); /// 10ms max time
+      for( unsigned int count = 0; cur_time <= end_time && count < p.limit && itr != end_itr; ++itr, cur_time = fc::time_point::now() ) {
+         if( p.table && itr->table != p.table ) continue;
+
+         result.rows.push_back( {itr->code, itr->scope, itr->table, itr->payer, itr->count} );
+
+         ++count;
+      }
+      if( itr != end_itr ) {
+         result.more = string(itr->scope);
+      }
+   };
+
+   auto lower = idx.lower_bound( lower_bound_lookup_tuple );
+   auto upper = idx.upper_bound( upper_bound_lookup_tuple );
+   if( p.reverse && *p.reverse ) {
+      walk_table_range( boost::make_reverse_iterator(upper), boost::make_reverse_iterator(lower) );
+   } else {
+      walk_table_range( lower, upper );
+   }
+
    return result;
 }
 
 vector<asset> read_only::get_currency_balance( const read_only::get_currency_balance_params& p )const {
 
    const abi_def abi = actc::chain_apis::get_abi( db, p.code );
-   auto table_type = get_table_type( abi, "accounts" );
+   (void)get_table_type( abi, "accounts" );
 
    vector<asset> results;
    walk_key_value_table(p.code, p.account, N(accounts), [&](const key_value_object& obj){
-      actc_ASSERT( obj.value.size() >= sizeof(asset), chain::asset_type_exception, "Invalid data on table");
+      ACTC_ASSERT( obj.value.size() >= sizeof(asset), chain::asset_type_exception, "Invalid data on table");
 
       asset cursor;
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       fc::raw::unpack(ds, cursor);
 
-      actc_ASSERT( cursor.get_symbol().valid(), chain::asset_type_exception, "Invalid asset");
+      ACTC_ASSERT( cursor.get_symbol().valid(), chain::asset_type_exception, "Invalid asset");
 
       if( !p.symbol || boost::iequals(cursor.symbol_name(), *p.symbol) ) {
         results.emplace_back(cursor);
@@ -1236,12 +1619,12 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
    fc::mutable_variant_object results;
 
    const abi_def abi = actc::chain_apis::get_abi( db, p.code );
-   auto table_type = get_table_type( abi, "stat" );
+   (void)get_table_type( abi, "stat" );
 
    uint64_t scope = ( actc::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
 
    walk_key_value_table(p.code, scope, N(stat), [&](const key_value_object& obj){
-      actc_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
+      ACTC_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
 
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       read_only::get_currency_stats_result result;
@@ -1257,33 +1640,27 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
    return results;
 }
 
-// TODO: move this and similar functions to a header. Copied from wasm_interface.cpp.
-// TODO: fix strict aliasing violation
-static float64_t to_softfloat64( double d ) {
-   return *reinterpret_cast<float64_t*>(&d);
-}
-
 fc::variant get_global_row( const database& db, const abi_def& abi, const abi_serializer& abis, const fc::microseconds& abi_serializer_max_time_ms, bool shorten_abi_errors ) {
    const auto table_type = get_table_type(abi, N(global));
-   actc_ASSERT(table_type == read_only::KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table global", ("type",table_type));
+   ACTC_ASSERT(table_type == read_only::KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table global", ("type",table_type));
 
    const auto* const table_id = db.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple(config::system_account_name, config::system_account_name, N(global)));
-   actc_ASSERT(table_id, chain::contract_table_query_exception, "Missing table global");
+   ACTC_ASSERT(table_id, chain::contract_table_query_exception, "Missing table global");
 
    const auto& kv_index = db.get_index<key_value_index, by_scope_primary>();
    const auto it = kv_index.find(boost::make_tuple(table_id->id, N(global)));
-   actc_ASSERT(it != kv_index.end(), chain::contract_table_query_exception, "Missing row in table global");
+   ACTC_ASSERT(it != kv_index.end(), chain::contract_table_query_exception, "Missing row in table global");
 
    vector<char> data;
    read_only::copy_inline_row(*it, data);
    return abis.binary_to_variant(abis.get_table_type(N(global)), data, abi_serializer_max_time_ms, shorten_abi_errors );
 }
 
-read_only::get_producers_result read_only::get_producers( const read_only::get_producers_params& p ) const {
+read_only::get_producers_result read_only::get_producers( const read_only::get_producers_params& p ) const try {
    const abi_def abi = actc::chain_apis::get_abi(db, config::system_account_name);
    const auto table_type = get_table_type(abi, N(producers));
    const abi_serializer abis{ abi, abi_serializer_max_time };
-   actc_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
+   ACTC_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
 
    const auto& d = db.db();
    const auto lower = name{p.lower_bound};
@@ -1293,7 +1670,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
            boost::make_tuple(config::system_account_name, config::system_account_name, N(producers)));
    const auto* const secondary_table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
            boost::make_tuple(config::system_account_name, config::system_account_name, N(producers) | secondary_index_num));
-   actc_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing producers table");
+   ACTC_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing producers table");
 
    const auto& kv_index = d.get_index<key_value_index, by_scope_primary>();
    const auto& secondary_index = d.get_index<index_double_index>().indices();
@@ -1327,6 +1704,20 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
    }
 
    result.total_producer_vote_weight = get_global_row(d, abi, abis, abi_serializer_max_time, shorten_abi_errors)["total_producer_vote_weight"].as_double();
+   return result;
+} catch (...) {
+   read_only::get_producers_result result;
+
+   for (auto p : db.active_producers().producers) {
+      fc::variant row = fc::mutable_variant_object()
+         ("owner", p.producer_name)
+         ("producer_key", p.block_signing_key)
+         ("url", "")
+         ("total_votes", 0.0f);
+
+      result.rows.push_back(row);
+   }
+
    return result;
 }
 
@@ -1380,7 +1771,7 @@ read_only::get_scheduled_transactions( const read_only::get_scheduled_transactio
                const auto& by_txid = d.get_index<generated_transaction_multi_index,by_trx_id>();
                auto itr = by_txid.find( txid );
                if (itr == by_txid.end()) {
-                  actc_THROW(transaction_exception, "Unknown Transaction ID: ${txid}", ("txid", txid));
+                  ACTC_THROW(transaction_exception, "Unknown Transaction ID: ${txid}", ("txid", txid));
                }
 
                return d.get_index<generated_transaction_multi_index>().indices().project<by_delay>(itr);
@@ -1439,16 +1830,26 @@ read_only::get_scheduled_transactions( const read_only::get_scheduled_transactio
 
 fc::variant read_only::get_block(const read_only::get_block_params& params) const {
    signed_block_ptr block;
-   actc_ASSERT(!params.block_num_or_id.empty() && params.block_num_or_id.size() <= 64, chain::block_id_type_exception, "Invalid Block number or ID, must be greater than 0 and less than 64 characters" );
+   optional<uint64_t> block_num;
+
+   ACTC_ASSERT( !params.block_num_or_id.empty() && params.block_num_or_id.size() <= 64,
+               chain::block_id_type_exception,
+               "Invalid Block number or ID, must be greater than 0 and less than 64 characters"
+   );
+
    try {
-      block = db.fetch_block_by_id(fc::variant(params.block_num_or_id).as<block_id_type>());
-      if (!block) {
-         block = db.fetch_block_by_number(fc::to_uint64(params.block_num_or_id));
-      }
+      block_num = fc::to_uint64(params.block_num_or_id);
+   } catch( ... ) {}
 
-   } actc_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+   if( block_num.valid() ) {
+      block = db.fetch_block_by_number( *block_num );
+   } else {
+      try {
+         block = db.fetch_block_by_id( fc::variant(params.block_num_or_id).as<block_id_type>() );
+      } ACTC_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+   }
 
-   actc_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num_or_id));
+   ACTC_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num_or_id));
 
    fc::variant pretty_output;
    abi_serializer::to_variant(*block, pretty_output, make_resolver(this, abi_serializer_max_time), abi_serializer_max_time);
@@ -1474,57 +1875,107 @@ fc::variant read_only::get_block_header_state(const get_block_header_state_param
    } else {
       try {
          b = db.fetch_block_state_by_id(fc::variant(params.block_num_or_id).as<block_id_type>());
-      } actc_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+      } ACTC_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
    }
 
-   actc_ASSERT( b, unknown_block_exception, "Could not find reversible block: ${block}", ("block", params.block_num_or_id));
+   ACTC_ASSERT( b, unknown_block_exception, "Could not find reversible block: ${block}", ("block", params.block_num_or_id));
 
    fc::variant vo;
    fc::to_variant( static_cast<const block_header_state&>(*b), vo );
    return vo;
 }
 
-void read_write::push_block(const read_write::push_block_params& params, next_function<read_write::push_block_results> next) {
+void read_write::push_block(read_write::push_block_params&& params, next_function<read_write::push_block_results> next) {
    try {
-      app().get_method<incoming::methods::block_sync>()(std::make_shared<signed_block>(params));
+      app().get_method<incoming::methods::block_sync>()(std::make_shared<signed_block>(std::move(params)));
       next(read_write::push_block_results{});
    } catch ( boost::interprocess::bad_alloc& ) {
       chain_plugin::handle_db_exhaustion();
+   } catch ( const std::bad_alloc& ) {
+      chain_plugin::handle_bad_alloc();
    } CATCH_AND_CALL(next);
 }
 
 void read_write::push_transaction(const read_write::push_transaction_params& params, next_function<read_write::push_transaction_results> next) {
-
    try {
       auto pretty_input = std::make_shared<packed_transaction>();
       auto resolver = make_resolver(this, abi_serializer_max_time);
+      transaction_metadata_ptr ptrx;
       try {
          abi_serializer::from_variant(params, *pretty_input, resolver, abi_serializer_max_time);
-      } actc_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
+         ptrx = std::make_shared<transaction_metadata>( pretty_input );
+      } ACTC_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
 
-      app().get_method<incoming::methods::transaction_async>()(pretty_input, true, [this, next](const fc::static_variant<fc::exception_ptr, transaction_trace_ptr>& result) -> void{
+      app().get_method<incoming::methods::transaction_async>()(ptrx, true, [this, next](const fc::static_variant<fc::exception_ptr, transaction_trace_ptr>& result) -> void{
          if (result.contains<fc::exception_ptr>()) {
             next(result.get<fc::exception_ptr>());
          } else {
             auto trx_trace_ptr = result.get<transaction_trace_ptr>();
 
             try {
-               chain::transaction_id_type id = trx_trace_ptr->id;
                fc::variant output;
                try {
                   output = db.to_variant_with_abi( *trx_trace_ptr, abi_serializer_max_time );
+
+                  // Create map of (closest_unnotified_ancestor_action_ordinal, global_sequence) with action trace
+                  std::map< std::pair<uint32_t, uint64_t>, fc::mutable_variant_object > act_traces_map;
+                  for( const auto& act_trace : output["action_traces"].get_array() ) {
+                     if (act_trace["receipt"].is_null() && act_trace["except"].is_null()) continue;
+                     auto closest_unnotified_ancestor_action_ordinal =
+                           act_trace["closest_unnotified_ancestor_action_ordinal"].as<fc::unsigned_int>().value;
+                     auto global_sequence = act_trace["receipt"].is_null() ?
+                                                std::numeric_limits<uint64_t>::max() :
+                                                act_trace["receipt"]["global_sequence"].as<uint64_t>();
+                     act_traces_map.emplace( std::make_pair( closest_unnotified_ancestor_action_ordinal,
+                                                             global_sequence ),
+                                             act_trace.get_object() );
+                  }
+
+                  std::function<vector<fc::variant>(uint32_t)> convert_act_trace_to_tree_struct =
+                  [&](uint32_t closest_unnotified_ancestor_action_ordinal) {
+                     vector<fc::variant> restructured_act_traces;
+                     auto it = act_traces_map.lower_bound(
+                                 std::make_pair( closest_unnotified_ancestor_action_ordinal, 0)
+                     );
+                     for( ;
+                        it != act_traces_map.end() && it->first.first == closest_unnotified_ancestor_action_ordinal; ++it )
+                     {
+                        auto& act_trace_mvo = it->second;
+
+                        auto action_ordinal = act_trace_mvo["action_ordinal"].as<fc::unsigned_int>().value;
+                        act_trace_mvo["inline_traces"] = convert_act_trace_to_tree_struct(action_ordinal);
+                        if (act_trace_mvo["receipt"].is_null()) {
+                           act_trace_mvo["receipt"] = fc::mutable_variant_object()
+                              ("abi_sequence", 0)
+                              ("act_digest", digest_type::hash(trx_trace_ptr->action_traces[action_ordinal-1].act))
+                              ("auth_sequence", flat_map<account_name,uint64_t>())
+                              ("code_sequence", 0)
+                              ("global_sequence", 0)
+                              ("receiver", act_trace_mvo["receiver"])
+                              ("recv_sequence", 0);
+                        }
+                        restructured_act_traces.push_back( std::move(act_trace_mvo) );
+                     }
+                     return restructured_act_traces;
+                  };
+
+                  fc::mutable_variant_object output_mvo(output);
+                  output_mvo["action_traces"] = convert_act_trace_to_tree_struct(0);
+
+                  output = output_mvo;
                } catch( chain::abi_exception& ) {
                   output = *trx_trace_ptr;
                }
 
+               const chain::transaction_id_type& id = trx_trace_ptr->id;
                next(read_write::push_transaction_results{id, output});
             } CATCH_AND_CALL(next);
          }
       });
-
-
    } catch ( boost::interprocess::bad_alloc& ) {
       chain_plugin::handle_db_exhaustion();
+   } catch ( const std::bad_alloc& ) {
+      chain_plugin::handle_bad_alloc();
    } CATCH_AND_CALL(next);
 }
 
@@ -1538,7 +1989,7 @@ static void push_recurse(read_write* rw, int index, const std::shared_ptr<read_w
          results->emplace_back( r );
       }
 
-      int next_index = index + 1;
+      size_t next_index = index + 1;
       if (next_index < params->size()) {
          push_recurse(rw, next_index, params, results, next );
       } else {
@@ -1551,13 +2002,53 @@ static void push_recurse(read_write* rw, int index, const std::shared_ptr<read_w
 
 void read_write::push_transactions(const read_write::push_transactions_params& params, next_function<read_write::push_transactions_results> next) {
    try {
-      actc_ASSERT( params.size() <= 1000, too_many_tx_at_once, "Attempt to push too many transactions at once" );
+      ACTC_ASSERT( params.size() <= 1000, too_many_tx_at_once, "Attempt to push too many transactions at once" );
       auto params_copy = std::make_shared<read_write::push_transactions_params>(params.begin(), params.end());
       auto result = std::make_shared<read_write::push_transactions_results>();
       result->reserve(params.size());
 
       push_recurse(this, 0, params_copy, result, next);
+   } catch ( boost::interprocess::bad_alloc& ) {
+      chain_plugin::handle_db_exhaustion();
+   } catch ( const std::bad_alloc& ) {
+      chain_plugin::handle_bad_alloc();
+   } CATCH_AND_CALL(next);
+}
 
+void read_write::send_transaction(const read_write::send_transaction_params& params, next_function<read_write::send_transaction_results> next) {
+
+   try {
+      auto pretty_input = std::make_shared<packed_transaction>();
+      auto resolver = make_resolver(this, abi_serializer_max_time);
+      transaction_metadata_ptr ptrx;
+      try {
+         abi_serializer::from_variant(params, *pretty_input, resolver, abi_serializer_max_time);
+         ptrx = std::make_shared<transaction_metadata>( pretty_input );
+      } ACTC_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
+
+      app().get_method<incoming::methods::transaction_async>()(ptrx, true, [this, next](const fc::static_variant<fc::exception_ptr, transaction_trace_ptr>& result) -> void{
+         if (result.contains<fc::exception_ptr>()) {
+            next(result.get<fc::exception_ptr>());
+         } else {
+            auto trx_trace_ptr = result.get<transaction_trace_ptr>();
+
+            try {
+               fc::variant output;
+               try {
+                  output = db.to_variant_with_abi( *trx_trace_ptr, abi_serializer_max_time );
+               } catch( chain::abi_exception& ) {
+                  output = *trx_trace_ptr;
+               }
+
+               const chain::transaction_id_type& id = trx_trace_ptr->id;
+               next(read_write::send_transaction_results{id, output});
+            } CATCH_AND_CALL(next);
+         }
+      });
+   } catch ( boost::interprocess::bad_alloc& ) {
+      chain_plugin::handle_db_exhaustion();
+   } catch ( const std::bad_alloc& ) {
+      chain_plugin::handle_bad_alloc();
    } CATCH_AND_CALL(next);
 }
 
@@ -1579,22 +2070,19 @@ read_only::get_code_results read_only::get_code( const get_code_params& params )
    get_code_results result;
    result.account_name = params.account_name;
    const auto& d = db.db();
-   const auto& accnt  = d.get<account_object,by_name>( params.account_name );
+   const auto& accnt_obj          = d.get<account_object,by_name>( params.account_name );
+   const auto& accnt_metadata_obj = d.get<account_metadata_object,by_name>( params.account_name );
 
-   actc_ASSERT( params.code_as_wasm, unsupported_feature, "Returning WAST from get_code is no longer supported" );
+   ACTC_ASSERT( params.code_as_wasm, unsupported_feature, "Returning WAST from get_code is no longer supported" );
 
-   if( accnt.code.size() ) {
-      if (params.code_as_wasm) {
-         result.wasm = string(accnt.code.begin(), accnt.code.end());
-      } else {
-         result.wast = wasm_to_wast( (const uint8_t*)accnt.code.data(), accnt.code.size(), true );
-      }
-      result.code_hash = fc::sha256::hash( accnt.code.data(), accnt.code.size() );
+   if( accnt_metadata_obj.code_hash != digest_type() ) {
+      const auto& code_obj = d.get<code_object, by_code_hash>(accnt_metadata_obj.code_hash);
+      result.wasm = string(code_obj.code.begin(), code_obj.code.end());
+      result.code_hash = code_obj.code_hash;
    }
 
    abi_def abi;
-   if( abi_serializer::to_abi(accnt.abi, abi) ) {
-
+   if( abi_serializer::to_abi(accnt_obj.abi, abi) ) {
       result.abi = std::move(abi);
    }
 
@@ -1605,11 +2093,10 @@ read_only::get_code_hash_results read_only::get_code_hash( const get_code_hash_p
    get_code_hash_results result;
    result.account_name = params.account_name;
    const auto& d = db.db();
-   const auto& accnt  = d.get<account_object,by_name>( params.account_name );
+   const auto& accnt  = d.get<account_metadata_object,by_name>( params.account_name );
 
-   if( accnt.code.size() ) {
-      result.code_hash = fc::sha256::hash( accnt.code.data(), accnt.code.size() );
-   }
+   if( accnt.code_hash != digest_type() )
+      result.code_hash = accnt.code_hash;
 
    return result;
 }
@@ -1619,9 +2106,13 @@ read_only::get_raw_code_and_abi_results read_only::get_raw_code_and_abi( const g
    result.account_name = params.account_name;
 
    const auto& d = db.db();
-   const auto& accnt = d.get<account_object,by_name>(params.account_name);
-   result.wasm = blob{{accnt.code.begin(), accnt.code.end()}};
-   result.abi = blob{{accnt.abi.begin(), accnt.abi.end()}};
+   const auto& accnt_obj          = d.get<account_object,by_name>(params.account_name);
+   const auto& accnt_metadata_obj = d.get<account_metadata_object,by_name>(params.account_name);
+   if( accnt_metadata_obj.code_hash != digest_type() ) {
+      const auto& code_obj = d.get<code_object, by_code_hash>(accnt_metadata_obj.code_hash);
+      result.wasm = blob{{code_obj.code.begin(), code_obj.code.end()}};
+   }
+   result.abi = blob{{accnt_obj.abi.begin(), accnt_obj.abi.end()}};
 
    return result;
 }
@@ -1631,11 +2122,13 @@ read_only::get_raw_abi_results read_only::get_raw_abi( const get_raw_abi_params&
    result.account_name = params.account_name;
 
    const auto& d = db.db();
-   const auto& accnt = d.get<account_object,by_name>(params.account_name);
-   result.abi_hash = fc::sha256::hash( accnt.abi.data(), accnt.abi.size() );
-   result.code_hash = fc::sha256::hash( accnt.code.data(), accnt.code.size() );
+   const auto& accnt_obj          = d.get<account_object,by_name>(params.account_name);
+   const auto& accnt_metadata_obj = d.get<account_metadata_object,by_name>(params.account_name);
+   result.abi_hash = fc::sha256::hash( accnt_obj.abi.data(), accnt_obj.abi.size() );
+   if( accnt_metadata_obj.code_hash != digest_type() )
+      result.code_hash = accnt_metadata_obj.code_hash;
    if( !params.abi_hash || *params.abi_hash != result.abi_hash )
-      result.abi = blob{{accnt.abi.begin(), accnt.abi.end()}};
+      result.abi = blob{{accnt_obj.abi.begin(), accnt_obj.abi.end()}};
 
    return result;
 }
@@ -1652,15 +2145,16 @@ read_only::get_account_results read_only::get_account( const get_account_params&
 
    rm.get_account_limits( result.account_name, result.ram_quota, result.net_weight, result.cpu_weight );
 
-   const auto& a = db.get_account(result.account_name);
+   const auto& accnt_obj = db.get_account( result.account_name );
+   const auto& accnt_metadata_obj = db.db().get<account_metadata_object,by_name>( result.account_name );
 
-   result.privileged       = a.privileged;
-   result.last_code_update = a.last_code_update;
-   result.created          = a.creation_date;
+   result.privileged       = accnt_metadata_obj.is_privileged();
+   result.last_code_update = accnt_metadata_obj.last_code_update;
+   result.created          = accnt_obj.creation_date;
 
-   bool grelisted = db.is_resource_greylisted(result.account_name);
-   result.net_limit = rm.get_account_net_limit_ex( result.account_name, !grelisted);
-   result.cpu_limit = rm.get_account_cpu_limit_ex( result.account_name, !grelisted);
+   uint32_t greylist_limit = db.is_resource_greylisted(result.account_name) ? 1 : config::maximum_elastic_resource_multiplier;
+   result.net_limit = rm.get_account_net_limit_ex( result.account_name, greylist_limit).first;
+   result.cpu_limit = rm.get_account_cpu_limit_ex( result.account_name, greylist_limit).first;
    result.ram_usage = rm.get_account_ram_usage( result.account_name );
 
    const auto& permissions = d.get_index<permission_index,by_owner>();
@@ -1673,7 +2167,7 @@ read_only::get_account_results read_only::get_account( const get_account_params&
       if( perm->parent._id ) {
          const auto* p = d.find<permission_object,by_id>( perm->parent );
          if( p ) {
-            actc_ASSERT(perm->owner == p->owner, invalid_parent_permission, "Invalid parent permission");
+            ACTC_ASSERT(perm->owner == p->owner, invalid_parent_permission, "Invalid parent permission");
             parent = p->name;
          }
       }
@@ -1688,11 +2182,11 @@ read_only::get_account_results read_only::get_account( const get_account_params&
    if( abi_serializer::to_abi(code_account.abi, abi) ) {
       abi_serializer abis( abi, abi_serializer_max_time );
 
-      const auto token_code = N(actc.token);
+      const auto token_code = N(aci.token);
 
       auto core_symbol = extract_core_symbol();
 
-      if (params.expected_core_symbol.valid()) 
+      if (params.expected_core_symbol.valid())
          core_symbol = *(params.expected_core_symbol);
 
       const auto* t_id = d.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple( token_code, params.account_name, N(accounts) ));
@@ -1768,20 +2262,20 @@ static variant action_abi_to_variant( const abi_def& abi, type_name action_type 
 read_only::abi_json_to_bin_result read_only::abi_json_to_bin( const read_only::abi_json_to_bin_params& params )const try {
    abi_json_to_bin_result result;
    const auto code_account = db.db().find<account_object,by_name>( params.code );
-   actc_ASSERT(code_account != nullptr, contract_query_exception, "Contract can't be found ${contract}", ("contract", params.code));
+   ACTC_ASSERT(code_account != nullptr, contract_query_exception, "Contract can't be found ${contract}", ("contract", params.code));
 
    abi_def abi;
    if( abi_serializer::to_abi(code_account->abi, abi) ) {
       abi_serializer abis( abi, abi_serializer_max_time );
       auto action_type = abis.get_action_type(params.action);
-      actc_ASSERT(!action_type.empty(), action_validate_exception, "Unknown action ${action} in contract ${contract}", ("action", params.action)("contract", params.code));
+      ACTC_ASSERT(!action_type.empty(), action_validate_exception, "Unknown action ${action} in contract ${contract}", ("action", params.action)("contract", params.code));
       try {
          result.binargs = abis.variant_to_binary( action_type, params.args, abi_serializer_max_time, shorten_abi_errors );
-      } actc_RETHROW_EXCEPTIONS(chain::invalid_action_args_exception,
+      } ACTC_RETHROW_EXCEPTIONS(chain::invalid_action_args_exception,
                                 "'${args}' is invalid args for action '${action}' code '${code}'. expected '${proto}'",
                                 ("args", params.args)("action", params.action)("code", params.code)("proto", action_abi_to_variant(abi, action_type)))
    } else {
-      actc_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
+      ACTC_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
    }
    return result;
 } FC_RETHROW_EXCEPTIONS( warn, "code: ${code}, action: ${action}, args: ${args}",
@@ -1795,7 +2289,7 @@ read_only::abi_bin_to_json_result read_only::abi_bin_to_json( const read_only::a
       abi_serializer abis( abi, abi_serializer_max_time );
       result.args = abis.binary_to_variant( abis.get_action_type( params.action ), params.binargs, abi_serializer_max_time, shorten_abi_errors );
    } else {
-      actc_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
+      ACTC_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
    }
    return result;
 }
@@ -1805,7 +2299,7 @@ read_only::get_required_keys_result read_only::get_required_keys( const get_requ
    auto resolver = make_resolver(this, abi_serializer_max_time);
    try {
       abi_serializer::from_variant(params.transaction, pretty_input, resolver, abi_serializer_max_time);
-   } actc_RETHROW_EXCEPTIONS(chain::transaction_type_exception, "Invalid transaction")
+   } ACTC_RETHROW_EXCEPTIONS(chain::transaction_type_exception, "Invalid transaction")
 
    auto required_keys_set = db.get_authorization_manager().get_required_keys( pretty_input, params.available_keys, fc::seconds( pretty_input.delay_sec ));
    get_required_keys_result result;

@@ -1,32 +1,20 @@
 [submodule "libraries/chainbase"]
 	path = libraries/chainbase
-	url = https://github.com/dccio/chainbase
+	url = https://github.com/eosio/chainbase
         ignore = dirty
 [submodule "libraries/appbase"]
 	path = libraries/appbase
-	url = https://github.com/dccio/appbase
+	url = https://github.com/eosio/appbase
         ignore = dirty
-[submodule "contracts/musl/upstream"]
-	path = contracts/musl/upstream
-	url = https://github.com/dccIO/musl.git
-	branch = dccio
-[submodule "contracts/libc++/upstream"]
-	path = contracts/libc++/upstream
-	url = https://github.com/dccIO/libcxx.git
-	branch = dccio
-[submodule "externals/binaryen"]
-	path = externals/binaryen
-	url = https://github.com/dccIO/binaryen
-
 [submodule "libraries/softfloat"]
 	path = libraries/softfloat
-	url = https://github.com/dccio/berkeley-softfloat-3
-[submodule "externals/magic_get"]
-	path = externals/magic_get
-	url = https://github.com/dccIO/magic_get
+	url = https://github.com/eosio/berkeley-softfloat-3
 [submodule "libraries/fc"]
 	path = libraries/fc
-	url = https://github.com/dccIO/fc
+	url = https://github.com/EOSIO/fc
 [submodule "libraries/wabt"]
 	path = libraries/wabt
-	url = http://github.com/dccIO/wabt
+	url = https://github.com/EOSIO/wabt
+[submodule "libraries/yubihsm"]
+	path = libraries/yubihsm
+	url = https://github.com/Yubico/yubihsm-shell
