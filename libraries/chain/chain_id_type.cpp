@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 
 #include <actc/chain/chain_id_type.hpp>
@@ -8,8 +8,8 @@
 
 namespace actc { namespace chain {
 
-   void chain_id_type::reflector_verify()const {
-      actc_ASSERT( *reinterpret_cast<const fc::sha256*>(this) != fc::sha256(), chain_id_type_exception, "chain_id_type cannot be zero" );
+   void chain_id_type::reflector_init()const {
+      ACTC_ASSERT( *reinterpret_cast<const fc::sha256*>(this) != fc::sha256(), chain_id_type_exception, "chain_id_type cannot be zero" );
    }
 
 } }  // namespace actc::chain

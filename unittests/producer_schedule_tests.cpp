@@ -1,6 +1,6 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/global_property_object.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/global_property_object.hpp>
 #include <boost/range/algorithm.hpp>
 
 #ifdef NON_VALIDATING_TEST
@@ -9,8 +9,8 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio::testing;
-using namespace dccio::chain;
+using namespace actc::testing;
+using namespace actc::chain;
 using mvo = fc::mutable_variant_object;
 
 BOOST_AUTO_TEST_SUITE(producer_schedule_tests)

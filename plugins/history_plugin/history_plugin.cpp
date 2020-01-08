@@ -148,34 +148,34 @@ namespace actc {
             if (bypass_filter) {
               pass_on = true;
             }
-            if (filter_on.find({ act.receipt.receiver, 0, 0 }) != filter_on.end()) {
+            if (filter_on.find({ act.receiver, 0, 0 }) != filter_on.end()) {
               pass_on = true;
             }
-            if (filter_on.find({ act.receipt.receiver, act.act.name, 0 }) != filter_on.end()) {
+            if (filter_on.find({ act.receiver, act.act.name, 0 }) != filter_on.end()) {
               pass_on = true;
             }
             for (const auto& a : act.act.authorization) {
-              if (filter_on.find({ act.receipt.receiver, 0, a.actor }) != filter_on.end()) {
+              if (filter_on.find({ act.receiver, 0, a.actor }) != filter_on.end()) {
                 pass_on = true;
               }
-              if (filter_on.find({ act.receipt.receiver, act.act.name, a.actor }) != filter_on.end()) {
+              if (filter_on.find({ act.receiver, act.act.name, a.actor }) != filter_on.end()) {
                 pass_on = true;
               }
             }
 
             if (!pass_on) {  return false;  }
 
-            if (filter_out.find({ act.receipt.receiver, 0, 0 }) != filter_out.end()) {
+            if (filter_out.find({ act.receiver, 0, 0 }) != filter_out.end()) {
               return false;
             }
-            if (filter_out.find({ act.receipt.receiver, act.act.name, 0 }) != filter_out.end()) {
+            if (filter_out.find({ act.receiver, act.act.name, 0 }) != filter_out.end()) {
               return false;
             }
             for (const auto& a : act.act.authorization) {
-              if (filter_out.find({ act.receipt.receiver, 0, a.actor }) != filter_out.end()) {
+              if (filter_out.find({ act.receiver, 0, a.actor }) != filter_out.end()) {
                 return false;
               }
-              if (filter_out.find({ act.receipt.receiver, act.act.name, a.actor }) != filter_out.end()) {
+              if (filter_out.find({ act.receiver, act.act.name, a.actor }) != filter_out.end()) {
                 return false;
               }
             }
@@ -186,17 +186,17 @@ namespace actc {
          set<account_name> account_set( const action_trace& act ) {
             set<account_name> result;
 
-            result.insert( act.receipt.receiver );
+            result.insert( act.receiver );
             for( const auto& a : act.act.authorization ) {
                if( bypass_filter ||
-                   filter_on.find({ act.receipt.receiver, 0, 0}) != filter_on.end() ||
-                   filter_on.find({ act.receipt.receiver, 0, a.actor}) != filter_on.end() ||
-                   filter_on.find({ act.receipt.receiver, act.act.name, 0}) != filter_on.end() ||
-                   filter_on.find({ act.receipt.receiver, act.act.name, a.actor }) != filter_on.end() ) {
-                 if ((filter_out.find({ act.receipt.receiver, 0, 0 }) == filter_out.end()) &&
-                     (filter_out.find({ act.receipt.receiver, 0, a.actor }) == filter_out.end()) &&
-                     (filter_out.find({ act.receipt.receiver, act.act.name, 0 }) == filter_out.end()) &&
-                     (filter_out.find({ act.receipt.receiver, act.act.name, a.actor }) == filter_out.end())) {
+                   filter_on.find({ act.receiver, 0, 0}) != filter_on.end() ||
+                   filter_on.find({ act.receiver, 0, a.actor}) != filter_on.end() ||
+                   filter_on.find({ act.receiver, act.act.name, 0}) != filter_on.end() ||
+                   filter_on.find({ act.receiver, act.act.name, a.actor }) != filter_on.end() ) {
+                 if ((filter_out.find({ act.receiver, 0, 0 }) == filter_out.end()) &&
+                     (filter_out.find({ act.receiver, 0, a.actor }) == filter_out.end()) &&
+                     (filter_out.find({ act.receiver, act.act.name, 0 }) == filter_out.end()) &&
+                     (filter_out.find({ act.receiver, act.act.name, a.actor }) == filter_out.end())) {
                    result.insert( a.actor );
                  }
                }
@@ -204,7 +204,7 @@ namespace actc {
             return result;
          }
 
-         void record_account_action( account_name n, const base_action_trace& act ) {
+         void record_account_action( account_name n, const action_trace& act ) {
             auto& chain = chain_plug->chain();
             chainbase::database& db = const_cast<chainbase::database&>( chain.db() ); // Override read-only access to state DB (highly unrecommended practice!)
 
@@ -216,13 +216,11 @@ namespace actc {
             if( itr->account == n )
                asn = itr->account_sequence_num + 1;
 
-            //idump((n)(act.receipt.global_sequence)(asn));
             const auto& a = db.create<account_history_object>( [&]( auto& aho ) {
               aho.account = n;
-              aho.action_sequence_num = act.receipt.global_sequence;
+              aho.action_sequence_num = act.receipt->global_sequence;
               aho.account_sequence_num = asn;
             });
-            //idump((a.account)(a.action_sequence_num)(a.action_sequence_num));
          }
 
          void on_system_action( const action_trace& at ) {
@@ -263,8 +261,8 @@ namespace actc {
                   aho.packed_action_trace.resize(ps);
                   datastream<char*> ds( aho.packed_action_trace.data(), ps );
                   fc::raw::pack( ds, at );
-                  aho.action_sequence_num = at.receipt.global_sequence;
-                  aho.block_num = chain.pending_block_state()->block_num;
+                  aho.action_sequence_num = at.receipt->global_sequence;
+                  aho.block_num = chain.head_block_num() + 1;
                   aho.block_time = chain.pending_block_time();
                   aho.trx_id     = at.trx_id;
                });
@@ -274,15 +272,16 @@ namespace actc {
                   record_account_action( a, at );
                }
             }
-            if( at.receipt.receiver == chain::config::system_account_name )
+            if( at.receiver == chain::config::system_account_name )
                on_system_action( at );
-            for( const auto& iline : at.inline_traces ) {
-               on_action_trace( iline );
-            }
          }
 
          void on_applied_transaction( const transaction_trace_ptr& trace ) {
+            if( !trace->receipt || (trace->receipt->status != transaction_receipt_header::executed &&
+                  trace->receipt->status != transaction_receipt_header::soft_fail) )
+               return;
             for( const auto& atrace : trace->action_traces ) {
+               if( !atrace.receipt ) continue;
                on_action_trace( atrace );
             }
          }
@@ -320,9 +319,9 @@ namespace actc {
                }
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               actc_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
+               ACTC_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
                filter_entry fe{v[0], v[1], v[2]};
-               actc_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
+               ACTC_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-on", ("s", s));
                my->filter_on.insert( fe );
             }
@@ -332,28 +331,28 @@ namespace actc {
             for( auto& s : fo ) {
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               actc_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
+               ACTC_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
                filter_entry fe{v[0], v[1], v[2]};
-               actc_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
+               ACTC_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-out", ("s", s));
                my->filter_out.insert( fe );
             }
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         actc_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         ACTC_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          auto& chain = my->chain_plug->chain();
 
          chainbase::database& db = const_cast<chainbase::database&>( chain.db() ); // Override read-only access to state DB (highly unrecommended practice!)
-         // TODO: Use separate chainbase database for managing the state of the history_plugin (or remove deprecated history_plugin entirely) 
+         // TODO: Use separate chainbase database for managing the state of the history_plugin (or remove deprecated history_plugin entirely)
          db.add_index<account_history_index>();
          db.add_index<action_history_index>();
          db.add_index<account_control_history_multi_index>();
          db.add_index<public_key_history_multi_index>();
 
          my->applied_transaction_connection.emplace(
-               chain.applied_transaction.connect( [&]( const transaction_trace_ptr& p ) {
-                  my->on_applied_transaction( p );
+               chain.applied_transaction.connect( [&]( std::tuple<const transaction_trace_ptr&, const signed_transaction&> t ) {
+                  my->on_applied_transaction( std::get<0>(t) );
                } ));
       } FC_LOG_AND_RETHROW()
    }
@@ -404,7 +403,7 @@ namespace actc {
            if( start > pos ) start = 0;
            end   = pos;
         }
-        actc_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
+        ACTC_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
 
         idump((start)(end));
 
@@ -449,7 +448,7 @@ namespace actc {
             FC_ASSERT( input_id_length <= 64, "hex string is too long to represent an actual transaction id" );
             FC_ASSERT( input_id_length >= 8,  "hex string representing transaction id should be at least 8 characters long to avoid excessive collisions" );
             input_id = transaction_id_type(p.id);
-         } actc_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
+         } ACTC_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
 
          auto txn_id_matched = [&input_id, input_id_size = input_id_length/2, no_half_byte_at_end = (input_id_length % 2 == 0)]
                                ( const transaction_id_type &id ) -> bool // hex prefix comparison
@@ -469,7 +468,7 @@ namespace actc {
          bool in_history = (itr != idx.end() && txn_id_matched(itr->trx_id) );
 
          if( !in_history && !p.block_num_hint ) {
-            actc_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
+            ACTC_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
          }
 
          get_transaction_result result;
@@ -491,20 +490,14 @@ namespace actc {
             }
 
             auto blk = chain.fetch_block_by_number( result.block_num );
-            if( blk == nullptr ) { // still in pending
-                auto blk_state = chain.pending_block_state();
-                if( blk_state != nullptr ) {
-                    blk = blk_state->block;
-                }
-            }
-            if( blk != nullptr ) {
-                for (const auto &receipt: blk->transactions) {
+            if( blk || chain.is_building_block() ) {
+               const vector<transaction_receipt>& receipts = blk ? blk->transactions : chain.get_pending_trx_receipts();
+               for (const auto &receipt: receipts) {
                     if (receipt.trx.contains<packed_transaction>()) {
                         auto &pt = receipt.trx.get<packed_transaction>();
-                        auto mtrx = transaction_metadata(pt);
-                        if (mtrx.id == result.id) {
+                        if (pt.id() == result.id) {
                             fc::mutable_variant_object r("receipt", receipt);
-                            r("trx", chain.to_variant_with_abi(mtrx.trx, abi_serializer_max_time));
+                            r("trx", chain.to_variant_with_abi(pt.get_signed_transaction(), abi_serializer_max_time));
                             result.trx = move(r);
                             break;
                         }
@@ -516,7 +509,7 @@ namespace actc {
                             break;
                         }
                     }
-                }
+               }
             }
          } else {
             auto blk = chain.fetch_block_by_number(*p.block_num_hint);
@@ -525,14 +518,14 @@ namespace actc {
                for (const auto& receipt: blk->transactions) {
                   if (receipt.trx.contains<packed_transaction>()) {
                      auto& pt = receipt.trx.get<packed_transaction>();
-                     auto mtrx = transaction_metadata(pt);
-                     if( txn_id_matched(mtrx.id) ) {
-                        result.id = mtrx.id;
+                     const auto& id = pt.id();
+                     if( txn_id_matched(id) ) {
+                        result.id = id;
                         result.last_irreversible_block = chain.last_irreversible_block_num();
                         result.block_num = *p.block_num_hint;
                         result.block_time = blk->timestamp;
                         fc::mutable_variant_object r("receipt", receipt);
-                        r("trx", chain.to_variant_with_abi(mtrx.trx, abi_serializer_max_time));
+                        r("trx", chain.to_variant_with_abi(pt.get_signed_transaction(), abi_serializer_max_time));
                         result.trx = move(r);
                         found = true;
                         break;
@@ -554,7 +547,7 @@ namespace actc {
             }
 
             if (!found) {
-               actc_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
+               ACTC_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
             }
          }
 

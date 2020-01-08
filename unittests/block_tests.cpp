@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
+#include <actc/testing/tester.hpp>
 
-using namespace dccio;
+using namespace actc;
 using namespace testing;
 using namespace chain;
 

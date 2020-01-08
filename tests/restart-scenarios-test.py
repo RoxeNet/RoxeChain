@@ -16,9 +16,9 @@ import random
 # -d <delay between nodes startup>
 # -v <verbose logging>
 # --kill-sig <kill signal [term|kill]>
-# --kill-count <noddcc instances to kill>
+# --kill-count <nodactc instances to kill>
 # --dont-kill <Leave cluster running after test finishes>
-# --dump-error-details <Upon error print etc/dccio/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -26,7 +26,7 @@ import random
 Print=Utils.Print
 errorExit=Utils.errorExit
 
-args=TestHelper.parse_args({"-p","-d","-s","-c","--kill-sig","--kill-count","--keep-logs","--p2p-plugin"
+args=TestHelper.parse_args({"-p","-d","-s","-c","--kill-sig","--kill-count","--keep-logs"
                             ,"--dump-error-details","-v","--leave-running","--clean-run"})
 pnodes=args.p
 topo=args.s
@@ -36,11 +36,10 @@ debug=args.v
 total_nodes = pnodes
 killCount=args.kill_count if args.kill_count > 0 else 1
 killSignal=args.kill_sig
-killdccInstances= not args.leave_running
+killActcInstances= not args.leave_running
 dumpErrorDetails=args.dump_error_details
 keepLogs=args.keep_logs
 killAll=args.clean_run
-p2pPlugin=args.p2p_plugin
 
 seed=1
 Utils.Debug=debug
@@ -66,33 +65,33 @@ try:
     pnodes, topo, delay, chainSyncStrategyStr))
 
     Print("Stand up cluster")
-    if cluster.launch(pnodes, total_nodes, topo=topo, delay=delay, p2pPlugin=p2pPlugin) is False:
-        errorExit("Failed to stand up dcc cluster.")
+    if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay) is False:
+        errorExit("Failed to stand up actc cluster.")
 
     Print ("Wait for Cluster stabilization")
     # wait for cluster to start producing blocks
     if not cluster.waitOnClusterBlockNumSync(3):
         errorExit("Cluster never stabilized")
 
-    Print("Stand up dcc wallet kdccd")
+    Print("Stand up ACTC wallet kactcd")
     accountsCount=total_nodes
     walletName="MyWallet"
     Print("Creating wallet %s if one doesn't already exist." % walletName)
-    wallet=walletMgr.create(walletName, [cluster.dccioAccount,cluster.defproduceraAccount,cluster.defproducerbAccount])
+    wallet=walletMgr.create(walletName, [cluster.actcAccount,cluster.defproduceraAccount,cluster.defproducerbAccount])
 
     Print ("Populate wallet with %d accounts." % (accountsCount))
     if not cluster.populateWallet(accountsCount, wallet):
         errorExit("Wallet initialization failed.")
 
     defproduceraAccount=cluster.defproduceraAccount
-    dccioAccount=cluster.dccioAccount
+    actcAccount=cluster.actcAccount
 
     Print("Importing keys for account %s into wallet %s." % (defproduceraAccount.name, wallet.name))
     if not walletMgr.importKey(defproduceraAccount, wallet):
         errorExit("Failed to import key for account %s" % (defproduceraAccount.name))
 
     Print("Create accounts.")
-    if not cluster.createAccounts(dccioAccount):
+    if not cluster.createAccounts(actcAccount):
         errorExit("Accounts creation failed.")
 
     Print("Wait on cluster sync.")
@@ -100,9 +99,9 @@ try:
         errorExit("Cluster sync wait failed.")
 
     Print("Kill %d cluster node instances." % (killCount))
-    if cluster.killSomedccInstances(killCount, killSignal) is False:
-        errorExit("Failed to kill dcc instances")
-    Print("noddcc instances killed.")
+    if cluster.killSomeActcInstances(killCount, killSignal) is False:
+        errorExit("Failed to kill Actc instances")
+    Print("nodactc instances killed.")
 
     Print("Spread funds and validate")
     if not cluster.spreadFundsAndValidate(10):
@@ -113,9 +112,9 @@ try:
         errorExit("Cluster sync wait failed.")
 
     Print ("Relaunch dead cluster nodes instances.")
-    if cluster.relaunchdccInstances() is False:
-        errorExit("Failed to relaunch dcc instances")
-    Print("noddcc instances relaunched.")
+    if cluster.relaunchActcInstances(cachePopen=True) is False:
+        errorExit("Failed to relaunch Actc instances")
+    Print("nodactc instances relaunched.")
 
     Print ("Resyncing cluster nodes.")
     if not cluster.waitOnClusterSync():
@@ -130,8 +129,16 @@ try:
     if not cluster.waitOnClusterSync():
         errorExit("Cluster sync wait failed.")
 
+    if killActcInstances:
+        atLeastOne=False
+        for node in cluster.getNodes():
+            if node.popenProc is not None:
+                atLeastOne=True
+                node.interruptAndVerifyExitStatus()
+        assert atLeastOne, "Test is setup to verify that a cleanly interrupted nodactc exits with an exit status of 0, but this test may no longer be setup to do that"
+
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killdccInstances, killdccInstances, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killActcInstances=killActcInstances, killWallet=killActcInstances, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
 exit(0)

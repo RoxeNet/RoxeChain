@@ -33,7 +33,6 @@ namespace actc { namespace chain {
 
          void init_for_input_trx( uint64_t packed_trx_unprunable_size,
                                   uint64_t packed_trx_prunable_size,
-                                  uint32_t num_signatures,
                                   bool skip_recording);
 
          void init_for_deferred_trx( fc::time_point published );
@@ -56,6 +55,8 @@ namespace actc { namespace chain {
 
          std::tuple<int64_t, int64_t, bool, bool> max_bandwidth_billed_accounts_can_pay( bool force_elastic_limits = false )const;
 
+         void validate_referenced_accounts( const transaction& trx, bool enforce_actor_whitelist_blacklist )const;
+
       private:
 
          friend struct controller_impl;
@@ -63,14 +64,29 @@ namespace actc { namespace chain {
 
          void add_ram_usage( account_name account, int64_t ram_delta );
 
-         void dispatch_action( action_trace& trace, const action& a, account_name receiver, bool context_free = false, uint32_t recurse_depth = 0 );
-         inline void dispatch_action( action_trace& trace, const action& a, bool context_free = false ) {
-            dispatch_action(trace, a, a.account, context_free);
-         };
+         action_trace& get_action_trace( uint32_t action_ordinal );
+         const action_trace& get_action_trace( uint32_t action_ordinal )const;
+
+         /** invalidates any action_trace references returned by get_action_trace */
+         uint32_t schedule_action( const action& act, account_name receiver, bool context_free,
+                                   uint32_t creator_action_ordinal, uint32_t closest_unnotified_ancestor_action_ordinal );
+
+         /** invalidates any action_trace references returned by get_action_trace */
+         uint32_t schedule_action( action&& act, account_name receiver, bool context_free,
+                                   uint32_t creator_action_ordinal, uint32_t closest_unnotified_ancestor_action_ordinal );
+
+         /** invalidates any action_trace references returned by get_action_trace */
+         uint32_t schedule_action( uint32_t action_ordinal, account_name receiver, bool context_free,
+                                   uint32_t creator_action_ordinal, uint32_t closest_unnotified_ancestor_action_ordinal );
+
+         void execute_action( uint32_t action_ordinal, uint32_t recurse_depth );
+
          void schedule_transaction();
          void record_transaction( const transaction_id_type& id, fc::time_point_sec expire );
 
          void validate_cpu_usage_to_bill( int64_t u, bool check_minimum = true )const;
+
+         void disallow_transaction_extensions( const char* error_msg )const;
 
       /// Fields:
       public:
@@ -95,10 +111,10 @@ namespace actc { namespace chain {
          fc::microseconds              delay;
          bool                          is_input           = false;
          bool                          apply_context_free = true;
-         bool                          can_subjectively_fail = true;
+         bool                          enforce_whiteblacklist = true;
 
          fc::time_point                deadline = fc::time_point::maximum();
-         fc::microseconds              leeway = fc::microseconds(3000);
+         fc::microseconds              leeway = fc::microseconds( config::default_subjective_cpu_leeway_us );
          int64_t                       billed_cpu_time_us = 0;
          bool                          explicit_billed_cpu_time = false;
 

@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/global_property_object.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/global_property_object.hpp>
 #include <fc/crypto/digest.hpp>
 
 #include <boost/test/unit_test.hpp>
@@ -16,8 +16,8 @@
 #endif
 
 
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc::chain;
+using namespace actc::testing;
 namespace bfs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(database_tests)
@@ -28,7 +28,7 @@ BOOST_AUTO_TEST_SUITE(database_tests)
          TESTER test;
 
          // Bypass read-only restriction on state DB access for this unit test which really needs to mutate the DB to properly conduct its test.
-         dccio::chain::database& db = const_cast<dccio::chain::database&>( test.control->db() );
+         actc::chain::database& db = const_cast<actc::chain::database&>( test.control->db() );
 
          auto ses = db.start_undo_session(true);
 
@@ -68,7 +68,7 @@ BOOST_AUTO_TEST_SUITE(database_tests)
          // Utility function to check expected irreversible block
          auto calc_exp_last_irr_block_num = [&](uint32_t head_block_num) -> uint32_t {
             const auto producers_size = test.control->head_block_state()->active_schedule.producers.size();
-            const auto max_reversible_rounds = dcc_PERCENT(producers_size, config::percent_100 - config::irreversible_threshold_percent);
+            const auto max_reversible_rounds = actc_PERCENT(producers_size, config::percent_100 - config::irreversible_threshold_percent);
             if( max_reversible_rounds == 0) {
                return head_block_num;
             } else {

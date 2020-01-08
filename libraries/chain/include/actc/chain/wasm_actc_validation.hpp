@@ -113,7 +113,7 @@ namespace actc { namespace chain { namespace wasm_validations {
                return;
             }
             depth++;
-            actc_ASSERT(depth < 1024, wasm_execution_error, "Nested depth exceeded");
+            ACTC_ASSERT(depth < 1024, wasm_execution_error, "Nested depth exceeded");
          }
       }
    };
@@ -338,7 +338,7 @@ namespace actc { namespace chain { namespace wasm_validations {
          void validate() {
             _module_validators.validate( *_module );
             for ( auto& fd : _module->functions.defs ) {
-               wasm_ops::actc_OperatorDecoderStream<op_constrainers> decoder(fd.code);
+               wasm_ops::ACTC_OperatorDecoderStream<op_constrainers> decoder(fd.code);
                while ( decoder ) {
                   wasm_ops::instruction_stream new_code(0);
                   auto op = decoder.decodeOp();

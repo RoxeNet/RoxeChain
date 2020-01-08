@@ -4,8 +4,8 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "actc.IO"
-PROJECT_NUMBER         = "actc ${DOXY_actc_VERSION}"
+PROJECT_NAME           = "ACTC.IO"
+PROJECT_NUMBER         = "ACTC ${DOXY_ACTC_VERSION}"
 PROJECT_BRIEF          =
 PROJECT_LOGO           = actc-logo.png
 OUTPUT_DIRECTORY       =

@@ -1,3 +1,4 @@
+import re
 import errno
 import subprocess
 import time
@@ -18,21 +19,25 @@ class Utils:
     Debug=False
     FNull = open(os.devnull, 'w')
 
-    dccClientPath="programs/cldcc/cldcc"
-    MiscdccClientArgs="--no-auto-kdccd"
+    ActcClientPath="programs/clactc/clactc"
+    MiscActcClientArgs="--no-auto-kactcd"
 
-    dccWalletName="kdccd"
-    dccWalletPath="programs/kdccd/"+ dccWalletName
+    ActcWalletName="kactcd"
+    ActcWalletPath="programs/kactcd/"+ ActcWalletName
 
-    dccServerName="noddcc"
-    dccServerPath="programs/noddcc/"+ dccServerName
+    ActcServerName="nodactc"
+    ActcServerPath="programs/nodactc/"+ ActcServerName
 
-    dccLauncherPath="programs/dccio-launcher/dccio-launcher"
+    ActcLauncherPath="programs/actc-launcher/actc-launcher"
     MongoPath="mongo"
     ShuttingDown=False
     CheckOutputDeque=deque(maxlen=10)
 
-    dccBlockLogPath="programs/dccio-blocklog/dccio-blocklog"
+    ActcBlockLogPath="programs/actc-blocklog/actc-blocklog"
+
+    FileDivider="================================================================="
+    DataDir="var/lib/"
+    ConfigDir="etc/actc/"
 
     @staticmethod
     def Print(*args, **kwargs):
@@ -63,6 +68,38 @@ class Utils:
         Utils.systemWaitTimeout=timeout
 
     @staticmethod
+    def getDateString(dt):
+        return "%d_%02d_%02d_%02d_%02d_%02d" % (
+            dt.year, dt.month, dt.day, dt.hour, dt.minute, dt.second)
+
+    @staticmethod
+    def nodeExtensionToName(ext):
+        r"""Convert node extension (bios, 0, 1, etc) to node name. """
+        prefix="node_"
+        if ext == "bios":
+            return prefix + ext
+
+        return "node_%02d" % (ext)
+
+    @staticmethod
+    def getNodeDataDir(ext, relativeDir=None, trailingSlash=False):
+        path=os.path.join(Utils.DataDir, Utils.nodeExtensionToName(ext))
+        if relativeDir is not None:
+           path=os.path.join(path, relativeDir)
+        if trailingSlash:
+           path=os.path.join(path, "")
+        return path
+
+    @staticmethod
+    def getNodeConfigDir(ext, relativeDir=None, trailingSlash=False):
+        path=os.path.join(Utils.ConfigDir, Utils.nodeExtensionToName(ext))
+        if relativeDir is not None:
+           path=os.path.join(path, relativeDir)
+        if trailingSlash:
+           path=os.path.join(path, "")
+        return path
+
+    @staticmethod
     def getChainStrategies():
         chainSyncStrategies={}
 
@@ -82,8 +119,10 @@ class Utils:
 
     @staticmethod
     def checkOutput(cmd, ignoreError=False):
-        assert(isinstance(cmd, list))
-        popen=subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        if (isinstance(cmd, list)):
+            popen=subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        else:
+            popen=subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True)
         (output,error)=popen.communicate()
         Utils.CheckOutputDeque.append((output,error,cmd))
         if popen.returncode != 0 and not ignoreError:
@@ -105,7 +144,7 @@ class Utils:
         Utils.Print(msg)
 
     @staticmethod
-    def waitForObj(lam, timeout=None):
+    def waitForObj(lam, timeout=None, sleepTime=3, reporter=None):
         if timeout is None:
             timeout=60
 
@@ -116,7 +155,6 @@ class Utils:
                 ret=lam()
                 if ret is not None:
                     return ret
-                sleepTime=3
                 if Utils.Debug:
                     Utils.Print("cmd: sleep %d seconds, remaining time: %d seconds" %
                                 (sleepTime, endTime - time.time()))
@@ -124,6 +162,8 @@ class Utils:
                     stdout.write('.')
                     stdout.flush()
                     needsNewLine=True
+                if reporter is not None:
+                    reporter()
                 time.sleep(sleepTime)
         finally:
             if needsNewLine:
@@ -132,9 +172,9 @@ class Utils:
         return None
 
     @staticmethod
-    def waitForBool(lam, timeout=None):
+    def waitForBool(lam, timeout=None, sleepTime=3, reporter=None):
         myLam = lambda: True if lam() else None
-        ret=Utils.waitForObj(myLam, timeout)
+        ret=Utils.waitForObj(myLam, timeout, sleepTime, reporter=reporter)
         return False if ret is None else ret
 
     @staticmethod
@@ -177,7 +217,8 @@ class Utils:
 
     @staticmethod
     def runCmdReturnStr(cmd, trace=False):
-        retStr=Utils.checkOutput(cmd.split())
+        cmdArr=shlex.split(cmd)
+        retStr=Utils.checkOutput(cmdArr)
         if trace: Utils.Print ("RAW > %s" % (retStr))
         return retStr
 
@@ -217,17 +258,22 @@ class Utils:
 
     @staticmethod
     def pgrepCmd(serverName):
-        pgrepOpts="-fl"
         # pylint: disable=deprecated-method
-        if platform.linux_distribution()[0] in ["Ubuntu", "LinuxMint", "Fedora","CentOS Linux","arch"]:
+        # pgrep differs on different platform (amazonlinux1 and 2 for example). We need to check if pgrep -h has -a available and add that if so:
+        try:
+            pgrepHelp = re.search('-a', subprocess.Popen("pgrep --help 2>/dev/null", shell=True, stdout=subprocess.PIPE).stdout.read().decode('utf-8'))
+            pgrepHelp.group(0) # group() errors if -a is not found, so we don't need to do anything else special here.
             pgrepOpts="-a"
+        except AttributeError as error:
+            # If no -a, AttributeError: 'NoneType' object has no attribute 'group'
+            pgrepOpts="-fl"
 
         return "pgrep %s %s" % (pgrepOpts, serverName)
 
     @staticmethod
     def getBlockLog(blockLogLocation, silentErrors=False, exitOnError=False):
         assert(isinstance(blockLogLocation, str))
-        cmd="%s --blocks-dir %s --as-json-array" % (Utils.dccBlockLogPath, blockLogLocation)
+        cmd="%s --blocks-dir %s --as-json-array" % (Utils.ActcBlockLogPath, blockLogLocation)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         rtn=None
         try:

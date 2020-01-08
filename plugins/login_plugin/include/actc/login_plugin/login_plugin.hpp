@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 #include <actc/chain_plugin/chain_plugin.hpp>
