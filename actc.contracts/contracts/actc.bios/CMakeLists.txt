@@ -1,8 +1,13 @@
-file(GLOB ABI_FILES "*.abi")
-configure_file("${ABI_FILES}" "${CMAKE_CURRENT_BINARY_DIR}" COPYONLY)
+add_contract(actc.bios actc.bios ${CMAKE_CURRENT_SOURCE_DIR}/src/actc.bios.cpp)
 
-add_wast_executable(TARGET actc.bios
-  INCLUDE_FOLDERS "${STANDARD_INCLUDE_FOLDERS}"
-  LIBRARIES libc++ libc actclib
-  DESTINATION_FOLDER ${CMAKE_CURRENT_BINARY_DIR}
-)
+target_include_directories(actc.bios
+   PUBLIC
+   ${CMAKE_CURRENT_SOURCE_DIR}/include)
+
+set_target_properties(actc.bios
+   PROPERTIES
+   RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}")
+
+configure_file( ${CMAKE_CURRENT_SOURCE_DIR}/ricardian/actc.bios.contracts.md.in ${CMAKE_CURRENT_BINARY_DIR}/ricardian/actc.bios.contracts.md @ONLY )
+
+target_compile_options( actc.bios PUBLIC -R${CMAKE_CURRENT_SOURCE_DIR}/ricardian -R${CMAKE_CURRENT_BINARY_DIR}/ricardian )
