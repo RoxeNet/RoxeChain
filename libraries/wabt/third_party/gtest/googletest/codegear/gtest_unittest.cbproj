@@ -21,7 +21,7 @@
     <OutputExt>exe</OutputExt>
     <BCC_OptimizeForSpeed>true</BCC_OptimizeForSpeed>
     <Defines>NO_STRICT</Defines>
-    <actc_CBuilderOutput>JPHNE</actc_CBuilderOutput>
+    <DCC_CBuilderOutput>JPHNE</DCC_CBuilderOutput>
     <DynamicRTL>true</DynamicRTL>
     <ILINK_ObjectSearchPath>..\test</ILINK_ObjectSearchPath>
     <UsePackages>true</UsePackages>
@@ -36,14 +36,14 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Cfg_1)'!=''">
     <BCC_OptimizeForSpeed>false</BCC_OptimizeForSpeed>
-    <actc_Optimize>false</actc_Optimize>
-    <actc_DebugInfoInExe>true</actc_DebugInfoInExe>
+    <DCC_Optimize>false</DCC_Optimize>
+    <DCC_DebugInfoInExe>true</DCC_DebugInfoInExe>
     <Defines>_DEBUG;$(Defines)</Defines>
     <ILINK_FullDebugInfo>true</ILINK_FullDebugInfo>
     <BCC_InlineFunctionExpansion>false</BCC_InlineFunctionExpansion>
     <ILINK_DisableIncrementalLinking>true</ILINK_DisableIncrementalLinking>
     <BCC_UseRegisterVariables>None</BCC_UseRegisterVariables>
-    <actc_Define>DEBUG</actc_Define>
+    <DCC_Define>DEBUG</DCC_Define>
     <BCC_DebugLineNumbers>true</BCC_DebugLineNumbers>
     <IntermediateOutputDir>Debug</IntermediateOutputDir>
     <TASM_DisplaySourceLines>true</TASM_DisplaySourceLines>

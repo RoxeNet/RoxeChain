@@ -41,16 +41,21 @@ add_library( actc_chain
              webassembly/wabt.cpp
 
 #             get_config.cpp
-#             global_property_object.cpp
 #
 #             contracts/chain_initializer.cpp
 
-
-#             transaction_metadata.cpp
+             trace.cpp
+             transaction_metadata.cpp
+             protocol_state_object.cpp
+             protocol_feature_activation.cpp
+             protocol_feature_manager.cpp
+             genesis_intrinsics.cpp
+             whitelisted_intrinsics.cpp
+             thread_utils.cpp
              ${HEADERS}
              )
 
-target_link_libraries( actc_chain actc_utilities fc chainbase Logging IR WAST WASM Runtime
+target_link_libraries( actc_chain fc chainbase Logging IR WAST WASM Runtime
                        softfloat builtins wabt
                      )
 target_include_directories( actc_chain

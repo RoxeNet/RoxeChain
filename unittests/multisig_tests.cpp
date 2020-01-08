@@ -1,49 +1,49 @@
 #include <boost/test/unit_test.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
-#include <dccio/chain/wast_to_wasm.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
+#include <actc/chain/wast_to_wasm.hpp>
 
-#include <dccio.msig/dccio.msig.wast.hpp>
-#include <dccio.msig/dccio.msig.abi.hpp>
+#include <actc.msig/actc.msig.wast.hpp>
+#include <actc.msig/actc.msig.abi.hpp>
 
 #include <test_api/test_api.wast.hpp>
 
-#include <dccio.system/dccio.system.wast.hpp>
-#include <dccio.system/dccio.system.abi.hpp>
+#include <actc.system/actc.system.wast.hpp>
+#include <actc.system/actc.system.abi.hpp>
 
-#include <dccio.token/dccio.token.wast.hpp>
-#include <dccio.token/dccio.token.abi.hpp>
+#include <actc.token/actc.token.wast.hpp>
+#include <actc.token/actc.token.abi.hpp>
 
 #include <Runtime/Runtime.h>
 
 #include <fc/variant_object.hpp>
 
-using namespace dccio::testing;
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 using mvo = fc::mutable_variant_object;
 
-class dccio_msig_tester : public tester {
+class actc_msig_tester : public tester {
 public:
 
-   dccio_msig_tester() {
-      create_accounts( { N(dccio.msig), N(dccio.stake), N(dccio.ram), N(dccio.ramfee), N(alice), N(bob), N(carol) } );
+   actc_msig_tester() {
+      create_accounts( { N(actc.msig), N(actc.stake), N(actc.ram), N(actc.ramfee), N(alice), N(bob), N(carol) } );
       produce_block();
 
       auto trace = base_tester::push_action(config::system_account_name, N(setpriv),
                                             config::system_account_name,  mutable_variant_object()
-                                            ("account", "dccio.msig")
+                                            ("account", "actc.msig")
                                             ("is_priv", 1)
       );
 
-      set_code( N(dccio.msig), dccio_msig_wast );
-      set_abi( N(dccio.msig), dccio_msig_abi );
+      set_code( N(actc.msig), actc_msig_wast );
+      set_abi( N(actc.msig), actc_msig_abi );
 
       produce_blocks();
-      const auto& accnt = control->db().get<account_object,by_name>( N(dccio.msig) );
+      const auto& accnt = control->db().get<account_object,by_name>( N(actc.msig) );
       abi_def abi;
       BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
       abi_ser.set_abi(abi, abi_serializer_max_time);
@@ -99,14 +99,14 @@ public:
       base_tester::push_action(contract, N(create), contract, act );
    }
    void issue( name to, const asset& amount, name manager = config::system_account_name ) {
-      base_tester::push_action( N(dccio.token), N(issue), manager, mutable_variant_object()
+      base_tester::push_action( N(actc.token), N(issue), manager, mutable_variant_object()
                                 ("to",      to )
                                 ("quantity", amount )
                                 ("memo", "")
                                 );
    }
    void transfer( name from, name to, const string& amount, name manager = config::system_account_name ) {
-      base_tester::push_action( N(dccio.token), N(transfer), manager, mutable_variant_object()
+      base_tester::push_action( N(actc.token), N(transfer), manager, mutable_variant_object()
                                 ("from",    from)
                                 ("to",      to )
                                 ("quantity", asset::from_string(amount) )
@@ -118,7 +118,7 @@ public:
       //temporary code. current get_currency_balancy uses table name N(accounts) from currency.h
       //generic_currency table name is N(account).
       const auto& db  = control->db();
-      const auto* tbl = db.find<table_id_object, by_code_scope_table>(boost::make_tuple(N(dccio.token), act, N(accounts)));
+      const auto* tbl = db.find<table_id_object, by_code_scope_table>(boost::make_tuple(N(actc.token), act, N(accounts)));
       share_type result = 0;
 
       // the balance is implied to be 0 if either the table or row does not exist
@@ -137,7 +137,7 @@ public:
       vector<account_name> accounts;
       if( auth )
          accounts.push_back( signer );
-      auto trace = base_tester::push_action( N(dccio.msig), name, accounts, data );
+      auto trace = base_tester::push_action( N(actc.msig), name, accounts, data );
       produce_block();
       BOOST_REQUIRE_EQUAL( true, chain_has_transaction(trace->id) );
       return trace;
@@ -148,7 +148,7 @@ public:
    abi_serializer abi_ser;
 };
 
-transaction dccio_msig_tester::reqauth( account_name from, const vector<permission_level>& auths, const fc::microseconds& max_serialization_time ) {
+transaction actc_msig_tester::reqauth( account_name from, const vector<permission_level>& auths, const fc::microseconds& max_serialization_time ) {
    fc::variants v;
    for ( auto& level : auths ) {
       v.push_back(fc::mutable_variant_object()
@@ -176,9 +176,9 @@ transaction dccio_msig_tester::reqauth( account_name from, const vector<permissi
    return trx;
 }
 
-BOOST_AUTO_TEST_SUITE(dccio_msig_tests)
+BOOST_AUTO_TEST_SUITE(actc_msig_tests)
 
-BOOST_FIXTURE_TEST_CASE( propose_approve_execute, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( propose_approve_execute, actc_msig_tester ) try {
    auto trx = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time );
 
    push_action( N(alice), N(propose), mvo()
@@ -194,8 +194,8 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_execute, dccio_msig_tester ) try {
                                           ("proposal_name", "first")
                                           ("executer",      "alice")
                             ),
-                            dccio_assert_message_exception,
-                            dccio_assert_message_is("transaction authorization failed")
+                            actc_assert_message_exception,
+                            actc_assert_message_is("transaction authorization failed")
    );
 
    //approve and execute
@@ -219,7 +219,7 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_execute, dccio_msig_tester ) try {
 } FC_LOG_AND_RETHROW()
 
 
-BOOST_FIXTURE_TEST_CASE( propose_approve_unapprove, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( propose_approve_unapprove, actc_msig_tester ) try {
    auto trx = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time );
 
    push_action( N(alice), N(propose), mvo()
@@ -246,14 +246,14 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_unapprove, dccio_msig_tester ) try {
                                           ("proposal_name", "first")
                                           ("executer",      "alice")
                             ),
-                            dccio_assert_message_exception,
-                            dccio_assert_message_is("transaction authorization failed")
+                            actc_assert_message_exception,
+                            actc_assert_message_is("transaction authorization failed")
    );
 
 } FC_LOG_AND_RETHROW()
 
 
-BOOST_FIXTURE_TEST_CASE( propose_approve_by_two, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( propose_approve_by_two, actc_msig_tester ) try {
    auto trx = reqauth("alice", vector<permission_level>{ { N(alice), config::active_name }, { N(bob), config::active_name } }, abi_serializer_max_time );
    push_action( N(alice), N(propose), mvo()
                   ("proposer",      "alice")
@@ -275,8 +275,8 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_by_two, dccio_msig_tester ) try {
                                           ("proposal_name", "first")
                                           ("executer",      "alice")
                             ),
-                            dccio_assert_message_exception,
-                            dccio_assert_message_is("transaction authorization failed")
+                            actc_assert_message_exception,
+                            actc_assert_message_is("transaction authorization failed")
    );
 
    //approve by bob and execute
@@ -301,7 +301,7 @@ BOOST_FIXTURE_TEST_CASE( propose_approve_by_two, dccio_msig_tester ) try {
 } FC_LOG_AND_RETHROW()
 
 
-BOOST_FIXTURE_TEST_CASE( propose_with_wrong_requested_auth, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( propose_with_wrong_requested_auth, actc_msig_tester ) try {
    auto trx = reqauth("alice", vector<permission_level>{ { N(alice), config::active_name },  { N(bob), config::active_name } }, abi_serializer_max_time );
    //try with not enough requested auth
    BOOST_REQUIRE_EXCEPTION( push_action( N(alice), N(propose), mvo()
@@ -310,16 +310,16 @@ BOOST_FIXTURE_TEST_CASE( propose_with_wrong_requested_auth, dccio_msig_tester ) 
                                              ("trx",           trx)
                                              ("requested", vector<permission_level>{ { N(alice), config::active_name } } )
                             ),
-                            dccio_assert_message_exception,
-                            dccio_assert_message_is("transaction authorization failed")
+                            actc_assert_message_exception,
+                            actc_assert_message_is("transaction authorization failed")
    );
 
 } FC_LOG_AND_RETHROW()
 
 
-BOOST_FIXTURE_TEST_CASE( big_transaction, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( big_transaction, actc_msig_tester ) try {
    vector<permission_level> perm = { { N(alice), config::active_name }, { N(bob), config::active_name } };
-   auto wasm = wast_to_wasm( dccio_token_wast );
+   auto wasm = wast_to_wasm( actc_token_wast );
 
    variant pretty_trx = fc::mutable_variant_object()
       ("expiration", "2020-01-01T00:30")
@@ -381,35 +381,35 @@ BOOST_FIXTURE_TEST_CASE( big_transaction, dccio_msig_tester ) try {
 
 
 
-BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, actc_msig_tester ) try {
 
-   // required to set up the link between (dccio active) and (dccio.prods active)
+   // required to set up the link between (actc active) and (actc.prods active)
    //
-   //                  dccio active
+   //                  actc active
    //                       |
-   //             dccio.prods active (2/3 threshold)
+   //             actc.prods active (2/3 threshold)
    //             /         |        \             <--- implicitly updated in onblock action
    // alice active     bob active   carol active
 
    set_authority(config::system_account_name, "active", authority(1,
-      vector<key_weight>{{get_private_key("dccio", "active").get_public_key(), 1}},
+      vector<key_weight>{{get_private_key("actc", "active").get_public_key(), 1}},
       vector<permission_level_weight>{{{config::producers_account_name, config::active_name}, 1}}), "owner",
       { { config::system_account_name, "active" } }, { get_private_key( config::system_account_name, "active" ) });
 
    set_producers( {N(alice),N(bob),N(carol)} );
    produce_blocks(50);
 
-   create_accounts( { N(dccio.token) } );
-   set_code( N(dccio.token), dccio_token_wast );
-   set_abi( N(dccio.token), dccio_token_abi );
+   create_accounts( { N(actc.token) } );
+   set_code( N(actc.token), actc_token_wast );
+   set_abi( N(actc.token), actc_token_abi );
 
-   create_currency( N(dccio.token), config::system_account_name, core_from_string("10000000000.0000") );
+   create_currency( N(actc.token), config::system_account_name, core_from_string("10000000000.0000") );
    issue(config::system_account_name, core_from_string("1000000000.0000"));
    BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"),
-                        get_balance("dccio") + get_balance("dccio.ramfee") + get_balance("dccio.stake") + get_balance("dccio.ram") );
+                        get_balance("actc") + get_balance("actc.ramfee") + get_balance("actc.stake") + get_balance("actc.ram") );
 
-   set_code( config::system_account_name, dccio_system_wast );
-   set_abi( config::system_account_name, dccio_system_abi );
+   set_code( config::system_account_name, actc_system_wast );
+   set_abi( config::system_account_name, actc_system_abi );
 
    produce_blocks();
 
@@ -418,7 +418,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, dccio_msig_tester )
    create_account_with_resources( N(carol1111111), config::system_account_name, core_from_string("1.0000"), false );
 
    BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"),
-                        get_balance("dccio") + get_balance("dccio.ramfee") + get_balance("dccio.stake") + get_balance("dccio.ram") );
+                        get_balance("actc") + get_balance("actc.ramfee") + get_balance("actc.stake") + get_balance("actc.ram") );
 
    vector<permission_level> perm = { { N(alice), config::active_name }, { N(bob), config::active_name },
       {N(carol), config::active_name} };
@@ -477,7 +477,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, dccio_msig_tester )
                   ("proposal_name", "first")
                   ("level",         permission_level{ N(carol), config::active_name })
    );
-   // execute by alice to replace the dccio system contract
+   // execute by alice to replace the actc system contract
    transaction_trace_ptr trace;
    control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
 
@@ -494,16 +494,16 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_all_approve, dccio_msig_tester )
    // can't create account because system contract was replace by the test_api contract
 
    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( N(alice1111112), config::system_account_name, core_from_string("1.0000"), false ),
-                            dccio_assert_message_exception, dccio_assert_message_is("Unknown Test")
+                            actc_assert_message_exception, actc_assert_message_is("Unknown Test")
 
    );
 } FC_LOG_AND_RETHROW()
 
-BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, dccio_msig_tester ) try {
+BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, actc_msig_tester ) try {
 
-   // set up the link between (dccio active) and (dccio.prods active)
+   // set up the link between (actc active) and (actc.prods active)
    set_authority(config::system_account_name, "active", authority(1,
-      vector<key_weight>{{get_private_key("dccio", "active").get_public_key(), 1}},
+      vector<key_weight>{{get_private_key("actc", "active").get_public_key(), 1}},
       vector<permission_level_weight>{{{config::producers_account_name, config::active_name}, 1}}), "owner",
       { { config::system_account_name, "active" } }, { get_private_key( config::system_account_name, "active" ) });
 
@@ -511,16 +511,16 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, dccio_msig_tester
    set_producers( {N(alice),N(bob),N(carol), N(apple)} );
    produce_blocks(50);
 
-   create_accounts( { N(dccio.token) } );
-   set_code( N(dccio.token), dccio_token_wast );
-   set_abi( N(dccio.token), dccio_token_abi );
+   create_accounts( { N(actc.token) } );
+   set_code( N(actc.token), actc_token_wast );
+   set_abi( N(actc.token), actc_token_abi );
 
-   create_currency( N(dccio.token), config::system_account_name, core_from_string("10000000000.0000") );
+   create_currency( N(actc.token), config::system_account_name, core_from_string("10000000000.0000") );
    issue(config::system_account_name, core_from_string("1000000000.0000"));
-   BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "dccio" ) );
+   BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "actc" ) );
 
-   set_code( config::system_account_name, dccio_system_wast );
-   set_abi( config::system_account_name, dccio_system_abi );
+   set_code( config::system_account_name, actc_system_wast );
+   set_abi( config::system_account_name, actc_system_abi );
 
    produce_blocks();
 
@@ -529,7 +529,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, dccio_msig_tester
    create_account_with_resources( N(carol1111111), config::system_account_name, core_from_string("1.0000"), false );
 
    BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"),
-                        get_balance("dccio") + get_balance("dccio.ramfee") + get_balance("dccio.stake") + get_balance("dccio.ram") );
+                        get_balance("actc") + get_balance("actc.ramfee") + get_balance("actc.stake") + get_balance("actc.ram") );
 
    vector<permission_level> perm = { { N(alice), config::active_name }, { N(bob), config::active_name },
       {N(carol), config::active_name}, {N(apple), config::active_name}};
@@ -590,7 +590,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, dccio_msig_tester
                      ("proposal_name", "first")
                      ("executer",      "alice")
       ),
-      dccio_assert_message_exception, dccio_assert_message_is("transaction authorization failed")
+      actc_assert_message_exception, actc_assert_message_is("transaction authorization failed")
    );
 
    //approve by apple
@@ -599,7 +599,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, dccio_msig_tester
                   ("proposal_name", "first")
                   ("level",         permission_level{ N(apple), config::active_name })
    );
-   // execute by alice to replace the dccio system contract
+   // execute by alice to replace the actc system contract
    transaction_trace_ptr trace;
    control->applied_transaction.connect([&]( const transaction_trace_ptr& t) { if (t->scheduled) { trace = t; } } );
 
@@ -617,7 +617,7 @@ BOOST_FIXTURE_TEST_CASE( update_system_contract_major_approve, dccio_msig_tester
    // can't create account because system contract was replace by the test_api contract
 
    BOOST_REQUIRE_EXCEPTION( create_account_with_resources( N(alice1111112), config::system_account_name, core_from_string("1.0000"), false ),
-                            dccio_assert_message_exception, dccio_assert_message_is("Unknown Test")
+                            actc_assert_message_exception, actc_assert_message_is("Unknown Test")
 
    );
 } FC_LOG_AND_RETHROW()

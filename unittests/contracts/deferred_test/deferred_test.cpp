@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in dcc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE.txt
  */
 
-#include <dcciolib/dccio.hpp>
-#include <dcciolib/transaction.hpp>
-#include <dcciolib/dispatcher.hpp>
+#include <actclib/actc.hpp>
+#include <actclib/transaction.hpp>
+#include <actclib/dispatcher.hpp>
 
-using namespace dccio;
+using namespace actc;
 
-class deferred_test : public dccio::contract {
+class deferred_test : public actc::contract {
    public:
       using contract::contract;
 
@@ -32,7 +32,7 @@ class deferred_test : public dccio::contract {
       //@abi action
       void deferfunc( uint64_t payload ) {
          print("deferfunc called on ", name{_self}, " with payload = ", payload, "\n");
-         dccio_assert( payload != 13, "value 13 not allowed in payload" );
+         actc_assert( payload != 13, "value 13 not allowed in payload" );
       }
 
    private:
@@ -45,7 +45,7 @@ void apply_onerror(uint64_t receiver, const onerror& error ) {
 extern "C" {
     /// The apply method implements the dispatch of events to this contract
     void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-      if( code == N(dccio) && action == N(onerror) ) {
+      if( code == N(actc) && action == N(onerror) ) {
          apply_onerror( receiver, onerror::from_current_action() );
       } else if( code == receiver ) {
          deferred_test thiscontract(receiver);
@@ -58,4 +58,4 @@ extern "C" {
    }
 }
 
-//dccIO_ABI( deferred_test, (defercall)(deferfunc) )
+//actc_ABI( deferred_test, (defercall)(deferfunc) )

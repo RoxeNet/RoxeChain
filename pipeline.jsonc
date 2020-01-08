@@ -1,0 +1,36 @@
+{
+    "actc-multiversion-tests":
+    {
+        "environment":
+        {
+            "IMAGE_TAG": "_1-8-0-rc2"
+        },
+        "configuration":
+        [
+            "170=v1.7.0"
+        ]
+    },
+    "actc-docker-builds":
+    {
+        "environment":
+        {
+            "BUILDER_TAG": "v1.8.0"
+        }
+    },
+    "actc-sync-tests":
+    {
+        "environment":
+        {
+            "SKIP_PRE_V180": "true",
+            "SKIP_V180": "false"
+        }
+    },
+    "actc-replay-tests":
+    {
+        "environment":
+        {
+            "SKIP_PRE_V180": "true",
+            "SKIP_V180": "false"
+        }
+    }
+}

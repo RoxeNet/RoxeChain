@@ -3,13 +3,13 @@
 #include <boost/test/unit_test.hpp>
 #pragma GCC diagnostic pop
 #include <boost/algorithm/string/predicate.hpp>
-#include <dccio/testing/tester.hpp>
-#include <dccio/chain/abi_serializer.hpp>
+#include <actc/testing/tester.hpp>
+#include <actc/chain/abi_serializer.hpp>
 
 #include <tic_tac_toe/tic_tac_toe.wast.hpp>
 #include <tic_tac_toe/tic_tac_toe.abi.hpp>
-#include <dccio.system/dccio.system.wast.hpp>
-#include <dccio.system/dccio.system.abi.hpp>
+#include <actc.system/actc.system.wast.hpp>
+#include <actc.system/actc.system.abi.hpp>
 
 #include <proxy/proxy.wast.hpp>
 #include <proxy/proxy.abi.hpp>
@@ -25,9 +25,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace dccio;
-using namespace dccio::chain;
-using namespace dccio::testing;
+using namespace actc;
+using namespace actc::chain;
+using namespace actc::testing;
 using namespace fc;
 
 const static uint32_t board_len = 9;
@@ -92,7 +92,7 @@ BOOST_AUTO_TEST_CASE( tic_tac_toe_game ) try {
          ("by", "player1")
          ("row", 0)
          ("column", 1)
-      ), dccio_assert_message_exception, dccio_assert_message_starts_with("it's not your turn yet"));
+      ), actc_assert_message_exception, actc_assert_message_starts_with("it's not your turn yet"));
 
    BOOST_CHECK_EXCEPTION(chain.push_action(N(tic.tac.toe), N(move), N(player2), mutable_variant_object()
          ("challenger", "player2")
@@ -100,7 +100,7 @@ BOOST_AUTO_TEST_CASE( tic_tac_toe_game ) try {
          ("by", "player2")
          ("row", 1)
          ("column", 1)
-      ), dccio_assert_message_exception, dccio_assert_message_starts_with("not a valid movement"));
+      ), actc_assert_message_exception, actc_assert_message_starts_with("not a valid movement"));
 
    chain.push_action(N(tic.tac.toe), N(move), N(player2), mutable_variant_object()
            ("challenger", "player2")
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( tic_tac_toe_game ) try {
          ("by", "player2")
          ("row", 2)
          ("column", 0)
-      ), dccio_assert_message_exception, dccio_assert_message_starts_with("the game has ended"));
+      ), actc_assert_message_exception, actc_assert_message_starts_with("the game has ended"));
 
    game current;
    chain.get_table_entry(current, N(tic.tac.toe), N(player1), N(games), N(player2));
@@ -157,13 +157,13 @@ BOOST_AUTO_TEST_CASE( tic_tac_toe_game ) try {
          ("by", "player2")
          ("row", 2)
          ("column", 0)
-      ), dccio_assert_message_exception, dccio_assert_message_starts_with("game doesn't exists"));
+      ), actc_assert_message_exception, actc_assert_message_starts_with("game doesn't exists"));
 
    BOOST_CHECK_EXCEPTION(chain.push_action(N(tic.tac.toe), N(restart), N(player2), mutable_variant_object()
          ("challenger", "player2")
          ("host", "player1")
          ("by", "player2")
-      ), dccio_assert_message_exception, dccio_assert_message_starts_with("game doesn't exists"));
+      ), actc_assert_message_exception, actc_assert_message_starts_with("game doesn't exists"));
 
    chain.push_action(N(tic.tac.toe), N(create), N(player2), mutable_variant_object()
            ("challenger", "player1")
@@ -192,7 +192,7 @@ BOOST_AUTO_TEST_CASE( tic_tac_toe_game ) try {
          ("by", "player2")
          ("row", 0)
          ("column", 1)
-      ), dccio_assert_message_exception, dccio_assert_message_starts_with("it's not your turn yet"));
+      ), actc_assert_message_exception, actc_assert_message_starts_with("it's not your turn yet"));
 } FC_LOG_AND_RETHROW()
 
 BOOST_AUTO_TEST_SUITE_END()

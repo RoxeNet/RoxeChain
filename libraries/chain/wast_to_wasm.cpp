@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #include <actc/chain/wast_to_wasm.hpp>
 #include <Inline/BasicTypes.h>
@@ -34,7 +34,7 @@ namespace actc { namespace chain {
             ss << error.locus.sourceLine << std::endl;
             ss << std::setw(error.locus.column(8)) << "^" << std::endl;
          }
-         actc_ASSERT( false, wasm_exception, "error parsing wast: ${msg}", ("msg",ss.str()) );
+         ACTC_ASSERT( false, wasm_exception, "error parsing wast: ${msg}", ("msg",ss.str()) );
       }
 
       for(auto sectionIt = module.userSections.begin();sectionIt != module.userSections.end();++sectionIt)
@@ -53,11 +53,11 @@ namespace actc { namespace chain {
       {
          ss << "Error serializing WebAssembly binary file:" << std::endl;
          ss << exception.message << std::endl;
-         actc_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
+         ACTC_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
       } catch(const IR::ValidationException& e) {
          ss << "Error validating WebAssembly binary file:" << std::endl;
          ss << e.message << std::endl;
-         actc_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
+         ACTC_ASSERT( false, wasm_exception, "error converting to wasm: ${msg}", ("msg",ss.get()) );
       }
 
    } FC_CAPTURE_AND_RETHROW( (wast) ) }  /// wast_to_wasm

@@ -19,6 +19,21 @@ from Node import BlockType
 from Node import Node
 from WalletMgr import WalletMgr
 
+# Protocol Feature Setup Policy
+class PFSetupPolicy:
+    NONE = 0
+    PREACTIVATE_FEATURE_ONLY = 1
+    FULL = 2 # This will only happen if the cluster is bootstrapped (i.e. dontBootstrap == False)
+    @staticmethod
+    def hasPreactivateFeature(policy):
+        return policy == PFSetupPolicy.PREACTIVATE_FEATURE_ONLY or \
+                policy == PFSetupPolicy.FULL
+    @staticmethod
+    def isValid(policy):
+        return policy == PFSetupPolicy.NONE or \
+               policy == PFSetupPolicy.PREACTIVATE_FEATURE_ONLY or \
+               policy == PFSetupPolicy.FULL
+
 # pylint: disable=too-many-instance-attributes
 # pylint: disable=too-many-public-methods
 class Cluster(object):
@@ -29,23 +44,20 @@ class Cluster(object):
     __BiosHost="localhost"
     __BiosPort=8788
     __LauncherCmdArr=[]
-    __bootlog="dccio-ignition-wd/bootlog.txt"
-    __configDir="etc/dccio/"
-    __dataDir="var/lib/"
-    __fileDivider="================================================================="
+    __bootlog="actc-ignition-wd/bootlog.txt"
 
     # pylint: disable=too-many-arguments
-    # walletd [True|False] Is kdccd running. If not load the wallet plugin
+    # walletd [True|False] Is kactcd running. If not load the wallet plugin
     def __init__(self, walletd=False, localCluster=True, host="localhost", port=8888, walletHost="localhost", walletPort=9899, enableMongo=False
-                 , mongoHost="localhost", mongoPort=27017, mongoDb="dcctest", defproduceraPrvtKey=None, defproducerbPrvtKey=None, staging=False):
+                 , mongoHost="localhost", mongoPort=27017, mongoDb="ACTCtest", defproduceraPrvtKey=None, defproducerbPrvtKey=None, staging=False):
         """Cluster container.
-        walletd [True|False] Is wallet kdccd running. If not load the wallet plugin
+        walletd [True|False] Is wallet kactcd running. If not load the wallet plugin
         localCluster [True|False] Is cluster local to host.
-        host: dcc server host
-        port: dcc server port
-        walletHost: dcc wallet host
+        host: actc server host
+        port: actc server port
+        walletHost: actc wallet host
         walletPort: wos wallet port
-        enableMongo: Include mongoDb support, configures dcc mongo plugin
+        enableMongo: Include mongoDb support, configures actc mongo plugin
         mongoHost: MongoDB host
         mongoPort: MongoDB port
         defproduceraPrvtKey: Defproducera account private key
@@ -53,6 +65,7 @@ class Cluster(object):
         """
         self.accounts={}
         self.nodes={}
+        self.unstartedNodes=[]
         self.localCluster=localCluster
         self.wallet=None
         self.walletd=walletd
@@ -75,7 +88,7 @@ class Cluster(object):
         self.defProducerAccounts={}
         self.defproduceraAccount=self.defProducerAccounts["defproducera"]= Account("defproducera")
         self.defproducerbAccount=self.defProducerAccounts["defproducerb"]= Account("defproducerb")
-        self.dccioAccount=self.defProducerAccounts["dccio"]= Account("dccio")
+        self.actcAccount=self.defProducerAccounts["actc"]= Account("actc")
 
         self.defproduceraAccount.ownerPrivateKey=defproduceraPrvtKey
         self.defproduceraAccount.activePrivateKey=defproduceraPrvtKey
@@ -84,6 +97,7 @@ class Cluster(object):
 
         self.useBiosBootFile=False
         self.filesToCleanup=[]
+        self.alternateVersionLabels=Cluster.__defaultAlternateVersionLabels()
 
 
     def setChainStrategy(self, chainSyncStrategy=Utils.SyncReplayTag):
@@ -94,37 +108,88 @@ class Cluster(object):
     def setWalletMgr(self, walletMgr):
         self.walletMgr=walletMgr
 
+    @staticmethod
+    def __defaultAlternateVersionLabels():
+        """Return a labels dictionary with just the "current" label to path set."""
+        labels={}
+        labels["current"]="./"
+        return labels
+
+    def setAlternateVersionLabels(self, file):
+        """From the provided file return a dictionary of labels to paths."""
+        Utils.Print("alternate file=%s" % (file))
+        self.alternateVersionLabels=Cluster.__defaultAlternateVersionLabels()
+        if file is None:
+            # only have "current"
+            return
+        if not os.path.exists(file):
+            Utils.errorExit("Alternate Version Labels file \"%s\" does not exist" % (file))
+        with open(file, 'r') as f:
+            content=f.read()
+            p=re.compile(r'^\s*(\w+)\s*=\s*([^\s](?:.*[^\s])?)\s*$', re.MULTILINE)
+            all=p.findall(content)
+            for match in all:
+                label=match[0]
+                path=match[1]
+                if label=="current":
+                    Utils.Print("ERROR: cannot overwrite default label %s with path=%s" % (label, path))
+                    continue
+                self.alternateVersionLabels[label]=path
+                if Utils.Debug: Utils.Print("Version label \"%s\" maps to \"%s\"" % (label, path))
+
     # launch local nodes and set self.nodes
     # pylint: disable=too-many-locals
     # pylint: disable=too-many-return-statements
     # pylint: disable=too-many-branches
     # pylint: disable=too-many-statements
-    def launch(self, pnodes=1, totalNodes=1, prodCount=1, topo="mesh", p2pPlugin="net", delay=1, onlyBios=False, dontBootstrap=False,
-               totalProducers=None, extraNoddccArgs=None, useBiosBootFile=True, specificExtraNoddccArgs=None):
+    def launch(self, pnodes=1, unstartedNodes=0, totalNodes=1, prodCount=1, topo="mesh", delay=1, onlyBios=False, dontBootstrap=False,
+               totalProducers=None, sharedProducers=0, extraNodactcArgs=None, useBiosBootFile=True, specificExtraNodactcArgs=None, onlySetProds=False,
+               pfSetupPolicy=PFSetupPolicy.FULL, alternateVersionLabelsFile=None, associatedNodeLabels=None, loadSystemContract=True):
         """Launch cluster.
         pnodes: producer nodes count
-        totalNodes: producer + non-producer nodes count
+        unstartedNodes: non-producer nodes that are configured into the launch, but not started.  Should be included in totalNodes.
+        totalNodes: producer + non-producer nodes + unstarted non-producer nodes count
         prodCount: producers per producer node count
         topo: cluster topology (as defined by launcher, and "bridge" shape that is specific to this launch method)
         delay: delay between individual nodes launch (as defined by launcher)
           delay 0 exposes a bootstrap bug where producer handover may have a large gap confusing nodes and bringing system to a halt.
         onlyBios: When true, only loads the bios contract (and not more full bootstrapping).
-        dontBootstrap: When true, don't do any bootstrapping at all.
-        extraNoddccArgs: string of arguments to pass through to each nodoes instance (via --noddcc flag on launcher)
+        dontBootstrap: When true, don't do any bootstrapping at all. (even bios is not uploaded)
+        extraNodactcArgs: string of arguments to pass through to each nodoes instance (via --nodactc flag on launcher)
         useBiosBootFile: determines which of two bootstrap methods is used (when both dontBootstrap and onlyBios are false).
           The default value of true uses the bios_boot.sh file generated by the launcher.
           A value of false uses manual bootstrapping in this script, which does not do things like stake votes for producers.
-        specificExtraNoddccArgs: dictionary of arguments to pass to a specific node (via --specific-num and
-                                 --specific-noddcc flags on launcher), example: { "5" : "--plugin dccio::test_control_api_plugin" }
+        specificExtraNodactcArgs: dictionary of arguments to pass to a specific node (via --specific-num and
+                                 --specific-nodactc flags on launcher), example: { "5" : "--plugin actc::test_control_api_plugin" }
+        onlySetProds: Stop the bootstrap process after setting the producers (only if useBiosBootFile is false)
+        pfSetupPolicy: determine the protocol feature setup policy (none, preactivate_feature_only, or full)
+        alternateVersionLabelsFile: Supply an alternate version labels file to use with associatedNodeLabels.
+        associatedNodeLabels: Supply a dictionary of node numbers to use an alternate label for a specific node.
+        loadSystemContract: indicate whether the actc.system contract should be loaded (setting this to False causes useBiosBootFile to be treated as False)
         """
         assert(isinstance(topo, str))
+        assert PFSetupPolicy.isValid(pfSetupPolicy)
+        if alternateVersionLabelsFile is not None:
+            assert(isinstance(alternateVersionLabelsFile, str))
+        elif associatedNodeLabels is not None:
+            associatedNodeLabels=None    # need to supply alternateVersionLabelsFile to use labels
+
+        if associatedNodeLabels is not None:
+            assert(isinstance(associatedNodeLabels, dict))
+            Utils.Print("associatedNodeLabels size=%s" % (len(associatedNodeLabels)))
+        Utils.Print("alternateVersionLabelsFile=%s" % (alternateVersionLabelsFile))
 
         if not self.localCluster:
-            Utils.Print("WARNING: Cluster not local, not launching %s." % (Utils.dccServerName))
+            Utils.Print("WARNING: Cluster not local, not launching %s." % (Utils.ActcServerName))
             return True
 
         if len(self.nodes) > 0:
             raise RuntimeError("Cluster already running.")
+
+        if pnodes > totalNodes:
+            raise RuntimeError("totalNodes (%d) must be equal to or greater than pnodes(%d)." % (totalNodes, pnodes))
+        if pnodes + unstartedNodes > totalNodes:
+            raise RuntimeError("totalNodes (%d) must be equal to or greater than pnodes(%d) + unstartedNodes(%d)." % (totalNodes, pnodes, unstartedNodes))
 
         if self.walletMgr is None:
             self.walletMgr=WalletMgr(True)
@@ -134,50 +199,69 @@ class Cluster(object):
             assert(isinstance(totalProducers, (str,int)))
             producerFlag="--producers %s" % (totalProducers)
 
+        if sharedProducers > 0:
+            producerFlag += (" --shared-producers %d" % (sharedProducers))
+
+        self.setAlternateVersionLabels(alternateVersionLabelsFile)
+
         tries = 30
         while not Utils.arePortsAvailable(set(range(self.port, self.port+totalNodes+1))):
-            Utils.Print("ERROR: Another process is listening on noddcc default port. wait...")
+            Utils.Print("ERROR: Another process is listening on nodactc default port. wait...")
             if tries == 0:
                 return False
             tries = tries - 1
             time.sleep(2)
 
-        cmd="%s -p %s -n %s -d %s -i %s -f --p2p-plugin %s %s" % (
-            Utils.dccLauncherPath, pnodes, totalNodes, delay, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
-            p2pPlugin, producerFlag)
+        cmd="%s -p %s -n %s -d %s -i %s -f %s --unstarted-nodes %s" % (
+            Utils.ActcLauncherPath, pnodes, totalNodes, delay, datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.%f")[:-3],
+            producerFlag, unstartedNodes)
         cmdArr=cmd.split()
         if self.staging:
             cmdArr.append("--nogen")
 
-        noddccArgs="--max-transaction-time -1 --abi-serializer-max-time-ms 990000 --filter-on * --p2p-max-nodes-per-host %d" % (totalNodes)
+        nodactcArgs="--max-transaction-time -1 --abi-serializer-max-time-ms 990000 --filter-on \"*\" --p2p-max-nodes-per-host %d" % (totalNodes)
         if not self.walletd:
-            noddccArgs += " --plugin dccio::wallet_api_plugin"
+            nodactcArgs += " --plugin actc::wallet_api_plugin"
         if self.enableMongo:
-            noddccArgs += " --plugin dccio::mongo_db_plugin --mongodb-wipe --delete-all-blocks --mongodb-uri %s" % self.mongoUri
-        if extraNoddccArgs is not None:
-            assert(isinstance(extraNoddccArgs, str))
-            noddccArgs += extraNoddccArgs
+            nodactcArgs += " --plugin actc::mongo_db_plugin --mongodb-wipe --delete-all-blocks --mongodb-uri %s" % self.mongoUri
+        if extraNodactcArgs is not None:
+            assert(isinstance(extraNodactcArgs, str))
+            nodactcArgs += extraNodactcArgs
         if Utils.Debug:
-            noddccArgs += " --contracts-console"
+            nodactcArgs += " --contracts-console"
+        if PFSetupPolicy.hasPreactivateFeature(pfSetupPolicy):
+            nodactcArgs += " --plugin actc::producer_api_plugin"
 
-        if noddccArgs:
-            cmdArr.append("--noddcc")
-            cmdArr.append(noddccArgs)
+        if nodactcArgs:
+            cmdArr.append("--nodactc")
+            cmdArr.append(nodactcArgs)
 
-        if specificExtraNoddccArgs is not None:
-            assert(isinstance(specificExtraNoddccArgs, dict))
-            for nodeNum,arg in specificExtraNoddccArgs.items():
+        if specificExtraNodactcArgs is not None:
+            assert(isinstance(specificExtraNodactcArgs, dict))
+            for nodeNum,arg in specificExtraNodactcArgs.items():
                 assert(isinstance(nodeNum, (str,int)))
                 assert(isinstance(arg, str))
                 cmdArr.append("--specific-num")
                 cmdArr.append(str(nodeNum))
-                cmdArr.append("--specific-noddcc")
+                cmdArr.append("--specific-nodactc")
                 cmdArr.append(arg)
 
         cmdArr.append("--max-block-cpu-usage")
         cmdArr.append(str(160000000))
         cmdArr.append("--max-transaction-cpu-usage")
         cmdArr.append(str(150000000))
+
+        if associatedNodeLabels is not None:
+            for nodeNum,label in associatedNodeLabels.items():
+                assert(isinstance(nodeNum, (str,int)))
+                assert(isinstance(label, str))
+                path=self.alternateVersionLabels.get(label)
+                if path is None:
+                    Utils.errorExit("associatedNodeLabels passed in indicates label %s for node num %s, but it was not identified in %s" % (label, nodeNum, alternateVersionLabelsFile))
+                cmdArr.append("--spcfc-inst-num")
+                cmdArr.append(str(nodeNum))
+                cmdArr.append("--spcfc-inst-nodactc")
+                cmdArr.append(path)
 
         # must be last cmdArr.append before subprocess.call, so that everything is on the command line
         # before constructing the shape.json file for "bridge"
@@ -203,7 +287,7 @@ class Cluster(object):
             # of two entries - [ <first>, <second> ] with first being the name and second being the node definition
             shapeFileNodes = shapeFileObject["nodes"]
 
-            numProducers=totalProducers if totalProducers is not None else totalNodes
+            numProducers=totalProducers if totalProducers is not None else (totalNodes - unstartedNodes)
             maxProducers=ord('z')-ord('a')+1
             assert numProducers<maxProducers, \
                    "ERROR: topo of %s assumes names of \"defproducera\" to \"defproducerz\", so must have at most %d producers" % \
@@ -215,7 +299,7 @@ class Cluster(object):
             producerNodes={}
             producers=[]
             for append in range(ord('a'),ord('a')+numProducers):
-                name="defproducer" + chr(append) 
+                name="defproducer" + chr(append)
                 producers.append(name)
 
             # first group starts at 0
@@ -271,7 +355,7 @@ class Cluster(object):
                                 producerGroup2.append(nodeName)
                                 Utils.Print("Group2 grouping producerIndex=%s, secondGroupStart=%s" % (producerIndex,secondGroupStart))
                         if group!=prodGroup:
-                            errorExit("Node configuration not consistent with \"bridge\" topology. Node %s has producers that fall into both halves of the bridged network" % (nodeName))
+                            Utils.errorExit("Node configuration not consistent with \"bridge\" topology. Node %s has producers that fall into both halves of the bridged network" % (nodeName))
 
             for _,bridgeNode in bridgeNodes.items():
                 bridgeNode["peers"]=[]
@@ -303,27 +387,31 @@ class Cluster(object):
         Cluster.__LauncherCmdArr = cmdArr.copy()
 
         s=" ".join(cmdArr)
-        if Utils.Debug: Utils.Print("cmd: %s" % (s))
+        Utils.Print("cmd: %s" % (s))
         if 0 != subprocess.call(cmdArr):
             Utils.Print("ERROR: Launcher failed to launch. failed cmd: %s" % (s))
             return False
 
-        self.nodes=list(range(totalNodes)) # placeholder for cleanup purposes only
+        startedNodes=totalNodes-unstartedNodes
+        self.nodes=list(range(startedNodes)) # placeholder for cleanup purposes only
 
-        nodes=self.discoverLocalNodes(totalNodes, timeout=Utils.systemWaitTimeout)
-        if nodes is None or totalNodes != len(nodes):
+        nodes=self.discoverLocalNodes(startedNodes, timeout=Utils.systemWaitTimeout)
+        if nodes is None or startedNodes != len(nodes):
             Utils.Print("ERROR: Unable to validate %s instances, expected: %d, actual: %d" %
-                          (Utils.dccServerName, totalNodes, len(nodes)))
+                          (Utils.ActcServerName, startedNodes, len(nodes)))
             return False
 
         self.nodes=nodes
 
-        if onlyBios:
-            biosNode=Node(Cluster.__BiosHost, Cluster.__BiosPort, walletMgr=self.walletMgr)
-            if not biosNode.checkPulse():
-                Utils.Print("ERROR: Bios node doesn't appear to be running...")
-                return False
+        if unstartedNodes > 0:
+            self.unstartedNodes=self.discoverUnstartedLocalNodes(unstartedNodes, totalNodes)
 
+        biosNode=self.discoverBiosNode(timeout=Utils.systemWaitTimeout)
+        if not biosNode or not Utils.waitForBool(biosNode.checkPulse, Utils.systemWaitTimeout):
+            Utils.Print("ERROR: Bios node doesn't appear to be running...")
+            return False
+
+        if onlyBios:
             self.nodes=[biosNode]
 
         # ensure cluster node are inter-connected by ensuring everyone has block 1
@@ -332,24 +420,33 @@ class Cluster(object):
             Utils.Print("ERROR: Cluster doesn't seem to be in sync. Some nodes missing block 1")
             return False
 
+        if PFSetupPolicy.hasPreactivateFeature(pfSetupPolicy):
+            Utils.Print("Activate Preactivate Feature.")
+            biosNode.activatePreactivateFeature()
+
         if dontBootstrap:
             Utils.Print("Skipping bootstrap.")
+            self.biosNode=biosNode
             return True
 
         Utils.Print("Bootstrap cluster.")
+        if not loadSystemContract:
+            useBiosBootFile=False  #ensure we use Cluster.bootstrap
         if onlyBios or not useBiosBootFile:
-            self.biosNode=Cluster.bootstrap(totalNodes, prodCount, totalProducers, Cluster.__BiosHost, Cluster.__BiosPort, self.walletMgr, onlyBios)
+            self.biosNode=self.bootstrap(biosNode, startedNodes, prodCount + sharedProducers, totalProducers, pfSetupPolicy, onlyBios, onlySetProds, loadSystemContract)
             if self.biosNode is None:
                 Utils.Print("ERROR: Bootstrap failed.")
                 return False
         else:
             self.useBiosBootFile=True
-            self.biosNode=Cluster.bios_bootstrap(totalNodes, Cluster.__BiosHost, Cluster.__BiosPort, self.walletMgr)
+            self.biosNode=self.bios_bootstrap(biosNode, startedNodes, pfSetupPolicy)
             if self.biosNode is None:
                 Utils.Print("ERROR: Bootstrap failed.")
                 return False
 
-        self.discoverBiosNodePid()
+        if self.biosNode is None:
+            Utils.Print("ERROR: Bootstrap failed.")
+            return False
 
         # validate iniX accounts can be retrieved
 
@@ -369,7 +466,7 @@ class Cluster(object):
             initAccountKeys(account, producerKeys[name])
             self.defProducerAccounts[name] = account
 
-        self.dccioAccount=self.defProducerAccounts["dccio"]
+        self.actcAccount=self.defProducerAccounts["actc"]
         self.defproduceraAccount=self.defProducerAccounts["defproducera"]
         self.defproducerbAccount=self.defProducerAccounts["defproducerb"]
 
@@ -438,7 +535,7 @@ class Cluster(object):
         assert(len(self.nodes) > 0)
         node=self.nodes[0]
         targetBlockNum=node.getBlockNum(blockType) #retrieve node 0's head or irrevercible block number
-        targetBlockNum+=blockAdvancing 
+        targetBlockNum+=blockAdvancing
         if Utils.Debug:
             Utils.Print("%s block number on root node: %d" % (blockType.type, targetBlockNum))
         if targetBlockNum == -1:
@@ -450,18 +547,28 @@ class Cluster(object):
         """Wait for all nodes to have targetBlockNum finalized."""
         assert(self.nodes)
 
-        def doNodesHaveBlockNum(nodes, targetBlockNum, blockType):
+        def doNodesHaveBlockNum(nodes, targetBlockNum, blockType, printCount):
+            ret=True
             for node in nodes:
                 try:
                     if (not node.killed) and (not node.isBlockPresent(targetBlockNum, blockType=blockType)):
-                        return False
+                        ret=False
+                        break
                 except (TypeError) as _:
                     # This can happen if client connects before server is listening
-                    return False
+                    ret=False
+                    break
 
-            return True
+            printCount+=1
+            if Utils.Debug and not ret and printCount%5==0:
+                blockNums=[]
+                for i in range(0, len(nodes)):
+                    blockNums.append(nodes[i].getBlockNum())
+                Utils.Print("Cluster still not in sync, head blocks for nodes: [ %s ]" % (", ".join(blockNums)))
+            return ret
 
-        lam = lambda: doNodesHaveBlockNum(self.nodes, targetBlockNum, blockType)
+        printCount=0
+        lam = lambda: doNodesHaveBlockNum(self.nodes, targetBlockNum, blockType, printCount)
         ret=Utils.waitForBool(lam, timeout)
         return ret
 
@@ -470,7 +577,7 @@ class Cluster(object):
         """Returns client version (string)"""
         p = re.compile(r'^Build version:\s(\w+)\n$')
         try:
-            cmd="%s version client" % (Utils.dccClientPath)
+            cmd="%s version client" % (Utils.ActcClientPath)
             if verbose: Utils.Print("cmd: %s" % (cmd))
             response=Utils.checkOutput(cmd.split())
             assert(response)
@@ -494,7 +601,7 @@ class Cluster(object):
         p = re.compile('Private key: (.+)\nPublic key: (.+)\n', re.MULTILINE)
         for _ in range(0, count):
             try:
-                cmd="%s create key --to-console" % (Utils.dccClientPath)
+                cmd="%s create key --to-console" % (Utils.ActcClientPath)
                 if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
                 keyStr=Utils.checkOutput(cmd.split())
                 m=p.search(keyStr)
@@ -505,7 +612,7 @@ class Cluster(object):
                 ownerPrivate=m.group(1)
                 ownerPublic=m.group(2)
 
-                cmd="%s create key --to-console" % (Utils.dccClientPath)
+                cmd="%s create key --to-console" % (Utils.ActcClientPath)
                 if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
                 keyStr=Utils.checkOutput(cmd.split())
                 m=p.match(keyStr)
@@ -582,6 +689,16 @@ class Cluster(object):
     def getNodes(self):
         return self.nodes
 
+    def launchUnstarted(self, numToLaunch=1, cachePopen=False):
+        assert(isinstance(numToLaunch, int))
+        assert(numToLaunch>0)
+        launchList=self.unstartedNodes[:numToLaunch]
+        del self.unstartedNodes[:numToLaunch]
+        for node in launchList:
+            # the node number is indexed off of the started nodes list
+            node.launchUnstarted(len(self.nodes), cachePopen=cachePopen)
+            self.nodes.append(node)
+
     # Spread funds across accounts with transactions spread through cluster nodes.
     #  Validate transactions are synchronized on root node
     def spreadFunds(self, source, accounts, amount=1):
@@ -598,7 +715,7 @@ class Cluster(object):
         node=self.nodes[0]
         fromm=source
         to=accounts[0]
-        Utils.Print("Transfer %s units from account %s to %s on dcc server port %d" % (
+        Utils.Print("Transfer %s units from account %s to %s on actc server port %d" % (
             transferAmountStr, fromm.name, to.name, node.port))
         trans=node.transferFunds(fromm, to, transferAmountStr)
         transId=Node.getTransId(trans)
@@ -607,15 +724,15 @@ class Cluster(object):
 
         if Utils.Debug: Utils.Print("Funds transfered on transaction id %s." % (transId))
 
-        nextdccIdx=-1
+        nextActcIdx=-1
         for i in range(0, count):
             account=accounts[i]
             nextInstanceFound=False
             for _ in range(0, count):
-                #Utils.Print("nextdccIdx: %d, n: %d" % (nextdccIdx, n))
-                nextdccIdx=(nextdccIdx + 1)%count
-                if not self.nodes[nextdccIdx].killed:
-                    #Utils.Print("nextdccIdx: %d" % (nextdccIdx))
+                #Utils.Print("nextActcIdx: %d, n: %d" % (nextActcIdx, n))
+                nextActcIdx=(nextActcIdx + 1)%count
+                if not self.nodes[nextActcIdx].killed:
+                    #Utils.Print("nextActcIdx: %d" % (nextActcIdx))
                     nextInstanceFound=True
                     break
 
@@ -623,8 +740,8 @@ class Cluster(object):
                 Utils.Print("ERROR: No active nodes found.")
                 return False
 
-            #Utils.Print("nextdccIdx: %d, count: %d" % (nextdccIdx, count))
-            node=self.nodes[nextdccIdx]
+            #Utils.Print("nextActcIdx: %d, count: %d" % (nextActcIdx, count))
+            node=self.nodes[nextActcIdx]
             if Utils.Debug: Utils.Print("Wait for transaction id %s on node port %d" % (transId, node.port))
             if node.waitForTransInBlock(transId) is False:
                 Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, node.port))
@@ -634,7 +751,7 @@ class Cluster(object):
             transferAmountStr=Node.currencyIntToStr(transferAmount, CORE_SYMBOL)
             fromm=account
             to=accounts[i+1] if i < (count-1) else source
-            Utils.Print("Transfer %s units from account %s to %s on dcc server port %d." %
+            Utils.Print("Transfer %s units from account %s to %s on actc server port %d." %
                     (transferAmountStr, fromm.name, to.name, node.port))
 
             trans=node.transferFunds(fromm, to, transferAmountStr)
@@ -670,20 +787,20 @@ class Cluster(object):
                 continue
 
             if Utils.Debug: Utils.Print("Validate funds on %s server port %d." %
-                                        (Utils.dccServerName, node.port))
+                                        (Utils.ActcServerName, node.port))
 
             if node.validateFunds(initialBalances, transferAmount, source, accounts) is False:
-                Utils.Print("ERROR: Failed to validate funds on dcc node port: %d" % (node.port))
+                Utils.Print("ERROR: Failed to validate funds on actc node port: %d" % (node.port))
                 return False
 
         return True
 
     def spreadFundsAndValidate(self, transferAmount=1):
         """Sprays 'transferAmount' funds across configured accounts and validates action. The spray is done in a trickle down fashion with account 1
-        receiving transferAmount*n SYS and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
+        receiving transferAmount*n ACI and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
 
         if Utils.Debug: Utils.Print("Get initial system balances.")
-        initialBalances=self.nodes[0].getdccBalances([self.defproduceraAccount] + self.accounts)
+        initialBalances=self.nodes[0].getActcBalances([self.defproduceraAccount] + self.accounts)
         assert(initialBalances)
         assert(isinstance(initialBalances, dict))
 
@@ -705,7 +822,7 @@ class Cluster(object):
 
         myAccounts = []
         if testSysAccounts:
-            myAccounts += [self.dccioAccount, self.defproduceraAccount, self.defproducerbAccount]
+            myAccounts += [self.actcAccount, self.defproduceraAccount, self.defproducerbAccount]
         if accounts:
             assert(isinstance(accounts, list))
             myAccounts += accounts
@@ -749,15 +866,6 @@ class Cluster(object):
         return int(m.group(1))
 
     @staticmethod
-    def nodeExtensionToName(ext):
-        r"""Convert node extension (bios, 0, 1, etc) to node name. """
-        prefix="node_"
-        if ext == "bios":
-            return prefix + ext
-
-        return "node_%02d" % (ext)
-
-    @staticmethod
     def parseProducerKeys(configFile, nodeName):
         """Parse node config file for producer keys. Returns dictionary. (Keys: account name; Values: dictionary objects (Keys: ["name", "node", "private","public"]; Values: account name, node id returned by nodeNameToId(nodeName), private key(string)and public key(string)))."""
 
@@ -794,7 +902,7 @@ class Cluster(object):
     def parseProducers(nodeNum):
         """Parse node config file for producers."""
 
-        configFile=Cluster.__configDir + Cluster.nodeExtensionToName(nodeNum) + "/config.ini"
+        configFile=Utils.getNodeConfigDir(nodeNum, "config.ini")
         if Utils.Debug: Utils.Print("Parsing config file %s" % configFile)
         configStr=None
         with open(configFile, 'r') as f:
@@ -812,19 +920,19 @@ class Cluster(object):
     def parseClusterKeys(totalNodes):
         """Parse cluster config file. Updates producer keys data members."""
 
-        nodeName=Cluster.nodeExtensionToName("bios")
-        configFile=Cluster.__configDir + nodeName + "/config.ini"
+        configFile=Utils.getNodeConfigDir("bios", "config.ini")
         if Utils.Debug: Utils.Print("Parsing config file %s" % configFile)
+        nodeName=Utils.nodeExtensionToName("bios")
         producerKeys=Cluster.parseProducerKeys(configFile, nodeName)
         if producerKeys is None:
-            Utils.Print("ERROR: Failed to parse dccio private keys from cluster config files.")
+            Utils.Print("ERROR: Failed to parse actc private keys from cluster config files.")
             return None
 
         for i in range(0, totalNodes):
-            nodeName=Cluster.nodeExtensionToName(i)
-            configFile=Cluster.__configDir + nodeName + "/config.ini"
+            configFile=Utils.getNodeConfigDir(i, "config.ini")
             if Utils.Debug: Utils.Print("Parsing config file %s" % configFile)
 
+            nodeName=Utils.nodeExtensionToName(i)
             keys=Cluster.parseProducerKeys(configFile, nodeName)
             if keys is not None:
                 producerKeys.update(keys)
@@ -832,20 +940,28 @@ class Cluster(object):
 
         return producerKeys
 
-    @staticmethod
-    def bios_bootstrap(totalNodes, biosHost, biosPort, walletMgr, silent=False):
-        """Bootstrap cluster using the bios_boot.sh script generated by dccio-launcher."""
+    def bios_bootstrap(self, biosNode, totalNodes, pfSetupPolicy, silent=False):
+        """Bootstrap cluster using the bios_boot.sh script generated by actc-launcher."""
 
         Utils.Print("Starting cluster bootstrap.")
-        biosNode=Node(biosHost, biosPort, walletMgr=walletMgr)
-        if not biosNode.checkPulse():
-            Utils.Print("ERROR: Bios node doesn't appear to be running...")
-            return None
+        assert PFSetupPolicy.isValid(pfSetupPolicy)
 
         cmd="bash bios_boot.sh"
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
-        if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
-            if not silent: Utils.Print("Launcher failed to shut down dcc cluster.")
+        env = {
+            "BIOS_CONTRACT_PATH": "unittests/contracts/old_versions/v1.6.0-rc3/actc.bios",
+            "FEATURE_DIGESTS": ""
+        }
+        if PFSetupPolicy.hasPreactivateFeature(pfSetupPolicy):
+            env["BIOS_CONTRACT_PATH"] = "unittests/contracts/actc.bios"
+
+        if pfSetupPolicy == PFSetupPolicy.FULL:
+            allBuiltinProtocolFeatureDigests = biosNode.getAllBuiltinFeatureDigestsToPreactivate()
+            env["FEATURE_DIGESTS"] = " ".join(allBuiltinProtocolFeatureDigests)
+            Utils.Print("Set FEATURE_DIGESTS to: %s" % env["FEATURE_DIGESTS"])
+
+        if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull, env=env):
+            if not silent: Utils.Print("Launcher failed to shut down actc cluster.")
             return None
 
         p = re.compile('error', re.IGNORECASE)
@@ -862,43 +978,43 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to parse private keys from cluster config files.")
             return None
 
-        walletMgr.killall()
-        walletMgr.cleanup()
+        self.walletMgr.killall()
+        self.walletMgr.cleanup()
 
-        if not walletMgr.launch():
+        if not self.walletMgr.launch():
             Utils.Print("ERROR: Failed to launch bootstrap wallet.")
             return None
 
-        ignWallet=walletMgr.create("ignition")
+        ignWallet=self.walletMgr.create("ignition")
         if ignWallet is None:
             Utils.Print("ERROR: Failed to create ignition wallet.")
             return None
 
-        dccioName="dccio"
-        dccioKeys=producerKeys[dccioName]
-        dccioAccount=Account(dccioName)
-        dccioAccount.ownerPrivateKey=dccioKeys["private"]
-        dccioAccount.ownerPublicKey=dccioKeys["public"]
-        dccioAccount.activePrivateKey=dccioKeys["private"]
-        dccioAccount.activePublicKey=dccioKeys["public"]
-        producerKeys.pop(dccioName)
+        actcName="actc"
+        actcKeys=producerKeys[actcName]
+        actcAccount=Account(actcName)
+        actcAccount.ownerPrivateKey=actcKeys["private"]
+        actcAccount.ownerPublicKey=actcKeys["public"]
+        actcAccount.activePrivateKey=actcKeys["private"]
+        actcAccount.activePublicKey=actcKeys["public"]
+        producerKeys.pop(actcName)
 
-        if not walletMgr.importKey(dccioAccount, ignWallet):
-            Utils.Print("ERROR: Failed to import %s account keys into ignition wallet." % (dccioName))
+        if not self.walletMgr.importKey(actcAccount, ignWallet):
+            Utils.Print("ERROR: Failed to import %s account keys into ignition wallet." % (actcName))
             return None
 
         initialFunds="1000000.0000 {0}".format(CORE_SYMBOL)
         Utils.Print("Transfer initial fund %s to individual accounts." % (initialFunds))
         trans=None
-        contract="dccio.token"
+        contract="aci.token"
         action="transfer"
         for name, keys in producerKeys.items():
-            data="{\"from\":\"dccio\",\"to\":\"%s\",\"quantity\":\"%s\",\"memo\":\"%s\"}" % (name, initialFunds, "init transfer")
-            opts="--permission dccio@active"
-            if name != "dccio":
+            data="{\"from\":\"actc\",\"to\":\"%s\",\"quantity\":\"%s\",\"memo\":\"%s\"}" % (name, initialFunds, "init actc transfer")
+            opts="--permission actc@active"
+            if name != "actc":
                 trans=biosNode.pushMessage(contract, action, data, opts)
                 if trans is None or not trans[0]:
-                    Utils.Print("ERROR: Failed to transfer funds from dccio.token to %s." % (name))
+                    Utils.Print("ERROR: Failed to transfer funds from aci.token to %s." % (name))
                     return None
 
             Node.validateTransaction(trans[1])
@@ -913,19 +1029,14 @@ class Cluster(object):
 
         return biosNode
 
-    @staticmethod
-    def bootstrap(totalNodes, prodCount, totalProducers, biosHost, biosPort, walletMgr, onlyBios=False):
-        """Create 'prodCount' init accounts and deposits 10000000000 SYS in each. If prodCount is -1 will initialize all possible producers.
+    def bootstrap(self, biosNode, totalNodes, prodCount, totalProducers, pfSetupPolicy, onlyBios=False, onlySetProds=False, loadSystemContract=True):
+        """Create 'prodCount' init accounts and deposits 10000000000 ACI in each. If prodCount is -1 will initialize all possible producers.
         Ensure nodes are inter-connected prior to this call. One way to validate this will be to check if every node has block 1."""
 
         Utils.Print("Starting cluster bootstrap.")
+        assert PFSetupPolicy.isValid(pfSetupPolicy)
         if totalProducers is None:
             totalProducers=totalNodes
-
-        biosNode=Node(biosHost, biosPort, walletMgr=walletMgr)
-        if not biosNode.checkPulse():
-            Utils.Print("ERROR: Bios node doesn't appear to be running...")
-            return None
 
         producerKeys=Cluster.parseClusterKeys(totalNodes)
         # should have totalNodes node plus bios node
@@ -936,41 +1047,48 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to parse %d producer keys from cluster config files, only found %d." % (totalProducers+1,len(producerKeys)))
             return None
 
-        walletMgr.killall()
-        walletMgr.cleanup()
+        self.walletMgr.killall()
+        self.walletMgr.cleanup()
 
-        if not walletMgr.launch():
+        if not self.walletMgr.launch():
             Utils.Print("ERROR: Failed to launch bootstrap wallet.")
             return None
 
-        ignWallet=walletMgr.create("ignition")
+        ignWallet=self.walletMgr.create("ignition")
 
-        dccioName="dccio"
-        dccioKeys=producerKeys[dccioName]
-        dccioAccount=Account(dccioName)
-        dccioAccount.ownerPrivateKey=dccioKeys["private"]
-        dccioAccount.ownerPublicKey=dccioKeys["public"]
-        dccioAccount.activePrivateKey=dccioKeys["private"]
-        dccioAccount.activePublicKey=dccioKeys["public"]
+        actcName="actc"
+        actcKeys=producerKeys[actcName]
+        actcAccount=Account(actcName)
+        actcAccount.ownerPrivateKey=actcKeys["private"]
+        actcAccount.ownerPublicKey=actcKeys["public"]
+        actcAccount.activePrivateKey=actcKeys["private"]
+        actcAccount.activePublicKey=actcKeys["public"]
 
-        if not walletMgr.importKey(dccioAccount, ignWallet):
-            Utils.Print("ERROR: Failed to import %s account keys into ignition wallet." % (dccioName))
+        if not self.walletMgr.importKey(actcAccount, ignWallet):
+            Utils.Print("ERROR: Failed to import %s account keys into ignition wallet." % (actcName))
             return None
 
-        contract="dccio.bios"
-        contractDir="contracts/%s" % (contract)
+        contract="actc.bios"
+        contractDir="unittests/contracts/%s" % (contract)
+        if PFSetupPolicy.hasPreactivateFeature(pfSetupPolicy):
+            contractDir="unittests/contracts/%s" % (contract)
+        else:
+            contractDir="unittests/contracts/old_versions/v1.6.0-rc3/%s" % (contract)
         wasmFile="%s.wasm" % (contract)
         abiFile="%s.abi" % (contract)
         Utils.Print("Publish %s contract" % (contract))
-        trans=biosNode.publishContract(dccioAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
+        trans=biosNode.publishContract(actcAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
         if trans is None:
             Utils.Print("ERROR: Failed to publish contract %s." % (contract))
             return None
 
+        if pfSetupPolicy == PFSetupPolicy.FULL:
+            biosNode.preactivateAllBuiltinProtocolFeature()
+
         Node.validateTransaction(trans)
 
         Utils.Print("Creating accounts: %s " % ", ".join(producerKeys.keys()))
-        producerKeys.pop(dccioName)
+        producerKeys.pop(actcName)
         accounts=[]
         for name, keys in producerKeys.items():
             initx = None
@@ -979,7 +1097,7 @@ class Cluster(object):
             initx.ownerPublicKey=keys["public"]
             initx.activePrivateKey=keys["private"]
             initx.activePublicKey=keys["public"]
-            trans=biosNode.createAccount(initx, dccioAccount, 0)
+            trans=biosNode.createAccount(initx, actcAccount, 0)
             if trans is None:
                 Utils.Print("ERROR: Failed to create account %s" % (name))
                 return None
@@ -1002,8 +1120,8 @@ class Cluster(object):
                     setProdsStr=f.read()
 
                     Utils.Print("Setting producers.")
-                    opts="--permission dccio@active"
-                    myTrans=biosNode.pushMessage("dccio", "setprods", setProdsStr, opts)
+                    opts="--permission actc@active"
+                    myTrans=biosNode.pushMessage("actc", "setprods", setProdsStr, opts)
                     if myTrans is None or not myTrans[0]:
                         Utils.Print("ERROR: Failed to set producers.")
                         return None
@@ -1027,9 +1145,9 @@ class Cluster(object):
                 setProdsStr += ' ] }'
                 if Utils.Debug: Utils.Print("setprods: %s" % (setProdsStr))
                 Utils.Print("Setting producers: %s." % (", ".join(prodNames)))
-                opts="--permission dccio@active"
+                opts="--permission actc@active"
                 # pylint: disable=redefined-variable-type
-                trans=biosNode.pushMessage("dccio", "setprods", setProdsStr, opts)
+                trans=biosNode.pushMessage("actc", "setprods", setProdsStr, opts)
                 if trans is None or not trans[0]:
                     Utils.Print("ERROR: Failed to set producer %s." % (keys["name"]))
                     return None
@@ -1040,39 +1158,41 @@ class Cluster(object):
                 Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, biosNode.port))
                 return None
 
-            # wait for block production handover (essentially a block produced by anyone but dccio).
-            lam = lambda: biosNode.getInfo(exitOnError=True)["head_block_producer"] != "dccio"
+            # wait for block production handover (essentially a block produced by anyone but actc).
+            lam = lambda: biosNode.getInfo(exitOnError=True)["head_block_producer"] != "actc"
             ret=Utils.waitForBool(lam)
             if not ret:
                 Utils.Print("ERROR: Block production handover failed.")
                 return None
 
-        dccioTokenAccount=copy.deepcopy(dccioAccount)
-        dccioTokenAccount.name="dccio.token"
-        trans=biosNode.createAccount(dccioTokenAccount, dccioAccount, 0)
+        if onlySetProds: return biosNode
+
+        actcTokenAccount=copy.deepcopy(actcAccount)
+        actcTokenAccount.name="aci.token"
+        trans=biosNode.createAccount(actcTokenAccount, actcAccount, 0)
         if trans is None:
-            Utils.Print("ERROR: Failed to create account %s" % (dccioTokenAccount.name))
+            Utils.Print("ERROR: Failed to create account %s" % (actcTokenAccount.name))
             return None
 
-        dccioRamAccount=copy.deepcopy(dccioAccount)
-        dccioRamAccount.name="dccio.ram"
-        trans=biosNode.createAccount(dccioRamAccount, dccioAccount, 0)
+        actcRamAccount=copy.deepcopy(actcAccount)
+        actcRamAccount.name="actc.ram"
+        trans=biosNode.createAccount(actcRamAccount, actcAccount, 0)
         if trans is None:
-            Utils.Print("ERROR: Failed to create account %s" % (dccioRamAccount.name))
+            Utils.Print("ERROR: Failed to create account %s" % (actcRamAccount.name))
             return None
 
-        dccioRamfeeAccount=copy.deepcopy(dccioAccount)
-        dccioRamfeeAccount.name="dccio.ramfee"
-        trans=biosNode.createAccount(dccioRamfeeAccount, dccioAccount, 0)
+        actcRamfeeAccount=copy.deepcopy(actcAccount)
+        actcRamfeeAccount.name="actc.ramfee"
+        trans=biosNode.createAccount(actcRamfeeAccount, actcAccount, 0)
         if trans is None:
-            Utils.Print("ERROR: Failed to create account %s" % (dccioRamfeeAccount.name))
+            Utils.Print("ERROR: Failed to create account %s" % (actcRamfeeAccount.name))
             return None
 
-        dccioStakeAccount=copy.deepcopy(dccioAccount)
-        dccioStakeAccount.name="dccio.stake"
-        trans=biosNode.createAccount(dccioStakeAccount, dccioAccount, 0)
+        actcStakeAccount=copy.deepcopy(actcAccount)
+        actcStakeAccount.name="actc.stake"
+        trans=biosNode.createAccount(actcStakeAccount, actcAccount, 0)
         if trans is None:
-            Utils.Print("ERROR: Failed to create account %s" % (dccioStakeAccount.name))
+            Utils.Print("ERROR: Failed to create account %s" % (actcStakeAccount.name))
             return None
 
         Node.validateTransaction(trans)
@@ -1081,25 +1201,25 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, biosNode.port))
             return None
 
-        contract="dccio.token"
-        contractDir="contracts/%s" % (contract)
+        contract="aci.token"
+        contractDir="unittests/contracts/%s" % (contract)
         wasmFile="%s.wasm" % (contract)
         abiFile="%s.abi" % (contract)
         Utils.Print("Publish %s contract" % (contract))
-        trans=biosNode.publishContract(dccioTokenAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
+        trans=biosNode.publishContract(actcTokenAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
         if trans is None:
             Utils.Print("ERROR: Failed to publish contract %s." % (contract))
             return None
 
         # Create currency0000, followed by issue currency0000
-        contract=dccioTokenAccount.name
+        contract=actcTokenAccount.name
         Utils.Print("push create action to %s contract" % (contract))
         action="create"
-        data="{\"issuer\":\"%s\",\"maximum_supply\":\"1000000000.0000 %s\",\"can_freeze\":\"0\",\"can_recall\":\"0\",\"can_whitelist\":\"0\"}" % (dccioTokenAccount.name, CORE_SYMBOL)
+        data="{\"issuer\":\"%s\",\"maximum_supply\":\"1000000000.0000 %s\"}" % (actcAccount.name, CORE_SYMBOL)
         opts="--permission %s@active" % (contract)
         trans=biosNode.pushMessage(contract, action, data, opts)
         if trans is None or not trans[0]:
-            Utils.Print("ERROR: Failed to push create action to dccio contract.")
+            Utils.Print("ERROR: Failed to push create action to actc contract.")
             return None
 
         Node.validateTransaction(trans[1])
@@ -1108,14 +1228,14 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, biosNode.port))
             return None
 
-        contract=dccioTokenAccount.name
+        contract=actcTokenAccount.name
         Utils.Print("push issue action to %s contract" % (contract))
         action="issue"
-        data="{\"to\":\"%s\",\"quantity\":\"1000000000.0000 %s\",\"memo\":\"initial issue\"}" % (dccioAccount.name, CORE_SYMBOL)
-        opts="--permission %s@active" % (contract)
+        data="{\"to\":\"%s\",\"quantity\":\"1000000000.0000 %s\",\"memo\":\"initial issue\"}" % (actcAccount.name, CORE_SYMBOL)
+        opts="--permission %s@active" % (actcAccount.name)
         trans=biosNode.pushMessage(contract, action, data, opts)
         if trans is None or not trans[0]:
-            Utils.Print("ERROR: Failed to push issue action to dccio contract.")
+            Utils.Print("ERROR: Failed to push issue action to actc contract.")
             return None
 
         Node.validateTransaction(trans[1])
@@ -1129,36 +1249,37 @@ class Cluster(object):
             return None
 
         expectedAmount="1000000000.0000 {0}".format(CORE_SYMBOL)
-        Utils.Print("Verify dccio issue, Expected: %s" % (expectedAmount))
-        actualAmount=biosNode.getAccountdccBalanceStr(dccioAccount.name)
+        Utils.Print("Verify actc issue, Expected: %s" % (expectedAmount))
+        actualAmount=biosNode.getAccountActcBalanceStr(actcAccount.name)
         if expectedAmount != actualAmount:
             Utils.Print("ERROR: Issue verification failed. Excepted %s, actual: %s" %
                         (expectedAmount, actualAmount))
             return None
 
-        contract="dccio.system"
-        contractDir="contracts/%s" % (contract)
-        wasmFile="%s.wasm" % (contract)
-        abiFile="%s.abi" % (contract)
-        Utils.Print("Publish %s contract" % (contract))
-        trans=biosNode.publishContract(dccioAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
-        if trans is None:
-            Utils.Print("ERROR: Failed to publish contract %s." % (contract))
-            return None
+        if loadSystemContract:
+            contract="actc.system"
+            contractDir="unittests/contracts/%s" % (contract)
+            wasmFile="%s.wasm" % (contract)
+            abiFile="%s.abi" % (contract)
+            Utils.Print("Publish %s contract" % (contract))
+            trans=biosNode.publishContract(actcAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
+            if trans is None:
+                Utils.Print("ERROR: Failed to publish contract %s." % (contract))
+                return None
 
-        Node.validateTransaction(trans)
+            Node.validateTransaction(trans)
 
         initialFunds="1000000.0000 {0}".format(CORE_SYMBOL)
         Utils.Print("Transfer initial fund %s to individual accounts." % (initialFunds))
         trans=None
-        contract=dccioTokenAccount.name
+        contract=actcTokenAccount.name
         action="transfer"
         for name, keys in producerKeys.items():
-            data="{\"from\":\"%s\",\"to\":\"%s\",\"quantity\":\"%s\",\"memo\":\"%s\"}" % (dccioAccount.name, name, initialFunds, "init transfer")
-            opts="--permission %s@active" % (dccioAccount.name)
+            data="{\"from\":\"%s\",\"to\":\"%s\",\"quantity\":\"%s\",\"memo\":\"%s\"}" % (actcAccount.name, name, initialFunds, "init transfer")
+            opts="--permission %s@active" % (actcAccount.name)
             trans=biosNode.pushMessage(contract, action, data, opts)
             if trans is None or not trans[0]:
-                Utils.Print("ERROR: Failed to transfer funds from %s to %s." % (dccioTokenAccount.name, name))
+                Utils.Print("ERROR: Failed to transfer funds from %s to %s." % (actcTokenAccount.name, name))
                 return None
 
             Node.validateTransaction(trans[1])
@@ -1169,13 +1290,20 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, biosNode.port))
             return None
 
+        # Only call init if the system contract is loaded
+        if loadSystemContract:
+            action="init"
+            data="{\"version\":0,\"core\":\"4,%s\"}" % (CORE_SYMBOL)
+            opts="--permission %s@active" % (actcAccount.name)
+            trans=biosNode.pushMessage(actcAccount.name, action, data, opts)
+
         Utils.Print("Cluster bootstrap done.")
 
         return biosNode
 
     @staticmethod
-    def pgrepdccServers(timeout=None):
-        cmd=Utils.pgrepCmd(Utils.dccServerName)
+    def pgrepActcServers(timeout=None):
+        cmd=Utils.pgrepCmd(Utils.ActcServerName)
 
         def myFunc():
             psOut=None
@@ -1192,15 +1320,15 @@ class Cluster(object):
         return Utils.waitForObj(myFunc, timeout)
 
     @staticmethod
-    def pgrepdccServerPattern(nodeInstance):
-        dataLocation=Cluster.__dataDir + Cluster.nodeExtensionToName(nodeInstance)
+    def pgrepActcServerPattern(nodeInstance):
+        dataLocation=Utils.getNodeDataDir(nodeInstance)
         return r"[\n]?(\d+) (.* --data-dir %s .*)\n" % (dataLocation)
 
-    # Populates list of dccInstanceInfo objects, matched to actual running instances
+    # Populates list of ActcInstanceInfo objects, matched to actual running instances
     def discoverLocalNodes(self, totalNodes, timeout=None):
         nodes=[]
 
-        psOut=Cluster.pgrepdccServers(timeout)
+        psOut=Cluster.pgrepActcServers(timeout)
         if psOut is None:
             Utils.Print("ERROR: No nodes discovered.")
             return nodes
@@ -1211,34 +1339,47 @@ class Cluster(object):
             psOutDisplay=psOut[:6660]+"..."
         if Utils.Debug: Utils.Print("pgrep output: \"%s\"" % psOutDisplay)
         for i in range(0, totalNodes):
-            pattern=Cluster.pgrepdccServerPattern(i)
-            m=re.search(pattern, psOut, re.MULTILINE)
-            if m is None:
-                Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.dccServerName, pattern))
+            instance=self.discoverLocalNode(i, psOut, timeout)
+            if instance is None:
                 break
-            instance=Node(self.host, self.port + i, pid=int(m.group(1)), cmd=m.group(2), walletMgr=self.walletMgr, enableMongo=self.enableMongo, mongoHost=self.mongoHost, mongoPort=self.mongoPort, mongoDb=self.mongoDb)
-            if Utils.Debug: Utils.Print("Node>", instance)
             nodes.append(instance)
 
         if Utils.Debug: Utils.Print("Found %d nodes" % (len(nodes)))
         return nodes
 
-    def discoverBiosNodePid(self, timeout=None):
-        psOut=Cluster.pgrepdccServers(timeout=timeout)
-        pattern=Cluster.pgrepdccServerPattern("bios")
+    # Populate a node matched to actual running instance
+    def discoverLocalNode(self, nodeNum, psOut=None, timeout=None):
+        if psOut is None:
+            psOut=Cluster.pgrepActcServers(timeout)
+        if psOut is None:
+            Utils.Print("ERROR: No nodes discovered.")
+            return None
+        pattern=Cluster.pgrepActcServerPattern(nodeNum)
+        m=re.search(pattern, psOut, re.MULTILINE)
+        if m is None:
+            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.ActcServerName, pattern))
+            return None
+        instance=Node(self.host, self.port + nodeNum, pid=int(m.group(1)), cmd=m.group(2), walletMgr=self.walletMgr, enableMongo=self.enableMongo, mongoHost=self.mongoHost, mongoPort=self.mongoPort, mongoDb=self.mongoDb)
+        if Utils.Debug: Utils.Print("Node>", instance)
+        return instance
+
+    def discoverBiosNode(self, timeout=None):
+        psOut=Cluster.pgrepActcServers(timeout=timeout)
+        pattern=Cluster.pgrepActcServerPattern("bios")
         Utils.Print("pattern={\n%s\n}, psOut=\n%s\n" % (pattern,psOut))
         m=re.search(pattern, psOut, re.MULTILINE)
         if m is None:
-            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.dccServerName, pattern))
+            Utils.Print("ERROR: Failed to find %s pid. Pattern %s" % (Utils.ActcServerName, pattern))
+            return None
         else:
-            self.biosNode.pid=int(m.group(1))
+            return Node(Cluster.__BiosHost, Cluster.__BiosPort, pid=int(m.group(1)), cmd=m.group(2), walletMgr=self.walletMgr)
 
-    # Kills a percentange of dcc instances starting from the tail and update dccInstanceInfos state
-    def killSomedccInstances(self, killCount, killSignalStr=Utils.SigKillTag):
+    # Kills a percentange of Actc instances starting from the tail and update actcInstanceInfos state
+    def killSomeActcInstances(self, killCount, killSignalStr=Utils.SigKillTag):
         killSignal=signal.SIGKILL
         if killSignalStr == Utils.SigTermTag:
             killSignal=signal.SIGTERM
-        Utils.Print("Kill %d %s instances with signal %s." % (killCount, Utils.dccServerName, killSignal))
+        Utils.Print("Kill %d %s instances with signal %s." % (killCount, Utils.ActcServerName, killSignal))
 
         killedCount=0
         for node in reversed(self.nodes):
@@ -1252,21 +1393,21 @@ class Cluster(object):
         time.sleep(1) # Give processes time to stand down
         return True
 
-    def relaunchdccInstances(self):
+    def relaunchActcInstances(self, cachePopen=False):
 
         chainArg=self.__chainSyncStrategy.arg
 
         newChain= False if self.__chainSyncStrategy.name in [Utils.SyncHardReplayTag, Utils.SyncNoneTag] else True
         for i in range(0, len(self.nodes)):
             node=self.nodes[i]
-            if node.killed and not node.relaunch(i, chainArg, newChain=newChain):
+            if node.killed and not node.relaunch(i, chainArg, newChain=newChain, cachePopen=cachePopen):
                 return False
 
         return True
 
     @staticmethod
     def dumpErrorDetailImpl(fileName):
-        Utils.Print(Cluster.__fileDivider)
+        Utils.Print(Utils.FileDivider)
         Utils.Print("Contents of %s:" % (fileName))
         if os.path.exists(fileName):
             with open(fileName, "r") as f:
@@ -1274,37 +1415,53 @@ class Cluster(object):
         else:
             Utils.Print("File %s not found." % (fileName))
 
+    @staticmethod
+    def __findFiles(path):
+        files=[]
+        it=os.scandir(path)
+        for entry in it:
+            if entry.is_file(follow_symlinks=False):
+                match=re.match("stderr\..+\.txt", entry.name)
+                if match:
+                    files.append(os.path.join(path, entry.name))
+        files.sort()
+        return files
+
     def dumpErrorDetails(self):
-        fileName=Cluster.__configDir + Cluster.nodeExtensionToName("bios") + "/config.ini"
+        fileName=Utils.getNodeConfigDir("bios", "config.ini")
         Cluster.dumpErrorDetailImpl(fileName)
-        fileName=Cluster.__dataDir + Cluster.nodeExtensionToName("bios") + "/stderr.txt"
-        Cluster.dumpErrorDetailImpl(fileName)
+        path=Utils.getNodeDataDir("bios")
+        fileNames=Cluster.__findFiles(path)
+        for fileName in fileNames:
+            Cluster.dumpErrorDetailImpl(fileName)
 
         for i in range(0, len(self.nodes)):
-            configLocation=Cluster.__configDir + Cluster.nodeExtensionToName(i) + "/"
-            fileName=configLocation + "config.ini"
+            configLocation=Utils.getNodeConfigDir(i)
+            fileName=os.path.join(configLocation, "config.ini")
             Cluster.dumpErrorDetailImpl(fileName)
-            fileName=configLocation + "genesis.json"
+            fileName=os.path.join(configLocation, "genesis.json")
             Cluster.dumpErrorDetailImpl(fileName)
-            fileName=Cluster.__dataDir + Cluster.nodeExtensionToName(i) + "/stderr.txt"
-            Cluster.dumpErrorDetailImpl(fileName)
+            path=Utils.getNodeDataDir(i)
+            fileNames=Cluster.__findFiles(path)
+            for fileName in fileNames:
+                Cluster.dumpErrorDetailImpl(fileName)
 
         if self.useBiosBootFile:
             Cluster.dumpErrorDetailImpl(Cluster.__bootlog)
 
     def killall(self, silent=True, allInstances=False):
-        """Kill cluster noddcc instances. allInstances will kill all noddcc instances running on the system."""
-        cmd="%s -k 9" % (Utils.dccLauncherPath)
+        """Kill cluster nodactc instances. allInstances will kill all nodactc instances running on the system."""
+        cmd="%s -k 9" % (Utils.ActcLauncherPath)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
-            if not silent: Utils.Print("Launcher failed to shut down dcc cluster.")
+            if not silent: Utils.Print("Launcher failed to shut down actc cluster.")
 
         if allInstances:
-            # ocassionally the launcher cannot kill the dcc server
-            cmd="pkill -9 %s" % (Utils.dccServerName)
+            # ocassionally the launcher cannot kill the actc server
+            cmd="pkill -9 %s" % (Utils.ActcServerName)
             if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
             if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
-                if not silent: Utils.Print("Failed to shut down dcc cluster.")
+                if not silent: Utils.Print("Failed to shut down actc cluster.")
 
         # another explicit nodes shutdown
         for node in self.nodes:
@@ -1315,7 +1472,7 @@ class Cluster(object):
                 pass
 
     def bounce(self, nodes, silent=True):
-        """Bounces noddcc instances as indicated by parameter nodes.
+        """Bounces nodactc instances as indicated by parameter nodes.
         nodes should take the form of a comma-separated list as accepted by the launcher --bounce command (e.g. '00' or '00,01')"""
         cmdArr = Cluster.__LauncherCmdArr.copy()
         cmdArr.append("--bounce")
@@ -1328,7 +1485,7 @@ class Cluster(object):
         return True
 
     def down(self, nodes, silent=True):
-        """Brings down noddcc instances as indicated by parameter nodes.
+        """Brings down nodactc instances as indicated by parameter nodes.
         nodes should take the form of a comma-separated list as accepted by the launcher --bounce command (e.g. '00' or '00,01')"""
         cmdArr = Cluster.__LauncherCmdArr.copy()
         cmdArr.append("--down")
@@ -1358,9 +1515,9 @@ class Cluster(object):
         return node.waitForNextBlock(timeout)
 
     def cleanup(self):
-        for f in glob.glob(Cluster.__dataDir + "node_*"):
+        for f in glob.glob(Utils.DataDir + "node_*"):
             shutil.rmtree(f)
-        for f in glob.glob(Cluster.__configDir + "node_*"):
+        for f in glob.glob(Utils.ConfigDir + "node_*"):
             shutil.rmtree(f)
 
         for f in self.filesToCleanup:
@@ -1399,6 +1556,23 @@ class Cluster(object):
 
         return True
 
+    def discoverUnstartedLocalNodes(self, unstartedNodes, totalNodes):
+        unstarted=[]
+        firstUnstartedNode=totalNodes-unstartedNodes
+        for nodeId in range(firstUnstartedNode, totalNodes):
+            unstarted.append(self.discoverUnstartedLocalNode(nodeId))
+        return unstarted
+
+    def discoverUnstartedLocalNode(self, nodeId):
+        startFile=Node.unstartedFile(nodeId)
+        with open(startFile, 'r') as file:
+            cmd=file.read()
+            Utils.Print("unstarted local node cmd: %s" % (cmd))
+        p=re.compile(r'^\s*(\w+)\s*=\s*([^\s](?:.*[^\s])?)\s*$')
+        instance=Node(self.host, port=self.port+nodeId, pid=None, cmd=cmd, walletMgr=self.walletMgr, enableMongo=self.enableMongo, mongoHost=self.mongoHost, mongoPort=self.mongoPort, mongoDb=self.mongoDb)
+        if Utils.Debug: Utils.Print("Unstarted Node>", instance)
+        return instance
+
     def getInfos(self, silentErrors=False, exitOnError=False):
         infos=[]
         for node in self.nodes:
@@ -1409,7 +1583,7 @@ class Cluster(object):
     def reportStatus(self):
         if hasattr(self, "biosNode") and self.biosNode is not None:
             self.biosNode.reportStatus()
-        if hasattr(self, "nodes"): 
+        if hasattr(self, "nodes"):
             for node in self.nodes:
                 try:
                     node.reportStatus()
@@ -1433,13 +1607,13 @@ class Cluster(object):
         self.printBlockLog()
 
     def getBlockLog(self, nodeExtension):
-        blockLogDir=Cluster.__dataDir + Cluster.nodeExtensionToName(nodeExtension) + "/blocks/"
+        blockLogDir=Utils.getNodeDataDir(nodeExtension, "blocks")
         return Utils.getBlockLog(blockLogDir, exitOnError=False)
 
     def printBlockLog(self):
         blockLogBios=self.getBlockLog("bios")
-        Utils.Print(Cluster.__fileDivider)
-        Utils.Print("Block log from %s:\n%s" % (blockLogDir, json.dumps(blockLogBios, indent=1)))
+        Utils.Print(Utils.FileDivider)
+        Utils.Print("Block log from %s:\n%s" % ("bios", json.dumps(blockLogBios, indent=1)))
 
         if not hasattr(self, "nodes"):
             return
@@ -1448,8 +1622,8 @@ class Cluster(object):
         for i in range(numNodes):
             node=self.nodes[i]
             blockLog=self.getBlockLog(i)
-            Utils.Print(Cluster.__fileDivider)
-            Utils.Print("Block log from %s:\n%s" % (blockLogDir, json.dumps(blockLog, indent=1)))
+            Utils.Print(Utils.FileDivider)
+            Utils.Print("Block log from node %s:\n%s" % (i, json.dumps(blockLog, indent=1)))
 
 
     def compareBlockLogs(self):
@@ -1502,10 +1676,10 @@ class Cluster(object):
             commonBlockLogs=[]
             commonBlockNameExtensions=[]
             for i in range(numNodes):
-                if (len(blockLogs[i]) >= last): 
+                if (len(blockLogs[i]) >= last):
                     commonBlockLogs.append(blockLogs[i][first:last])
                     commonBlockNameExtensions.append(blockNameExtensions[i])
-            return (commonBlockLogs,commonBlockNameExtensions) 
+            return (commonBlockLogs,commonBlockNameExtensions)
 
         # compare the contents of the blockLogs for the given common block number span
         def compareCommon(blockLogs, blockNameExtensions, first, last):
@@ -1523,13 +1697,13 @@ class Cluster(object):
                 if Utils.Debug: Utils.Print("context=%s" % (context))
                 ret=Utils.compare(commonBlockLogs[0], commonBlockLogs[i], context)
                 if ret is not None:
-                    blockLogDir1=Cluster.__dataDir + Cluster.nodeExtensionToName(commonBlockNameExtensions[0]) + "/blocks/"
-                    blockLogDir2=Cluster.__dataDir + Cluster.nodeExtensionToName(commonBlockNameExtensions[i]) + "/blocks/"
-                    Utils.Print(Cluster.__fileDivider)
+                    blockLogDir1=Utils.DataDir + Utils.nodeExtensionToName(commonBlockNameExtensions[0]) + "/blocks/"
+                    blockLogDir2=Utils.DataDir + Utils.nodeExtensionToName(commonBlockNameExtensions[i]) + "/blocks/"
+                    Utils.Print(Utils.FileDivider)
                     Utils.Print("Block log from %s:\n%s" % (blockLogDir1, json.dumps(commonBlockLogs[0], indent=1)))
-                    Utils.Print(Cluster.__fileDivider)
+                    Utils.Print(Utils.FileDivider)
                     Utils.Print("Block log from %s:\n%s" % (blockLogDir2, json.dumps(commonBlockLogs[i], indent=1)))
-                    Utils.Print(Cluster.__fileDivider)
+                    Utils.Print(Utils.FileDivider)
                     Utils.errorExit("Block logs do not match, difference description -> %s" % (ret))
 
             return True
@@ -1545,4 +1719,3 @@ class Cluster(object):
         while len(lowestMaxes)>0 and compareCommon(blockLogs, blockNameExtensions, first, lowestMaxes[0]):
             first=lowestMaxes[0]+1
             lowestMaxes=stripValues(lowestMaxes,lowestMaxes[0])
-

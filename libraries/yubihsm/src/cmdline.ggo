@@ -1,0 +1,91 @@
+#
+# Copyright 2015-2018 Yubico AB
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+# http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+option "action" a "Action to perform" values="benchmark",
+                                             "blink-device",
+                                             "create-otp-aead",
+                                             "decrypt-aesccm",
+                                             "decrypt-oaep",
+                                             "decrypt-otp",
+                                             "decrypt-pkcs1v15",
+                                             "delete-object",
+                                             "derive-ecdh",
+                                             "encrypt-aesccm",
+                                             "generate-asymmetric-key",
+                                             "generate-hmac-key",
+                                             "generate-otp-aead-key",
+                                             "generate-wrap-key",
+                                             "get-device-info",
+                                             "get-logs",
+                                             "get-object-info",
+                                             "get-opaque",
+                                             "get-pseudo-random",
+                                             "get-public-key",
+                                             "get-storage-info",
+                                             "get-template",
+                                             "get-wrapped",
+                                             "list-objects",
+                                             "put-asymmetric-key",
+                                             "put-authentication-key",
+                                             "put-hmac-key",
+                                             "put-opaque",
+                                             "put-otp-aead-key",
+                                             "put-template",
+                                             "put-wrap-key",
+                                             "put-wrapped",
+                                             "randomize-otp-aead",
+                                             "reset",
+                                             "set-log-index",
+                                             "set-option",
+                                             "sign-attestation-certificate",
+                                             "sign-ecdsa",
+                                             "sign-eddsa",
+                                             "sign-hmac",
+                                             "sign-pkcs1v15",
+                                             "sign-pss",
+                                             "sign-ssh-certificate" enum optional multiple
+option "password" p "Authentication password" string optional
+option "authkey" - "Authentication key" int optional default="1"
+option "object-id" i "Object ID" short optional default="0"
+option "label" l "Object label" string optional default=""
+option "domains" d "Object domains" string optional default="1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16"
+option "capabilities" c "Capabilities for an object" string optional default="0"
+option "object-type" t "Object type" string optional
+
+option "delegated" - "Delegated capabilities" string optional default="0"
+option "new-password" - "New authentication password" string optional
+option "algorithm" A "Operation algorithm" string optional
+option "nonce" - "OTP nonce" int optional
+option "count" - "Number of bytes to request" int optional default="256"
+option "duration" - "Blink duration in seconds" int optional default="10"
+option "wrap-id" - "Wrap key ID" int optional
+option "template-id" - "Template ID" int optional
+option "attestation-id" - "Attestation ID" int optional
+option "log-index" - "Log index" int optional
+
+option "in" - "Input data (filename)" string optional default="-"
+option "out" - "Output data (filename)" string optional default="-"
+option "informat" - "Input format" values="default","base64","binary","PEM","password","hex","ASCII" enum optional default="default"
+option "outformat" - "Input and output format" values="default","base64","binary","PEM","hex","ASCII" enum optional default="default"
+
+#option "enc-key" e "Encryption key to use" string optional default="404142434445464748494a4b4c4d4e4f"
+#option "mac-key" m "Mac key to use" string optional default="404142434445464748494a4b4c4d4e4f"
+
+option "config-file" f "Configuration file to read" string optional default=""
+option "connector" C "List of connectors to use" string optional multiple
+option "cacert" - "HTTPS cacert for connector" string optional
+option "proxy" - "Proxy server to use for connector" string optional
+option "verbose" v "Print more information" int optional default="0"

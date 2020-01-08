@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 
@@ -34,7 +34,7 @@ namespace chain {
         return ds;
       }
 
-      void reflector_verify()const;
+      void reflector_init()const;
 
       private:
          chain_id_type() = default;
@@ -47,8 +47,6 @@ namespace chain {
 
          friend class actc::net_plugin_impl;
          friend struct actc::handshake_message;
-
-         friend struct ::hello; // TODO: Rushed hack to support bnet_plugin. Need a better solution.
    };
 
 } }  // namespace actc::chain
