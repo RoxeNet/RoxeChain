@@ -24,7 +24,7 @@ systemAccounts = [
     'actc.ramfee',
     'actc.saving',
     'actc.stake',
-    'aci.token',
+    'actc.token',
     'actc.vpay',
     'actc.rex',
 ]
@@ -288,12 +288,12 @@ def stepStartBoot():
     startNode(0, {'name': 'actc', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(1.5)
 def stepInstallSystemContracts():
-    run(args.clactc + 'set contract aci.token ' + args.contracts_dir + '/aci.token/')
+    run(args.clactc + 'set contract actc.token ' + args.contracts_dir + '/actc.token/')
     run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + '/actc.msig/')
 def stepCreateTokens():
-    run(args.clactc + 'push action aci.token create \'["actc", "10000000000.0000 %s"]\' -p aci.token' % (args.symbol))
+    run(args.clactc + 'push action actc.token create \'["actc", "10000000000.0000 %s"]\' -p actc.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
-    run(args.clactc + 'push action aci.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
+    run(args.clactc + 'push action actc.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
     sleep(1)
 def stepSetSystemContract():
     # All of the protocol upgrade features introduced in v1.8 first require a special protocol 
@@ -387,7 +387,7 @@ commands = [
     ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="ACTC Public Key", default='ACI8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--public-key', metavar='', help="ACTC Public Key", default='ACTC8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
 parser.add_argument('--private-Key', metavar='', help="ACTC Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
 parser.add_argument('--clactc', metavar='', help="Clactc command", default='../../build/programs/clactc/clactc --wallet-url http://127.0.0.1:6666 ')
 parser.add_argument('--nodactc', metavar='', help="Path to nodactc binary", default='../../build/programs/nodactc/nodactc')
