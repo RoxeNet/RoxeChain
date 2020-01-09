@@ -208,7 +208,7 @@ endif()
 message( STATUS "Using '${CORE_SYMBOL_NAME}' as CORE symbol name" )
 
 if ("${ACTC_ROOT_KEY}" STREQUAL "")
-    set(ACTC_ROOT_KEY "ACI7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt")
+    set(ACTC_ROOT_KEY "ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt")
 endif()
 
 message( STATUS "Using '${ACTC_ROOT_KEY}' as public key for 'actc' account" )
