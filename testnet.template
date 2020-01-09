@@ -24,7 +24,7 @@ wdurl=http://$wdaddr
 #    bioshost=$BIOS_HOSTNAME
 #    biosport=$BIOS_HTTP_PORT
 #    cnt_dir=$CONTRACT_DIR
-#    sys=$ACI_CONTRACT
+#    sys=$SYS_CONTRACT
 # where $BIOS_HOSTNAME is replaced by the hostname portion of the http-server-address configured
 # for the nodactc instance running to bios producer
 # ------ DO NOT ALTER THE NEXT LINE -------
@@ -103,20 +103,20 @@ ecmd create account actc actc.ram $pubsyskey $pubsyskey
 ecmd create account actc actc.ramfee $pubsyskey $pubsyskey
 ecmd create account actc actc.saving $pubsyskey $pubsyskey
 ecmd create account actc actc.stake $pubsyskey $pubsyskey
-ecmd create account actc aci.token $pubsyskey $pubsyskey
+ecmd create account actc actc.token $pubsyskey $pubsyskey
 ecmd create account actc actc.vpay $pubsyskey $pubsyskey
 ecmd create account actc actc.wrap $pubsyskey $pubsyskey
 
-ecmd set contract aci.token unittests/contracts/aci.token aci.token.wasm aci.token.abi
+ecmd set contract actc.token unittests/contracts/actc.token actc.token.wasm actc.token.abi
 ecmd set contract actc.msig unittests/contracts/actc.msig actc.msig.wasm actc.msig.abi
 ecmd set contract actc.wrap unittests/contracts/actc.wrap actc.wrap.wasm actc.wrap.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action aci.token create '[ "actc", "10000000000.0000 ACI" ]' -p aci.token | tee -a $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action aci.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 ACI" ]' -p actc.token | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action aci.token create '[ "actc", "10000000000.0000 ACI" ]' -p aci.token >> $logfile 2>&1
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action aci.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 ACI" ]' -p actc.token >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
