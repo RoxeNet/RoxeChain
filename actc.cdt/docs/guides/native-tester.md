@@ -95,7 +95,7 @@ Every `intrinsic` that is defined for actc (prints, require_auth, etc.) is redef
 - Via CMake
     - `add_native_library` and `add_native_executable` CMake macros have been added (these are a drop in replacement for add_library and add_executable).
 
-### Eosio.CDT Native Tester API
+### Actc.CDT Native Tester API
 - CHECK_ASSERT(...) : This macro will check whether a particular assert has occured and flag the tests as failed but allow the rest of the tests to run.  
     - This is called either by 
         - `CHECK_ASSERT("<assert message>", [](<args>){ whatever_function(<args>); })`
