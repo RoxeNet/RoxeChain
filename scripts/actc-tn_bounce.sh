@@ -11,7 +11,7 @@
 # in most cases, simply running ./actc-tn_bounce.sh is sufficient.
 #
 
-pushd $actc_HOME
+pushd $ACTC_HOME
 
 if [ ! -f programs/nodactc/nodactc ]; then
     echo unable to locate binary for nodactc
@@ -19,20 +19,20 @@ if [ ! -f programs/nodactc/nodactc ]; then
 fi
 
 config_base=etc/actc/node_
-if [ -z "$actc_NODE" ]; then
+if [ -z "$ACTC_NODE" ]; then
     DD=`ls -d ${config_base}[012]?`
     ddcount=`echo $DD | wc -w`
     if [ $ddcount -ne 1 ]; then
         echo $HOSTNAME has $ddcount config directories, bounce not possible. Set environment variable
-        echo actc_NODE to the 2-digit node id number to specify which node to bounce. For example:
-        echo actc_NODE=06 $0 \<options\>
+        echo ACTC_NODE to the 2-digit node id number to specify which node to bounce. For example:
+        echo ACTC_NODE=06 $0 \<options\>
         cd -
         exit 1
     fi
     OFS=$((${#DD}-2))
-    export actc_NODE=${DD:$OFS}
+    export ACTC_NODE=${DD:$OFS}
 else
-    DD=${config_base}$actc_NODE
+    DD=${config_base}$ACTC_NODE
     if [ ! \( -d $DD \) ]; then
         echo no directory named $PWD/$DD
         cd -
@@ -40,5 +40,5 @@ else
     fi
 fi
 
-bash $actc_HOME/scripts/actc-tn_down.sh
-bash $actc_HOME/scripts/actc-tn_up.sh "$*"
+bash $ACTC_HOME/scripts/actc-tn_down.sh
+bash $ACTC_HOME/scripts/actc-tn_up.sh "$*"
