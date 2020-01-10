@@ -49,7 +49,7 @@ namespace actc { namespace cdt {
 
       void add_action( const clang::CXXRecordDecl* decl ) {
          abi_action ret;
-         auto action_name = decl->getEosioActionAttr()->getName();
+         auto action_name = decl->getActcActionAttr()->getName();
 
          if (rcs[get_action_name(decl)].empty())
             std::cout << "Warning, action <"+get_action_name(decl)+"> does not have a ricardian contract\n";
@@ -81,7 +81,7 @@ namespace actc { namespace cdt {
       void add_action( const clang::CXXMethodDecl* decl ) {
          abi_action ret;
 
-         auto action_name = decl->getEosioActionAttr()->getName();
+         auto action_name = decl->getActcActionAttr()->getName();
 
          if (rcs[get_action_name(decl)].empty())
             std::cout << "Warning, action <"+get_action_name(decl)+"> does not have a ricardian contract\n";
@@ -201,7 +201,7 @@ namespace actc { namespace cdt {
          tables.insert(decl);
          abi_table t;
          t.type = decl->getNameAsString();
-         auto table_name = decl->getEosioTableAttr()->getName();
+         auto table_name = decl->getActcTableAttr()->getName();
          if (!table_name.empty()) {
             try {
                validate_name( table_name.str(), error_handler );
@@ -216,7 +216,7 @@ namespace actc { namespace cdt {
       }
 
       void add_table( uint64_t name, const clang::CXXRecordDecl* decl ) {
-         if (!(decl->isEosioTable() && abigen::is_actc_contract(decl, get_contract_name())))
+         if (!(decl->isActcTable() && abigen::is_actc_contract(decl, get_contract_name())))
             return;
          abi_table t;
          t.type = decl->getNameAsString();
