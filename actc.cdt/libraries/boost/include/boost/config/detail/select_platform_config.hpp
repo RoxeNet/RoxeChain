@@ -45,9 +45,9 @@
 // Haiku
 #  define BOOST_PLATFORM_CONFIG "boost/config/platform/haiku.hpp"
 
-#elif defined(__BEOS__)
+#elif defined(__BACTC__)
 // BeOS
-#  define BOOST_PLATFORM_CONFIG "boost/config/platform/bactc.hpp"
+#  define BOOST_PLATFORM_CONFIG "boost/config/platform/beos.hpp"
 
 #elif defined(macintosh) || defined(__APPLE__) || defined(__APPLE_CC__)
 // MacOS
@@ -124,7 +124,7 @@
 #  include "boost/config/platform/hpux.hpp"
 #  include "boost/config/platform/cygwin.hpp"
 #  include "boost/config/platform/win32.hpp"
-#  include "boost/config/platform/bactc.hpp"
+#  include "boost/config/platform/beos.hpp"
 #  include "boost/config/platform/macos.hpp"
 #  include "boost/config/platform/zos.hpp"
 #  include "boost/config/platform/aix.hpp"

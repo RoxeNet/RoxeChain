@@ -378,7 +378,7 @@ namespace actc {
             printl( buffer, (end-buffer) );
       }
 
-      EOSLIB_SERIALIZE( asset, (amount)(symbol) )
+      ACTCLIB_SERIALIZE( asset, (amount)(symbol) )
    };
 
   /**
@@ -505,7 +505,7 @@ namespace actc {
          return a.quantity >= b.quantity;
       }
 
-      EOSLIB_SERIALIZE( extended_asset, (quantity)(contract) )
+      ACTCLIB_SERIALIZE( extended_asset, (quantity)(contract) )
    };
 
 /// @} asset type

@@ -35,7 +35,7 @@ namespace actc {
 
         int64_t _count;
         /// @endcond
-        EOSLIB_SERIALIZE( microseconds, (_count) )
+        ACTCLIB_SERIALIZE( microseconds, (_count) )
     private:
         friend class time_point;
   };
@@ -73,7 +73,7 @@ namespace actc {
         microseconds elapsed;
         /// @endcond
 
-        EOSLIB_SERIALIZE( time_point, (elapsed) )
+        ACTCLIB_SERIALIZE( time_point, (elapsed) )
   };
 
   /**
@@ -128,7 +128,7 @@ namespace actc {
 
         /// @endcond
 
-        EOSLIB_SERIALIZE( time_point_sec, (utc_seconds) )
+        ACTCLIB_SERIALIZE( time_point_sec, (utc_seconds) )
   };
 
    /**
@@ -186,7 +186,7 @@ namespace actc {
          static constexpr int64_t block_timestamp_epoch = 946684800000ll;  // epoch is year 2000
          /// @endcond
 
-         EOSLIB_SERIALIZE( block_timestamp, (slot) )
+         ACTCLIB_SERIALIZE( block_timestamp, (slot) )
       private:
 
 
