@@ -593,7 +593,7 @@ static const char apply_wrong_signature_wast[] = R"=====(
 static const char import_injected_wast[] =                                            \
 "(module"                                                                             \
 " (export \"apply\" (func $apply))"                                                   \
-" (import \"" actc_INJECTED_MODULE_NAME "\" \"checktime\" (func $inj (param i32)))"  \
+" (import \"" ACTC_INJECTED_MODULE_NAME "\" \"checktime\" (func $inj (param i32)))"  \
 " (func $apply (param $0 i64) (param $1 i64) (param $2 i64))"                         \
 ")";
 
@@ -630,6 +630,20 @@ static const char memory_growth_memset_test[] = R"=====(
      )
      (i32.const 0)
    )
+ )
+)
+)=====";
+
+static const char large_maligned_host_ptr[] = R"=====(
+(module
+ (export "apply" (func $$apply))
+ (import "env" "get_active_producers" (func $$get_active_producers (param i32 i32) (result i32)))
+ (memory $$0 ${MAX_WASM_PAGES})
+ (func $$apply (param i64) (param i64) (param i64)
+   (drop (call $$get_active_producers
+     (i32.const 1)
+     (i32.const ${MAX_NAME_ARRAY})
+   ))
  )
 )
 )=====";

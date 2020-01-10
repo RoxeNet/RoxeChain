@@ -12,8 +12,8 @@ prog=nodactc
 # Quote any args that are "*", so they are not expanded
 qargs=`echo "$*" | sed -e 's/ \* / "*" /' -e 's/ \*$/ "*"/'`
 
-if [ "$PWD" != "$actc_HOME" ]; then
-    echo $0 must only be run from $actc_HOME
+if [ "$PWD" != "$ACTC_HOME" ]; then
+    echo $0 must only be run from $ACTC_HOME
     exit -1
 fi
 
@@ -22,12 +22,12 @@ if [ ! -e $rundir/$prog ]; then
     exit -1
 fi
 
-if [ -z "$actc_NODE" ]; then
+if [ -z "$ACTC_NODE" ]; then
     echo data directory not set
     exit -1
 fi
 
-datadir=var/lib/node_$actc_NODE
+datadir=var/lib/node_$ACTC_NODE
 now=`date +'%Y_%m_%d_%H_%M_%S'`
 log=stderr.$now.txt
 touch $datadir/$log
@@ -35,8 +35,8 @@ rm $datadir/stderr.txt
 ln -s $log $datadir/stderr.txt
 
 relaunch() {
-    echo "$rundir/$prog $qargs $* --data-dir $datadir --config-dir etc/actc/node_$actc_NODE > $datadir/stdout.txt  2>> $datadir/$log "
-    nohup $rundir/$prog $qargs $* --data-dir $datadir --config-dir etc/actc/node_$actc_NODE > $datadir/stdout.txt  2>> $datadir/$log &
+    echo "$rundir/$prog $qargs $* --data-dir $datadir --config-dir etc/actc/node_$ACTC_NODE > $datadir/stdout.txt  2>> $datadir/$log "
+    nohup $rundir/$prog $qargs $* --data-dir $datadir --config-dir etc/actc/node_$ACTC_NODE > $datadir/stdout.txt  2>> $datadir/$log &
     pid=$!
     echo pid = $pid
     echo $pid > $datadir/$prog.pid
@@ -56,26 +56,26 @@ relaunch() {
     done
 }
 
-if [ -z "$actc_LEVEL" ]; then
+if [ -z "$ACTC_LEVEL" ]; then
     echo starting with no modifiers
     relaunch
     if [ "$connected" -eq 0 ]; then
-        actc_LEVEL=replay
+        ACTC_LEVEL=replay
     else
         exit 0
     fi
 fi
 
-if [ "$actc_LEVEL" == replay ]; then
+if [ "$ACTC_LEVEL" == replay ]; then
     echo starting with replay
     relaunch --hard-replay-blockchain
     if [  "$connected" -eq 0 ]; then
-        actc_LEVEL=resync
+        ACTC_LEVEL=resync
     else
         exit 0
     fi
 fi
-if [ "$actc_LEVEL" == resync ]; then
+if [ "$ACTC_LEVEL" == resync ]; then
     echo starting with delete-all-blocks
     relaunch --delete-all-blocks
 fi
