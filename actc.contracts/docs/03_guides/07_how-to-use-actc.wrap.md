@@ -22,7 +22,7 @@ Three unsigned transactions will be generated using clactc and then the actions 
 
 First, generate a transaction to capture the necessary actions involved in creating a new account:
 ```
-$ clactc system newaccount -s -j -d --transfer --stake-net "1.000 ACI" --stake-cpu "1.000 ACI" --buy-ram-kbytes 50 actc actc.wrap EOS8MMUW11TAdTDxqdSwSqJodefSoZbFhcprndomgLi9MeR2o8MT4 > generated_account_creation_trx.json
+$ clactc system newaccount -s -j -d --transfer --stake-net "1.000 ACI" --stake-cpu "1.000 ACI" --buy-ram-kbytes 50 actc actc.wrap ACTC8MMUW11TAdTDxqdSwSqJodefSoZbFhcprndomgLi9MeR2o8MT4 > generated_account_creation_trx.json
 726964ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea305500c80000"} arg: {"code":"actc","action":"buyrambytes","args":{"payer":"actc","receiver":"actc.wrap","bytes":51200}}
 726967ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea3055102700000000000004535953000000001027000000000000045359530000000001"} arg: {"code":"actc","action":"delegatebw","args":{"from":"actc","receiver":"actc.wrap","stake_net_quantity":"1.0000 ACI","stake_cpu_quantity":"1.0000 ACI","transfer":true}}
 $ cat generated_account_creation_trx.json
@@ -608,8 +608,8 @@ The goal of this example is for the block producers to change the owner permissi
 The initial status of the `alice` account might be:
 ```
 permissions:
-     owner     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
-        active     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+     owner     1:    1 ACTC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+        active     1:    1 ACTC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 memory:
      quota:     49.74 KiB    used:     3.365 KiB  
 
@@ -630,7 +630,7 @@ cpu bandwidth:
 producers:     <not voted>
 ```
 
-Assume that none of the block producers know the private key corresponding to the public key `EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV` which, as can be seen above, is initially securing access to the `alice` account.
+Assume that none of the block producers know the private key corresponding to the public key `ACTC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV` which, as can be seen above, is initially securing access to the `alice` account.
 
 The first step is to generate the transaction changing the owner permission of the `alice` account as if `alice` is authorizing the change:
 ```
@@ -851,7 +851,7 @@ Anyone can now verify that the owner authority of `alice` was successfully chang
 $ clactc get account alice
 permissions:
      owner     1:    1 actc@active,
-        active     1:    1 EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+        active     1:    1 ACTC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 memory:
      quota:     49.74 KiB    used:     3.348 KiB  
 
