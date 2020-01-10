@@ -137,7 +137,7 @@ namespace actcsystem {
       block_timestamp      last_name_close;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE_DERIVED( actc_global_state, actc::blockchain_parameters,
+      ACTCLIB_SERIALIZE_DERIVED( actc_global_state, actc::blockchain_parameters,
                                 (max_ram_size)(total_ram_bytes_reserved)(total_ram_stake)
                                 (last_producer_schedule_update)(last_pervote_bucket_fill)
                                 (pervote_bucket)(perblock_bucket)(total_unpaid_blocks)(total_activated_stake)(thresh_activated_stake_time)
@@ -154,7 +154,7 @@ namespace actcsystem {
       double            total_producer_votepay_share = 0;
       uint8_t           revision = 0; ///< used to track version updates in the future.
 
-      EOSLIB_SERIALIZE( actc_global_state2, (new_ram_per_block)(last_ram_increase)(last_block_num)
+      ACTCLIB_SERIALIZE( actc_global_state2, (new_ram_per_block)(last_ram_increase)(last_block_num)
                         (total_producer_votepay_share)(revision) )
    };
 
@@ -164,7 +164,7 @@ namespace actcsystem {
       time_point        last_vpay_state_update;
       double            total_vpay_share_change_rate = 0;
 
-      EOSLIB_SERIALIZE( actc_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate) )
+      ACTCLIB_SERIALIZE( actc_global_state3, (last_vpay_state_update)(total_vpay_share_change_rate) )
    };
 
    // Defines new global state parameters to store inflation rate and distribution
@@ -174,7 +174,7 @@ namespace actcsystem {
       int64_t  inflation_pay_factor;
       int64_t  votepay_factor;
 
-      EOSLIB_SERIALIZE( actc_global_state4, (continuous_rate)(inflation_pay_factor)(votepay_factor) )
+      ACTCLIB_SERIALIZE( actc_global_state4, (continuous_rate)(inflation_pay_factor)(votepay_factor) )
    };
 
    // Defines `producer_info` structure to be stored in `producer_info` table, added after version 1.0
@@ -193,7 +193,7 @@ namespace actcsystem {
       void     deactivate()       { producer_key = public_key(); is_active = false; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( producer_info, (owner)(total_votes)(producer_key)(is_active)(url)
+      ACTCLIB_SERIALIZE( producer_info, (owner)(total_votes)(producer_key)(is_active)(url)
                         (unpaid_blocks)(last_claim_time)(location) )
    };
 
@@ -206,7 +206,7 @@ namespace actcsystem {
       uint64_t primary_key()const { return owner.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( producer_info2, (owner)(votepay_share)(last_votepay_share_update) )
+      ACTCLIB_SERIALIZE( producer_info2, (owner)(votepay_share)(last_votepay_share_update) )
    };
 
    // Voter info. Voter info stores information about the voter:
@@ -243,7 +243,7 @@ namespace actcsystem {
       };
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( voter_info, (owner)(proxy)(producers)(staked)(last_vote_weight)(proxied_vote_weight)(is_proxy)(flags1)(reserved2)(reserved3) )
+      ACTCLIB_SERIALIZE( voter_info, (owner)(proxy)(producers)(staked)(last_vote_weight)(proxied_vote_weight)(is_proxy)(flags1)(reserved2)(reserved3) )
    };
 
 
@@ -275,7 +275,7 @@ namespace actcsystem {
       uint64_t primary_key()const { return owner.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( user_resources, (owner)(net_weight)(cpu_weight)(ram_bytes) )
+      ACTCLIB_SERIALIZE( user_resources, (owner)(net_weight)(cpu_weight)(ram_bytes) )
    };
 
    // Every user 'from' has a scope/table that uses every receipient 'to' as the primary key.
@@ -289,7 +289,7 @@ namespace actcsystem {
       uint64_t  primary_key()const { return to.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( delegated_bandwidth, (from)(to)(net_weight)(cpu_weight) )
+      ACTCLIB_SERIALIZE( delegated_bandwidth, (from)(to)(net_weight)(cpu_weight) )
 
    };
 
@@ -303,7 +303,7 @@ namespace actcsystem {
       uint64_t  primary_key()const { return owner.value; }
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( refund_request, (owner)(request_time)(net_amount)(cpu_amount) )
+      ACTCLIB_SERIALIZE( refund_request, (owner)(request_time)(net_amount)(cpu_amount) )
    };
 
 
@@ -984,7 +984,7 @@ namespace actcsystem {
           * @pre If proxy is set then proxy account must exist and be registered as a proxy
           * @pre Every listed producer or proxy must have been previously registered
           * @pre Voter must authorize this action
-          * @pre Voter must have previously staked some EOS for voting
+          * @pre Voter must have previously staked some ACTC for voting
           * @pre Voter->staked must be up to date
           *
           * @post Every producer previously voted for will have vote reduced by previous vote weight

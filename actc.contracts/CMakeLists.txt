@@ -19,8 +19,8 @@ find_package(actc.cdt)
 
 message(STATUS "Building actc.contracts v${VERSION_FULL}")
 
-set(ACTC_CDT_VERSION_MIN "1.6")
-set(ACTC_CDT_VERSION_SOFT_MAX "1.6")
+set(ACTC_CDT_VERSION_MIN "1.0")
+set(ACTC_CDT_VERSION_SOFT_MAX "1.0")
 #set(ACTC_CDT_VERSION_HARD_MAX "")
 
 ### Check the version of actc.cdt

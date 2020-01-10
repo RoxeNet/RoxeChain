@@ -26,7 +26,7 @@ namespace actcsystem {
          asset balance;
          double weight = .5;
 
-         EOSLIB_SERIALIZE( connector, (balance)(weight) )
+         ACTCLIB_SERIALIZE( connector, (balance)(weight) )
       };
 
       connector base;
@@ -46,7 +46,7 @@ namespace actcsystem {
                                        int64_t inp_reserve,
                                        int64_t out );
 
-      EOSLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
+      ACTCLIB_SERIALIZE( exchange_state, (supply)(base)(quote) )
    };
 
    typedef actc::multi_index< "rammarket"_n, exchange_state > rammarket;

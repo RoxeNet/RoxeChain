@@ -50,7 +50,7 @@ namespace actcsystem {
       uint16_t          weight;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( permission_level_weight, (permission)(weight) )
+      ACTCLIB_SERIALIZE( permission_level_weight, (permission)(weight) )
    };
 
    /**
@@ -63,7 +63,7 @@ namespace actcsystem {
       uint16_t           weight;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( key_weight, (key)(weight) )
+      ACTCLIB_SERIALIZE( key_weight, (key)(weight) )
    };
 
    /**
@@ -76,7 +76,7 @@ namespace actcsystem {
       uint16_t           weight;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( wait_weight, (wait_sec)(weight) )
+      ACTCLIB_SERIALIZE( wait_weight, (wait_sec)(weight) )
    };
 
    /**
@@ -95,7 +95,7 @@ namespace actcsystem {
       std::vector<wait_weight>              waits;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
+      ACTCLIB_SERIALIZE( authority, (threshold)(keys)(accounts)(waits) )
    };
 
    /**
@@ -122,7 +122,7 @@ namespace actcsystem {
       std::optional<actc::producer_schedule>   new_producers;
 
       // explicit serialization macro is not necessary, used here only to improve compilation time
-      EOSLIB_SERIALIZE(block_header, (timestamp)(producer)(confirmed)(previous)(transaction_mroot)(action_mroot)
+      ACTCLIB_SERIALIZE(block_header, (timestamp)(producer)(confirmed)(previous)(transaction_mroot)(action_mroot)
                                      (schedule_version)(new_producers))
    };
 
@@ -138,7 +138,7 @@ namespace actcsystem {
       checksum256       hash;
       uint64_t primary_key()const { return owner.value; }
 
-      EOSLIB_SERIALIZE( abi_hash, (owner)(hash) )
+      ACTCLIB_SERIALIZE( abi_hash, (owner)(hash) )
    };
 
    // Method parameters commented out to prevent generation of code that parses input data.

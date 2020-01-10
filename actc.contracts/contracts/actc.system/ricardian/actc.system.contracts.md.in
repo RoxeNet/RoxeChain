@@ -393,7 +393,7 @@ Sell {{bytes}} bytes of unused RAM from account {{account}} at market price. Thi
 
 ---
 spec_version: "0.2.0"
-title: Sell REX Tokens in Exchange for EOS
+title: Sell REX Tokens in Exchange for ACTC
 summary: '{{nowrap from}} sells {{nowrap rex}} tokens'
 icon: @ICON_BASE_URL@/@REX_ICON_URI@
 ---
