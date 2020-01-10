@@ -41,7 +41,7 @@ namespace  actc {
           */
          uint64_t primary_key() const { return pk_value; }
 
-         EOSLIB_SERIALIZE( row, (value) )
+         ACTCLIB_SERIALIZE( row, (value) )
       };
 
       typedef actc::multi_index<SingletonName, row> table;

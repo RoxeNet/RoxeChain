@@ -47,7 +47,7 @@ namespace actc {
       friend bool operator != ( const public_key& a, const public_key& b ) {
         return std::tie(a.type,a.data) != std::tie(b.type,b.data);
       }
-      EOSLIB_SERIALIZE( public_key, (type)(data) )
+      ACTCLIB_SERIALIZE( public_key, (type)(data) )
    };
 
    /// @} publickeytype
@@ -84,7 +84,7 @@ namespace actc {
       friend bool operator != ( const signature& a, const signature& b ) {
         return std::tie(a.type,a.data) != std::tie(b.type,b.data);
       }
-      EOSLIB_SERIALIZE( signature, (type)(data) )
+      ACTCLIB_SERIALIZE( signature, (type)(data) )
    };
 
    /// @} signaturetype

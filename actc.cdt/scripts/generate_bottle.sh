@@ -32,7 +32,7 @@ bash generate_tarball.sh ${NAME}
 
 hash=`openssl dgst -sha256 ${NAME} | awk 'NF>1{print $NF}'`
 
-echo "class EosioCdt < Formula
+echo "class ActcCdt < Formula
 
    homepage \"${URL}\"
    revision 0

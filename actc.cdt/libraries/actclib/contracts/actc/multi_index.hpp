@@ -1077,7 +1077,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *        });
@@ -1112,7 +1112,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *        });
@@ -1147,7 +1147,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *        });
@@ -1183,7 +1183,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *        });
@@ -1220,7 +1220,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *          address.zip = 93445;
@@ -1266,7 +1266,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *          address.zip = 93445;
@@ -1311,7 +1311,7 @@ class multi_index
        *          address.key = addresses.available_primary_key();
        *          address.first_name = "Daniel";
        *          address.last_name = "Larimer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Blacksburg";
        *          address.state = "VA";
        *        });
@@ -1415,7 +1415,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *          address.zip = 93445;
@@ -1466,7 +1466,7 @@ class multi_index
        *          address.account_name = "brendan"_n;
        *          address.first_name = "Brendan";
        *          address.last_name = "Blumer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Hong Kong";
        *          address.state = "HK";
        *          address.zip = 93445;
@@ -1512,7 +1512,7 @@ class multi_index
        *          address.account_name = "dan"_n;
        *          address.first_name = "Daniel";
        *          address.last_name = "Larimer";
-       *          address.street = "1 EOS Way";
+       *          address.street = "1 ACTC Way";
        *          address.city = "Blacksburg";
        *          address.state = "VA";
        *        });

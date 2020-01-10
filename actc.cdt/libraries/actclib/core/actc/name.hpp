@@ -268,7 +268,7 @@ namespace actc {
 
       uint64_t value = 0;
 
-      EOSLIB_SERIALIZE( name, (value) )
+      ACTCLIB_SERIALIZE( name, (value) )
    };
 
    namespace detail {

@@ -15,7 +15,7 @@ extern "C" {
  * @brief Defines API for querying action and sending action
  *
  *
- * A EOS.IO action has the following abstract structure:
+ * A ACTC.IO action has the following abstract structure:
  *
  * ```
  *   struct action {

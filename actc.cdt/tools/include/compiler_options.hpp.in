@@ -7,15 +7,15 @@
 #include "llvm/Support/Path.h"
 
 #ifdef ONLY_LD
-#define LD_CAT EosioLdToolCategory
+#define LD_CAT ActcLdToolCategory
 #else
-#define LD_CAT EosioCompilerToolCategory
+#define LD_CAT ActcCompilerToolCategory
 #endif
 
 #ifndef ONLY_LD
-static llvm::cl::OptionCategory EosioCompilerToolCategory("compiler options");
+static llvm::cl::OptionCategory ActcCompilerToolCategory("compiler options");
 #else
-static llvm::cl::OptionCategory EosioLdToolCategory("ld options");
+static llvm::cl::OptionCategory ActcLdToolCategory("ld options");
 #endif
 
 /// begin ld options
@@ -124,150 +124,150 @@ static cl::opt<bool> llvm_ir_opt(
     "emit-ir",
     cl::desc("Emit llvm ir"),
     cl::Hidden,
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> MF_opt(
     "MF",
     cl::desc("Write depfile output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> MT_opt(
     "MT",
     cl::desc("Specify name of main file output in depfile"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> MD_opt(
     "MD",
     cl::desc("Write depfile containing user and system headers"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> MMD_opt(
     "MMD",
     cl::desc("Write depfile containing user"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::list<std::string> resources(
      "R",
      cl::Prefix,
      cl::desc("Add a resource path for inclusion"),
      cl::ZeroOrMore,
-     cl::cat(EosioCompilerToolCategory));
+     cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> abigen_opt(
     "abigen",
     cl::desc("Generate ABI"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> abigen_output_opt(
     "abigen_output",
     cl::desc("ABIGEN output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 // ignore for now
 static cl::opt<bool> g_opt(
       "g",
       cl::desc("debug build <ignored>"),
       cl::Hidden,
       cl::ZeroOrMore,
-      cl::cat(EosioCompilerToolCategory));
+      cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> x_opt(
       "x",
       cl::desc("<ignored>"),
       cl::Hidden,
       cl::Prefix,
-      cl::cat(EosioCompilerToolCategory));
+      cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> pch_opt(
       "fpch-preprocess",
       cl::desc("<ignored>"),
       cl::Hidden,
-      cl::cat(EosioCompilerToolCategory));
+      cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> CC_opt(
     "CC",
     cl::desc("Include comments from within macros in preprocessed output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> C_opt(
     "C",
     cl::desc("Include comments in preprocessed output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> c_opt(
     "c",
     cl::desc("Only run preprocess, compile, and assemble steps"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> color_diag_opt(
     "fcolor-diagnostics",
     cl::desc("Use colors in diagnostics"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> dD_opt(
     "dD",
     cl::desc("Print macro definitions in -E mode in addition to normal output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> dI_opt(
     "dI",
     cl::desc("Print include directives in -E mode in addition to normal output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> dM_opt(
     "dM",
     cl::desc("Print macro definitions in -E mode instead to normal output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::list<std::string> D_opt(
     "D",
     cl::desc("Define <macro> to <value> (or 1 if <value> omitted)"),
     cl::ZeroOrMore,
     cl::Prefix,
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> emit_ast_opt(
     "emit-ast",
     cl::desc("Emit Clang AST files for source inputs"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> emit_llvm_opt(
     "emit-llvm",
     cl::desc("Use the LLVM representation for assembler and object files"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> E_opt(
     "E",
     cl::desc("Only run the preprocessor"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> finline_functions_opt(
     "finline-functions",
     cl::desc("Inline suitable functions"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> finline_hint_functions_opt(
     "finline-hint-functions",
     cl::desc("Inline functions which are (explicitly or implicitly) marked inline"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fmerge_all_constants_opt(
     "fmerge-all-constants",
     cl::desc("Allow merging of constants"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fno_elide_constructors_opt(
     "fno-elide-constructors",
     cl::desc("Disable C++ copy constructor elision"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fstack_protector_all_opt(
     "fstack-protector-all",
     cl::desc("Force the usage of stack protectors for all functions"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fstack_protector_strong_opt(
     "fstack-protector-strong",
     cl::desc("Use a strong heuristic to apply stack protectors to functions"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fstack_protector_opt(
     "fstack-protector",
     cl::desc("Enable stack protectors for functions potentially vulnerable to stack smashing"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fstrict_enums_opt(
     "fstrict-enums",
     cl::desc("Enable optimizations based on the strict definition of an enum's value range"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fstrict_return_opt(
     "fstrict-return",
     cl::desc("Always treat control flow paths that fall off the end of a non-void function as unreachable"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fstrict_vtable_pointers_opt(
     "fstrict-vtable-pointers",
     cl::desc("Enable optimizations based on the strict rules for overwriting polymorphic C++ objects"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::list<std::string> include_opt(
     "include",
     cl::desc("Include file before parsing"),
-    cl::cat(EosioCompilerToolCategory),
+    cl::cat(ActcCompilerToolCategory),
     cl::ZeroOrMore);
 static cl::list<std::string> I_opt(
     "I",
     cl::desc("Add directory to include search path"),
-    cl::cat(EosioCompilerToolCategory),
+    cl::cat(ActcCompilerToolCategory),
     cl::Prefix,
     cl::ZeroOrMore);
 static cl::opt<std::string> O_opt(
@@ -275,49 +275,49 @@ static cl::opt<std::string> O_opt(
     cl::desc("Optimization level s, 0-3"),
     cl::Prefix,
     cl::ZeroOrMore,
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> sysroot_opt(
     "sysroot",
     cl::desc("Set the system root directory"),
     cl::Prefix,
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> isysroot_opt(
     "isysroot",
     cl::desc("Set the system root directory (usually /)"),
     cl::Hidden,
     cl::Prefix,
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> isystem_opt(
     "isystem",
     cl::desc("Add directory to SYSTEM include search path"),
     cl::Prefix,
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> S_opt(
     "S",
     cl::desc("Only run preprocess and compilation steps"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<std::string> U_opt(
     "U",
     cl::desc("Undefine macro <macro>"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> v_opt(
     "v",
     cl::desc("Show commands to run and use verbose output"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> w_opt(
     "w",
     cl::desc("Suppress all warnings"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::list<std::string> W_opt(
     "W",
     cl::desc("Enable the specified warning"),
-    cl::cat(EosioCompilerToolCategory),
+    cl::cat(ActcCompilerToolCategory),
     cl::Prefix,
     cl::ZeroOrMore);
 static cl::opt<std::string> contract_name(
     "contract",
     cl::desc("Contract name"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 
 /// end c/c++ options
 
@@ -326,15 +326,15 @@ static cl::opt<std::string> contract_name(
 static cl::opt<std::string> std_opt(
     "std",
     cl::desc("Language standard to compile for"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> faligned_allocation_opt(
     "faligned-allocation",
     cl::desc("Enable C++17 aligned allocation functions"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 static cl::opt<bool> fcoroutine_ts_opt(
     "fcoroutine-ts",
     cl::desc("Enable support for the C++ Coroutines TS"),
-    cl::cat(EosioCompilerToolCategory));
+    cl::cat(ActcCompilerToolCategory));
 #endif
 /// end c++ options
 #endif
@@ -394,19 +394,19 @@ static void GetCompDefaults(std::vector<std::string>& copts) {
          copts.emplace_back("-Xclang");
          copts.emplace_back("-load");
          copts.emplace_back("-Xclang");
-         if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/LLVMEosioApply"+actc_apply_suff))
-            copts.emplace_back(actc::cdt::whereami::where()+"/LLVMEosioApply"+actc_apply_suff);
-         else if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/../lib/LLVMEosioApply"+actc_apply_suff))
-            copts.emplace_back(actc::cdt::whereami::where()+"/../lib/LLVMEosioApply"+actc_apply_suff);
+         if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/LLVMActcApply"+actc_apply_suff))
+            copts.emplace_back(actc::cdt::whereami::where()+"/LLVMActcApply"+actc_apply_suff);
+         else if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/../lib/LLVMActcApply"+actc_apply_suff))
+            copts.emplace_back(actc::cdt::whereami::where()+"/../lib/LLVMActcApply"+actc_apply_suff);
       }
       if (false && fnative_opt) {
          copts.emplace_back("-Xclang");
          copts.emplace_back("-load");
          copts.emplace_back("-Xclang");
-         if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/LLVMEosioSoftfloat"+actc_apply_suff))
-            copts.emplace_back(actc::cdt::whereami::where()+"/LLVMEosioSoftfloat"+actc_apply_suff);
-         else if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+actc_apply_suff))
-            copts.emplace_back(actc::cdt::whereami::where()+"/../lib/LLVMEosioSoftfloat"+actc_apply_suff);
+         if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/LLVMActcSoftfloat"+actc_apply_suff))
+            copts.emplace_back(actc::cdt::whereami::where()+"/LLVMActcSoftfloat"+actc_apply_suff);
+         else if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/../lib/LLVMActcSoftfloat"+actc_apply_suff))
+            copts.emplace_back(actc::cdt::whereami::where()+"/../lib/LLVMActcSoftfloat"+actc_apply_suff);
       }
       if (llvm::sys::fs::exists(actc::cdt::whereami::where()+"/actc_plugin"+actc_apply_suff))
          copts.emplace_back("-fplugin="+actc::cdt::whereami::where()+"/actc_plugin"+actc_apply_suff);

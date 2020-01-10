@@ -34,23 +34,23 @@ include(modules/ToolsExternalProject.txt)
 
 set(WASM_SDK_BUILD true)
 
-### Configure the EosioWasmToolchain.cmakes
+### Configure the ActcWasmToolchain.cmakes
 set(CDT_ROOT_DIR ${CMAKE_BINARY_DIR})
 
 configure_file(${CMAKE_SOURCE_DIR}/modules/actc.cdt-config.cmake ${CMAKE_BINARY_DIR}/lib/cmake/actc.cdt/actc.cdt-config.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/modules/EosioCDTMacros.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc.cdt/EosioCDTMacros.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/modules/EosioWasmToolchain.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc.cdt/EosioWasmToolchain.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/modules/ActcCDTMacros.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc.cdt/ActcCDTMacros.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/modules/ActcWasmToolchain.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc.cdt/ActcWasmToolchain.cmake @ONLY)
 
 set(CDT_ROOT_DIR ${CDT_INSTALL_PREFIX})
 
 configure_file(${CMAKE_SOURCE_DIR}/modules/actc.cdt-config.cmake ${CMAKE_BINARY_DIR}/modules/actc.cdt-config.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/modules/EosioCDTMacros.cmake.in ${CMAKE_BINARY_DIR}/modules/EosioCDTMacros.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/modules/EosioWasmToolchain.cmake.in ${CMAKE_BINARY_DIR}/modules/EosioWasmToolchain.cmake @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/modules/EosioCDTMacros.cmake DESTINATION ${CDT_INSTALL_PREFIX}/lib/cmake/actc.cdt)
+configure_file(${CMAKE_SOURCE_DIR}/modules/ActcCDTMacros.cmake.in ${CMAKE_BINARY_DIR}/modules/ActcCDTMacros.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/modules/ActcWasmToolchain.cmake.in ${CMAKE_BINARY_DIR}/modules/ActcWasmToolchain.cmake @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/modules/ActcCDTMacros.cmake DESTINATION ${CDT_INSTALL_PREFIX}/lib/cmake/actc.cdt)
 
 set(CDT_ROOT_DIR "_PREFIX_")
-configure_file(${CMAKE_SOURCE_DIR}/modules/EosioCDTMacros.cmake.in ${CMAKE_BINARY_DIR}/modules/EosioCDTMacrosPackage.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/modules/EosioWasmToolchain.cmake.in ${CMAKE_BINARY_DIR}/modules/EosioWasmToolchainPackage.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/modules/ActcCDTMacros.cmake.in ${CMAKE_BINARY_DIR}/modules/ActcCDTMacrosPackage.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/modules/ActcWasmToolchain.cmake.in ${CMAKE_BINARY_DIR}/modules/ActcWasmToolchainPackage.cmake @ONLY)
 configure_file(${CMAKE_SOURCE_DIR}/modules/actc.cdt-config.cmake ${CMAKE_BINARY_DIR}/modules/actc.cdt-config.cmake.package @ONLY)
 
 include(modules/LibrariesExternalProject.txt)

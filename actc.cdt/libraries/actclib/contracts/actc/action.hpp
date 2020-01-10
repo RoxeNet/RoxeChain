@@ -74,7 +74,7 @@ namespace actc {
     *    unsigned long long b; //8
     *    int  c; //4
     *
-    *    EOSLIB_SERIALIZE( dummy_action, (a)(b)(c) )
+    *    ACTCLIB_SERIALIZE( dummy_action, (a)(b)(c) )
     *  };
     *  dummy_action msg = unpack_action_data<dummy_action>();
     *  @endcode
@@ -213,7 +213,7 @@ namespace actc {
          return std::tie( a.actor, a.permission ) == std::tie( b.actor, b.permission );
       }
 
-      EOSLIB_SERIALIZE( permission_level, (actor)(permission) )
+      ACTCLIB_SERIALIZE( permission_level, (actor)(permission) )
    };
 
    /**
@@ -306,7 +306,7 @@ namespace actc {
 
       /// @cond INTERNAL
 
-      EOSLIB_SERIALIZE( action, (account)(name)(authorization)(data) )
+      ACTCLIB_SERIALIZE( action, (account)(name)(authorization)(data) )
 
       /// @endcond
 

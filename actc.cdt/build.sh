@@ -117,4 +117,4 @@ printf "\t    \\  \\::/       \\  \\::/        /__/:/        \\__\\/      \\  \\
 printf "\t     \\__\\/         \\__\\/         \\__\\/                     \\__\\/ \n${txtrst}"
 
 printf "\\tFor more information:\\n"
-printf "\\tACTC website: https://actc.io\\n"
+printf "\\tACTC website: https://eos.io\\n"

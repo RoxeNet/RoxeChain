@@ -1,4 +1,4 @@
-message(STATUS "Setting up Eosio Wasm Toolchain @VERSION_FULL@ at @CDT_ROOT_DIR@")
+message(STATUS "Setting up Actc Wasm Toolchain @VERSION_FULL@ at @CDT_ROOT_DIR@")
 
 if (NOT ACTC_WASM_OLD_BEHAVIOR STREQUAL "On")
     set(CMAKE_SYSTEM_NAME Generic)
