@@ -22,7 +22,7 @@ cd actc.contracts/contracts/actc.token
 | You may have to unlock your wallet first!
 
 ```shell
-clactc create account actc actc.token EOS6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
+clactc create account actc actc.token ACTC6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV
 ```
 
 ## Step 3: Compile the Contract
