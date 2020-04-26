@@ -160,7 +160,7 @@ namespace actcsystem {
 
       return new_votepay_share;
    }
-
+   ///TODO modify vote methodolergy
    void system_contract::voteproducer( const name& voter_name, const name& proxy, const std::vector<name>& producers ) {
       require_auth( voter_name );
       vote_stake_updater( voter_name );
