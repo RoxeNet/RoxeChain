@@ -42,7 +42,7 @@ cd $( dirname "${BASH_SOURCE[0]}" )/..
 
 [[ ! -f ${BUILD_DIR}/CMakeCache.txt ]] && printf "${COLOR_RED}Please run ${SCRIPT_DIR}/actc_build.sh first!${COLOR_NC}" && exit 1
 echo "${COLOR_CYAN}====================================================================================="
-echo "========================== ${COLOR_WHITE}Starting ACTC Installation${COLOR_CYAN} ==============================${COLOR_NC}"
+echo "========================== ${COLOR_WHITE}Starting GLS Installation${COLOR_CYAN} ==============================${COLOR_NC}"
 execute cd $BUILD_DIR
 execute make install
 execute cd ..
@@ -60,7 +60,7 @@ printf "    \\  \\::/       \\  \\::/        /__/:/        \\__\\/      \\  \\::
 printf "     \\__\\/         \\__\\/         \\__\\/                     \\__\\/ \n\n${COLOR_NC}"
 
 printf "==============================================================================================\\n"
-printf "${COLOR_GREEN}ACTC has been installed into ${CACHED_INSTALL_PATH}/bin${COLOR_NC}"
+printf "${COLOR_GREEN}GLS has been installed into ${CACHED_INSTALL_PATH}/bin${COLOR_NC}"
 printf "\\n${COLOR_YELLOW}Uninstall with: ${SCRIPT_DIR}/actc_uninstall.sh${COLOR_NC}\\n"
 printf "==============================================================================================\\n\\n"
 resources

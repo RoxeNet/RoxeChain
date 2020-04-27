@@ -78,10 +78,10 @@ fi
 export ACTC_INSTALL_DIR=${INSTALL_LOCATION:-$ACTC_INSTALL_DIR}
 
 if [[ ! -d "${ACTC_INSTALL_DIR}" ]]; then
-   echo "[ACTC installation ${COLOR_YELLOW}NOT${COLOR_NC} found in ${ACTC_INSTALL_DIR}]"
+   echo "[GLS installation ${COLOR_YELLOW}NOT${COLOR_NC} found in ${ACTC_INSTALL_DIR}]"
 else
    # As of 1.8.0, we're using a versioned directories under home: https://github.com/ACTC/actc/issues/6940
-   echo "[ACTC installation found: ${ACTC_INSTALL_DIR}]" && INSTALL_PATHS+=("${ACTC_INSTALL_DIR}") # ACTC_INSTALL_DIR set in .environment
+   echo "[GLS installation found: ${ACTC_INSTALL_DIR}]" && INSTALL_PATHS+=("${ACTC_INSTALL_DIR}") # ACTC_INSTALL_DIR set in .environment
    while true; do
       [[ $NONINTERACTIVE == false ]] && read -p "Do you wish to remove the installation in ${ACTC_INSTALL_DIR}? (y/n) " PROCEED
       case $PROCEED in
@@ -98,9 +98,9 @@ else
             for INSTALL_PATH in ${INSTALL_PATHS[@]}; do
                execute rm -rf $INSTALL_PATH
             done
-            echo " - ACTC Removal Complete"
+            echo " - GLS Removal Complete"
             break;;
-         1 | false | [Nn]* ) echo " - Cancelled ACTC Removal!"; exit 1;;
+         1 | false | [Nn]* ) echo " - Cancelled GLS Removal!"; exit 1;;
          * ) echo "Please type 'y' for yes or 'n' for no.";;
       esac
    done
