@@ -151,7 +151,7 @@ The actions implemented and publicly exposed by the `actc.system` system contrac
 |refund|This action is called after the delegation-period to claim all pending unstaked tokens belonging to owner.|
 |regproducer|Register producer action, indicates that a particular account wishes to become a producer.|
 |unregprod|Deactivate the block producer with specified account.|
-|voteproducer|Votes for a set of producers. This action updates the list of producers voted for, for given voter account.|
+|voteproducer(forbidden)|Votes for a set of producers. This action updates the list of producers voted for, for given voter account.|
 |regproxy|Set specified account as proxy.|
 |onblock|This special action is triggered when a block is applied by the given producer and cannot be generated from any other source.|
 |claimrewards|Claim block producing and vote rewards for block producer identified by an account.|

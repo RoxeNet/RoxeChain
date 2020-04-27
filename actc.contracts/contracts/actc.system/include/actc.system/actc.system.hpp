@@ -72,6 +72,7 @@ namespace actcsystem {
 
    static constexpr int64_t  inflation_precision           = 100;     // 2 decimals
    static constexpr int64_t  default_annual_rate           = 500;     // 5% annual rate
+   /// FIXME
    static constexpr int64_t  pay_factor_precision          = 10000;
    static constexpr int64_t  default_inflation_pay_factor  = 50000;   // producers pay share = 10000 / 50000 = 20% of the inflation
    static constexpr int64_t  default_votepay_factor        = 40000;   // per-block pay share = 10000 / 40000 = 25% of the producer pay
@@ -992,8 +993,8 @@ namespace actcsystem {
           * @post Prior proxy will proxied_vote_weight decremented by previous vote weight
           * @post New proxy will proxied_vote_weight incremented by new vote weight
           */
-         [[actc::action]]
-         void voteproducer( const name& voter, const name& proxy, const std::vector<name>& producers );
+//         [[actc::action]]     /// FIXME forbidden
+//         void voteproducer( const name& voter, const name& proxy, const std::vector<name>& producers );
 
          /**
           * Register proxy action. Set `proxy` account as proxy.
@@ -1135,7 +1136,7 @@ namespace actcsystem {
          using unregprod_action = actc::action_wrapper<"unregprod"_n, &system_contract::unregprod>;
          using setram_action = actc::action_wrapper<"setram"_n, &system_contract::setram>;
          using setramrate_action = actc::action_wrapper<"setramrate"_n, &system_contract::setramrate>;
-         using voteproducer_action = actc::action_wrapper<"voteproducer"_n, &system_contract::voteproducer>;
+//         using voteproducer_action = actc::action_wrapper<"voteproducer"_n, &system_contract::voteproducer>;
          using regproxy_action = actc::action_wrapper<"regproxy"_n, &system_contract::regproxy>;
          using claimrewards_action = actc::action_wrapper<"claimrewards"_n, &system_contract::claimrewards>;
          using rmvproducer_action = actc::action_wrapper<"rmvproducer"_n, &system_contract::rmvproducer>;
