@@ -219,11 +219,11 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         BOOST_TEST(actc_token_acc.is_privileged() == true);
 
 
-        // Create ACI tokens in actc.token, set its manager as actc
+        // Create LSC tokens in actc.token, set its manager as actc
         auto max_supply = core_from_string("10000000000.0000"); /// 1x larger than 1B initial tokens
         auto initial_supply = core_from_string("1000000000.0000"); /// 1x larger than 1B initial tokens
         create_currency(N(actc.token), config::system_account_name, max_supply);
-        // Issue the genesis supply of 1 billion ACI tokens to actc.system
+        // Issue the genesis supply of 1 billion LSC tokens to actc.system
         issue(N(actc.token), config::system_account_name, config::system_account_name, initial_supply);
 
         auto actual = get_balance(config::system_account_name);

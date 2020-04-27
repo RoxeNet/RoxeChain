@@ -1,6 +1,6 @@
 set(VENDOR "block.one")
 set(PROJECT_NAME "actc")
-set(DESC "Software for the ACTC.IO network")
+set(DESC "Software for the GLSchain network")
 set(URL "https://github.com/actc/actc")
 set(EMAIL "support@block.one")
 

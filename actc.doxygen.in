@@ -4,7 +4,7 @@
 # Project related configuration options
 #---------------------------------------------------------------------------
 DOXYFILE_ENCODING      = UTF-8
-PROJECT_NAME           = "ACTC.IO"
+PROJECT_NAME           = "GLSchain"
 PROJECT_NUMBER         = "ACTC ${DOXY_ACTC_VERSION}"
 PROJECT_BRIEF          =
 PROJECT_LOGO           = actc-logo.png

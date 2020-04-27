@@ -68,7 +68,7 @@
 	printf "\\tChecking Home Brew installation\\n"
 	if ! BREW=$( command -v brew )
 	then
-		printf "\\tHomebrew must be installed to compile ACTC.IO\\n\\n"
+		printf "\\tHomebrew must be installed to compile GLSchain\\n\\n"
 		printf "\\tDo you wish to install Home Brew?\\n"
 		select yn in "Yes" "No"; do
 			case "${yn}" in

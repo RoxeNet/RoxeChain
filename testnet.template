@@ -63,7 +63,7 @@ wcmd () {
 }
 
 cacmd () {
-    programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 ACI" --stake-cpu "10000000.0000 ACI"  --buy-ram "10000000.0000 ACI" actc $* >> $logfile 2>&1
+    programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 LSC" --stake-cpu "10000000.0000 LSC"  --buy-ram "10000000.0000 LSC" actc $* >> $logfile 2>&1
     ecmd system regproducer $1 $2
 #    ecmd system voteproducer prods $1 $1
 }
@@ -112,16 +112,16 @@ ecmd set contract actc.msig unittests/contracts/actc.msig actc.msig.wasm actc.ms
 ecmd set contract actc.wrap unittests/contracts/actc.wrap actc.wrap.wasm actc.wrap.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 ACI" ]' -p actc.token | tee -a $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 LSC" ]' -p actc.token | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 LSC", "memo" ]' -p actc | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 ACI" ]' -p actc.token >> $logfile 2>&1
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 LSC" ]' -p actc.token >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 LSC", "memo" ]' -p actc >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
 ecmd set contract actc unittests/contracts/actc.system actc.system.wasm actc.system.abi
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc init '[0, "4,ACI"]' -p actc >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc init '[0, "4,LSC"]' -p actc >> $logfile 2>&1
 
 # Manual deployers, add a series of lines below this block that looks like:
 #    cacmd $PRODNAME[0] $OWNERKEY[0] $ACTIVEKEY[0]

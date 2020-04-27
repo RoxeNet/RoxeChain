@@ -36,7 +36,7 @@ function usage() {
    printf "Usage: $0 OPTION...
   -P          Build with pinned clang and libcxx
   -o TYPE     Build <Debug|Release|RelWithDebInfo|MinSizeRel> (default: Release)
-  -s NAME     Core Symbol Name <1-7 characters> (default: ACI)
+  -s NAME     Core Symbol Name <1-7 characters> (default: LSC)
   -b DIR      Use pre-built boost in DIR
   -i DIR      Directory to use for installing dependencies & ACTC (default: $HOME)
   -y          Noninteractive mode (answers yes to every prompt)

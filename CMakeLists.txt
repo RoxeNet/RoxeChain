@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.8 )
 
-project( ACTC )
+project( GLS )
 include(CTest) # suppresses DartConfiguration.tcl error
 enable_testing()
 
@@ -21,7 +21,7 @@ include( SetupTargetMacros )
 include( InstallDirectoryPermissions )
 include( MASSigning )
 
-set( BLOCKCHAIN_NAME "ACTC" )
+set( BLOCKCHAIN_NAME "GLS" )
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_EXTENSIONS ON )
 set( CXX_STANDARD_REQUIRED ON)
@@ -120,7 +120,7 @@ link_libraries(Threads::Threads)
 
 if( WIN32 )
 
-    message( STATUS "Configuring ACTC on WIN32")
+    message( STATUS "Configuring GLS on WIN32")
     set( DB_VERSION 60 )
     set( BDB_STATIC_LIBS 1 )
 
@@ -155,11 +155,11 @@ else( WIN32 ) # Apple AND Linux
 
     if( APPLE )
         # Apple Specific Options Here
-        message( STATUS "Configuring ACTC on OS X" )
+        message( STATUS "Configuring GLS on OS X" )
         set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-declarations" )
     else( APPLE )
         # Linux Specific Options Here
-        message( STATUS "Configuring ACTC on Linux" )
+        message( STATUS "Configuring GLS on Linux" )
         set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -Wall" )
         if ( FULL_STATIC_BUILD )
             set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
@@ -184,7 +184,7 @@ else( WIN32 ) # Apple AND Linux
 
 endif( WIN32 )
 
-set(ENABLE_COVERAGE_TESTING FALSE CACHE BOOL "Build ACTC for code coverage analysis")
+set(ENABLE_COVERAGE_TESTING FALSE CACHE BOOL "Build GLS for code coverage analysis")
 
 if(ENABLE_COVERAGE_TESTING)
     SET(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
@@ -196,7 +196,7 @@ endif()
 include(utils)
 
 if ("${CORE_SYMBOL_NAME}" STREQUAL "")
-    set( CORE_SYMBOL_NAME "ACI" )
+    set( CORE_SYMBOL_NAME "LSC" )
 endif()
 string(TOUPPER ${CORE_SYMBOL_NAME} CORE_SYMBOL_NAME)
 
@@ -207,11 +207,11 @@ endif()
 
 message( STATUS "Using '${CORE_SYMBOL_NAME}' as CORE symbol name" )
 
-if ("${ACTC_ROOT_KEY}" STREQUAL "")
-    set(ACTC_ROOT_KEY "ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt")
+if ("${GLS_ROOT_KEY}" STREQUAL "")
+    set(GLS_ROOT_KEY "ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt")
 endif()
 
-message( STATUS "Using '${ACTC_ROOT_KEY}' as public key for 'actc' account" )
+message( STATUS "Using '${GLS_ROOT_KEY}' as public key for 'actc' account" )
 
 add_subdirectory( libraries )
 add_subdirectory( plugins )

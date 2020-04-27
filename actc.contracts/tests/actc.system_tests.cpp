@@ -2452,7 +2452,7 @@ BOOST_FIXTURE_TEST_CASE(votepay_transition, actc_system_tester, * boost::unit_te
 BOOST_AUTO_TEST_CASE(votepay_transition2, * boost::unit_test::tolerance(1e-10)) try {
    actc_system_tester t(actc_system_tester::setup_level::minimal);
 
-   std::string old_contract_core_symbol_name = "ACI"; // Set to core symbol used in contracts::util::system_wasm_old()
+   std::string old_contract_core_symbol_name = "LSC"; // Set to core symbol used in contracts::util::system_wasm_old()
    symbol old_contract_core_symbol{::actc::chain::string_to_symbol_c( 4, old_contract_core_symbol_name.c_str() )};
 
    auto old_core_from_string = [&]( const std::string& s ) {

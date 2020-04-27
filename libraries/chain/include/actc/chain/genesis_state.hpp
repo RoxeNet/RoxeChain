@@ -18,7 +18,7 @@ namespace actc { namespace chain {
 struct genesis_state {
    genesis_state();
 
-   static const string actc_root_key;
+   static const string gls_root_key;
 
    chain_config   initial_configuration = {
       .max_block_net_usage                  = config::default_max_block_net_usage,

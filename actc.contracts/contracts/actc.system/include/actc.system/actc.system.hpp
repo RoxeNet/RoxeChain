@@ -412,8 +412,8 @@ namespace actcsystem {
    // - `version` defaulted to zero,
    // - `from` account creating and paying for loan,
    // - `receiver` account receiving rented resources,
-   // - `payment` ACI tokens paid for the loan,
-   // - `balance` is the amount of ACI tokens available to be used for loan auto-renewal,
+   // - `payment` LSC tokens paid for the loan,
+   // - `balance` is the amount of LSC tokens available to be used for loan auto-renewal,
    // - `total_staked` total amount staked,
    // - `loan_num` loan number/id,
    // - `expiration` the expiration time when loan will be either closed or renewed
@@ -595,7 +595,7 @@ namespace actcsystem {
          // functions defined in delegate_bandwidth.cpp
 
          /**
-          * Delegate bandwidth and/or cpu action. Stakes ACI from the balance of `from` for the benefit of `receiver`.
+          * Delegate bandwidth and/or cpu action. Stakes LSC from the balance of `from` for the benefit of `receiver`.
           *
           * @param from - the account to delegate bandwidth from, that is, the account holding
           *    tokens to be staked,
@@ -708,7 +708,7 @@ namespace actcsystem {
          void cnclrexorder( const name& owner );
 
          /**
-          * Rentcpu action. Use payment to rent as many ACI tokens as possible as determined by market price and
+          * Rentcpu action. Use payment to rent as many LSC tokens as possible as determined by market price and
           * stake them for CPU for the benefit of receiver, after 30 days the rented core delegation of CPU
           * will expire. At expiration, if balance is greater than or equal to `loan_payment`, `loan_payment`
           * is taken out of loan balance and used to renew the loan. Otherwise, the loan is closed and user
@@ -728,7 +728,7 @@ namespace actcsystem {
          void rentcpu( const name& from, const name& receiver, const asset& loan_payment, const asset& loan_fund );
 
          /**
-          * Rentnet action. Use payment to rent as many ACI tokens as possible as determined by market price and
+          * Rentnet action. Use payment to rent as many LSC tokens as possible as determined by market price and
           * stake them for NET for the benefit of receiver, after 30 days the rented core delegation of NET
           * will expire. At expiration, if balance is greater than or equal to `loan_payment`, `loan_payment`
           * is taken out of loan balance and used to renew the loan. Otherwise, the loan is closed and user

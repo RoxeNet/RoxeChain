@@ -7,6 +7,6 @@
 
 namespace actc { namespace chain {
 
-const string genesis_state::actc_root_key = "${ACTC_ROOT_KEY}";
+const string genesis_state::gls_root_key = "${GLS_ROOT_KEY}";
 
 } } // namespace actc::chain

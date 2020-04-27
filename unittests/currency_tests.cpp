@@ -275,10 +275,10 @@ BOOST_FIXTURE_TEST_CASE(test_symbol, TESTER) try {
    }
 
    {
-      symbol sys(4, "ACI");
-      BOOST_REQUIRE_EQUAL(SY(4,ACI), sys.value());
-      BOOST_REQUIRE_EQUAL("4,ACI", sys.to_string());
-      BOOST_REQUIRE_EQUAL("ACI", sys.name());
+      symbol sys(4, "LSC");
+      BOOST_REQUIRE_EQUAL(SY(4,LSC), sys.value());
+      BOOST_REQUIRE_EQUAL("4,LSC", sys.to_string());
+      BOOST_REQUIRE_EQUAL("LSC", sys.name());
       BOOST_REQUIRE_EQUAL(4, sys.decimals());
    }
 

@@ -548,8 +548,8 @@ BOOST_AUTO_TEST_CASE(general)
     {
       "publickey"     :  "ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt",
       "publickey_arr" :  ["ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt"],
-      "asset"         : "100.0000 ACI",
-      "asset_arr"     : ["100.0000 ACI","100.0000 ACI"],
+      "asset"         : "100.0000 LSC",
+      "asset_arr"     : ["100.0000 LSC","100.0000 LSC"],
 
       "string"            : "ola ke ase",
       "string_arr"        : ["ola ke ase","ola ke desi"],
