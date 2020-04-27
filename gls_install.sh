@@ -1,7 +1,7 @@
 #!/bin/bash
 ##########################################################################
-# This is the actc automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/actc/actc
+# This is the gls automated install script for Linux and Mac OS.
+# This file was downloaded from https://github.com/glsio/gls
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -27,7 +27,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/actc/actc/blob/master/LICENSE.txt
+# https://github.com/glsio/gls/blob/master/LICENSE.txt
 ##########################################################################
 
 if [ "$(id -u)" -ne 0 ]; then
@@ -58,9 +58,9 @@ fi
    }
 
    create_cmake_symlink() {
-      mkdir -p /usr/local/lib/cmake/actc
-      pushd /usr/local/lib/cmake/actc &> /dev/null
-      ln -sf ../../../actc/lib/cmake/actc/$1 $1
+      mkdir -p /usr/local/lib/cmake/gls
+      pushd /usr/local/lib/cmake/gls &> /dev/null
+      ln -sf ../../../gls/lib/cmake/gls/$1 $1
       popd &> /dev/null
    }
 
@@ -101,20 +101,7 @@ fi
    popd &> /dev/null 
 
    install_symlinks   
-   create_cmake_symlink "actc-config.cmake"
-
-   printf "\n\n${bldred}\t _______  _______  _______ _________ _______\n"
-   printf '\t(  ____ \(  ___  )(  ____ \\\\__   __/(  ___  )\n'
-   printf "\t| (    \/| (   ) || (    \/   ) (   | (   ) |\n"
-   printf "\t| (__    | |   | || (_____    | |   | |   | |\n"
-   printf "\t|  __)   | |   | |(_____  )   | |   | |   | |\n"
-   printf "\t| (      | |   | |      ) |   | |   | |   | |\n"
-   printf "\t| (____/\| (___) |/\____) |___) (___| (___) |\n"
-   printf "\t(_______/(_______)\_______)\_______/(_______)\n${txtrst}"
+   create_cmake_symlink "gls-config.cmake"
 
    printf "\\tFor more information:\\n"
-   printf "\\tactc website: https://actc.io\\n"
-   printf "\\tactc Telegram channel @ https://t.me/actcProject\\n"
-   printf "\\tactc resources: https://actc.io/resources/\\n"
-   printf "\\tactc Stack Exchange: https://actc.stackexchange.com\\n"
-   printf "\\tactc wiki: https://github.com/actc/actc/wiki\\n\\n\\n"
+   printf "\\tactc website: https://gls.network\\n"
