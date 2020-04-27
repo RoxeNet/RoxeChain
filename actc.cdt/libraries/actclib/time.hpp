@@ -31,7 +31,7 @@ namespace actc {
         int64_t to_seconds()const { return _count/1000000; }
 
         int64_t _count;
-        EOSLIB_SERIALIZE( microseconds, (_count) )
+        ACTCLIB_SERIALIZE( microseconds, (_count) )
     private:
         friend class time_point;
   };
@@ -60,7 +60,7 @@ namespace actc {
         time_point   operator - (const microseconds& m) const { return time_point(elapsed-m); }
         microseconds operator - (const time_point& m) const { return microseconds(elapsed.count() - m.elapsed.count()); }
         microseconds elapsed;
-        EOSLIB_SERIALIZE( time_point, (elapsed) )
+        ACTCLIB_SERIALIZE( time_point, (elapsed) )
   };
 
   /**
@@ -110,7 +110,7 @@ namespace actc {
         friend microseconds operator - ( const time_point& t, const time_point_sec& m ) { return time_point(t) - time_point(m); }
         uint32_t utc_seconds;
 
-        EOSLIB_SERIALIZE( time_point_sec, (utc_seconds) )
+        ACTCLIB_SERIALIZE( time_point_sec, (utc_seconds) )
   };
 
    /**
@@ -164,7 +164,7 @@ namespace actc {
          static constexpr int32_t block_interval_ms = 500;
          static constexpr int64_t block_timestamp_epoch = 946684800000ll;  // epoch is year 2000
 
-         EOSLIB_SERIALIZE( block_timestamp, (slot) )
+         ACTCLIB_SERIALIZE( block_timestamp, (slot) )
       private:
 
 

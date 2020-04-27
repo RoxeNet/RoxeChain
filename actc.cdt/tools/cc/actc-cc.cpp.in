@@ -30,7 +30,7 @@ int main(int argc, const char **argv) {
    cl::SetVersionPrinter([](llvm::raw_ostream& os) {
          os << COMPILER_NAME << " version " << "${VERSION_FULL}" << "\n";
    });
-   cl::ParseCommandLineOptions(argc, argv, std::string(COMPILER_NAME)+" (Eosio C -> WebAssembly compiler)");
+   cl::ParseCommandLineOptions(argc, argv, std::string(COMPILER_NAME)+" (Actc C -> WebAssembly compiler)");
    Options opts = CreateOptions();
 
    if (opts.abigen) {

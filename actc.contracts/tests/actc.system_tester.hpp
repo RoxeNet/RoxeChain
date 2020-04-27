@@ -904,7 +904,7 @@ public:
    }
 
    vector<name> active_and_vote_producers() {
-      //stake more than 15% of total EOS supply to activate chain
+      //stake more than 15% of total ACTC supply to activate chain
       transfer( "actc", "alice1111111", core_sym::from_string("650000000.0000"), "actc" );
       BOOST_REQUIRE_EQUAL( success(), stake( "alice1111111", "alice1111111", core_sym::from_string("300000000.0000"), core_sym::from_string("300000000.0000") ) );
 

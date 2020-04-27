@@ -8,7 +8,7 @@ ExternalProject_Add(
    send_inline_project
    SOURCE_DIR ${CMAKE_SOURCE_DIR}/src
    BINARY_DIR ${CMAKE_BINARY_DIR}/send_inline
-   CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${ACTC_CDT_ROOT}/lib/cmake/actc.cdt/EosioWasmToolchain.cmake
+   CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${ACTC_CDT_ROOT}/lib/cmake/actc.cdt/ActcWasmToolchain.cmake
    UPDATE_COMMAND ""
    PATCH_COMMAND ""
    TEST_COMMAND ""

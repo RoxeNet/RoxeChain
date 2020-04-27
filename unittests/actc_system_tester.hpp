@@ -1,22 +1,15 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in actc/LICENSE
  */
 #pragma once
 
-#include <actc/testing/tester.hpp>
 #include <actc/chain/abi_serializer.hpp>
-
-#include <actc.system/actc.system.wast.hpp>
-#include <actc.system/actc.system.abi.hpp>
-
-#include <actc.token/actc.token.wast.hpp>
-#include <actc.token/actc.token.abi.hpp>
-
-#include <actc.msig/actc.msig.wast.hpp>
-#include <actc.msig/actc.msig.abi.hpp>
+#include <actc/testing/tester.hpp>
 
 #include <fc/variant_object.hpp>
+
+#include <contracts.hpp>
 
 using namespace actc::chain;
 using namespace actc::testing;
@@ -49,11 +42,10 @@ public:
       create_accounts({ N(actc.token), N(actc.ram), N(actc.ramfee), N(actc.stake),
                N(actc.bpay), N(actc.vpay), N(actc.saving), N(actc.names) });
 
-
       produce_blocks( 100 );
 
-      set_code( N(actc.token), actc_token_wast );
-      set_abi( N(actc.token), actc_token_abi );
+      set_code( N(actc.token), contracts::actc_token_wasm() );
+      set_abi( N(actc.token), contracts::actc_token_abi().data() );
 
       {
          const auto& accnt = control->db().get<account_object,by_name>( N(actc.token) );
@@ -66,8 +58,13 @@ public:
       issue(config::system_account_name,      core_from_string("1000000000.0000"));
       BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "actc" ) );
 
-      set_code( config::system_account_name, actc_system_wast );
-      set_abi( config::system_account_name, actc_system_abi );
+      set_code( config::system_account_name, contracts::actc_system_wasm() );
+      set_abi( config::system_account_name, contracts::actc_system_abi().data() );
+
+      base_tester::push_action(config::system_account_name, N(init),
+                            config::system_account_name,  mutable_variant_object()
+                            ("version", 0)
+                            ("core", CORE_SYM_STR));
 
       {
          const auto& accnt = control->db().get<account_object,by_name>( config::system_account_name );
@@ -85,6 +82,15 @@ public:
       BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("actc")  + get_balance("actc.ramfee") + get_balance("actc.stake") + get_balance("actc.ram") );
    }
 
+   action_result open( account_name  owner,
+                       const string& symbolname,
+                       account_name  ram_payer    ) {
+      return push_action( ram_payer, N(open), mvo()
+                          ( "owner", owner )
+                          ( "symbol", symbolname )
+                          ( "ram_payer", ram_payer )
+         );
+   }
 
    void create_accounts_with_resources( vector<account_name> accounts, account_name creator = config::system_account_name ) {
       for( auto a : accounts ) {
@@ -417,8 +423,8 @@ public:
                                                ("is_priv", 1)
          );
 
-         set_code( N(actc.msig), actc_msig_wast );
-         set_abi( N(actc.msig), actc_msig_abi );
+         set_code( N(actc.msig), contracts::actc_msig_wasm() );
+         set_abi( N(actc.msig), contracts::actc_msig_abi().data() );
 
          produce_blocks();
          const auto& accnt = control->db().get<account_object,by_name>( N(actc.msig) );
@@ -430,7 +436,7 @@ public:
    }
 
    vector<name> active_and_vote_producers() {
-      //stake more than 15% of total actc supply to activate chain
+      //stake more than 15% of total ACTC supply to activate chain
       transfer( "actc", "alice1111111", core_from_string("650000000.0000"), "actc" );
       BOOST_REQUIRE_EQUAL( success(), stake( "alice1111111", "alice1111111", core_from_string("300000000.0000"), core_from_string("300000000.0000") ) );
 
@@ -535,7 +541,6 @@ inline fc::mutable_variant_object voter( account_name acct ) {
       ("proxy", name(0).to_string())
       ("producers", variants() )
       ("staked", int64_t(0))
-      //("last_vote_weight", double(0))
       ("proxied_vote_weight", double(0))
       ("is_proxy", 0)
       ;

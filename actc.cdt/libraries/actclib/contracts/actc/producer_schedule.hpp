@@ -41,7 +41,7 @@ namespace actc {
 
     /// @endcond
 
-    EOSLIB_SERIALIZE( producer_key, (producer_name)(block_signing_key) )
+    ACTCLIB_SERIALIZE( producer_key, (producer_name)(block_signing_key) )
   };
 
    /**

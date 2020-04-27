@@ -292,7 +292,7 @@ namespace actc { namespace cdt {
             std::string name = decl->getNameAsString();
             static std::set<std::string> _action_set; //used for validations
             static std::set<std::string> _notify_set; //used for validations
-            if (decl->isEosioAction()) {
+            if (decl->isActcAction()) {
                name = generation_utils::get_action_name(decl);
                validate_name(name, [&]() {emitError(*ci, decl->getLocation(), "action not a valid actc name");});
                if (!_action_set.count(name))
@@ -308,7 +308,7 @@ namespace actc { namespace cdt {
                }
                cg.actions.insert(full_action_name); // insert the method action, so we don't create the dispatcher twice
             }
-            else if (decl->isEosioNotify()) {
+            else if (decl->isActcNotify()) {
 
                name = generation_utils::get_notify_pair(decl);
                auto first = name.substr(0, name.find("::"));
@@ -362,7 +362,7 @@ namespace actc { namespace cdt {
          }
          virtual bool VisitCXXRecordDecl(CXXRecordDecl* decl) {
             std::string rec_name = decl->getQualifiedNameAsString();
-            if (decl->isEosioAction()) {
+            if (decl->isActcAction()) {
                rec_name = generation_utils::get_action_name(decl);
                cg.actions.insert(rec_name);
             }

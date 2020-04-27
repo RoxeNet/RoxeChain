@@ -51,7 +51,7 @@ struct be_test {
    be_test() : val{42} {}
    be_test(int i) : val{i} {}
    int val;
-   EOSLIB_SERIALIZE( be_test, (val) )
+   ACTCLIB_SERIALIZE( be_test, (val) )
 };
 
 // Definitions in `actc.cdt/libraries/actc/datastream.hpp`

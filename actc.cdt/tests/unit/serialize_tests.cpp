@@ -25,7 +25,7 @@ using actc::datastream;
 
 struct B {
    const char c{};
-   EOSLIB_SERIALIZE( B, (c) )
+   ACTCLIB_SERIALIZE( B, (c) )
 
    friend bool operator==(const B& lhs, const B& rhs) {
          return lhs.c == rhs.c;
@@ -34,7 +34,7 @@ struct B {
 
 struct D1 : public B {
    const int i{};
-   EOSLIB_SERIALIZE_DERIVED( D1, B, (i) )
+   ACTCLIB_SERIALIZE_DERIVED( D1, B, (i) )
 
    friend bool operator==(const D1& lhs, const D1& rhs) {
       return tie(lhs.c, lhs.i) == tie(rhs.c, rhs.i);
@@ -43,7 +43,7 @@ struct D1 : public B {
 
 struct D2 : public D1 {
    const vector<double> v{};
-   EOSLIB_SERIALIZE_DERIVED( D2, D1, (v) )
+   ACTCLIB_SERIALIZE_DERIVED( D2, D1, (v) )
 
    friend bool operator==(const D2& lhs, const D2& rhs) {
       return tie(lhs.c, lhs.i, lhs.v) == tie(rhs.c, rhs.i, rhs.v);

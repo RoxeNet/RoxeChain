@@ -55,12 +55,12 @@ namespace actc { namespace cdt {
       return ag;
    }
 
-   class EosioMethodMatcher : public MatchFinder::MatchCallback {
+   class ActcMethodMatcher : public MatchFinder::MatchCallback {
       public:
          virtual void run( const MatchFinder::MatchResult& res ) {
             if (const clang::CXXMethodDecl* decl = res.Nodes.getNodeAs<clang::CXXMethodDecl>("actc_tool")->getCanonicalDecl()) {
                abi abi;
-               if (decl->isEosioAction() && abigen::is_actc_contract(decl, get_abigen_ref().get_contract_name())) {
+               if (decl->isActcAction() && abigen::is_actc_contract(decl, get_abigen_ref().get_contract_name())) {
                   get_abigen_ref().add_struct(decl);
                   get_abigen_ref().add_action(decl);
                   auto params = decl->parameters();
@@ -72,7 +72,7 @@ namespace actc { namespace cdt {
          }
    };
 
-   class EosioRecordMatcher : public MatchFinder::MatchCallback {
+   class ActcRecordMatcher : public MatchFinder::MatchCallback {
       public:
          bool has_added_clauses = false;
          virtual void run( const MatchFinder::MatchResult& res ) {
@@ -82,14 +82,14 @@ namespace actc { namespace cdt {
                   get_abigen_ref().add_contracts(get_abigen_ref().parse_contracts());
                   has_added_clauses = true;
                }
-               if (decl->isEosioAction() && abigen::is_actc_contract(decl, get_abigen_ref().get_contract_name())) {
+               if (decl->isActcAction() && abigen::is_actc_contract(decl, get_abigen_ref().get_contract_name())) {
                   get_abigen_ref().add_struct(decl);
                   get_abigen_ref().add_action(decl);
                   for (auto field : decl->fields()) {
                      get_abigen_ref().add_type( field->getType() );
                   }
                }
-               if (decl->isEosioTable() && abigen::is_actc_contract(decl, get_abigen_ref().get_contract_name())) {
+               if (decl->isActcTable() && abigen::is_actc_contract(decl, get_abigen_ref().get_contract_name())) {
                   get_abigen_ref().add_struct(decl);
                   get_abigen_ref().add_table(decl);
                   for (auto field : decl->fields())
@@ -125,15 +125,15 @@ void generate(const std::vector<std::string>& base_options, std::string input, s
    for (size_t i=0; i < size; i++)
       new_argv[i] = options[i].c_str();
 
-   CommonOptionsParser opts( size, new_argv, EosioCompilerToolCategory, 0 );
+   CommonOptionsParser opts( size, new_argv, ActcCompilerToolCategory, 0 );
    ClangTool ctool(opts.getCompilations(), opts.getSourcePathList());
 
    get_abigen_ref().set_contract_name(contract_name);
    get_abigen_ref().set_resource_dirs(resource_paths);
    codegen::get().set_contract_name(contract_name);
 
-   EosioMethodMatcher actc_method_matcher;
-   EosioRecordMatcher actc_record_matcher;
+   ActcMethodMatcher actc_method_matcher;
+   ActcRecordMatcher actc_record_matcher;
    MatchFinder finder;
 
    finder.addMatcher(function_decl_matcher, &actc_method_matcher);
@@ -169,7 +169,7 @@ int main(int argc, const char **argv) {
    cl::SetVersionPrinter([](llvm::raw_ostream& os) {
          os << COMPILER_NAME << " version " << "${VERSION_FULL}" << "\n";
    });
-   cl::ParseCommandLineOptions(argc, argv, std::string(COMPILER_NAME)+" (Eosio C++ -> WebAssembly compiler)");
+   cl::ParseCommandLineOptions(argc, argv, std::string(COMPILER_NAME)+" (Actc C++ -> WebAssembly compiler)");
    Options opts = CreateOptions();
 
    std::vector<std::string> outputs;

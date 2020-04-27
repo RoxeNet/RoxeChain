@@ -797,7 +797,7 @@ class Cluster(object):
 
     def spreadFundsAndValidate(self, transferAmount=1):
         """Sprays 'transferAmount' funds across configured accounts and validates action. The spray is done in a trickle down fashion with account 1
-        receiving transferAmount*n ACI and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
+        receiving transferAmount*n  ACI and forwarding x-transferAmount funds. Transfer actions are spread round-robin across the cluster to vaidate system cohesiveness."""
 
         if Utils.Debug: Utils.Print("Get initial system balances.")
         initialBalances=self.nodes[0].getActcBalances([self.defproduceraAccount] + self.accounts)
@@ -1006,7 +1006,7 @@ class Cluster(object):
         initialFunds="1000000.0000 {0}".format(CORE_SYMBOL)
         Utils.Print("Transfer initial fund %s to individual accounts." % (initialFunds))
         trans=None
-        contract="aci.token"
+        contract="actc.token"
         action="transfer"
         for name, keys in producerKeys.items():
             data="{\"from\":\"actc\",\"to\":\"%s\",\"quantity\":\"%s\",\"memo\":\"%s\"}" % (name, initialFunds, "init actc transfer")
@@ -1014,7 +1014,7 @@ class Cluster(object):
             if name != "actc":
                 trans=biosNode.pushMessage(contract, action, data, opts)
                 if trans is None or not trans[0]:
-                    Utils.Print("ERROR: Failed to transfer funds from aci.token to %s." % (name))
+                    Utils.Print("ERROR: Failed to transfer funds from actc.token to %s." % (name))
                     return None
 
             Node.validateTransaction(trans[1])
@@ -1168,7 +1168,7 @@ class Cluster(object):
         if onlySetProds: return biosNode
 
         actcTokenAccount=copy.deepcopy(actcAccount)
-        actcTokenAccount.name="aci.token"
+        actcTokenAccount.name="actc.token"
         trans=biosNode.createAccount(actcTokenAccount, actcAccount, 0)
         if trans is None:
             Utils.Print("ERROR: Failed to create account %s" % (actcTokenAccount.name))
@@ -1201,7 +1201,7 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, biosNode.port))
             return None
 
-        contract="aci.token"
+        contract="actc.token"
         contractDir="unittests/contracts/%s" % (contract)
         wasmFile="%s.wasm" % (contract)
         abiFile="%s.abi" % (contract)

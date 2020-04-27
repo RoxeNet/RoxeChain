@@ -1,13 +1,17 @@
-#include <boost/test/unit_test.hpp>
-#include <actc/testing/tester.hpp>
+/**
+ *  @file
+ *  @copyright defined in actc/LICENSE.txt
+ */
 #include <actc/chain/abi_serializer.hpp>
-
-#include <actc.token/actc.token.wast.hpp>
-#include <actc.token/actc.token.abi.hpp>
+#include <actc/testing/tester.hpp>
 
 #include <Runtime/Runtime.h>
 
 #include <fc/variant_object.hpp>
+
+#include <boost/test/unit_test.hpp>
+
+#include <contracts.hpp>
 
 using namespace actc::testing;
 using namespace actc;
@@ -27,8 +31,8 @@ public:
       create_accounts( { N(alice), N(bob), N(carol), N(actc.token) } );
       produce_blocks( 2 );
 
-      set_code( N(actc.token), actc_token_wast );
-      set_abi( N(actc.token), actc_token_abi );
+      set_code( N(actc.token), contracts::actc_token_wasm() );
+      set_abi( N(actc.token), contracts::actc_token_abi().data() );
 
       produce_blocks();
 

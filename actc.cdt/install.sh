@@ -1,7 +1,7 @@
 #!/bin/bash
 ##########################################################################
 # This is the ACTC automated install script for Linux and Mac OS.
-# This file was downloaded from https://github.com/ACTC/actc
+# This file was downloaded from https://github.com/ACTC/eos
 #
 # Copyright (c) 2017, Respective Authors all rights reserved.
 #
@@ -27,7 +27,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 #
-# https://github.com/ACTC/actc/blob/master/LICENSE.txt
+# https://github.com/ACTC/eos/blob/master/LICENSE.txt
 ##########################################################################
    
 
@@ -74,4 +74,4 @@
    printf "\t     \\__\\/         \\__\\/         \\__\\/                     \\__\\/ \n${txtrst}"
 
    printf "\\tFor more information:\\n"
-   printf "\\tACTC website: https://actc.io\\n"
+   printf "\\tACTC website: https://eos.io\\n"

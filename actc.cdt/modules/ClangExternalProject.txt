@@ -3,7 +3,7 @@ find_package(Git REQUIRED)
 include(GNUInstallDirs)
 
 ExternalProject_Add(
-  EosioClang
+  ActcClang
   CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}/llvm -DCMAKE_BUILD_TYPE=Release -DACTC_TOOL_DIR=${CMAKE_SOURCE_DIR}/tools
 
   SOURCE_DIR "${CMAKE_SOURCE_DIR}/actc_llvm"
