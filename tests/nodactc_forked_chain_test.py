@@ -227,10 +227,10 @@ try:
     #verify nodes are in sync and advancing
     cluster.waitOnClusterSync(blockAdvancing=5)
     index=0
-    for account in accounts:
-        Print("Vote for producers=%s" % (producers))
-        trans=prodNodes[index % len(prodNodes)].vote(account, producers, waitForTransBlock=True)
-        index+=1
+    # for account in accounts:
+    #     Print("Vote for producers=%s" % (producers))
+    #     trans=prodNodes[index % len(prodNodes)].vote(account, producers, waitForTransBlock=True)
+    #     index+=1
 
 
     # ***   Identify a block where production is stable   ***

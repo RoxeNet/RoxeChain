@@ -18,7 +18,7 @@ The naming convention is codeaccount::actionname followed by a list of paramters
    - **url** producer URL
    - **location** currently unused index
 
-## actc::voteproducer voter proxy producers
+## actc::voteproducer voter proxy producers[forbidden]
    - **voter** the account doing the voting
    - **proxy** proxy account to whom voter delegates vote
    - **producers** list of producers voted for. A maximum of 30 producers is allowed

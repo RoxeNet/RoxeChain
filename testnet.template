@@ -65,7 +65,7 @@ wcmd () {
 cacmd () {
     programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 ACI" --stake-cpu "10000000.0000 ACI"  --buy-ram "10000000.0000 ACI" actc $* >> $logfile 2>&1
     ecmd system regproducer $1 $2
-    ecmd system voteproducer prods $1 $1
+#    ecmd system voteproducer prods $1 $1
 }
 
 sleep 2

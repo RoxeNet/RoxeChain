@@ -1037,15 +1037,15 @@ class Node(object):
 
         return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
-    def vote(self, account, producers, waitForTransBlock=False, exitOnError=False):
-        cmdDesc = "system voteproducer prods"
-        cmd="%s -j %s %s" % (
-            cmdDesc, account.name, " ".join(producers))
-        msg="account=%s, producers=[ %s ]" % (account.name, ", ".join(producers));
-        trans=self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
-        self.trackCmdTransaction(trans)
-
-        return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
+    # def vote(self, account, producers, waitForTransBlock=False, exitOnError=False):
+    #     cmdDesc = "system voteproducer prods"
+    #     cmd="%s -j %s %s" % (
+    #         cmdDesc, account.name, " ".join(producers))
+    #     msg="account=%s, producers=[ %s ]" % (account.name, ", ".join(producers));
+    #     trans=self.processClactcCmd(cmd, cmdDesc, exitOnError=exitOnError, exitMsg=msg)
+    #     self.trackCmdTransaction(trans)
+    #
+    #     return self.waitForTransBlockIfNeeded(trans, waitForTransBlock, exitOnError=exitOnError)
 
     def processClactcCmd(self, cmd, cmdDesc, silentErrors=True, exitOnError=False, exitMsg=None, returnType=ReturnType.json):
         assert(isinstance(returnType, ReturnType))

@@ -228,7 +228,7 @@ try:
     #first account will vote for node0 producers, all others will vote for node1 producers
     node=node0
     for account in accounts:
-        trans=node.vote(account, node.producers, waitForTransBlock=True)
+        # trans=node.vote(account, node.producers, waitForTransBlock=True)
         node=node1
 
     setActiveProducers(prodsActive, node1.producers)
@@ -239,7 +239,7 @@ try:
     # first account will vote for node2 producers, all others will vote for node3 producers
     node1
     for account in accounts:
-        trans=node.vote(account, node.producers, waitForTransBlock=True)
+        # trans=node.vote(account, node.producers, waitForTransBlock=True)
         node=node2
 
     setActiveProducers(prodsActive, node2.producers)

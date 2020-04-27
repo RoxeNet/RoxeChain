@@ -693,7 +693,7 @@ public:
          create_account_with_resources( a, config::system_account_name, core_sym::from_string("1.0000"), false, net, cpu );
          transfer( config::system_account_name, a, init_balance + nstake + cstake, config::system_account_name );
          BOOST_REQUIRE_EQUAL( success(),                        stake( a, a, nstake, cstake) );
-         BOOST_REQUIRE_EQUAL( success(),                        vote( a, { }, N(proxyaccount) ) );
+//         BOOST_REQUIRE_EQUAL( success(),                        vote( a, { }, N(proxyaccount) ) );
          BOOST_REQUIRE_EQUAL( init_balance,                     get_balance(a) );
          BOOST_REQUIRE_EQUAL( asset::from_string("0.0000 REX"), get_rex_balance(a) );
          if (deposit_into_rex_fund) {
@@ -746,12 +746,12 @@ public:
       return r;
    }
 
-   action_result vote( const account_name& voter, const std::vector<account_name>& producers, const account_name& proxy = name(0) ) {
-      return push_action(voter, N(voteproducer), mvo()
-                         ("voter",     voter)
-                         ("proxy",     proxy)
-                         ("producers", producers));
-   }
+//   action_result vote( const account_name& voter, const std::vector<account_name>& producers, const account_name& proxy = name(0) ) {
+//      return push_action(voter, N(voteproducer), mvo()
+//                         ("voter",     voter)
+//                         ("proxy",     proxy)
+//                         ("producers", producers));
+//   }
 
    uint32_t last_block_time() const {
       return time_point_sec( control->head_block_time() ).sec_since_epoch();

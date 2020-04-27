@@ -185,15 +185,15 @@ def regProducers(b, e):
 def listProducers():
     run(args.clactc + 'system listproducers')
 
-def vote(b, e):
-    for i in range(b, e):
-        voter = accounts[i]['name']
-        k = args.num_producers_vote
-        if k > numProducers:
-            k = numProducers - 1
-        prods = random.sample(range(firstProducer, firstProducer + numProducers), k)
-        prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
-        retry(args.clactc + 'system voteproducer prods ' + voter + ' ' + prods)
+# def vote(b, e):
+#     for i in range(b, e):
+#         voter = accounts[i]['name']
+#         k = args.num_producers_vote
+#         if k > numProducers:
+#             k = numProducers - 1
+#         prods = random.sample(range(firstProducer, firstProducer + numProducers), k)
+#         prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
+#         retry(args.clactc + 'system voteproducer prods ' + voter + ' ' + prods)
 
 def claimRewards():
     table = getJsonOutput(args.clactc + 'get table actc actc producers -l 100')
@@ -204,7 +204,7 @@ def claimRewards():
     print('Elapsed time for claimrewards:', times)
 
 def proxyVotes(b, e):
-    vote(firstProducer, firstProducer + 1)
+    # vote(firstProducer, firstProducer + 1)
     proxy = accounts[firstProducer]['name']
     retry(args.clactc + 'system regproxy ' + proxy)
     sleep(1.0)
@@ -345,11 +345,11 @@ def stepRegProducers():
 def stepStartProducers():
     startProducers(firstProducer, firstProducer + numProducers)
     sleep(args.producer_sync_delay)
-def stepVote():
-    vote(0, 0 + args.num_voters)
-    sleep(1)
-    listProducers()
-    sleep(5)
+# def stepVote():
+#     vote(0, 0 + args.num_voters)
+#     sleep(1)
+#     listProducers()
+#     sleep(5)
 def stepProxyVotes():
     proxyVotes(0, 0 + args.num_voters)
 def stepResign():
@@ -378,7 +378,7 @@ commands = [
     ('T', 'stake',              stepCreateStakedAccounts,   True,    "Create staked accounts"),
     ('p', 'reg-prod',           stepRegProducers,           True,    "Register producers"),
     ('P', 'start-prod',         stepStartProducers,         True,    "Start producers"),
-    ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
+    # ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
     ('R', 'claim',              claimRewards,               True,    "Claim rewards"),
     ('x', 'proxy',              stepProxyVotes,             True,    "Proxy votes"),
     ('q', 'resign',             stepResign,                 True,    "Resign actc"),
