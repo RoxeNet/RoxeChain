@@ -1,52 +1,52 @@
-# AC Trade Chain
+# GLS Chain
 
 
-**If you have previously installed actc, please run the `actc_uninstall` script (it is in the directory where you cloned actc) before downloading and using the binary releases.**
+**If you have previously installed GLSchain, please run the `gls_uninstall` script (it is in the directory where you cloned actc) before downloading and using the binary releases.**
 
 #### Mac OS X Brew Install
 
 ```sh
-$ brew tap actcio/actc
-$ brew install actc
+$ brew tap glsio/gls
+$ brew install gls
 ```
 
 #### Mac OS X Brew Uninstall
 
 ```sh
-$ brew remove actc
+$ brew remove gls
 ```
 
 #### Ubuntu 18.04 Debian Package Install
 
 ```sh
-$ wget https://github.com/actcio/actc/releases/download/v1.0.0/actc-1.0.0.ubuntu-18.04-x86_64.deb
-$ sudo apt install ./actc-1.0.0.ubuntu-18.04-x86_64.deb
+$ wget https://github.com/glsio/gls/releases/download/v1.0.0/gls-1.0.0.ubuntu-18.04-x86_64.deb
+$ sudo apt install ./gls-1.0.0.ubuntu-18.04-x86_64.deb
 ```
 
 #### Ubuntu 16.04 Debian Package Install
 
 ```sh
-$ wget https://github.com/actcio/actc/releases/download/v1.0.0/actc-1.0.0.ubuntu-16.04-x86_64.deb
-$ sudo apt install ./actc-1.0.0.ubuntu-16.04-x86_64.deb
+$ wget https://github.com/glsio/gls/releases/download/v1.0.0/gls-1.0.0.ubuntu-16.04-x86_64.deb
+$ sudo apt install ./gls-1.0.0.ubuntu-16.04-x86_64.deb
 ```
 
 #### Debian Package Uninstall
 
 ```sh
-$ sudo apt remove actc
+$ sudo apt remove gls
 ```
 
 #### RPM Package Install
 
 ```sh
-$ wget https://github.com/actcio/actc/releases/download/v1.0.0/actc-1.0.0.x86_64-0.x86_64.rpm
-$ sudo yum install ./actc-1.0.0.x86_64-0.x86_64.rpm
+$ wget https://github.com/glsio/gls/releases/download/v1.0.0/gls-1.0.0.x86_64-0.x86_64.rpm
+$ sudo yum install ./gls-1.0.0.x86_64-0.x86_64.rpm
 ```
 
 #### RPM Package Uninstall
 
 ```sh
-$ sudo yum remove actc.cdt
+$ sudo yum remove gls.cdt
 ```
 
 ## Supported Operating Systems
