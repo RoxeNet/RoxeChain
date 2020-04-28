@@ -48,7 +48,7 @@ namespace actc {
  *
  * This repository contains examples of these privileged contracts that are useful when deploying,
  * managing, and/or using an ACTC blockchain. They are provided for reference purposes:
- * - actc.bios
+ * - gls.bios
  * - gls.system
  * - gls.msig
  * - gls.wrap
@@ -112,7 +112,7 @@ namespace actc {
                                      (schedule_version)(new_producers))
    };
 
-   class [[actc::contract("actc.bios")]] bios : public contract {
+   class [[actc::contract("gls.bios")]] bios : public contract {
       public:
          using contract::contract;
          /**

@@ -2,7 +2,7 @@
 
 The ACTC blockchain platform is unique in that the features and characteristics of the blockchain built on it are flexible, that is, they can be changed, or modified completely to suit each business case requirement. Core blockchain features such as consensus, fee schedules, account creation and modification, token economics, block producer registration, voting, multi-sig, etc., are implemented inside smart contracts which are deployed on the blockchain built on the ACTC platform.
 
-Block.one implements and maintains ACTC open source platform which contains, as an example, the system contracts encapsulating the base functionality for an ACTC based blockchain. This document will detail each one of them, [actc.bios](#actcbios-system-contract), [gls.system](#actcsystem-system-contract), [gls.msig](#actcmsig-system-contract), [gls.token](#actctoken-system-contract), [gls.wrap](#actcwrap-system-contract) along with a few other main concepts.
+Block.one implements and maintains ACTC open source platform which contains, as an example, the system contracts encapsulating the base functionality for an ACTC based blockchain. This document will detail each one of them, [gls.bios](#actcbios-system-contract), [gls.system](#actcsystem-system-contract), [gls.msig](#actcmsig-system-contract), [gls.token](#actctoken-system-contract), [gls.wrap](#actcwrap-system-contract) along with a few other main concepts.
 
 ## Concepts
 
@@ -53,17 +53,17 @@ In a ACTC-based network the blockchain is kept alive by nodes which are intercon
 
 ## System contracts defined in gls.contracts
 
-1. [actc.bios](#actcbios-system-contract)
+1. [gls.bios](#actcbios-system-contract)
 2. [gls.system](#actcsystem-system-contract)
 3. [gls.msig](#actcmsig-system-contract)
 4. [gls.token](#actctoken-system-contract)
 5. [gls.wrap](#actcwrap-system-contract)
 
-### actc.bios system contract
+### gls.bios system contract
 
-The `actc.bios` is the first sample of system smart contract provided by `block.one` through the ACTC platform. It is a minimalist system contract because it only supplies the actions that are absolutely critical to bootstrap a chain and nothing more. This allows for a chain agnostic approach to bootstrapping a chain.
+The `gls.bios` is the first sample of system smart contract provided by `block.one` through the ACTC platform. It is a minimalist system contract because it only supplies the actions that are absolutely critical to bootstrap a chain and nothing more. This allows for a chain agnostic approach to bootstrapping a chain.
 
-The actions implemented and publicly exposed by `actc.bios` system contract are: setpriv, setalimits, setglimits, setprods, setparams, reqauth, setabi.
+The actions implemented and publicly exposed by `gls.bios` system contract are: setpriv, setalimits, setglimits, setprods, setparams, reqauth, setabi.
 
 |Action name|Action description|
 |---|---|
@@ -75,9 +75,9 @@ The actions implemented and publicly exposed by `actc.bios` system contract are:
 |reqauth|Check if an account has authorization to access the current action.|
 |setabi|Set the abi for a contract identified by an account name.|
 
-The above actions are enough to serve the functionality of a basic blockchain, however, a keen eye would notice that the actions listed above do not allow for creation of an account, nor updating permissions, and other important features. As we mentioned earlier, this sample system contract is minimalist in its implementation, therefore it relies also on some native ACTC actions. These native actions are not implemented in the `actc.bios` system contract, they are implemented at the ACTC chain core level. In the `actc.bios` contract they are simply declared and have no implementation, so they can show in the contracts ABI definition, and therefore users can push these actions to the account that holds the `actc.bios` contract. When one of these actions are pushed to the chain, to the `actc.bios` contract account holder, via a `clactc` command for example, the corresponding native action is executed by the blockchain first, [see the code here](https://github.com/ACTC/actc/blob/3fddb727b8f3615917707281dfd3dd3cc5d3d66d/libraries/chain/apply_context.cpp#L58), and then the `actc.bios` contract `apply` method is invoked, [see the code here](https://github.com/ACTC/actc/blob/3fddb727b8f3615917707281dfd3dd3cc5d3d66d/libraries/chain/apply_context.cpp#L69), but having no implementation and not being part of the `ACTC_DISPATCH`, at the contract level, this action will be a NOP, it will do nothing when called from core ACTC code.
+The above actions are enough to serve the functionality of a basic blockchain, however, a keen eye would notice that the actions listed above do not allow for creation of an account, nor updating permissions, and other important features. As we mentioned earlier, this sample system contract is minimalist in its implementation, therefore it relies also on some native ACTC actions. These native actions are not implemented in the `gls.bios` system contract, they are implemented at the ACTC chain core level. In the `gls.bios` contract they are simply declared and have no implementation, so they can show in the contracts ABI definition, and therefore users can push these actions to the account that holds the `gls.bios` contract. When one of these actions are pushed to the chain, to the `gls.bios` contract account holder, via a `clactc` command for example, the corresponding native action is executed by the blockchain first, [see the code here](https://github.com/ACTC/actc/blob/3fddb727b8f3615917707281dfd3dd3cc5d3d66d/libraries/chain/apply_context.cpp#L58), and then the `gls.bios` contract `apply` method is invoked, [see the code here](https://github.com/ACTC/actc/blob/3fddb727b8f3615917707281dfd3dd3cc5d3d66d/libraries/chain/apply_context.cpp#L69), but having no implementation and not being part of the `ACTC_DISPATCH`, at the contract level, this action will be a NOP, it will do nothing when called from core ACTC code.
 
-Below are listed the actions which are declared in the `actc.bios` contract, mapped one-to-one with the native ACTC actions, but having no implementation at the contract level:
+Below are listed the actions which are declared in the `gls.bios` contract, mapped one-to-one with the native ACTC actions, but having no implementation at the contract level:
 
 |Action name|Description|
 |---|---|
@@ -92,14 +92,14 @@ Below are listed the actions which are declared in the `actc.bios` contract, map
 
 ### gls.system system contract
 
-The `gls.system` contract is another smart contract that Block.one provides an implementation for as a sample system contract.  It is a version of `actc.bios` only this time it is not minimalist, it contains more elaborated structures, classes, methods, and actions needed for an ACTC based blockchain core functionality:
+The `gls.system` contract is another smart contract that Block.one provides an implementation for as a sample system contract.  It is a version of `gls.bios` only this time it is not minimalist, it contains more elaborated structures, classes, methods, and actions needed for an ACTC based blockchain core functionality:
 - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or delegate their vote to a proxy.
 - Producers can register in order to be voted for, and can claim per-block and per-vote rewards.
 - Users can buy and sell RAM at a market-determined price.
 - Users can bid on premium names.
 - A resource exchange system, named REX, allows token holders to lend their tokens, and users to rent CPU and NET resources in return for a market-determined fee.
 
-The actions implemented and publicly exposed by the `gls.system` system contract are presented in the table below. Just like the `actc.bios` sample contract there are a few actions which are not implemented at the contract level (`newaccount`, `updateauth`, `deleteauth`, `linkauth`, `unlinkauth`, `canceldelay`, `onerror`, `setabi`, `setcode`), they are just declared in the contract so they will show in the contract's ABI and users will be able to push those actions to the chain via the account holding the 'gls.system' contract, but the implementation is at the ACTC core level. They are referred to as ACTC native actions.
+The actions implemented and publicly exposed by the `gls.system` system contract are presented in the table below. Just like the `gls.bios` sample contract there are a few actions which are not implemented at the contract level (`newaccount`, `updateauth`, `deleteauth`, `linkauth`, `unlinkauth`, `canceldelay`, `onerror`, `setabi`, `setcode`), they are just declared in the contract so they will show in the contract's ABI and users will be able to push those actions to the chain via the account holding the 'gls.system' contract, but the implementation is at the ACTC core level. They are referred to as ACTC native actions.
 
 |Action name|Action description|
 |---|---|

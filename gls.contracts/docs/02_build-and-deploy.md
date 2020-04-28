@@ -49,10 +49,10 @@ cd ..
 
 ## How to deploy the gls.contracts
 
-### To deploy actc.bios contract execute the following command:
+### To deploy gls.bios contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testerbios`
 ```
-clactc set contract testerbios you_local_path_to/gls.contracts/build/contracts/actc.bios/ -p testerbios
+clactc set contract testerbios you_local_path_to/gls.contracts/build/contracts/gls.bios/ -p testerbios
 ```
 
 ### To deploy gls.msig contract execute the following command:

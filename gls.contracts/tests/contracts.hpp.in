@@ -12,8 +12,8 @@ struct contracts {
    static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.msig/gls.msig.abi"); }
    static std::vector<uint8_t> wrap_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/gls.wrap/gls.wrap.wasm"); }
    static std::vector<char>    wrap_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.wrap/gls.wrap.abi"); }
-   static std::vector<uint8_t> bios_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/actc.bios/actc.bios.wasm"); }
-   static std::vector<char>    bios_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/actc.bios/actc.bios.abi"); }
+   static std::vector<uint8_t> bios_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/gls.bios/gls.bios.wasm"); }
+   static std::vector<char>    bios_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.bios/gls.bios.abi"); }
 
    struct util {
       static std::vector<uint8_t> reject_all_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/reject_all.wasm"); }

@@ -20,7 +20,7 @@ using namespace actc::chain::webassembly::common;
 
 struct wabt_apply_instance_vars {
    Memory* memory;
-   apply_context& ctx;
+   apply_conapply_contexttext& ctx;
 
    char* get_validated_pointer(uint32_t offset, uint32_t size) {
       ACTC_ASSERT(memory, wasm_execution_error, "access violation");

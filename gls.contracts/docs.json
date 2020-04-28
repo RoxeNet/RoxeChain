@@ -13,7 +13,7 @@
         "source_dirs": [
           "contracts/gls.token/include/gls.token/",
           "contracts/gls.wrap/include/gls.wrap/",
-          "contracts/actc.bios/include/actc.bios/",
+          "contracts/gls.bios/include/gls.bios/",
           "contracts/gls.system/include/gls.system/",
           "contracts/gls.msig/include/gls.msig/"
         ],

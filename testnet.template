@@ -14,7 +14,7 @@ fi
 
 bioscontractpath=$BIOS_CONTRACT_PATH
 if [ -z "$bioscontractpath" ]; then
-    bioscontractpath="unittests/contracts/actc.bios"
+    bioscontractpath="unittests/contracts/gls.bios"
 fi
 
 wddir=actc-ignition-wd
@@ -82,7 +82,7 @@ wcmd create --to-console -n ignition
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT prodkeys
 
-ecmd set contract actc $bioscontractpath actc.bios.wasm actc.bios.abi
+ecmd set contract actc $bioscontractpath gls.bios.wasm gls.bios.abi
 
 # Preactivate all digests
 for digest in $FEATURE_DIGESTS;

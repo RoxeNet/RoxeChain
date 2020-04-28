@@ -63,7 +63,7 @@ $ ./nodactc -d ~/actc.data/generator_node --config-dir ~/actc.data/generator_nod
 ```bash
 $ ./clactc wallet create --to-console
 $ ./clactc wallet import --private-key 5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU
-$ ./clactc set contract actc ~/actc/build.release/contracts/actc.bios/
+$ ./clactc set contract actc ~/actc/build.release/contracts/gls.bios/
 ```
 
 ### Initialize the accounts txn_test_gen_plugin uses

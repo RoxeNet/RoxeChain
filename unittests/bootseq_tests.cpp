@@ -195,7 +195,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         // Create gls.msig and gls.token
         create_accounts({N(gls.msig), N(gls.token), N(gls.ram), N(gls.ramfee), N(gls.stake), N(gls.vpay), N(gls.bpay), N(gls.saving) });
         // Set code for the following accounts:
-        //  - actc (code: actc.bios) (already set by tester constructor)
+        //  - actc (code: gls.bios) (already set by tester constructor)
         //  - gls.msig (code: gls.msig)
         //  - gls.token (code: gls.token)
         // set_code_abi(N(gls.msig), contracts::actc_msig_wasm(), contracts::actc_msig_abi().data());//, &actc_active_pk);

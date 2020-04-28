@@ -949,11 +949,11 @@ class Cluster(object):
         cmd="bash bios_boot.sh"
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         env = {
-            "BIOS_CONTRACT_PATH": "unittests/contracts/old_versions/v1.6.0-rc3/actc.bios",
+            "BIOS_CONTRACT_PATH": "unittests/contracts/old_versions/v1.6.0-rc3/gls.bios",
             "FEATURE_DIGESTS": ""
         }
         if PFSetupPolicy.hasPreactivateFeature(pfSetupPolicy):
-            env["BIOS_CONTRACT_PATH"] = "unittests/contracts/actc.bios"
+            env["BIOS_CONTRACT_PATH"] = "unittests/contracts/gls.bios"
 
         if pfSetupPolicy == PFSetupPolicy.FULL:
             allBuiltinProtocolFeatureDigests = biosNode.getAllBuiltinFeatureDigestsToPreactivate()
@@ -1068,7 +1068,7 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to import %s account keys into ignition wallet." % (actcName))
             return None
 
-        contract="actc.bios"
+        contract="gls.bios"
         contractDir="unittests/contracts/%s" % (contract)
         if PFSetupPolicy.hasPreactivateFeature(pfSetupPolicy):
             contractDir="unittests/contracts/%s" % (contract)

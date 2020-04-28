@@ -30,13 +30,13 @@ namespace actc {
    namespace testing {
       struct contracts {
          // Contracts in `actc/unittests/contracts' directory
-         MAKE_READ_WASM_ABI(actc_bios,   actc.bios, contracts)
+         MAKE_READ_WASM_ABI(actc_bios,   gls.bios, contracts)
          MAKE_READ_WASM_ABI(actc_msig,   gls.msig, contracts)
          MAKE_READ_WASM_ABI(actc_system, gls.system, contracts)
          MAKE_READ_WASM_ABI(actc_token,  gls.token,  contracts)
          MAKE_READ_WASM_ABI(actc_wrap,   gls.wrap,   contracts)
 
-         MAKE_READ_WASM_ABI(before_preactivate_actc_bios,   actc.bios, contracts/old_versions/v1.6.0-rc3)
+         MAKE_READ_WASM_ABI(before_preactivate_actc_bios,   gls.bios, contracts/old_versions/v1.6.0-rc3)
 
          // Contracts in `actc/unittests/unittests/test-contracts' directory
          MAKE_READ_WASM_ABI(asserter,              asserter,              test-contracts)

@@ -239,8 +239,8 @@ void apply_actc_updateauth(apply_context& context) {
    auto& db = context.db;
 
    ACTC_ASSERT(!update.permission.empty(), action_validate_exception, "Cannot create authority with empty name");
-   ACTC_ASSERT( update.permission.to_string().find( "actc." ) != 0, action_validate_exception,
-               "Permission names that start with 'actc.' are reserved" );
+   ACTC_ASSERT( update.permission.to_string().find( "gls." ) != 0, action_validate_exception,
+               "Permission names that start with 'gls.' are reserved" );
    ACTC_ASSERT(update.permission != update.parent, action_validate_exception, "Cannot set an authority as its own parent");
    db.get<account_object, by_name>(update.account);
    ACTC_ASSERT(validate(update.auth), action_validate_exception,
