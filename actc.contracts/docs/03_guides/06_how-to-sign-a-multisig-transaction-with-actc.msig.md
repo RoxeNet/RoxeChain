@@ -4,13 +4,13 @@
 
 #### Prerequisites:
    - actc.token contract installed to actc.token account, actc.msig contract installed on actc.msig account which is a priviliged account.
-   - account 'treasury' is the issuer of ACI token.
+   - account 'treasury' is the issuer of LSC token.
    - account 'tester' exists.
    - keys to accounts 'treasury' and 'tester' imported into local wallet, the wallet is unlocked.
 
 #### One user creates a proposal:
 ````
-$ clactc multisig propose test '[{"actor": "treasury", "permission": "active"}]' '[{"actor": "treasury", "permission": "active"}]' actc.token issue '{"to": "tester", "quantity": "1000.0000 ACI", "memo": ""}' -p tester
+$ clactc multisig propose test '[{"actor": "treasury", "permission": "active"}]' '[{"actor": "treasury", "permission": "active"}]' actc.token issue '{"to": "tester", "quantity": "1000.0000 LSC", "memo": ""}' -p tester
 
 executed transaction: e26f3a3a7cba524a7b15a0b6c77c7daa73d3ba9bf84e83f9c2cdf27fcb183d61  336 bytes  107520 cycles
 #    actc.msig <= actc.msig::propose          {"proposer":"tester","proposal_name":"test","requested":[{"actor":"treasury","permission":"active"}]...
@@ -47,7 +47,7 @@ $ clactc multisig review tester test
         ],
         "data": {
           "to": "tester",
-          "quantity": "1000.0000 ACI",
+          "quantity": "1000.0000 LSC",
           "memo": ""
         },
         "hex_data": "000000005c95b1ca809698000000000004454f530000000000"
@@ -78,13 +78,13 @@ executed transaction: 64e5eaceb77362694055f572ae35876111e87b637a55250de315b1b55e
 
 #### Prerequisites:
    - actc.token contract installed to actc.token account, actc.msig contract installed on actc.msig account which is a priviliged account.
-   - account 'treasury' has at least 1.1000 ACI token balance.
+   - account 'treasury' has at least 1.1000 LSC token balance.
    - account 'tester' exists.
    - keys to accounts 'treasury' and 'tester' imported into local wallet, the wallet is unlocked.
 
 #### One user creates a proposal:
 ````
-$ clactc multisig propose test '[{"actor": "treasury", "permission": "active"}]' '[{"actor": "treasury", "permission": "active"}]' actc.token transfer '{"from": "treasury", "to": "tester", "quantity": "1.0000 ACI", "memo": ""}' -p tester
+$ clactc multisig propose test '[{"actor": "treasury", "permission": "active"}]' '[{"actor": "treasury", "permission": "active"}]' actc.token transfer '{"from": "treasury", "to": "tester", "quantity": "1.0000 LSC", "memo": ""}' -p tester
 
 executed transaction: e26f3a3a7cba524a7b15a0b6c77c7daa73d3ba9bf84e83f9c2cdf27fcb183d61  336 bytes  107520 cycles
 #    actc.msig <= actc.msig::propose          {"proposer":"tester","proposal_name":"test","requested":[{"actor":"treasury","permission":"active"}]...
@@ -122,7 +122,7 @@ $ clactc multisig review tester test
         "data": {
           "from": "treasury",
           "to": "tester",
-          "quantity": "1.0000 ACI",
+          "quantity": "1.0000 LSC",
           "memo": ""
         },
         "hex_data": "000000005c95b1ca809698000000000004454f530000000000"
@@ -144,11 +144,11 @@ executed transaction: 475970a4b0016368d0503d1ce01577376f91f5a5ba63dd4353683bd951
 ````
 $ clactc get account tester
 ...
-ACI balances:
-     liquid:            1.0487 ACI
-     staked:            2.0000 ACI
-     unstaking:         0.0000 ACI
-     total:             4.0487 ACI
+LSC balances:
+     liquid:            1.0487 LSC
+     staked:            2.0000 LSC
+     unstaking:         0.0000 LSC
+     total:             4.0487 LSC
 ````
 
 #### First user initiates execution of proposed transaction:
@@ -159,13 +159,13 @@ executed transaction: 64e5eaceb77362694055f572ae35876111e87b637a55250de315b1b55e
 #    actc.msig <= actc.msig::exec             {"proposer":"tester","proposal_name":"test","executer":"tester"}
 ````
 
-#### First user can check account balance, it should be increased by 1.0000 ACI
+#### First user can check account balance, it should be increased by 1.0000 LSC
 ````
 $ clactc get account tester
 ...
-ACI balances:
-     liquid:            2.0487 ACI
-     staked:            2.0000 ACI
-     unstaking:         0.0000 ACI
-     total:             4.0487 ACI
+LSC balances:
+     liquid:            2.0487 LSC
+     staked:            2.0000 LSC
+     unstaking:         0.0000 LSC
+     total:             4.0487 LSC
 ````

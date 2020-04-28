@@ -15,14 +15,14 @@ Stake resource for your account
 
 ## Steps
 
-Stake 0.01 ACI network bandwidth for `alice`
+Stake 0.01 LSC network bandwidth for `alice`
 
 ```shell
-clactc system delegatebw alice alice "0 ACI" "0.01 ACI"
+clactc system delegatebw alice alice "0 LSC" "0.01 LSC"
 ```
 
-Stake 0.01 ACI CPU bandwidth for `alice`:
+Stake 0.01 LSC CPU bandwidth for `alice`:
 
 ```shell
-clactc system delegatebw alice alice "0.01 ACI" "0 ACI"
+clactc system delegatebw alice alice "0.01 LSC" "0 LSC"
 ```

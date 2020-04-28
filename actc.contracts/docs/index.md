@@ -21,10 +21,10 @@ As you just learned the relation between an account and a contract, we are addin
 |actc.names|No|No|The account which is holding funds from namespace auctions.|
 |actc.bpay|No|No|The account that pays the block producers for producing blocks. It assigns 0.25% of the inflation based on the amount of blocks a block producer created in the last 24 hours.|
 |actc.prods|No|No|The account representing the union of all current active block producers permissions.|
-|actc.ram|No|No|The account that keeps track of the ACI balances based on users actions of buying or selling RAM.|
+|actc.ram|No|No|The account that keeps track of the LSC balances based on users actions of buying or selling RAM.|
 |actc.ramfee|No|No|The account that keeps track of the fees collected from users RAM trading actions: 0.5% from the value of each trade goes into this account.|
 |actc.saving|No|No|The account which holds the 4% of network inflation.|
-|actc.stake|No|No|The account that keeps track of all ACI tokens which have been staked for NET or CPU bandwidth.|
+|actc.stake|No|No|The account that keeps track of all LSC tokens which have been staked for NET or CPU bandwidth.|
 |actc.vpay|No|No|The account that pays the block producers accordingly with the votes won. It assigns 0.75% of inflation based on the amount of votes a block producer won in the last 24 hours.|
 |actc.rex|No|No|The account that keeps track of fees and balances resulted from REX related actions execution.|
 
@@ -131,8 +131,8 @@ The actions implemented and publicly exposed by the `actc.system` system contrac
 |unstaketorex|Use staked core tokens to buy REX.|
 |sellrex|Sells REX in exchange for core tokens by converting REX stake back into core tokens at current exchange rate.|
 |cnclrexorder|Cancels unfilled REX sell order by owner if one exists.|
-|rentcpu|Use payment to rent as many ACI tokens as possible as determined by market price and stake them for CPU for the benefit of receiver, after 30 days the rented core delegation of CPU will expire.|
-|rentnet|Use payment to rent as many ACI tokens as possible as determined by market price and stake them for NET for the benefit of receiver, after 30 days the rented core delegation of NET will expire.|
+|rentcpu|Use payment to rent as many LSC tokens as possible as determined by market price and stake them for CPU for the benefit of receiver, after 30 days the rented core delegation of CPU will expire.|
+|rentnet|Use payment to rent as many LSC tokens as possible as determined by market price and stake them for NET for the benefit of receiver, after 30 days the rented core delegation of NET will expire.|
 |fundcpuloan|Transfers tokens from REX fund to the fund of a specific CPU loan in order to be used for loan renewal at expiry.|
 |fundnetloan|Transfers tokens from REX fund to the fund of a specific NET loan in order to be used for loan renewal at expiry.|
 |defcpuloan|Withdraws tokens from the fund of a specific CPU loan and adds them to the REX fund.|
@@ -146,7 +146,7 @@ The actions implemented and publicly exposed by the `actc.system` system contrac
 |buyrambytes|Increases receiver's ram in quantity of bytes provided.|
 |buyram|Increases receiver's ram quota based upon current price and quantity of tokens provided.|
 |sellram|Reduces quota my bytes and then performs an inline transfer of tokens to receiver based upon the average purchase price of the original quota.|
-|delegatebw|Stakes ACI from the balance of one account for the benefit of another.|
+|delegatebw|Stakes LSC from the balance of one account for the benefit of another.|
 |undelegatebw|Decreases the total tokens delegated by one account to another account and/or frees the memory associated with the delegation if there is nothing left to delegate.|
 |refund|This action is called after the delegation-period to claim all pending unstaked tokens belonging to owner.|
 |regproducer|Register producer action, indicates that a particular account wishes to become a producer.|

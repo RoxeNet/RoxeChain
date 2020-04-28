@@ -50,40 +50,40 @@ warning: transaction executed locally, but may not be confirmed by the network y
 ## Step 5: Create the Token
 
 ```shell
-clactc push action actc.token create '[ "actc", "1000000000.0000 ACI"]' -p actc.token@active
+clactc push action actc.token create '[ "actc", "1000000000.0000 LSC"]' -p actc.token@active
 ```
 
 Result should look similar to the one below:
 ```shell
 executed transaction: 0e49a421f6e75f4c5e09dd738a02d3f51bd18a0cf31894f68d335cd70d9c0e12  120 bytes  1000 cycles
-#   actc.token <= actc.token::create          {"issuer":"actc","maximum_supply":"1000000000.0000 ACI"}
+#   actc.token <= actc.token::create          {"issuer":"actc","maximum_supply":"1000000000.0000 LSC"}
 ```
 
 An alternate approach uses named arguments:
 
 ```shell
-clactc push action actc.token create '{"issuer":"actc", "maximum_supply":"1000000000.0000 ACI"}' -p actc.token@active
+clactc push action actc.token create '{"issuer":"actc", "maximum_supply":"1000000000.0000 LSC"}' -p actc.token@active
 ```
 
 Result should look similar to the one below:
 ```shell
 executed transaction: 0e49a421f6e75f4c5e09dd738a02d3f51bd18a0cf31894f68d335cd70d9c0e12  120 bytes  1000 cycles
-#   actc.token <= actc.token::create          {"issuer":"actc","maximum_supply":"1000000000.0000 ACI"}
+#   actc.token <= actc.token::create          {"issuer":"actc","maximum_supply":"1000000000.0000 LSC"}
 ```
-This command created a new token `ACI` with a precision of 4 decimals and a maximum supply of 1000000000.0000 ACI.  To create this token requires the permission of the `actc.token` contract. For this reason, `-p actc.token@active` was passed to authorize the request.
+This command created a new token `ACI` with a precision of 4 decimals and a maximum supply of 1000000000.0000 LSC.  To create this token requires the permission of the `actc.token` contract. For this reason, `-p actc.token@active` was passed to authorize the request.
 
 ## Step 6: Issue Tokens
 
 The issuer can issue new tokens to the issuer account in our case `actc`.
 
 ```text
-clactc push action actc.token issue '[ "actc", "100.0000 ACI", "memo" ]' -p actc@active
+clactc push action actc.token issue '[ "actc", "100.0000 LSC", "memo" ]' -p actc@active
 ```
 
 Result should look similar to the one below:
 ```shell
 executed transaction: a26b29d66044ad95edf0fc04bad3073e99718bc26d27f3c006589adedb717936  128 bytes  337 us
-#   actc.token <= actc.token::issue           {"to":"actc","quantity":"100.0000 ACI","memo":"memo"}
+#   actc.token <= actc.token::issue           {"to":"actc","quantity":"100.0000 LSC","memo":"memo"}
 warning: transaction executed locally, but may not be confirmed by the network yet         ]
 ```
 
@@ -92,35 +92,35 @@ warning: transaction executed locally, but may not be confirmed by the network y
 Now that account `actc` has been issued tokens, transfer some of them to account `bob`.
 
 ```shell
-clactc push action actc.token transfer '[ "actc", "bob", "25.0000 ACI", "m" ]' -p actc@active
+clactc push action actc.token transfer '[ "actc", "bob", "25.0000 LSC", "m" ]' -p actc@active
 ```
 
 Result should look similar to the one below:
 ```text
 executed transaction: 60d334850151cb95c35fe31ce2e8b536b51441c5fd4c3f2fea98edcc6d69f39d  128 bytes  497 us
-#   actc.token <= actc.token::transfer        {"from":"actc","to":"bob","quantity":"25.0000 ACI","memo":"m"}
-#         actc <= actc.token::transfer        {"from":"actc","to":"bob","quantity":"25.0000 ACI","memo":"m"}
-#           bob <= actc.token::transfer        {"from":"actc","to":"bob","quantity":"25.0000 ACI","memo":"m"}
+#   actc.token <= actc.token::transfer        {"from":"actc","to":"bob","quantity":"25.0000 LSC","memo":"m"}
+#         actc <= actc.token::transfer        {"from":"actc","to":"bob","quantity":"25.0000 LSC","memo":"m"}
+#           bob <= actc.token::transfer        {"from":"actc","to":"bob","quantity":"25.0000 LSC","memo":"m"}
 warning: transaction executed locally, but may not be confirmed by the network yet         ]
 ```
 Now check if "bob" got the tokens using [clactc get currency balance](https://developers.actc.io/actc-clactc/reference#currency-balance)
 
 ```shell
-clactc get currency balance actc.token bob ACI
+clactc get currency balance actc.token bob LSC
 ```
 
 Result:
 ```text
-25.00 ACI
+25.00 LSC
 ```
 
 Check "actc's" balance, notice that tokens were deducted from the account
 
 ```shell
-clactc get currency balance actc.token actc ACI
+clactc get currency balance actc.token actc LSC
 ```
 
 Result:
 ```text
-75.00 ACI
+75.00 LSC
 ```

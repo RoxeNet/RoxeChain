@@ -22,9 +22,9 @@ Three unsigned transactions will be generated using clactc and then the actions 
 
 First, generate a transaction to capture the necessary actions involved in creating a new account:
 ```
-$ clactc system newaccount -s -j -d --transfer --stake-net "1.000 ACI" --stake-cpu "1.000 ACI" --buy-ram-kbytes 50 actc actc.wrap ACTC8MMUW11TAdTDxqdSwSqJodefSoZbFhcprndomgLi9MeR2o8MT4 > generated_account_creation_trx.json
+$ clactc system newaccount -s -j -d --transfer --stake-net "1.000 LSC" --stake-cpu "1.000 LSC" --buy-ram-kbytes 50 actc actc.wrap ACTC8MMUW11TAdTDxqdSwSqJodefSoZbFhcprndomgLi9MeR2o8MT4 > generated_account_creation_trx.json
 726964ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea305500c80000"} arg: {"code":"actc","action":"buyrambytes","args":{"payer":"actc","receiver":"actc.wrap","bytes":51200}}
-726967ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea3055102700000000000004535953000000001027000000000000045359530000000001"} arg: {"code":"actc","action":"delegatebw","args":{"from":"actc","receiver":"actc.wrap","stake_net_quantity":"1.0000 ACI","stake_cpu_quantity":"1.0000 ACI","transfer":true}}
+726967ms thread-0   main.cpp:429                  create_action        ] result: {"binargs":"0000000000ea305500004d1a03ea3055102700000000000004535953000000001027000000000000045359530000000001"} arg: {"code":"actc","action":"delegatebw","args":{"from":"actc","receiver":"actc.wrap","stake_net_quantity":"1.0000 LSC","stake_cpu_quantity":"1.0000 LSC","transfer":true}}
 $ cat generated_account_creation_trx.json
 {
   "expiration": "2018-06-29T17:11:36",
@@ -372,15 +372,15 @@ memory:
      quota:     49.74 KiB    used:     3.33 KiB  
 
 net bandwidth:
-     staked:          1.0000 ACI           (total stake delegated from account to self)
-     delegated:       0.0000 ACI           (total staked delegated to account from others)
+     staked:          1.0000 LSC           (total stake delegated from account to self)
+     delegated:       0.0000 LSC           (total staked delegated to account from others)
      used:                 0 bytes
      available:        2.304 MiB  
      limit:            2.304 MiB  
 
 cpu bandwidth:
-     staked:          1.0000 ACI           (total stake delegated from account to self)
-     delegated:       0.0000 ACI           (total staked delegated to account from others)
+     staked:          1.0000 LSC           (total stake delegated from account to self)
+     delegated:       0.0000 LSC           (total staked delegated to account from others)
      used:                 0 us   
      available:        460.8 ms   
      limit:            460.8 ms   
@@ -614,15 +614,15 @@ memory:
      quota:     49.74 KiB    used:     3.365 KiB  
 
 net bandwidth:
-     staked:          1.0000 ACI           (total stake delegated from account to self)
-     delegated:       0.0000 ACI           (total staked delegated to account from others)
+     staked:          1.0000 LSC           (total stake delegated from account to self)
+     delegated:       0.0000 LSC           (total staked delegated to account from others)
      used:                 0 bytes
      available:        2.304 MiB  
      limit:            2.304 MiB  
 
 cpu bandwidth:
-     staked:          1.0000 ACI           (total stake delegated from account to self)
-     delegated:       0.0000 ACI           (total staked delegated to account from others)
+     staked:          1.0000 LSC           (total stake delegated from account to self)
+     delegated:       0.0000 LSC           (total staked delegated to account from others)
      used:                 0 us   
      available:        460.8 ms   
      limit:            460.8 ms   
@@ -856,15 +856,15 @@ memory:
      quota:     49.74 KiB    used:     3.348 KiB  
 
 net bandwidth:
-     staked:          1.0000 ACI           (total stake delegated from account to self)
-     delegated:       0.0000 ACI           (total staked delegated to account from others)
+     staked:          1.0000 LSC           (total stake delegated from account to self)
+     delegated:       0.0000 LSC           (total staked delegated to account from others)
      used:                 0 bytes
      available:        2.304 MiB  
      limit:            2.304 MiB  
 
 cpu bandwidth:
-     staked:          1.0000 ACI           (total stake delegated from account to self)
-     delegated:       0.0000 ACI           (total staked delegated to account from others)
+     staked:          1.0000 LSC           (total stake delegated from account to self)
+     delegated:       0.0000 LSC           (total staked delegated to account from others)
      used:               413 us   
      available:        460.4 ms   
      limit:            460.8 ms   

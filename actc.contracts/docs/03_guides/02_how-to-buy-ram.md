@@ -16,8 +16,8 @@ Setup an account that require multiple signatures for signing a transaction
 
 ## Steps
 
-Buys RAM in value of 0.1 ACI tokens for account `alice`:
+Buys RAM in value of 0.1 LSC tokens for account `alice`:
 
 ```shell
-clactc system buyram alice alice "0.1 ACI" -p alice@active
+clactc system buyram alice alice "0.1 LSC" -p alice@active
 ```
