@@ -8,8 +8,8 @@ struct contracts {
    static std::vector<char>    system_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.system/gls.system.abi"); }
    static std::vector<uint8_t> token_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/gls.token/gls.token.wasm"); }
    static std::vector<char>    token_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.token/gls.token.abi"); }
-   static std::vector<uint8_t> msig_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/actc.msig/actc.msig.wasm"); }
-   static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/actc.msig/actc.msig.abi"); }
+   static std::vector<uint8_t> msig_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/gls.msig/gls.msig.wasm"); }
+   static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.msig/gls.msig.abi"); }
    static std::vector<uint8_t> wrap_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/gls.wrap/gls.wrap.wasm"); }
    static std::vector<char>    wrap_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/gls.wrap/gls.wrap.abi"); }
    static std::vector<uint8_t> bios_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/actc.bios/actc.bios.wasm"); }
@@ -20,8 +20,8 @@ struct contracts {
       static std::vector<uint8_t> exchange_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/exchange.wasm"); }
       static std::vector<uint8_t> system_wasm_old() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/gls.system.old/gls.system.wasm"); }
       static std::vector<char>    system_abi_old() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/gls.system.old/gls.system.abi"); }
-      static std::vector<uint8_t> msig_wasm_old() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/actc.msig.old/actc.msig.wasm"); }
-      static std::vector<char>    msig_abi_old() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/actc.msig.old/actc.msig.abi"); }
+      static std::vector<uint8_t> msig_wasm_old() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/gls.msig.old/gls.msig.wasm"); }
+      static std::vector<char>    msig_abi_old() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/gls.msig.old/gls.msig.abi"); }
    };
 };
 }} //ns actc::testing

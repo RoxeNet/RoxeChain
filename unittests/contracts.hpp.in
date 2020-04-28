@@ -31,7 +31,7 @@ namespace actc {
       struct contracts {
          // Contracts in `actc/unittests/contracts' directory
          MAKE_READ_WASM_ABI(actc_bios,   actc.bios, contracts)
-         MAKE_READ_WASM_ABI(actc_msig,   actc.msig, contracts)
+         MAKE_READ_WASM_ABI(actc_msig,   gls.msig, contracts)
          MAKE_READ_WASM_ABI(actc_system, gls.system, contracts)
          MAKE_READ_WASM_ABI(actc_token,  gls.token,  contracts)
          MAKE_READ_WASM_ABI(actc_wrap,   gls.wrap,   contracts)

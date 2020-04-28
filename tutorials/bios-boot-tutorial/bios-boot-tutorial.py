@@ -18,7 +18,7 @@ fastUnstakeSystem = './fast.refund/gls.system/gls.system.wasm'
 
 systemAccounts = [
     'gls.bpay',
-    'actc.msig',
+    'gls.msig',
     'gls.names',
     'gls.ram',
     'gls.ramfee',
@@ -289,7 +289,7 @@ def stepStartBoot():
     sleep(1.5)
 def stepInstallSystemContracts():
     run(args.clactc + 'set contract gls.token ' + args.contracts_dir + '/gls.token/')
-    run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + '/actc.msig/')
+    run(args.clactc + 'set contract gls.msig ' + args.contracts_dir + '/gls.msig/')
 def stepCreateTokens():
     run(args.clactc + 'push action gls.token create \'["actc", "10000000000.0000 %s"]\' -p gls.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
@@ -331,7 +331,7 @@ def stepSetSystemContract():
     retry(args.clactc + 'push action actc activate \'["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]\' -p actc')
     # RAM_RESTRICTIONS
     retry(args.clactc + 'push action actc activate \'["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]\' -p actc')
-    run(args.clactc + 'push action actc setpriv' + jsonArg(['actc.msig', 1]) + '-p actc@active')
+    run(args.clactc + 'push action actc setpriv' + jsonArg(['gls.msig', 1]) + '-p actc@active')
 
 def stepInitSystemContract():
     run(args.clactc + 'push action actc init' + jsonArg(['0', '4,' + args.symbol]) + '-p actc@active')

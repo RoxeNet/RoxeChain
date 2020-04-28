@@ -1,18 +1,18 @@
 ## Upgrading the system contract
 
-### Indirect method using actc.msig contract
+### Indirect method using gls.msig contract
 
-Clactc currently provides tools to propose an action with the actc.msig contract, but it does not provide an easy interface to propose a custom transaction.
+Clactc currently provides tools to propose an action with the gls.msig contract, but it does not provide an easy interface to propose a custom transaction.
 
 So, at the moment it is difficult to propose an atomic transaction with multiple actions (for example `actc::setcode` followed by `actc::setabi`).
 
-The advantage of the actc.msig method is that it makes coordination much easier and does not place strict time limits (less than 9 hours) on signature collection.
+The advantage of the gls.msig method is that it makes coordination much easier and does not place strict time limits (less than 9 hours) on signature collection.
 
-The disadvantage of the actc.msig method is that it requires the proposer to have sufficient RAM to propose the transaction and currently clactc does not provide convenient tools to use it with custom transactions like the one that would be necessary to atomically upgrade the system contract.
+The disadvantage of the gls.msig method is that it requires the proposer to have sufficient RAM to propose the transaction and currently clactc does not provide convenient tools to use it with custom transactions like the one that would be necessary to atomically upgrade the system contract.
 
 For now, it is recommended to use the direct method to upgrade the system contract.
 
-### Direct method (avoids using actc.msig contract)
+### Direct method (avoids using gls.msig contract)
 
 Each of the top 21 block producers should do the following:
 

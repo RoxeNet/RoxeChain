@@ -97,7 +97,7 @@ prisyskey=`grep "^Private key:" $logfile | tail -1 | sed "s/^Private key://"`
 echo actc.* keys: $prisyskey $pubsyskey >> $logfile
 wcmd import -n ignition --private-key $prisyskey
 ecmd create account actc gls.bpay $pubsyskey $pubsyskey
-ecmd create account actc actc.msig $pubsyskey $pubsyskey
+ecmd create account actc gls.msig $pubsyskey $pubsyskey
 ecmd create account actc gls.names $pubsyskey $pubsyskey
 ecmd create account actc gls.ram $pubsyskey $pubsyskey
 ecmd create account actc gls.ramfee $pubsyskey $pubsyskey
@@ -108,7 +108,7 @@ ecmd create account actc gls.vpay $pubsyskey $pubsyskey
 ecmd create account actc gls.wrap $pubsyskey $pubsyskey
 
 ecmd set contract gls.token unittests/contracts/gls.token gls.token.wasm gls.token.abi
-ecmd set contract actc.msig unittests/contracts/actc.msig actc.msig.wasm actc.msig.abi
+ecmd set contract gls.msig unittests/contracts/gls.msig gls.msig.wasm gls.msig.abi
 ecmd set contract gls.wrap unittests/contracts/gls.wrap gls.wrap.wasm gls.wrap.abi
 
 echo ===== Start: $step ============ >> $logfile

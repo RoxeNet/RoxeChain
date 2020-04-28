@@ -2,7 +2,7 @@
 
 The ACTC blockchain platform is unique in that the features and characteristics of the blockchain built on it are flexible, that is, they can be changed, or modified completely to suit each business case requirement. Core blockchain features such as consensus, fee schedules, account creation and modification, token economics, block producer registration, voting, multi-sig, etc., are implemented inside smart contracts which are deployed on the blockchain built on the ACTC platform.
 
-Block.one implements and maintains ACTC open source platform which contains, as an example, the system contracts encapsulating the base functionality for an ACTC based blockchain. This document will detail each one of them, [actc.bios](#actcbios-system-contract), [gls.system](#actcsystem-system-contract), [actc.msig](#actcmsig-system-contract), [gls.token](#actctoken-system-contract), [gls.wrap](#actcwrap-system-contract) along with a few other main concepts.
+Block.one implements and maintains ACTC open source platform which contains, as an example, the system contracts encapsulating the base functionality for an ACTC based blockchain. This document will detail each one of them, [actc.bios](#actcbios-system-contract), [gls.system](#actcsystem-system-contract), [gls.msig](#actcmsig-system-contract), [gls.token](#actctoken-system-contract), [gls.wrap](#actcwrap-system-contract) along with a few other main concepts.
 
 ## Concepts
 
@@ -15,7 +15,7 @@ As you just learned the relation between an account and a contract, we are addin
 |Account|Priviledged|Has contract|Description|
 |---|---|---|---|
 |actc|Yes|It contains the `gls.system` contract|The main system account on an ACTC based blockchain.|
-|actc.msig|Yes|It contains the `actc.msig` contract|Allows the signing of a multi-sig transaction proposal for later execution if all required parties sign the proposal before the expiration time.|
+|gls.msig|Yes|It contains the `gls.msig` contract|Allows the signing of a multi-sig transaction proposal for later execution if all required parties sign the proposal before the expiration time.|
 |gls.wrap|Yes|It contains the `gls.wrap` contract.|Simplifies block producer superuser actions by making them more readable and easier to audit.|
 |gls.token|No|It contains the `gls.token` contract.|Defines the structures and actions allowing users to create, issue, and manage tokens on ACTC based blockchains.|
 |gls.names|No|No|The account which is holding funds from namespace auctions.|
@@ -55,7 +55,7 @@ In a ACTC-based network the blockchain is kept alive by nodes which are intercon
 
 1. [actc.bios](#actcbios-system-contract)
 2. [gls.system](#actcsystem-system-contract)
-3. [actc.msig](#actcmsig-system-contract)
+3. [gls.msig](#actcmsig-system-contract)
 4. [gls.token](#actctoken-system-contract)
 5. [gls.wrap](#actcwrap-system-contract)
 
@@ -156,17 +156,17 @@ The actions implemented and publicly exposed by the `gls.system` system contract
 |onblock|This special action is triggered when a block is applied by the given producer and cannot be generated from any other source.|
 |claimrewards|Claim block producing and vote rewards for block producer identified by an account.|
 
-### actc.msig system contract
+### gls.msig system contract
 
-The `actc.msig` allows for the creation of proposed transactions which require authorization from a list of accounts, approval of the proposed transactions by those accounts required to approve it, and finally, it also allows the execution of the approved transactions on the blockchain.
+The `gls.msig` allows for the creation of proposed transactions which require authorization from a list of accounts, approval of the proposed transactions by those accounts required to approve it, and finally, it also allows the execution of the approved transactions on the blockchain.
 
-The workflow to propose, review, approve and then executed a transaction is describe in details [here](./03_guides/06_how-to-sign-a-multisig-transaction-with-actc.msig.md), and in short it can be described by the following:
+The workflow to propose, review, approve and then executed a transaction is describe in details [here](./03_guides/06_how-to-sign-a-multisig-transaction-with-gls.msig.md), and in short it can be described by the following:
 - first you create a transaction json file, 
-- then you submit this proposal to the `actc.msig` contract, and you also insert the account permissions required to approve this proposal into the command that submits the proposal to the blockchain,
-- the proposal then gets stored on the blockchain by the `actc.msig` contract, and is accessible for review and approval to those accounts required to approve it,
-- after each of the appointed accounts required to approve the proposed transactions reviews and approves it, you can execute the proposed transaction.  The `actc.msig` contract will execute it automatically, but not before validating that the transaction has not expired, it is not cancelled, and it has been signed by all the permissions in the initial proposal's required permission list.
+- then you submit this proposal to the `gls.msig` contract, and you also insert the account permissions required to approve this proposal into the command that submits the proposal to the blockchain,
+- the proposal then gets stored on the blockchain by the `gls.msig` contract, and is accessible for review and approval to those accounts required to approve it,
+- after each of the appointed accounts required to approve the proposed transactions reviews and approves it, you can execute the proposed transaction.  The `gls.msig` contract will execute it automatically, but not before validating that the transaction has not expired, it is not cancelled, and it has been signed by all the permissions in the initial proposal's required permission list.
 
-These are the actions implemented and publicly exposed by the `actc.msig` contract:
+These are the actions implemented and publicly exposed by the `gls.msig` contract:
 |Action name|Action description|
 |---|---|
 |propose|Creates a proposal containing one transaction.|

@@ -50,7 +50,7 @@ namespace actc {
  * managing, and/or using an ACTC blockchain. They are provided for reference purposes:
  * - actc.bios
  * - gls.system
- * - actc.msig
+ * - gls.msig
  * - gls.wrap
  *
  * The following unprivileged contract(s) are also part of the system.

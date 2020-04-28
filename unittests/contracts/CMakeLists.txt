@@ -2,7 +2,7 @@
 # these directories go as -isystem <dir> to avoid warnings from code of third-party libraries
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/actc.bios/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/actc.bios/)
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/actc.msig/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/actc.msig/)
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gls.msig/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/gls.msig/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gls.system/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/gls.system/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gls.token/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/gls.token/)
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/gls.wrap/ DESTINATION ${CMAKE_CURRENT_BINARY_DIR}/gls.wrap/)

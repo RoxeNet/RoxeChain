@@ -20,20 +20,20 @@ using mvo = fc::mutable_variant_object;
 class actc_msig_tester : public tester {
 public:
    actc_msig_tester() {
-      create_accounts( { N(actc.msig), N(gls.stake), N(gls.ram), N(gls.ramfee), N(alice), N(bob), N(carol) } );
+      create_accounts( { N(gls.msig), N(gls.stake), N(gls.ram), N(gls.ramfee), N(alice), N(bob), N(carol) } );
       produce_block();
 
       auto trace = base_tester::push_action(config::system_account_name, N(setpriv),
                                             config::system_account_name,  mutable_variant_object()
-                                            ("account", "actc.msig")
+                                            ("account", "gls.msig")
                                             ("is_priv", 1)
       );
 
-      set_code( N(actc.msig), contracts::msig_wasm() );
-      set_abi( N(actc.msig), contracts::msig_abi().data() );
+      set_code( N(gls.msig), contracts::msig_wasm() );
+      set_abi( N(gls.msig), contracts::msig_abi().data() );
 
       produce_blocks();
-      const auto& accnt = control->db().get<account_object,by_name>( N(actc.msig) );
+      const auto& accnt = control->db().get<account_object,by_name>( N(gls.msig) );
       abi_def abi;
       BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
       abi_ser.set_abi(abi, abi_serializer_max_time);
@@ -127,7 +127,7 @@ public:
       vector<account_name> accounts;
       if( auth )
          accounts.push_back( signer );
-      auto trace = base_tester::push_action( N(actc.msig), name, accounts, data );
+      auto trace = base_tester::push_action( N(gls.msig), name, accounts, data );
       produce_block();
       BOOST_REQUIRE_EQUAL( true, chain_has_transaction(trace->id) );
       return trace;
@@ -136,7 +136,7 @@ public:
          string action_type_name = abi_ser.get_action_type(name);
 
          action act;
-         act.account = N(actc.msig);
+         act.account = N(gls.msig);
          act.name = name;
          act.data = abi_ser.variant_to_binary( action_type_name, data, abi_serializer_max_time );
          //std::cout << "test:\n" << fc::to_hex(act.data.data(), act.data.size()) << " size = " << act.data.size() << std::endl;
@@ -747,11 +747,11 @@ BOOST_FIXTURE_TEST_CASE( propose_invalidate_approve, actc_msig_tester ) try {
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( approve_execute_old, actc_msig_tester ) try {
-   set_code( N(actc.msig), contracts::util::msig_wasm_old() );
-   set_abi( N(actc.msig), contracts::util::msig_abi_old().data() );
+   set_code( N(gls.msig), contracts::util::msig_wasm_old() );
+   set_abi( N(gls.msig), contracts::util::msig_abi_old().data() );
    produce_blocks();
 
-   //propose with old version of actc.msig
+   //propose with old version of gls.msig
    auto trx = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time );
    push_action( N(alice), N(propose), mvo()
                   ("proposer",      "alice")
@@ -760,8 +760,8 @@ BOOST_FIXTURE_TEST_CASE( approve_execute_old, actc_msig_tester ) try {
                   ("requested", vector<permission_level>{{ N(alice), config::active_name }})
    );
 
-   set_code( N(actc.msig), contracts::msig_wasm() );
-   set_abi( N(actc.msig), contracts::msig_abi().data() );
+   set_code( N(gls.msig), contracts::msig_wasm() );
+   set_abi( N(gls.msig), contracts::msig_abi().data() );
    produce_blocks();
 
    //approve and execute with new version
@@ -792,11 +792,11 @@ BOOST_FIXTURE_TEST_CASE( approve_execute_old, actc_msig_tester ) try {
 
 
 BOOST_FIXTURE_TEST_CASE( approve_unapprove_old, actc_msig_tester ) try {
-   set_code( N(actc.msig), contracts::util::msig_wasm_old() );
-   set_abi( N(actc.msig), contracts::util::msig_abi_old().data() );
+   set_code( N(gls.msig), contracts::util::msig_wasm_old() );
+   set_abi( N(gls.msig), contracts::util::msig_abi_old().data() );
    produce_blocks();
 
-   //propose with old version of actc.msig
+   //propose with old version of gls.msig
    auto trx = reqauth("alice", {permission_level{N(alice), config::active_name}}, abi_serializer_max_time );
    push_action( N(alice), N(propose), mvo()
                   ("proposer",      "alice")
@@ -812,8 +812,8 @@ BOOST_FIXTURE_TEST_CASE( approve_unapprove_old, actc_msig_tester ) try {
                   ("level",         permission_level{ N(alice), config::active_name })
    );
 
-   set_code( N(actc.msig), contracts::msig_wasm() );
-   set_abi( N(actc.msig), contracts::msig_abi().data() );
+   set_code( N(gls.msig), contracts::msig_wasm() );
+   set_abi( N(gls.msig), contracts::msig_abi().data() );
    produce_blocks();
 
    //unapprove with old version
@@ -835,8 +835,8 @@ BOOST_FIXTURE_TEST_CASE( approve_unapprove_old, actc_msig_tester ) try {
 } FC_LOG_AND_RETHROW()
 
 BOOST_FIXTURE_TEST_CASE( approve_by_two_old, actc_msig_tester ) try {
-   set_code( N(actc.msig), contracts::util::msig_wasm_old() );
-   set_abi( N(actc.msig), contracts::util::msig_abi_old().data() );
+   set_code( N(gls.msig), contracts::util::msig_wasm_old() );
+   set_abi( N(gls.msig), contracts::util::msig_abi_old().data() );
    produce_blocks();
 
    auto trx = reqauth("alice", vector<permission_level>{ { N(alice), config::active_name }, { N(bob), config::active_name } }, abi_serializer_max_time );
@@ -854,8 +854,8 @@ BOOST_FIXTURE_TEST_CASE( approve_by_two_old, actc_msig_tester ) try {
                   ("level",         permission_level{ N(alice), config::active_name })
    );
 
-   set_code( N(actc.msig), contracts::msig_wasm() );
-   set_abi( N(actc.msig), contracts::msig_abi().data() );
+   set_code( N(gls.msig), contracts::msig_wasm() );
+   set_abi( N(gls.msig), contracts::msig_abi().data() );
    produce_blocks();
 
    //fail because approval by bob is missing

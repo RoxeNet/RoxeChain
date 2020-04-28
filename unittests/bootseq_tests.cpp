@@ -192,28 +192,28 @@ BOOST_AUTO_TEST_SUITE(bootseq_tests)
 BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
     try {
 
-        // Create actc.msig and gls.token
-        create_accounts({N(actc.msig), N(gls.token), N(gls.ram), N(gls.ramfee), N(gls.stake), N(gls.vpay), N(gls.bpay), N(gls.saving) });
+        // Create gls.msig and gls.token
+        create_accounts({N(gls.msig), N(gls.token), N(gls.ram), N(gls.ramfee), N(gls.stake), N(gls.vpay), N(gls.bpay), N(gls.saving) });
         // Set code for the following accounts:
         //  - actc (code: actc.bios) (already set by tester constructor)
-        //  - actc.msig (code: actc.msig)
+        //  - gls.msig (code: gls.msig)
         //  - gls.token (code: gls.token)
-        // set_code_abi(N(actc.msig), contracts::actc_msig_wasm(), contracts::actc_msig_abi().data());//, &actc_active_pk);
+        // set_code_abi(N(gls.msig), contracts::actc_msig_wasm(), contracts::actc_msig_abi().data());//, &actc_active_pk);
         // set_code_abi(N(gls.token), contracts::actc_token_wasm(), contracts::actc_token_abi().data()); //, &actc_active_pk);
 
-        set_code_abi(N(actc.msig),
+        set_code_abi(N(gls.msig),
                      contracts::actc_msig_wasm(),
                      contracts::actc_msig_abi().data());//, &actc_active_pk);
         set_code_abi(N(gls.token),
                      contracts::actc_token_wasm(),
                      contracts::actc_token_abi().data()); //, &actc_active_pk);
 
-        // Set privileged for actc.msig and gls.token
-        set_privileged(N(actc.msig));
+        // Set privileged for gls.msig and gls.token
+        set_privileged(N(gls.msig));
         set_privileged(N(gls.token));
 
-        // Verify actc.msig and gls.token is privileged
-        const auto& actc_msig_acc = get<account_metadata_object, by_name>(N(actc.msig));
+        // Verify gls.msig and gls.token is privileged
+        const auto& actc_msig_acc = get<account_metadata_object, by_name>(N(gls.msig));
         BOOST_TEST(actc_msig_acc.is_privileged() == true);
         const auto& actc_token_acc = get<account_metadata_object, by_name>(N(gls.token));
         BOOST_TEST(actc_token_acc.is_privileged() == true);

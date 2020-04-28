@@ -15,7 +15,7 @@
           "contracts/gls.wrap/include/gls.wrap/",
           "contracts/actc.bios/include/actc.bios/",
           "contracts/gls.system/include/gls.system/",
-          "contracts/actc.msig/include/actc.msig/"
+          "contracts/gls.msig/include/gls.msig/"
         ],
         "output_dir": "action-reference"
       }

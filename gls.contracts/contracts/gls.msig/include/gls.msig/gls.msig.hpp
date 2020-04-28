@@ -8,12 +8,12 @@
 namespace actc {
     
    /**
-    * @defgroup actcmsig actc.msig
+    * @defgroup actcmsig gls.msig
     * @ingroup actccontracts
-    * actc.msig contract defines the structures and actions needed to manage the proposals and approvals on blockchain.
+    * gls.msig contract defines the structures and actions needed to manage the proposals and approvals on blockchain.
     * @{
     */
-   class [[actc::contract("actc.msig")]] multisig : public contract {
+   class [[actc::contract("gls.msig")]] multisig : public contract {
       public:
          using contract::contract;
 
@@ -170,5 +170,5 @@ namespace actc {
 
          typedef actc::multi_index< "invals"_n, invalidation > invalidations;
    };
-   /** @}*/ // end of @defgroup actcmsig actc.msig
+   /** @}*/ // end of @defgroup actcmsig gls.msig
 } /// namespace actc

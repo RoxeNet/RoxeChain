@@ -6,9 +6,9 @@ The design of the ACTC blockchain calls for a number of smart contracts that are
 
 This repository contains examples of these privileged contracts that are useful when deploying, managing, and/or using an ACTC blockchain.  They are provided for reference purposes:
 
-   * [actc.bios](./contracts/actc.bios)
+   * [gls.bios](./contracts/gls.bios)
    * [gls.system](./contracts/gls.system)
-   * [actc.msig](./contracts/actc.msig)
+   * [gls.msig](./contracts/gls.msig)
    * [gls.wrap](./contracts/gls.wrap)
 
 The following unprivileged contract(s) are also part of the system.

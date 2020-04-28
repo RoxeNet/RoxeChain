@@ -2538,7 +2538,7 @@ BOOST_FIXTURE_TEST_CASE(producers_upgrade_system_contract, actc_system_tester) t
          string action_type_name = msig_abi_ser.get_action_type(name);
 
          action act;
-         act.account = N(actc.msig);
+         act.account = N(gls.msig);
          act.name = name;
          act.data = msig_abi_ser.variant_to_binary( action_type_name, data, abi_serializer_max_time );
 
@@ -3320,7 +3320,7 @@ BOOST_FIXTURE_TEST_CASE( setparams, actc_system_tester ) try {
          string action_type_name = msig_abi_ser.get_action_type(name);
 
          action act;
-         act.account = N(actc.msig);
+         act.account = N(gls.msig);
          act.name = name;
          act.data = msig_abi_ser.variant_to_binary( action_type_name, data, abi_serializer_max_time );
 

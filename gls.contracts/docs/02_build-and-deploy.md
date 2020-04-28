@@ -55,10 +55,10 @@ Let's assume your account name to which you want to deploy the contract is `test
 clactc set contract testerbios you_local_path_to/gls.contracts/build/contracts/actc.bios/ -p testerbios
 ```
 
-### To deploy actc.msig contract execute the following command:
+### To deploy gls.msig contract execute the following command:
 Let's assume your account name to which you want to deploy the contract is `testermsig`
 ```
-clactc set contract testermsig you_local_path_to/gls.contracts/build/contracts/actc.msig/ -p testermsig
+clactc set contract testermsig you_local_path_to/gls.contracts/build/contracts/gls.msig/ -p testermsig
 ```
 
 ### To deploy gls.system contract execute the following command:

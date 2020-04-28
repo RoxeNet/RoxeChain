@@ -2,7 +2,7 @@
 #include <actc/crypto.hpp>
 #include <actc/permission.hpp>
 
-#include <actc.msig/actc.msig.hpp>
+#include <gls.msig/gls.msig.hpp>
 
 namespace actc {
 
