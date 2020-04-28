@@ -24,12 +24,12 @@ The `bios-boot-tutorial.py` script simulates the ACTC bios boot sequence.
 2. Install actc.cdt binaries by following the steps outlined in below tutorial
 [Install actc.cdt binaries](https://github.com/ACTC/actc.cdt#binary-releases)
 
-3. Compile actc.contracts
+3. Compile gls.contracts
 
 ```bash
 $ cd ~
-$ git clone https://github.com/ACTC/actc.contracts.git
-$ cd ./actc.contracts/
+$ git clone https://github.com/ACTC/gls.contracts.git
+$ cd ./gls.contracts/
 $ ./build.sh
 $ cd ./build/contracts/
 $ pwd

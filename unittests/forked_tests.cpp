@@ -150,25 +150,25 @@ BOOST_AUTO_TEST_CASE( forking ) try {
    wlog("set producer schedule to [dan,sam,pam]");
    c.produce_blocks(30);
 
-   auto r2 = c.create_accounts( {N(actc.token)} );
+   auto r2 = c.create_accounts( {N(gls.token)} );
    wdump((fc::json::to_pretty_string(r2)));
-   c.set_code( N(actc.token), contracts::actc_token_wasm() );
-   c.set_abi( N(actc.token), contracts::actc_token_abi().data() );
+   c.set_code( N(gls.token), contracts::actc_token_wasm() );
+   c.set_abi( N(gls.token), contracts::actc_token_abi().data() );
    c.produce_blocks(10);
 
 
-   auto cr = c.push_action( N(actc.token), N(create), N(actc.token), mutable_variant_object()
+   auto cr = c.push_action( N(gls.token), N(create), N(gls.token), mutable_variant_object()
               ("issuer",       "actc" )
               ("maximum_supply", core_from_string("10000000.0000"))
       );
 
-   cr = c.push_action( N(actc.token), N(issue), config::system_account_name, mutable_variant_object()
+   cr = c.push_action( N(gls.token), N(issue), config::system_account_name, mutable_variant_object()
               ("to",       "actc" )
               ("quantity", core_from_string("100.0000"))
               ("memo", "")
       );
 
-   cr = c.push_action( N(actc.token), N(transfer), config::system_account_name, mutable_variant_object()
+   cr = c.push_action( N(gls.token), N(transfer), config::system_account_name, mutable_variant_object()
               ("from",     "actc")
               ("to",       "dan" )
               ("quantity", core_from_string("100.0000"))

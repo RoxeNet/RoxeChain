@@ -32,9 +32,9 @@ namespace actc {
          // Contracts in `actc/unittests/contracts' directory
          MAKE_READ_WASM_ABI(actc_bios,   actc.bios, contracts)
          MAKE_READ_WASM_ABI(actc_msig,   actc.msig, contracts)
-         MAKE_READ_WASM_ABI(actc_system, actc.system, contracts)
-         MAKE_READ_WASM_ABI(actc_token,  actc.token,  contracts)
-         MAKE_READ_WASM_ABI(actc_wrap,   actc.wrap,   contracts)
+         MAKE_READ_WASM_ABI(actc_system, gls.system, contracts)
+         MAKE_READ_WASM_ABI(actc_token,  gls.token,  contracts)
+         MAKE_READ_WASM_ABI(actc_wrap,   gls.wrap,   contracts)
 
          MAKE_READ_WASM_ABI(before_preactivate_actc_bios,   actc.bios, contracts/old_versions/v1.6.0-rc3)
 

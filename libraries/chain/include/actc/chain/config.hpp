@@ -24,7 +24,7 @@ const static auto default_state_guard_size      =    128*1024*1024ll;
 
 
 const static uint64_t system_account_name    = N(actc);
-const static uint64_t null_account_name      = N(actc.null);
+const static uint64_t null_account_name      = N(gls.null);
 const static uint64_t producers_account_name = N(actc.prods);
 
 // Active permission of producers account requires greater than 2/3 of the producers to authorize

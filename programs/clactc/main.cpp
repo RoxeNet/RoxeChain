@@ -696,7 +696,7 @@ asset to_asset( account_name code, const string& s ) {
 }
 
 inline asset to_asset( const string& s ) {
-   return to_asset( N(actc.token), s );
+   return to_asset( N(gls.token), s );
 }
 
 struct set_account_permission_subcommand {
@@ -3061,7 +3061,7 @@ int main( int argc, char** argv ) {
    auto setActionPermission = set_action_permission_subcommand(setAction);
 
    // Transfer subcommand
-   string con = "actc.token";
+   string con = "gls.token";
    string sender;
    string recipient;
    string amount;
@@ -3839,7 +3839,7 @@ int main( int argc, char** argv ) {
    wrap->require_subcommand();
 
    // wrap exec
-   string wrap_con = "actc.wrap";
+   string wrap_con = "gls.wrap";
    executer = "";
    string trx_to_exec;
    auto wrap_exec = wrap->add_subcommand("exec", localized("Execute a transaction while bypassing authorization checks"));
@@ -3867,7 +3867,7 @@ int main( int argc, char** argv ) {
    });
 
    // system subcommand
-   auto system = app.add_subcommand("system", localized("Send actc.system contract action to the blockchain."), false);
+   auto system = app.add_subcommand("system", localized("Send gls.system contract action to the blockchain."), false);
    system->require_subcommand();
 
    auto createAccountSystem = create_account_subcommand( system, false /*simple*/ );

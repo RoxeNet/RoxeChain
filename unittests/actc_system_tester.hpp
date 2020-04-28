@@ -39,22 +39,22 @@ public:
 
       produce_blocks( 2 );
 
-      create_accounts({ N(actc.token), N(actc.ram), N(actc.ramfee), N(actc.stake),
-               N(actc.bpay), N(actc.vpay), N(actc.saving), N(actc.names) });
+      create_accounts({ N(gls.token), N(gls.ram), N(gls.ramfee), N(gls.stake),
+               N(gls.bpay), N(gls.vpay), N(gls.saving), N(gls.names) });
 
       produce_blocks( 100 );
 
-      set_code( N(actc.token), contracts::actc_token_wasm() );
-      set_abi( N(actc.token), contracts::actc_token_abi().data() );
+      set_code( N(gls.token), contracts::actc_token_wasm() );
+      set_abi( N(gls.token), contracts::actc_token_abi().data() );
 
       {
-         const auto& accnt = control->db().get<account_object,by_name>( N(actc.token) );
+         const auto& accnt = control->db().get<account_object,by_name>( N(gls.token) );
          abi_def abi;
          BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
          token_abi_ser.set_abi(abi, abi_serializer_max_time);
       }
 
-      create_currency( N(actc.token), config::system_account_name, core_from_string("10000000000.0000") );
+      create_currency( N(gls.token), config::system_account_name, core_from_string("10000000000.0000") );
       issue(config::system_account_name,      core_from_string("1000000000.0000"));
       BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance( "actc" ) );
 
@@ -79,7 +79,7 @@ public:
       create_account_with_resources( N(bob111111111), config::system_account_name, core_from_string("0.4500"), false );
       create_account_with_resources( N(carol1111111), config::system_account_name, core_from_string("1.0000"), false );
 
-      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("actc")  + get_balance("actc.ramfee") + get_balance("actc.stake") + get_balance("actc.ram") );
+      BOOST_REQUIRE_EQUAL( core_from_string("1000000000.0000"), get_balance("actc")  + get_balance("gls.ramfee") + get_balance("gls.stake") + get_balance("gls.ram") );
    }
 
    action_result open( account_name  owner,
@@ -335,7 +335,7 @@ public:
    }
 
    asset get_balance( const account_name& act ) {
-      vector<char> data = get_row_by_account( N(actc.token), act, N(accounts), symbol(CORE_SYMBOL).to_symbol_code().value );
+      vector<char> data = get_row_by_account( N(gls.token), act, N(accounts), symbol(CORE_SYMBOL).to_symbol_code().value );
       return data.empty() ? asset(0, symbol(CORE_SYMBOL)) : token_abi_ser.binary_to_variant("account", data, abi_serializer_max_time)["balance"].as<asset>();
    }
 
@@ -363,14 +363,14 @@ public:
    }
 
    void issue( name to, const asset& amount, name manager = config::system_account_name ) {
-      base_tester::push_action( N(actc.token), N(issue), manager, mutable_variant_object()
+      base_tester::push_action( N(gls.token), N(issue), manager, mutable_variant_object()
                                 ("to",      to )
                                 ("quantity", amount )
                                 ("memo", "")
                                 );
    }
    void transfer( name from, name to, const asset& amount, name manager = config::system_account_name ) {
-      base_tester::push_action( N(actc.token), N(transfer), manager, mutable_variant_object()
+      base_tester::push_action( N(gls.token), N(transfer), manager, mutable_variant_object()
                                 ("from",    from)
                                 ("to",      to )
                                 ("quantity", amount)
@@ -390,7 +390,7 @@ public:
    fc::variant get_stats( const string& symbolname ) {
       auto symb = actc::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account( N(actc.token), symbol_code, N(stat), symbol_code );
+      vector<char> data = get_row_by_account( N(gls.token), symbol_code, N(stat), symbol_code );
       return data.empty() ? fc::variant() : token_abi_ser.binary_to_variant( "currency_stats", data, abi_serializer_max_time );
    }
 

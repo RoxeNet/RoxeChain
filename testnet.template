@@ -96,31 +96,31 @@ pubsyskey=`grep "^Public key:" $logfile | tail -1 | sed "s/^Public key://"`
 prisyskey=`grep "^Private key:" $logfile | tail -1 | sed "s/^Private key://"`
 echo actc.* keys: $prisyskey $pubsyskey >> $logfile
 wcmd import -n ignition --private-key $prisyskey
-ecmd create account actc actc.bpay $pubsyskey $pubsyskey
+ecmd create account actc gls.bpay $pubsyskey $pubsyskey
 ecmd create account actc actc.msig $pubsyskey $pubsyskey
-ecmd create account actc actc.names $pubsyskey $pubsyskey
-ecmd create account actc actc.ram $pubsyskey $pubsyskey
-ecmd create account actc actc.ramfee $pubsyskey $pubsyskey
-ecmd create account actc actc.saving $pubsyskey $pubsyskey
-ecmd create account actc actc.stake $pubsyskey $pubsyskey
-ecmd create account actc actc.token $pubsyskey $pubsyskey
-ecmd create account actc actc.vpay $pubsyskey $pubsyskey
-ecmd create account actc actc.wrap $pubsyskey $pubsyskey
+ecmd create account actc gls.names $pubsyskey $pubsyskey
+ecmd create account actc gls.ram $pubsyskey $pubsyskey
+ecmd create account actc gls.ramfee $pubsyskey $pubsyskey
+ecmd create account actc gls.saving $pubsyskey $pubsyskey
+ecmd create account actc gls.stake $pubsyskey $pubsyskey
+ecmd create account actc gls.token $pubsyskey $pubsyskey
+ecmd create account actc gls.vpay $pubsyskey $pubsyskey
+ecmd create account actc gls.wrap $pubsyskey $pubsyskey
 
-ecmd set contract actc.token unittests/contracts/actc.token actc.token.wasm actc.token.abi
+ecmd set contract gls.token unittests/contracts/gls.token gls.token.wasm gls.token.abi
 ecmd set contract actc.msig unittests/contracts/actc.msig actc.msig.wasm actc.msig.abi
-ecmd set contract actc.wrap unittests/contracts/actc.wrap actc.wrap.wasm actc.wrap.abi
+ecmd set contract gls.wrap unittests/contracts/gls.wrap gls.wrap.wasm gls.wrap.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 LSC" ]' -p actc.token | tee -a $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 LSC", "memo" ]' -p actc | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action gls.token create '[ "actc", "10000000000.0000 LSC" ]' -p gls.token | tee -a $logfile
+echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action gls.token issue '[ "actc", "1000000000.0000 LSC", "memo" ]' -p actc | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 LSC" ]' -p actc.token >> $logfile 2>&1
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 LSC", "memo" ]' -p actc >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action gls.token create '[ "actc", "10000000000.0000 LSC" ]' -p gls.token >> $logfile 2>&1
+programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action gls.token issue '[ "actc", "1000000000.0000 LSC", "memo" ]' -p actc >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
-ecmd set contract actc unittests/contracts/actc.system actc.system.wasm actc.system.abi
+ecmd set contract actc unittests/contracts/gls.system gls.system.wasm gls.system.abi
 programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc init '[0, "4,LSC"]' -p actc >> $logfile 2>&1
 
 # Manual deployers, add a series of lines below this block that looks like:

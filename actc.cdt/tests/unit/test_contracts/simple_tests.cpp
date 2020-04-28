@@ -22,7 +22,7 @@ class [[actc::contract]] simple_tests : public contract {
 
       [[actc::action("test4")]]
       void test4(name to) {
-         transfer_contract::transfer_action trans("actc.token"_n, {_self, "active"_n});
+         transfer_contract::transfer_action trans("gls.token"_n, {_self, "active"_n});
          trans.send(_self, to, asset{100, {"TST", 4}}, "memo");
       }
 
@@ -61,15 +61,15 @@ class [[actc::contract]] simple_tests : public contract {
          t.send(nm.value, get_self());
       }
 
-      [[actc::on_notify("actc.token::transfer")]]
+      [[actc::on_notify("gls.token::transfer")]]
       void on_transfer(name from, name to, asset quant, std::string memo) {
-         check(get_first_receiver() == "actc.token"_n, "should be actc.token");
+         check(get_first_receiver() == "gls.token"_n, "should be gls.token");
          print_f("On notify : % % % %", from, to, quant, memo);
       }
 
       [[actc::on_notify("*::transfer")]]
       void on_transfer2(name from, name to, asset quant, std::string memo) {
-         check(get_first_receiver() != "actc.token"_n, "should not be actc.token");
+         check(get_first_receiver() != "gls.token"_n, "should not be gls.token");
          print_f("On notify 2 : % % % %", from, to, quant, memo);
       }
 

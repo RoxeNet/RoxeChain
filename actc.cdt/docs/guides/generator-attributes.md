@@ -54,9 +54,9 @@ This will mark this `class` as being an `ACTC` contract, this allows for namespa
 
 #### [[actc::on_notify("\<valid actc account name\>::\<valid actc action name\>")]]
 ```
-[[actc::on_notify("actc.token::transfer")]]
+[[actc::on_notify("gls.token::transfer")]]
 void on_token_transfer(name from, name to, asset quantity, std::string memo) {
-   do something on transfer from actc.token...
+   do something on transfer from gls.token...
 }
 
 [[actc::on_notify("*::transfer")]]

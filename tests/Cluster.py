@@ -165,7 +165,7 @@ class Cluster(object):
         pfSetupPolicy: determine the protocol feature setup policy (none, preactivate_feature_only, or full)
         alternateVersionLabelsFile: Supply an alternate version labels file to use with associatedNodeLabels.
         associatedNodeLabels: Supply a dictionary of node numbers to use an alternate label for a specific node.
-        loadSystemContract: indicate whether the actc.system contract should be loaded (setting this to False causes useBiosBootFile to be treated as False)
+        loadSystemContract: indicate whether the gls.system contract should be loaded (setting this to False causes useBiosBootFile to be treated as False)
         """
         assert(isinstance(topo, str))
         assert PFSetupPolicy.isValid(pfSetupPolicy)
@@ -1006,7 +1006,7 @@ class Cluster(object):
         initialFunds="1000000.0000 {0}".format(CORE_SYMBOL)
         Utils.Print("Transfer initial fund %s to individual accounts." % (initialFunds))
         trans=None
-        contract="actc.token"
+        contract="gls.token"
         action="transfer"
         for name, keys in producerKeys.items():
             data="{\"from\":\"actc\",\"to\":\"%s\",\"quantity\":\"%s\",\"memo\":\"%s\"}" % (name, initialFunds, "init actc transfer")
@@ -1014,7 +1014,7 @@ class Cluster(object):
             if name != "actc":
                 trans=biosNode.pushMessage(contract, action, data, opts)
                 if trans is None or not trans[0]:
-                    Utils.Print("ERROR: Failed to transfer funds from actc.token to %s." % (name))
+                    Utils.Print("ERROR: Failed to transfer funds from gls.token to %s." % (name))
                     return None
 
             Node.validateTransaction(trans[1])
@@ -1168,28 +1168,28 @@ class Cluster(object):
         if onlySetProds: return biosNode
 
         actcTokenAccount=copy.deepcopy(actcAccount)
-        actcTokenAccount.name="actc.token"
+        actcTokenAccount.name="gls.token"
         trans=biosNode.createAccount(actcTokenAccount, actcAccount, 0)
         if trans is None:
             Utils.Print("ERROR: Failed to create account %s" % (actcTokenAccount.name))
             return None
 
         actcRamAccount=copy.deepcopy(actcAccount)
-        actcRamAccount.name="actc.ram"
+        actcRamAccount.name="gls.ram"
         trans=biosNode.createAccount(actcRamAccount, actcAccount, 0)
         if trans is None:
             Utils.Print("ERROR: Failed to create account %s" % (actcRamAccount.name))
             return None
 
         actcRamfeeAccount=copy.deepcopy(actcAccount)
-        actcRamfeeAccount.name="actc.ramfee"
+        actcRamfeeAccount.name="gls.ramfee"
         trans=biosNode.createAccount(actcRamfeeAccount, actcAccount, 0)
         if trans is None:
             Utils.Print("ERROR: Failed to create account %s" % (actcRamfeeAccount.name))
             return None
 
         actcStakeAccount=copy.deepcopy(actcAccount)
-        actcStakeAccount.name="actc.stake"
+        actcStakeAccount.name="gls.stake"
         trans=biosNode.createAccount(actcStakeAccount, actcAccount, 0)
         if trans is None:
             Utils.Print("ERROR: Failed to create account %s" % (actcStakeAccount.name))
@@ -1201,7 +1201,7 @@ class Cluster(object):
             Utils.Print("ERROR: Failed to validate transaction %s got rolled into a block on server port %d." % (transId, biosNode.port))
             return None
 
-        contract="actc.token"
+        contract="gls.token"
         contractDir="unittests/contracts/%s" % (contract)
         wasmFile="%s.wasm" % (contract)
         abiFile="%s.abi" % (contract)
@@ -1257,7 +1257,7 @@ class Cluster(object):
             return None
 
         if loadSystemContract:
-            contract="actc.system"
+            contract="gls.system"
             contractDir="unittests/contracts/%s" % (contract)
             wasmFile="%s.wasm" % (contract)
             abiFile="%s.abi" % (contract)

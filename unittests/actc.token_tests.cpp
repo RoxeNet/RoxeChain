@@ -28,15 +28,15 @@ public:
    actc_token_tester() {
       produce_blocks( 2 );
 
-      create_accounts( { N(alice), N(bob), N(carol), N(actc.token) } );
+      create_accounts( { N(alice), N(bob), N(carol), N(gls.token) } );
       produce_blocks( 2 );
 
-      set_code( N(actc.token), contracts::actc_token_wasm() );
-      set_abi( N(actc.token), contracts::actc_token_abi().data() );
+      set_code( N(gls.token), contracts::actc_token_wasm() );
+      set_abi( N(gls.token), contracts::actc_token_abi().data() );
 
       produce_blocks();
 
-      const auto& accnt = control->db().get<account_object,by_name>( N(actc.token) );
+      const auto& accnt = control->db().get<account_object,by_name>( N(gls.token) );
       abi_def abi;
       BOOST_REQUIRE_EQUAL(abi_serializer::to_abi(accnt.abi, abi), true);
       abi_ser.set_abi(abi, abi_serializer_max_time);
@@ -46,7 +46,7 @@ public:
       string action_type_name = abi_ser.get_action_type(name);
 
       action act;
-      act.account = N(actc.token);
+      act.account = N(gls.token);
       act.name    = name;
       act.data    = abi_ser.variant_to_binary( action_type_name, data, abi_serializer_max_time );
 
@@ -57,7 +57,7 @@ public:
    {
       auto symb = actc::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account( N(actc.token), symbol_code, N(stat), symbol_code );
+      vector<char> data = get_row_by_account( N(gls.token), symbol_code, N(stat), symbol_code );
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "currency_stats", data, abi_serializer_max_time );
    }
 
@@ -65,14 +65,14 @@ public:
    {
       auto symb = actc::chain::symbol::from_string(symbolname);
       auto symbol_code = symb.to_symbol_code().value;
-      vector<char> data = get_row_by_account( N(actc.token), acc, N(accounts), symbol_code );
+      vector<char> data = get_row_by_account( N(gls.token), acc, N(accounts), symbol_code );
       return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "account", data, abi_serializer_max_time );
    }
 
    action_result create( account_name issuer,
                 asset        maximum_supply ) {
 
-      return push_action( N(actc.token), N(create), mvo()
+      return push_action( N(gls.token), N(create), mvo()
            ( "issuer", issuer)
            ( "maximum_supply", maximum_supply)
       );

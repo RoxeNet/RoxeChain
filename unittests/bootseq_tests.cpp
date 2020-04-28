@@ -167,7 +167,7 @@ public:
     }
 
     asset get_balance( const account_name& act ) {
-         return get_currency_balance(N(actc.token), symbol(CORE_SYMBOL), act);
+         return get_currency_balance(N(gls.token), symbol(CORE_SYMBOL), act);
     }
 
     void set_code_abi(const account_name& account, const vector<uint8_t>& wasm, const char* abi, const private_key_type* signer = nullptr) {
@@ -192,39 +192,39 @@ BOOST_AUTO_TEST_SUITE(bootseq_tests)
 BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
     try {
 
-        // Create actc.msig and actc.token
-        create_accounts({N(actc.msig), N(actc.token), N(actc.ram), N(actc.ramfee), N(actc.stake), N(actc.vpay), N(actc.bpay), N(actc.saving) });
+        // Create actc.msig and gls.token
+        create_accounts({N(actc.msig), N(gls.token), N(gls.ram), N(gls.ramfee), N(gls.stake), N(gls.vpay), N(gls.bpay), N(gls.saving) });
         // Set code for the following accounts:
         //  - actc (code: actc.bios) (already set by tester constructor)
         //  - actc.msig (code: actc.msig)
-        //  - actc.token (code: actc.token)
+        //  - gls.token (code: gls.token)
         // set_code_abi(N(actc.msig), contracts::actc_msig_wasm(), contracts::actc_msig_abi().data());//, &actc_active_pk);
-        // set_code_abi(N(actc.token), contracts::actc_token_wasm(), contracts::actc_token_abi().data()); //, &actc_active_pk);
+        // set_code_abi(N(gls.token), contracts::actc_token_wasm(), contracts::actc_token_abi().data()); //, &actc_active_pk);
 
         set_code_abi(N(actc.msig),
                      contracts::actc_msig_wasm(),
                      contracts::actc_msig_abi().data());//, &actc_active_pk);
-        set_code_abi(N(actc.token),
+        set_code_abi(N(gls.token),
                      contracts::actc_token_wasm(),
                      contracts::actc_token_abi().data()); //, &actc_active_pk);
 
-        // Set privileged for actc.msig and actc.token
+        // Set privileged for actc.msig and gls.token
         set_privileged(N(actc.msig));
-        set_privileged(N(actc.token));
+        set_privileged(N(gls.token));
 
-        // Verify actc.msig and actc.token is privileged
+        // Verify actc.msig and gls.token is privileged
         const auto& actc_msig_acc = get<account_metadata_object, by_name>(N(actc.msig));
         BOOST_TEST(actc_msig_acc.is_privileged() == true);
-        const auto& actc_token_acc = get<account_metadata_object, by_name>(N(actc.token));
+        const auto& actc_token_acc = get<account_metadata_object, by_name>(N(gls.token));
         BOOST_TEST(actc_token_acc.is_privileged() == true);
 
 
-        // Create LSC tokens in actc.token, set its manager as actc
+        // Create LSC tokens in gls.token, set its manager as actc
         auto max_supply = core_from_string("10000000000.0000"); /// 1x larger than 1B initial tokens
         auto initial_supply = core_from_string("1000000000.0000"); /// 1x larger than 1B initial tokens
-        create_currency(N(actc.token), config::system_account_name, max_supply);
-        // Issue the genesis supply of 1 billion LSC tokens to actc.system
-        issue(N(actc.token), config::system_account_name, config::system_account_name, initial_supply);
+        create_currency(N(gls.token), config::system_account_name, max_supply);
+        // Issue the genesis supply of 1 billion LSC tokens to gls.system
+        issue(N(gls.token), config::system_account_name, config::system_account_name, initial_supply);
 
         auto actual = get_balance(config::system_account_name);
         BOOST_REQUIRE_EQUAL(initial_supply, actual);
@@ -246,7 +246,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            auto r = buyram(config::system_account_name, a.aname, asset(ram));
            BOOST_REQUIRE( !r->except_ptr );
 
-           r = delegate_bandwidth(N(actc.stake), a.aname, asset(net), asset(cpu));
+           r = delegate_bandwidth(N(gls.stake), a.aname, asset(net), asset(cpu));
            BOOST_REQUIRE( !r->except_ptr );
         }
 

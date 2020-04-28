@@ -872,7 +872,7 @@ class Node(object):
     def getAccountActcBalanceStr(self, scope):
         """Returns LSC currency0000 account balance from clactc get table command. Returned balance is string following syntax "98.0311 LSC". """
         assert isinstance(scope, str)
-        amount=self.getTableAccountBalance("actc.token", scope)
+        amount=self.getTableAccountBalance("gls.token", scope)
         if Utils.Debug: Utils.Print("getNodeAccountActcBalance %s %s" % (scope, amount))
         assert isinstance(amount, str)
         return amount

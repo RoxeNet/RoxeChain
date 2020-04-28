@@ -70,15 +70,15 @@ class whitelist_blacklist_tester {
 
          if( !bootstrap ) return;
 
-         chain->create_accounts({N(actc.token), N(alice), N(bob), N(charlie)});
-         chain->set_code(N(actc.token), contracts::actc_token_wasm() );
-         chain->set_abi(N(actc.token), contracts::actc_token_abi().data() );
-         chain->push_action( N(actc.token), N(create), N(actc.token), mvo()
-              ( "issuer", "actc.token" )
+         chain->create_accounts({N(gls.token), N(alice), N(bob), N(charlie)});
+         chain->set_code(N(gls.token), contracts::actc_token_wasm() );
+         chain->set_abi(N(gls.token), contracts::actc_token_abi().data() );
+         chain->push_action( N(gls.token), N(create), N(gls.token), mvo()
+              ( "issuer", "gls.token" )
               ( "maximum_supply", "1000000.00 TOK" )
          );
-         chain->push_action( N(actc.token), N(issue), N(actc.token), mvo()
-              ( "to", "actc.token" )
+         chain->push_action( N(gls.token), N(issue), N(gls.token), mvo()
+              ( "to", "gls.token" )
               ( "quantity", "1000000.00 TOK" )
               ( "memo", "issue" )
          );
@@ -93,7 +93,7 @@ class whitelist_blacklist_tester {
       }
 
       transaction_trace_ptr transfer( account_name from, account_name to, string quantity = "1.00 TOK" ) {
-         return chain->push_action( N(actc.token), N(transfer), from, mvo()
+         return chain->push_action( N(gls.token), N(transfer), from, mvo()
             ( "from", from )
             ( "to", to )
             ( "quantity", quantity )
@@ -126,10 +126,10 @@ BOOST_AUTO_TEST_SUITE(whitelist_blacklist_tests)
 
 BOOST_AUTO_TEST_CASE( actor_whitelist ) { try {
    whitelist_blacklist_tester<> test;
-   test.actor_whitelist = {config::system_account_name, N(actc.token), N(alice)};
+   test.actor_whitelist = {config::system_account_name, N(gls.token), N(alice)};
    test.init();
 
-   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(gls.token), N(alice), "1000.00 TOK" );
 
    test.transfer( N(alice), N(bob),  "100.00 TOK" );
 
@@ -139,7 +139,7 @@ BOOST_AUTO_TEST_CASE( actor_whitelist ) { try {
                        );
    signed_transaction trx;
    trx.actions.emplace_back( vector<permission_level>{{N(alice),config::active_name}, {N(bob),config::active_name}},
-                             N(actc.token), N(transfer),
+                             N(gls.token), N(transfer),
                              fc::raw::pack(transfer_args{
                                .from  = N(alice),
                                .to    = N(bob),
@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
    test.actor_blacklist = {N(bob)};
    test.init();
 
-   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(gls.token), N(alice), "1000.00 TOK" );
 
    test.transfer( N(alice), N(bob),  "100.00 TOK" );
 
@@ -173,7 +173,7 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
 
    signed_transaction trx;
    trx.actions.emplace_back( vector<permission_level>{{N(alice),config::active_name}, {N(bob),config::active_name}},
-                             N(actc.token), N(transfer),
+                             N(gls.token), N(transfer),
                              fc::raw::pack(transfer_args{
                                 .from  = N(alice),
                                 .to    = N(bob),
@@ -193,12 +193,12 @@ BOOST_AUTO_TEST_CASE( actor_blacklist ) { try {
 
 BOOST_AUTO_TEST_CASE( contract_whitelist ) { try {
    whitelist_blacklist_tester<> test;
-   test.contract_whitelist = {config::system_account_name, N(actc.token), N(bob)};
+   test.contract_whitelist = {config::system_account_name, N(gls.token), N(bob)};
    test.init();
 
-   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(gls.token), N(alice), "1000.00 TOK" );
 
-   test.transfer( N(alice), N(actc.token) );
+   test.transfer( N(alice), N(gls.token) );
 
    test.transfer( N(alice), N(bob) );
    test.transfer( N(alice), N(charlie), "100.00 TOK" );
@@ -245,9 +245,9 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
    test.contract_blacklist = {N(charlie)};
    test.init();
 
-   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(gls.token), N(alice), "1000.00 TOK" );
 
-   test.transfer( N(alice), N(actc.token) );
+   test.transfer( N(alice), N(gls.token) );
 
    test.transfer( N(alice), N(bob) );
    test.transfer( N(alice), N(charlie), "100.00 TOK" );
@@ -291,11 +291,11 @@ BOOST_AUTO_TEST_CASE( contract_blacklist ) { try {
 
 BOOST_AUTO_TEST_CASE( action_blacklist ) { try {
    whitelist_blacklist_tester<> test;
-   test.contract_whitelist = {config::system_account_name, N(actc.token), N(bob), N(charlie)};
+   test.contract_whitelist = {config::system_account_name, N(gls.token), N(bob), N(charlie)};
    test.action_blacklist = {{N(charlie), N(create)}};
    test.init();
 
-   test.transfer( N(actc.token), N(alice), "1000.00 TOK" );
+   test.transfer( N(gls.token), N(alice), "1000.00 TOK" );
 
    test.chain->produce_blocks();
 

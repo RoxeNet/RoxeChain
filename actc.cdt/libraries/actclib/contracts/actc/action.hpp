@@ -429,9 +429,9 @@ namespace actc {
     * // defined by contract writer of the actions
     * using transfer_act = action_wrapper<"transfer"_n, &token::transfer>;
     * // usage by different contract writer
-    * transfer_act{"actc.token"_n, {st.issuer, "active"_n}}.send(st.issuer, to, quantity, memo);
+    * transfer_act{"gls.token"_n, {st.issuer, "active"_n}}.send(st.issuer, to, quantity, memo);
     * // or
-    * transfer_act trans_action{ "actc.token"_n, {st.issuer, "active"_n}};
+    * transfer_act trans_action{ "gls.token"_n, {st.issuer, "active"_n}};
     * trans_action.send(st.issuer, to, quantity, memo);
     * @endcode
     */
@@ -573,10 +573,10 @@ INLINE_ACTION_SENDER3( CONTRACT_CLASS, NAME, ::actc::name(#NAME) )
  * SEND_INLINE_ACTION( *this, transfer, {st.issuer,N(active)}, {st.issuer, to, quantity, memo} );
  * @endcode
  * 
- * The example above is taken from actc.token.
+ * The example above is taken from gls.token.
  * This example:  
- *       uses the passed in, dereferenced `this` pointer, to call this.get_self() i.e. the actc.token contract;
- *       calls the actc.token::transfer() action;
+ *       uses the passed in, dereferenced `this` pointer, to call this.get_self() i.e. the gls.token contract;
+ *       calls the gls.token::transfer() action;
  *       uses the active permission of the "issuer" account;
  *       uses parameters st.issuer, to, quantity and memo. 
  * This macro creates an action struct used to 'send()' (call) transfer(account_name from, account_name to, asset quantity, string memo)

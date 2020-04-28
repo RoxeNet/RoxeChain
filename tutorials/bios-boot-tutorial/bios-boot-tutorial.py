@@ -14,19 +14,19 @@ args = None
 logFile = None
 
 unlockTimeout = 999999999
-fastUnstakeSystem = './fast.refund/actc.system/actc.system.wasm'
+fastUnstakeSystem = './fast.refund/gls.system/gls.system.wasm'
 
 systemAccounts = [
-    'actc.bpay',
+    'gls.bpay',
     'actc.msig',
-    'actc.names',
-    'actc.ram',
-    'actc.ramfee',
-    'actc.saving',
-    'actc.stake',
-    'actc.token',
-    'actc.vpay',
-    'actc.rex',
+    'gls.names',
+    'gls.ram',
+    'gls.ramfee',
+    'gls.saving',
+    'gls.stake',
+    'gls.token',
+    'gls.vpay',
+    'gls.rex',
 ]
 
 def jsonArg(a):
@@ -288,26 +288,26 @@ def stepStartBoot():
     startNode(0, {'name': 'actc', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(1.5)
 def stepInstallSystemContracts():
-    run(args.clactc + 'set contract actc.token ' + args.contracts_dir + '/actc.token/')
+    run(args.clactc + 'set contract gls.token ' + args.contracts_dir + '/gls.token/')
     run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + '/actc.msig/')
 def stepCreateTokens():
-    run(args.clactc + 'push action actc.token create \'["actc", "10000000000.0000 %s"]\' -p actc.token' % (args.symbol))
+    run(args.clactc + 'push action gls.token create \'["actc", "10000000000.0000 %s"]\' -p gls.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
-    run(args.clactc + 'push action actc.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
+    run(args.clactc + 'push action gls.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
     sleep(1)
 def stepSetSystemContract():
     # All of the protocol upgrade features introduced in v1.8 first require a special protocol 
     # feature (codename PREACTIVATE_FEATURE) to be activated and for an updated version of the system 
     # contract that makes use of the functionality introduced by that feature to be deployed. 
 
-    # activate PREACTIVATE_FEATURE before installing actc.system
+    # activate PREACTIVATE_FEATURE before installing gls.system
     retry('curl -X POST http://127.0.0.1:%d' % args.http_port + 
         '/v1/producer/schedule_protocol_feature_activations ' +
         '-d \'{"protocol_features_to_activate": ["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]}\'')
     sleep(5)
 
-    # install actc.system
-    retry(args.clactc + 'set contract actc ' + args.contracts_dir + '/actc.system/')
+    # install gls.system
+    retry(args.clactc + 'set contract actc ' + args.contracts_dir + '/gls.system/')
     sleep(1)
 
     # activate remaining features
@@ -397,7 +397,7 @@ parser.add_argument('--nodes-dir', metavar='', help="Path to nodes directory", d
 parser.add_argument('--genesis', metavar='', help="Path to genesis.json", default="./genesis.json")
 parser.add_argument('--wallet-dir', metavar='', help="Path to wallet directory", default='./wallet/')
 parser.add_argument('--log-path', metavar='', help="Path to log file", default='./output.log')
-parser.add_argument('--symbol', metavar='', help="The actc.system symbol", default='ACI')
+parser.add_argument('--symbol', metavar='', help="The gls.system symbol", default='ACI')
 parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=3000)
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=10)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)

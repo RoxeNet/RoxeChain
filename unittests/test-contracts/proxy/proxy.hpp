@@ -8,9 +8,9 @@
 #include <actc/singleton.hpp>
 #include <actc/asset.hpp>
 
-// Extacted from actc.token contract:
+// Extacted from gls.token contract:
 namespace actc {
-   class [[actc::contract("actc.token")]] token : public actc::contract {
+   class [[actc::contract("gls.token")]] token : public actc::contract {
    public:
       using actc::contract::contract;
 
@@ -31,7 +31,7 @@ public:
    [[actc::action]]
    void setowner( actc::name owner, uint32_t delay );
 
-   [[actc::on_notify("actc.token::transfer")]]
+   [[actc::on_notify("gls.token::transfer")]]
    void on_transfer( actc::name        from,
                      actc::name        to,
                      actc::asset       quantity,
