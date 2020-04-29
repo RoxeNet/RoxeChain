@@ -90,7 +90,7 @@ namespace actcsystem {
          /// FIXME to give all rewards to producers without to_saving acccount
          int64_t to_producers     = new_tokens;
 //         int64_t to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
-         int64_t to_savings       = new_tokens - to_producers;
+//         int64_t to_savings       = new_tokens - to_producers;
          int64_t to_per_block_pay = (to_producers * uint128_t(pay_factor_precision)) / _gstate4.votepay_factor;
          int64_t to_per_vote_pay  = to_producers - to_per_block_pay;
 
@@ -101,9 +101,9 @@ namespace actcsystem {
             }
             {
                token::transfer_action transfer_act{ token_account, { {get_self(), active_permission} } };
-               if( to_savings > 0 ) {
-                  transfer_act.send( get_self(), saving_account, asset(to_savings, core_symbol()), "unallocated inflation" );
-               }
+//               if( to_savings > 0 ) {
+//                  transfer_act.send( get_self(), saving_account, asset(to_savings, core_symbol()), "unallocated inflation" );
+//               }
                if( to_per_block_pay > 0 ) {
                   transfer_act.send( get_self(), bpay_account, asset(to_per_block_pay, core_symbol()), "fund per-block bucket" );
                }

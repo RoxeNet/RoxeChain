@@ -74,6 +74,7 @@ void token::retire( const asset& quantity, const string& memo )
     sub_balance( st.issuer, quantity );
 }
 
+///FIXME for transaction fee
 void token::transfer( const name&    from,
                       const name&    to,
                       const asset&   quantity,
