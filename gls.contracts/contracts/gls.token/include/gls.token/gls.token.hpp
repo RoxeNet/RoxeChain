@@ -96,6 +96,17 @@ namespace actc {
          [[actc::action]]
          void close( const name& owner, const symbol& symbol );
 
+         /**
+                * Set transaction fee `fee` for token `symbol` only by owner account `owner`.
+                *
+                * @param owner - the account to be authorization,
+                * @param symbol - the token to be payed,
+                * @param fee - the number that supports the cost of each transaction.
+                *
+                */
+         [[actc::action]]   ///FIXME add transaction fee
+         void setFee( const name& owner, const symbol& symbol, const uint64_t fee );
+
          static asset get_supply( const name& token_contract_account, const symbol_code& sym_code )
          {
             stats statstable( token_contract_account, sym_code.raw() );
@@ -116,7 +127,13 @@ namespace actc {
          using transfer_action = actc::action_wrapper<"transfer"_n, &token::transfer>;
          using open_action = actc::action_wrapper<"open"_n, &token::open>;
          using close_action = actc::action_wrapper<"close"_n, &token::close>;
+//         using setFee_action = actc::action_wrapper<"setFee"_n, &token::setFee>;
       private:
+         /**
+           * default transaction fee
+           */
+         static constexpr share_type default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
+
          struct [[actc::table]] account {
             asset    balance;
 
@@ -127,6 +144,7 @@ namespace actc {
             asset    supply;
             asset    max_supply;
             name     issuer;
+            share_type  fee;
 
             uint64_t primary_key()const { return supply.symbol.code().raw(); }
          };

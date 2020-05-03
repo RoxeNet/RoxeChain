@@ -79,11 +79,6 @@ namespace actcsystem {
 
 
    /**
-    * default transaction fee
-    */
-   static constexpr int64_t default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
-
-   /**
     * gls.system contract defines the structures and actions needed for blockchain's core functionality.
     * - Users can stake tokens for CPU and Network bandwidth, and then vote for producers or
     *    delegate their vote to a proxy.
