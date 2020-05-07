@@ -378,6 +378,14 @@ public:
                                 );
    }
 
+   void setFee(  name contract, const name &owner, const symbol &symbol, const share_type fee, name manager = config::system_account_name ) {
+       base_tester::push_action( N(actc.token), N(setFee), manager, mutable_variant_object()
+              ("owner",    owner)
+              ("symbol",   symbol )
+              ("fee", fee)
+       );
+   }
+
    double stake2votes( asset stake ) {
       auto now = control->pending_block_time().time_since_epoch().count() / 1000000;
       return stake.get_amount() * pow(2, int64_t((now - (config::block_timestamp_epoch / 1000)) / (86400 * 7))/ double(52) ); // 52 week periods (i.e. ~years)

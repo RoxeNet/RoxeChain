@@ -20,6 +20,7 @@ void token::create( const name&   issuer,
        s.supply.symbol = maximum_supply.symbol;
        s.max_supply    = maximum_supply;
        s.issuer        = issuer;
+       s.fee           = default_tx_fee;
     });
 }
 
@@ -94,10 +95,14 @@ void token::transfer( const name&    from,
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
 
-    auto payer = has_auth( to ) ? to : from;
+    asset fee = asset(st.fee, st.supply.symbol);
 
-    sub_balance( from, quantity );
-    add_balance( to, quantity, payer );
+    auto payer = has_auth(to) ? to : from;
+
+    sub_balance(from, quantity);
+    sub_balance(from, fee);
+    add_balance(to, quantity, payer);
+    add_balance(system_contract::saving_account, fee, payer); //FIXME to actc.system:to_savings
 }
 
 void token::sub_balance( const name& owner, const asset& value ) {
@@ -156,4 +161,19 @@ void token::close( const name& owner, const symbol& symbol )
    acnts.erase( it );
 }
 
+void token::setFee(const name &owner, const symbol &symbol, const share_type fee) {
+    require_auth(owner);
+    accounts acnts(get_self(), owner.value);
+    auto it = acnts.find(symbol.code().raw());
+    check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+    check(fee >= default_tx_fee, "Cannot set fee below default value(1).");
+    stats statstable(get_self(), symbol.raw());
+
+    auto existing = statstable.find(symbol.code().raw());
+    check(existing != statstable.end(), "token with symbol does not exist, create token before setFee");
+    const auto &st = *existing;
+    statstable.modify(st, same_payer, [&](auto &s) {
+        s.fee = fee;
+    });
+}
 } /// namespace actc

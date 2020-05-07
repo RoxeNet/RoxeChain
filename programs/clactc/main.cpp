@@ -2050,6 +2050,30 @@ struct closerex_subcommand {
    }
 };
 
+///FIXME to set fee
+//struct set_fee_subcommand {
+//    string owner_str;
+//    string proxy_str;
+//    symbol symbol;
+//    share_type fee;
+//
+//    set_fee_proxy_subcommand(CLI::App* actionRoot) {
+//        auto set_fee_proxy = actionRoot->add_subcommand("proxy", localized("set token fee through a proxy"));
+//        set_fee_proxy->add_option("owner", owner_str, localized("The owner account"))->required();
+//        set_fee_proxy->add_option("proxy", proxy_str, localized("The proxy account"))->required();
+//        add_standard_transaction_options(set_fee_proxy, "actc@active");
+//
+//        set_fee_proxy->set_callback([this] {
+//            fc::variant act_payload = fc::mutable_variant_object()
+//                    ("owner", voter_str)
+//                    ("proxy", proxy_str)
+//                    ("producers", std::vector<account_name>{});
+//            auto accountPermissions = get_account_permissions(tx_permission, {voter_str,config::active_name});
+//            send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
+//        });
+//    }
+//};
+
 void get_account( const string& accountName, const string& coresym, bool json_format ) {
    fc::variant json;
    if (coresym.empty()) {
