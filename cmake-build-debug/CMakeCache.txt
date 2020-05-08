@@ -153,7 +153,7 @@ CMAKE_PROJECT_DESCRIPTION:STATIC=
 CMAKE_PROJECT_HOMEPAGE_URL:STATIC=
 
 //Value Computed by CMake
-CMAKE_PROJECT_NAME:STATIC=GLS
+CMAKE_PROJECT_NAME:STATIC=ROXE
 
 //Path to a program.
 CMAKE_RANLIB:FILEPATH=/usr/bin/ranlib
@@ -218,10 +218,10 @@ CMAKE_STRIP:FILEPATH=/usr/bin/strip
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
-GLS_BINARY_DIR:STATIC=/Users/shadow/git/actcio/actc/cmake-build-debug
+ROXE_BINARY_DIR:STATIC=/Users/shadow/git/actcio/actc/cmake-build-debug
 
 //Value Computed by CMake
-GLS_SOURCE_DIR:STATIC=/Users/shadow/git/actcio/actc
+ROXE_SOURCE_DIR:STATIC=/Users/shadow/git/actcio/actc
 
 //Path to a program.
 ProcessorCount_cmd_sysctl:FILEPATH=/usr/sbin/sysctl
