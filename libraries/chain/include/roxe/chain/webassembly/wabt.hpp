@@ -20,7 +20,7 @@ using namespace roxe::chain::webassembly::common;
 
 struct wabt_apply_instance_vars {
    Memory* memory;
-   apply_conapply_contexttext& ctx;
+   apply_context& ctx;
 
    char* get_validated_pointer(uint32_t offset, uint32_t size) {
       ROXE_ASSERT(memory, wasm_execution_error, "access violation");
