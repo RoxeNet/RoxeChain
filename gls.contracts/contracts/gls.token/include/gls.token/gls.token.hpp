@@ -97,6 +97,7 @@ namespace actc {
          void close( const name& owner, const symbol& symbol );
 
          /**
+<<<<<<< HEAD:gls.contracts/contracts/gls.token/include/gls.token/gls.token.hpp
                 * Set transaction fee `fee` for token `symbol` only by owner account `owner`.
                 *
                 * @param owner - the account to be authorization,
@@ -106,6 +107,17 @@ namespace actc {
                 */
          [[actc::action]]   ///FIXME add transaction fee
          void setFee( const name& owner, const symbol& symbol, const uint64_t fee );
+=======
+          * Set transaction fee `fee` for token `symbol` only by owner account `owner`.
+          *
+          * @param owner - the account to be authorization,
+          * @param symbol - the token to be payed,
+          * @param fee - the number that supports the cost of each transaction.
+          *
+          */
+         [[actc::action]]   ///FIXME add transaction fee
+         void setFee( const name& owner, const symbol& symbol, const share_type fee );
+>>>>>>> v1.0.1:actc.contracts/contracts/actc.token/include/actc.token/actc.token.hpp
 
          static asset get_supply( const name& token_contract_account, const symbol_code& sym_code )
          {
@@ -127,11 +139,19 @@ namespace actc {
          using transfer_action = actc::action_wrapper<"transfer"_n, &token::transfer>;
          using open_action = actc::action_wrapper<"open"_n, &token::open>;
          using close_action = actc::action_wrapper<"close"_n, &token::close>;
+<<<<<<< HEAD:gls.contracts/contracts/gls.token/include/gls.token/gls.token.hpp
 //         using setFee_action = actc::action_wrapper<"setFee"_n, &token::setFee>;
       private:
          /**
            * default transaction fee
            */
+=======
+         using setFee_action = actc::action_wrapper<"setFee"_n, &token::setFee>;
+      private:
+        /**
+         * default transaction fee
+         */
+>>>>>>> v1.0.1:actc.contracts/contracts/actc.token/include/actc.token/actc.token.hpp
          static constexpr share_type default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
 
          struct [[actc::table]] account {
