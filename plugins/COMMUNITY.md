@@ -1,24 +1,24 @@
 # Community Plugin List
 
-This file contains a list of community authored plugins for `nodactc` and APIs/tools that are associated with plugins, acting as a directory of the community authored plugins that are available.
+This file contains a list of community authored plugins for `nodroxe` and APIs/tools that are associated with plugins, acting as a directory of the community authored plugins that are available.
 
 Third parties are encouraged to make pull requests to this file (`develop` branch please) in order to list new related projects.
 
 | Description | URL |
 | ----------- | --- |
-| BP Heartbeat  | https://github.com/bancorprotocol/actc-producer-heartbeat-plugin |
-| ElasticSearch | https://github.com/ACTCLaoMao/elasticsearch_plugin |
+| BP Heartbeat  | https://github.com/bancorprotocol/roxe-producer-heartbeat-plugin |
+| ElasticSearch | https://github.com/ROXELaoMao/elasticsearch_plugin |
 | Kafka | https://github.com/TP-Lab/kafka_plugin |
-| MySQL | https://github.com/actcBLACK/actc_mysqldb_plugin |
-| SQL | https://github.com/asiniscalchi/actc_sql_plugin |
-| Watch for specific actions and send them to an HTTP URL | https://github.com/actcauthority/actc-watcher-plugin |
-| ZMQ / history | https://github.com/cc32d9/actc_zmq_plugin |
-| ZMQ Light History API | https://github.com/cc32d9/actc_zmq_light_api |
+| MySQL | https://github.com/roxeBLACK/roxe_mysqldb_plugin |
+| SQL | https://github.com/asiniscalchi/roxe_sql_plugin |
+| Watch for specific actions and send them to an HTTP URL | https://github.com/roxeauthority/roxe-watcher-plugin |
+| ZMQ / history | https://github.com/cc32d9/roxe_zmq_plugin |
+| ZMQ Light History API | https://github.com/cc32d9/roxe_zmq_light_api |
 | Chintai ZMQ Watcher | https://github.com/acoutts/chintai-zeromq-watcher-plugin |
-| Mongo History API | https://github.com/CryptoLions/ACTC-mongo-history-API |
-| State History API | https://github.com/acoutts/ACTC-state-history-API |
-| Hyperion History API | https://github.com/actcrio/Hyperion-History-API |
-| Chronicle	| https://github.com/ACTCChronicleProject/actc-chronicle |
+| Mongo History API | https://github.com/CryptoLions/ROXE-mongo-history-API |
+| State History API | https://github.com/acoutts/ROXE-state-history-API |
+| Hyperion History API | https://github.com/roxerio/Hyperion-History-API |
+| Chronicle	| https://github.com/ROXEChronicleProject/roxe-chronicle |
 
 ## DISCLAIMER:
 

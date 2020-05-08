@@ -1,23 +1,23 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/genesis_state.hpp>
-#include <actc/wallet_plugin/wallet.hpp>
-#include <actc/wallet_plugin/wallet_manager.hpp>
+#include <roxe/chain/genesis_state.hpp>
+#include <roxe/wallet_plugin/wallet.hpp>
+#include <roxe/wallet_plugin/wallet_manager.hpp>
 
 #include <boost/test/unit_test.hpp>
-#include <actc/chain/authority.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/chain/authority.hpp>
+#include <roxe/chain/exceptions.hpp>
 
-namespace actc {
+namespace roxe {
 
 BOOST_AUTO_TEST_SUITE(wallet_tests)
 
 /// Test creating the wallet
 BOOST_AUTO_TEST_CASE(wallet_test)
 { try {
-   using namespace actc::wallet;
+   using namespace roxe::wallet;
 
    wallet_data d;
    soft_wallet wallet(d);
@@ -69,7 +69,7 @@ BOOST_AUTO_TEST_CASE(wallet_test)
 /// Test wallet manager
 BOOST_AUTO_TEST_CASE(wallet_manager_test)
 { try {
-   using namespace actc::wallet;
+   using namespace roxe::wallet;
 
    if (fc::exists("test.wallet")) fc::remove("test.wallet");
    if (fc::exists("test2.wallet")) fc::remove("test2.wallet");
@@ -219,7 +219,7 @@ BOOST_AUTO_TEST_CASE(wallet_manager_test)
 /// Test wallet manager
 BOOST_AUTO_TEST_CASE(wallet_manager_create_test) {
    try {
-      using namespace actc::wallet;
+      using namespace roxe::wallet;
 
       if (fc::exists("test.wallet")) fc::remove("test.wallet");
 
@@ -269,4 +269,4 @@ BOOST_AUTO_TEST_CASE(wallet_manager_create_test) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // namespace actc
+} // namespace roxe

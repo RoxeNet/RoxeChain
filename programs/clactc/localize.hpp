@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
 #include <libintl.h>
 #include <fc/variant.hpp>
 
-namespace actc { namespace client { namespace localize {
+namespace roxe { namespace client { namespace localize {
    #if !defined(_)
    #define _(str) str
    #endif

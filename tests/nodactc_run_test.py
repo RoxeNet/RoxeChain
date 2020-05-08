@@ -11,8 +11,8 @@ import decimal
 import re
 
 ###############################################################
-# nodactc_run_test
-# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodroxe_run_test
+# --dump-error-details <Upon error print etc/roxe/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -45,12 +45,12 @@ localTest=True if server == TestHelper.LOCAL_HOST else False
 cluster=Cluster(host=server, port=port, walletd=True, enableMongo=enableMongo, defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 dontBootstrap=sanityTest # intent is to limit the scope of the sanity test to just verifying that nodes can be started
 
-WalletdName=Utils.ActcWalletName
-ClientName="clactc"
+WalletdName=Utils.RoxeWalletName
+ClientName="clroxe"
 timeout = .5 * 12 * 2 + 60 # time for finalization with 1 producer + 60 seconds padding
 Utils.setIrreversibleTimeout(timeout)
 
@@ -69,18 +69,18 @@ try:
         Print("Stand up cluster")
         if cluster.launch(prodCount=prodCount, onlyBios=onlyBios, dontBootstrap=dontBootstrap) is False:
             cmdError("launcher")
-            errorExit("Failed to stand up actc cluster.")
+            errorExit("Failed to stand up roxe cluster.")
     else:
         Print("Collecting cluster info.")
         cluster.initializeNodes(defproduceraPrvtKey=defproduceraPrvtKey, defproducerbPrvtKey=defproducerbPrvtKey)
-        killActcInstances=False
+        killRoxeInstances=False
         Print("Stand up %s" % (WalletdName))
         walletMgr.killall(allInstances=killAll)
         walletMgr.cleanup()
         print("Stand up walletd")
         if walletMgr.launch() is False:
             cmdError("%s" % (WalletdName))
-            errorExit("Failed to stand up actc walletd.")
+            errorExit("Failed to stand up roxe walletd.")
 
     if sanityTest:
         testSuccessful=True
@@ -116,7 +116,7 @@ try:
     Print("Creating wallet \"%s\"." % (testWalletName))
     walletAccounts=[cluster.defproduceraAccount,cluster.defproducerbAccount]
     if not dontLaunch:
-        walletAccounts.append(cluster.actcAccount)
+        walletAccounts.append(cluster.roxeAccount)
     testWallet=walletMgr.create(testWalletName, walletAccounts)
 
     Print("Wallet \"%s\" password=%s." % (testWalletName, testWallet.password.encode("utf-8")))
@@ -227,7 +227,7 @@ try:
 
     expectedAmount=transferAmount
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountActcBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountRoxeBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -239,7 +239,7 @@ try:
 
     expectedAmount="97.5421 {0}".format(CORE_SYMBOL)
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountActcBalanceStr(testeraAccount.name)
+    actualAmount=node.getAccountRoxeBalanceStr(testeraAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -266,7 +266,7 @@ try:
 
     expectedAmount="98.0311 {0}".format(CORE_SYMBOL) # 5000 initial deposit
     Print("Verify transfer, Expected: %s" % (expectedAmount))
-    actualAmount=node.getAccountActcBalanceStr(currencyAccount.name)
+    actualAmount=node.getAccountRoxeBalanceStr(currencyAccount.name)
     if expectedAmount != actualAmount:
         cmdError("FAILURE - transfer failed")
         errorExit("Transfer verification failed. Excepted %s, actual: %s" % (expectedAmount, actualAmount))
@@ -320,9 +320,9 @@ try:
     if hashNum != 0:
         errorExit("FAILURE - get code currency1111 failed", raw=True)
 
-    contractDir="unittests/contracts/gls.token"
-    wasmFile="gls.token.wasm"
-    abiFile="gls.token.abi"
+    contractDir="unittests/contracts/roxe.token"
+    wasmFile="roxe.token.wasm"
+    abiFile="roxe.token.abi"
     Print("Publish contract")
     trans=node.publishContract(currencyAccount.name, contractDir, wasmFile, abiFile, waitForTransBlock=True)
     if trans is None:
@@ -340,12 +340,12 @@ try:
             errorExit("FAILURE - get code currency1111 failed", raw=True)
     else:
         Print("verify abi is set")
-        account=node.getActcAccountFromDb(currencyAccount.name)
+        account=node.getRoxeAccountFromDb(currencyAccount.name)
         abiName=account["abi"]["structs"][0]["name"]
         abiActionName=account["abi"]["actions"][0]["name"]
         abiType=account["abi"]["actions"][0]["type"]
         if abiName != "account" or abiActionName != "close" or abiType != "close":
-            errorExit("FAILURE - get ACTC account failed", raw=True)
+            errorExit("FAILURE - get ROXE account failed", raw=True)
 
     Print("push create action to currency1111 contract")
     contract="currency1111"
@@ -637,7 +637,7 @@ try:
         errorExit("Failed to unlock wallet %s" % (defproduceraWallet.name))
 
     Print("Get account defproducera")
-    account=node.getActcAccount(defproduceraAccount.name, exitOnError=True)
+    account=node.getRoxeAccount(defproduceraAccount.name, exitOnError=True)
 
     Print("Unlocking wallet \"%s\"." % (defproduceraWallet.name))
     if not walletMgr.unlockWallet(testWallet):
@@ -646,7 +646,7 @@ try:
 
     if not enableMongo:
         Print("Verify non-JSON call works")
-        rawAccount=node.getActcAccount(defproduceraAccount.name, exitOnError=True, returnType=ReturnType.raw)
+        rawAccount=node.getRoxeAccount(defproduceraAccount.name, exitOnError=True, returnType=ReturnType.raw)
         coreLiquidBalance=account['core_liquid_balance']
         match=re.search(r'\bliquid:\s*%s\s' % (coreLiquidBalance), rawAccount, re.MULTILINE | re.DOTALL)
         assert match is not None, "did not find the core liquid balance (\"liquid:\") of %d in \"%s\"" % (coreLiquidBalance, rawAccount)
@@ -696,6 +696,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killActcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killRoxeInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exit(0)

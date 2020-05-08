@@ -1,11 +1,11 @@
-#include <actc/chain/apply_context.hpp>
-#include <actc/chain/transaction_context.hpp>
-#include <actc/chain/authorization_manager.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/generated_transaction_object.hpp>
-#include <actc/chain/transaction_object.hpp>
-#include <actc/chain/global_property_object.hpp>
+#include <roxe/chain/apply_context.hpp>
+#include <roxe/chain/transaction_context.hpp>
+#include <roxe/chain/authorization_manager.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/generated_transaction_object.hpp>
+#include <roxe/chain/transaction_object.hpp>
+#include <roxe/chain/global_property_object.hpp>
 
 #pragma push_macro("N")
 #undef N
@@ -19,7 +19,7 @@
 
 #include <chrono>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 namespace bacc = boost::accumulators;
 
@@ -171,15 +171,15 @@ namespace bacc = boost::accumulators;
 
    void transaction_context::disallow_transaction_extensions( const char* error_msg )const {
       if( control.is_producing_block() ) {
-         ACTC_THROW( subjective_block_production_exception, error_msg );
+         ROXE_THROW( subjective_block_production_exception, error_msg );
       } else {
-         ACTC_THROW( disallowed_transaction_extensions_bad_block_exception, error_msg );
+         ROXE_THROW( disallowed_transaction_extensions_bad_block_exception, error_msg );
       }
    }
 
    void transaction_context::init(uint64_t initial_net_usage)
    {
-      ACTC_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
+      ROXE_ASSERT( !is_initialized, transaction_exception, "cannot initialize twice" );
       const static int64_t large_number_no_overflow = std::numeric_limits<int64_t>::max()/2;
 
       const auto& cfg = control.get_global_properties().configuration;
@@ -357,7 +357,7 @@ namespace bacc = boost::accumulators;
    }
 
    void transaction_context::exec() {
-      ACTC_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      ROXE_ASSERT( is_initialized, transaction_exception, "must first initialize" );
 
       if( apply_context_free ) {
          for( const auto& act : trx.context_free_actions ) {
@@ -383,7 +383,7 @@ namespace bacc = boost::accumulators;
    }
 
    void transaction_context::finalize() {
-      ACTC_ASSERT( is_initialized, transaction_exception, "must first initialize" );
+      ROXE_ASSERT( is_initialized, transaction_exception, "must first initialize" );
 
       if( is_input ) {
          auto& am = control.get_mutable_authorization_manager();
@@ -449,15 +449,15 @@ namespace bacc = boost::accumulators;
       if (!control.skip_trx_checks()) {
          if( BOOST_UNLIKELY(net_usage > eager_net_limit) ) {
             if ( net_limit_due_to_block ) {
-               ACTC_THROW( block_net_usage_exceeded,
+               ROXE_THROW( block_net_usage_exceeded,
                           "not enough space left in block: ${net_usage} > ${net_limit}",
                           ("net_usage", net_usage)("net_limit", eager_net_limit) );
             }  else if (net_limit_due_to_greylist) {
-               ACTC_THROW( greylist_net_usage_exceeded,
+               ROXE_THROW( greylist_net_usage_exceeded,
                           "greylisted transaction net usage is too high: ${net_usage} > ${net_limit}",
                           ("net_usage", net_usage)("net_limit", eager_net_limit) );
             } else {
-               ACTC_THROW( tx_net_usage_exceeded,
+               ROXE_THROW( tx_net_usage_exceeded,
                           "transaction net usage is too high: ${net_usage} > ${net_limit}",
                           ("net_usage", net_usage)("net_limit", eager_net_limit) );
             }
@@ -472,28 +472,28 @@ namespace bacc = boost::accumulators;
       if( BOOST_UNLIKELY( now > _deadline ) ) {
          // edump((now-start)(now-pseudo_start));
          if( explicit_billed_cpu_time || deadline_exception_code == deadline_exception::code_value ) {
-            ACTC_THROW( deadline_exception, "deadline exceeded", ("now", now)("deadline", _deadline)("start", start) );
+            ROXE_THROW( deadline_exception, "deadline exceeded", ("now", now)("deadline", _deadline)("start", start) );
          } else if( deadline_exception_code == block_cpu_usage_exceeded::code_value ) {
-            ACTC_THROW( block_cpu_usage_exceeded,
+            ROXE_THROW( block_cpu_usage_exceeded,
                         "not enough time left in block to complete executing transaction",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
          } else if( deadline_exception_code == tx_cpu_usage_exceeded::code_value ) {
             if (cpu_limit_due_to_greylist) {
-               ACTC_THROW( greylist_cpu_usage_exceeded,
+               ROXE_THROW( greylist_cpu_usage_exceeded,
                         "greylisted transaction was executing for too long",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
             } else {
-               ACTC_THROW( tx_cpu_usage_exceeded,
+               ROXE_THROW( tx_cpu_usage_exceeded,
                         "transaction was executing for too long",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
             }
          } else if( deadline_exception_code == leeway_deadline_exception::code_value ) {
-            ACTC_THROW( leeway_deadline_exception,
+            ROXE_THROW( leeway_deadline_exception,
                         "the transaction was unable to complete by deadline, "
                         "but it is possible it could have succeeded if it were allowed to run to completion",
                         ("now", now)("deadline", _deadline)("start", start)("billing_timer", now - pseudo_start) );
          }
-         ACTC_ASSERT( false,  transaction_exception, "unexpected deadline exception code" );
+         ROXE_ASSERT( false,  transaction_exception, "unexpected deadline exception code" );
       }
    }
 
@@ -526,27 +526,27 @@ namespace bacc = boost::accumulators;
       if (!control.skip_trx_checks()) {
          if( check_minimum ) {
             const auto& cfg = control.get_global_properties().configuration;
-            ACTC_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
+            ROXE_ASSERT( billed_us >= cfg.min_transaction_cpu_usage, transaction_exception,
                         "cannot bill CPU time less than the minimum of ${min_billable} us",
                         ("min_billable", cfg.min_transaction_cpu_usage)("billed_cpu_time_us", billed_us)
                       );
          }
 
          if( billing_timer_exception_code == block_cpu_usage_exceeded::code_value ) {
-            ACTC_ASSERT( billed_us <= objective_duration_limit.count(),
+            ROXE_ASSERT( billed_us <= objective_duration_limit.count(),
                         block_cpu_usage_exceeded,
                         "billed CPU time (${billed} us) is greater than the billable CPU time left in the block (${billable} us)",
                         ("billed", billed_us)("billable", objective_duration_limit.count())
                       );
          } else {
             if (cpu_limit_due_to_greylist) {
-               ACTC_ASSERT( billed_us <= objective_duration_limit.count(),
+               ROXE_ASSERT( billed_us <= objective_duration_limit.count(),
                            greylist_cpu_usage_exceeded,
                            "billed CPU time (${billed} us) is greater than the maximum greylisted billable CPU time for the transaction (${billable} us)",
                            ("billed", billed_us)("billable", objective_duration_limit.count())
                );
             } else {
-               ACTC_ASSERT( billed_us <= objective_duration_limit.count(),
+               ROXE_ASSERT( billed_us <= objective_duration_limit.count(),
                            tx_cpu_usage_exceeded,
                            "billed CPU time (${billed} us) is greater than the maximum billable CPU time for the transaction (${billable} us)",
                            ("billed", billed_us)("billable", objective_duration_limit.count())
@@ -610,7 +610,7 @@ namespace bacc = boost::accumulators;
    }
 
    action_trace& transaction_context::get_action_trace( uint32_t action_ordinal ) {
-      ACTC_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
+      ROXE_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
                   transaction_exception,
                   "action_ordinal ${ordinal} is outside allowed range [1,${max}]",
                   ("ordinal", action_ordinal)("max", trace->action_traces.size())
@@ -619,7 +619,7 @@ namespace bacc = boost::accumulators;
    }
 
    const action_trace& transaction_context::get_action_trace( uint32_t action_ordinal )const {
-      ACTC_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
+      ROXE_ASSERT( 0 < action_ordinal && action_ordinal <= trace->action_traces.size() ,
                   transaction_exception,
                   "action_ordinal ${ordinal} is outside allowed range [1,${max}]",
                   ("ordinal", action_ordinal)("max", trace->action_traces.size())
@@ -715,7 +715,7 @@ namespace bacc = boost::accumulators;
       } catch( const boost::interprocess::bad_alloc& ) {
          throw;
       } catch ( ... ) {
-          ACTC_ASSERT( false, tx_duplicate,
+          ROXE_ASSERT( false, tx_duplicate,
                      "duplicate transaction ${id}", ("id", id ) );
       }
    } /// record_transaction
@@ -726,9 +726,9 @@ namespace bacc = boost::accumulators;
 
       for( const auto& a : trx.context_free_actions ) {
          auto* code = db.find<account_object, by_name>(a.account);
-         ACTC_ASSERT( code != nullptr, transaction_exception,
+         ROXE_ASSERT( code != nullptr, transaction_exception,
                      "action's code account '${account}' does not exist", ("account", a.account) );
-         ACTC_ASSERT( a.authorization.size() == 0, transaction_exception,
+         ROXE_ASSERT( a.authorization.size() == 0, transaction_exception,
                      "context-free actions cannot have authorizations" );
       }
 
@@ -737,21 +737,21 @@ namespace bacc = boost::accumulators;
       bool one_auth = false;
       for( const auto& a : trx.actions ) {
          auto* code = db.find<account_object, by_name>(a.account);
-         ACTC_ASSERT( code != nullptr, transaction_exception,
+         ROXE_ASSERT( code != nullptr, transaction_exception,
                      "action's code account '${account}' does not exist", ("account", a.account) );
          for( const auto& auth : a.authorization ) {
             one_auth = true;
             auto* actor = db.find<account_object, by_name>(auth.actor);
-            ACTC_ASSERT( actor  != nullptr, transaction_exception,
+            ROXE_ASSERT( actor  != nullptr, transaction_exception,
                         "action's authorizing actor '${account}' does not exist", ("account", auth.actor) );
-            ACTC_ASSERT( auth_manager.find_permission(auth) != nullptr, transaction_exception,
+            ROXE_ASSERT( auth_manager.find_permission(auth) != nullptr, transaction_exception,
                         "action's authorizations include a non-existent permission: {permission}",
                         ("permission", auth) );
             if( enforce_actor_whitelist_blacklist )
                actors.insert( auth.actor );
          }
       }
-      ACTC_ASSERT( one_auth, tx_no_auths, "transaction must have at least one authorization" );
+      ROXE_ASSERT( one_auth, tx_no_auths, "transaction must have at least one authorization" );
 
       if( enforce_actor_whitelist_blacklist ) {
          control.check_actor_list( actors );
@@ -759,4 +759,4 @@ namespace bacc = boost::accumulators;
    }
 
 
-} } /// actc::chain
+} } /// roxe::chain

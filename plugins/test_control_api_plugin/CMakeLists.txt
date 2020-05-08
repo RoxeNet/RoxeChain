@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/actc/test_control_api_plugin/*.hpp")
+file(GLOB HEADERS "include/roxe/test_control_api_plugin/*.hpp")
 add_library( test_control_api_plugin
              test_control_api_plugin.cpp
              ${HEADERS} )

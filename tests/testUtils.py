@@ -19,25 +19,25 @@ class Utils:
     Debug=False
     FNull = open(os.devnull, 'w')
 
-    ActcClientPath="programs/clactc/clactc"
-    MiscActcClientArgs="--no-auto-kactcd"
+    RoxeClientPath="programs/clroxe/clroxe"
+    MiscRoxeClientArgs="--no-auto-kroxed"
 
-    ActcWalletName="kactcd"
-    ActcWalletPath="programs/kactcd/"+ ActcWalletName
+    RoxeWalletName="kroxed"
+    RoxeWalletPath="programs/kroxed/"+ RoxeWalletName
 
-    ActcServerName="nodactc"
-    ActcServerPath="programs/nodactc/"+ ActcServerName
+    RoxeServerName="nodroxe"
+    RoxeServerPath="programs/nodroxe/"+ RoxeServerName
 
-    ActcLauncherPath="programs/actc-launcher/actc-launcher"
+    RoxeLauncherPath="programs/roxe-launcher/roxe-launcher"
     MongoPath="mongo"
     ShuttingDown=False
     CheckOutputDeque=deque(maxlen=10)
 
-    ActcBlockLogPath="programs/actc-blocklog/actc-blocklog"
+    RoxeBlockLogPath="programs/roxe-blocklog/roxe-blocklog"
 
     FileDivider="================================================================="
     DataDir="var/lib/"
-    ConfigDir="etc/actc/"
+    ConfigDir="etc/roxe/"
 
     @staticmethod
     def Print(*args, **kwargs):
@@ -273,7 +273,7 @@ class Utils:
     @staticmethod
     def getBlockLog(blockLogLocation, silentErrors=False, exitOnError=False):
         assert(isinstance(blockLogLocation, str))
-        cmd="%s --blocks-dir %s --as-json-array" % (Utils.ActcBlockLogPath, blockLogLocation)
+        cmd="%s --blocks-dir %s --as-json-array" % (Utils.RoxeBlockLogPath, blockLogLocation)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         rtn=None
         try:

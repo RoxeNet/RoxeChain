@@ -17,7 +17,7 @@ fi
 
 NAME="${PROJECT}-${VERSION}.${MAC_VERSION}.bottle"
 
-mkdir -p ${PROJECT}/${VERSION}/opt/actc/lib/cmake
+mkdir -p ${PROJECT}/${VERSION}/opt/roxe/lib/cmake
 
 PREFIX="${PROJECT}/${VERSION}"
 SPREFIX="\/usr\/local"
@@ -33,11 +33,11 @@ export SSUBPREFIX
 
 hash=`openssl dgst -sha256 ${NAME}.tar.gz | awk 'NF>1{print $NF}'`
 
-echo "class Actc < Formula
+echo "class Roxe < Formula
 
    homepage \"${URL}\"
    revision 0
-   url \"https://github.com/actc/actc/archive/v${VERSION}.tar.gz\"
+   url \"https://github.com/roxe/roxe/archive/v${VERSION}.tar.gz\"
    version \"${VERSION}\"
 
    option :universal
@@ -50,13 +50,13 @@ echo "class Actc < Formula
    depends_on :arch =>  :intel
 
    bottle do
-      root_url \"https://github.com/actc/actc/releases/download/v${VERSION}\"
+      root_url \"https://github.com/roxe/roxe/releases/download/v${VERSION}\"
       sha256 \"${hash}\" => :${MAC_VERSION}
    end
    def install
       raise \"Error, only supporting binary packages at this time\"
    end
 end
-__END__" &> actc.rb
+__END__" &> roxe.rb
 
 rm -r ${PROJECT} || exit 1

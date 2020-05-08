@@ -15,8 +15,8 @@ import re
 import signal
 
 ###############################################################
-# nodactc_short_fork_take_over_test
-# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodroxe_short_fork_take_over_test
+# --dump-error-details <Upon error print etc/roxe/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 Print=Utils.Print
@@ -130,11 +130,11 @@ walletPort=args.wallet_port
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.ActcWalletName
-ClientName="clactc"
+WalletdName=Utils.RoxeWalletName
+ClientName="clroxe"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -143,9 +143,9 @@ try:
     cluster.killall(allInstances=killAll)
     cluster.cleanup()
     Print("Stand up cluster")
-    specificExtraNodactcArgs={}
+    specificExtraNodroxeArgs={}
     # producer nodes will be mapped to 0 through totalProducerNodes-1, so the number totalProducerNodes will be the non-producing node
-    specificExtraNodactcArgs[totalProducerNodes]="--plugin actc::test_control_api_plugin"
+    specificExtraNodroxeArgs[totalProducerNodes]="--plugin roxe::test_control_api_plugin"
 
 
     # ***   setup topogrophy   ***
@@ -154,9 +154,9 @@ try:
     # and the only connection between those 2 groups is through the bridge node
     if cluster.launch(prodCount=2, topo="bridge", pnodes=totalProducerNodes,
                       totalNodes=totalNodes, totalProducers=totalProducers,
-                      useBiosBootFile=False, specificExtraNodactcArgs=specificExtraNodactcArgs, onlySetProds=True) is False:
+                      useBiosBootFile=False, specificExtraNodroxeArgs=specificExtraNodroxeArgs, onlySetProds=True) is False:
         Utils.cmdError("launcher")
-        Utils.errorExit("Failed to stand up actc cluster.")
+        Utils.errorExit("Failed to stand up roxe cluster.")
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
 
@@ -404,7 +404,7 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killActcInstances=killActcInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killRoxeInstances=killRoxeInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
     if not testSuccessful:
         Print(Utils.FileDivider)

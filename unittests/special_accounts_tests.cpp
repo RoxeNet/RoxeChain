@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <algorithm>
 #include <iterator>
 #include <vector>
 
-#include <actc/chain/controller.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/permission_object.hpp>
-#include <actc/chain/global_property_object.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/permission_object.hpp>
+#include <roxe/chain/global_property_object.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <fc/crypto/digest.hpp>
 
@@ -19,9 +19,9 @@
 #include <boost/range/algorithm/permutation.hpp>
 #include <boost/test/unit_test.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace chain;
-using tester = actc::testing::tester;
+using tester = roxe::testing::tester;
 
 BOOST_AUTO_TEST_SUITE(special_account_tests)
 

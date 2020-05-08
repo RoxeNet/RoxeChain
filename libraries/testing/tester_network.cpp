@@ -1,6 +1,6 @@
-#include <actc/testing/tester_network.hpp>
+#include <roxe/testing/tester_network.hpp>
 
-namespace actc { namespace testing {
+namespace roxe { namespace testing {
 
    void tester_network::connect_blockchain(base_tester &new_blockchain) {
       if (blockchains.count(&new_blockchain))
@@ -37,8 +37,8 @@ namespace actc { namespace testing {
     //  for (const auto &pair : blockchains) {
     //     if (pair.first == &skip_blockchain) continue;
     //     boost::signals2::shared_connection_block blocker(pair.second);
-    //     pair.first->control->push_block(block, actc::chain::validation_steps::created_block);
+    //     pair.first->control->push_block(block, roxe::chain::validation_steps::created_block);
     //  }
    }
 
-} } /// actc::testing
+} } /// roxe::testing

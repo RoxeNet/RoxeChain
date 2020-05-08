@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
 #pragma once
 #include <boost/asio/ip/tcp.hpp>

@@ -1,45 +1,45 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] ram_restrictions_test : public actc::contract {
+class [[roxe::contract]] ram_restrictions_test : public roxe::contract {
 public:
-   struct [[actc::table]] data {
+   struct [[roxe::table]] data {
       uint64_t           key;
       std::vector<char>  value;
 
       uint64_t primary_key() const { return key; }
    };
 
-   typedef actc::multi_index<"tablea"_n, data> tablea;
-   typedef actc::multi_index<"tableb"_n, data> tableb;
+   typedef roxe::multi_index<"tablea"_n, data> tablea;
+   typedef roxe::multi_index<"tableb"_n, data> tableb;
 
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
+   [[roxe::action]]
    void noop();
 
-   [[actc::action]]
-   void setdata( uint32_t len1, uint32_t len2, actc::name payer );
+   [[roxe::action]]
+   void setdata( uint32_t len1, uint32_t len2, roxe::name payer );
 
-   [[actc::action]]
-   void notifysetdat( actc::name acctonotify, uint32_t len1, uint32_t len2, actc::name payer );
+   [[roxe::action]]
+   void notifysetdat( roxe::name acctonotify, uint32_t len1, uint32_t len2, roxe::name payer );
 
-   [[actc::on_notify("tester2::notifysetdat")]]
-   void on_notify_setdata( actc::name acctonotify, uint32_t len1, uint32_t len2, actc::name payer );
+   [[roxe::on_notify("tester2::notifysetdat")]]
+   void on_notify_setdata( roxe::name acctonotify, uint32_t len1, uint32_t len2, roxe::name payer );
 
-   [[actc::action]]
-   void senddefer( uint64_t senderid, actc::name payer );
+   [[roxe::action]]
+   void senddefer( uint64_t senderid, roxe::name payer );
 
-   [[actc::action]]
-   void notifydefer( actc::name acctonotify, uint64_t senderid, actc::name payer );
+   [[roxe::action]]
+   void notifydefer( roxe::name acctonotify, uint64_t senderid, roxe::name payer );
 
-   [[actc::on_notify("tester2::notifydefer")]]
-   void on_notifydefer( actc::name acctonotify, uint64_t senderid, actc::name payer );
+   [[roxe::on_notify("tester2::notifydefer")]]
+   void on_notifydefer( roxe::name acctonotify, uint64_t senderid, roxe::name payer );
 
 };

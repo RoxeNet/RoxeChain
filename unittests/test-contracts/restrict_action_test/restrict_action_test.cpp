@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "restrict_action_test.hpp"
-#include <actc/transaction.hpp>
+#include <roxe/transaction.hpp>
 
-using namespace actc;
+using namespace roxe;
 
 void restrict_action_test::noop( ) {
 

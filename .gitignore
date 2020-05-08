@@ -46,17 +46,17 @@ libraries/wasm-jit/Source/Programs/Disassemble
 libraries/wasm-jit/Source/Programs/Test
 libraries/wasm-jit/Source/Programs/wavm
 
-programs/clactc/clactc
+programs/clroxe/clroxe
 programs/js_operation_serializer/js_operation_serializer
 programs/data-dir
-programs/actc-abigen/actc-abigen
-programs/clactc/config.hpp
-programs/actc-applesedemo/actc-applesedemo
-programs/actc-launcher/config.hpp
-programs/actc-launcher/actc-launcher
-programs/kactcd/kactcd
-programs/nodactc/config.hpp
-programs/nodactc/nodactc
+programs/roxe-abigen/roxe-abigen
+programs/clroxe/config.hpp
+programs/roxe-applesedemo/roxe-applesedemo
+programs/roxe-launcher/config.hpp
+programs/roxe-launcher/roxe-launcher
+programs/kroxed/kroxed
+programs/nodroxe/config.hpp
+programs/nodroxe/nodroxe
 
 scripts/tn_init.sh
 
@@ -64,7 +64,7 @@ tests/plugin_test
 unittests/unit_test
 
 doxygen
-actc.doxygen
+roxe.doxygen
 
 wallet.json
 witness_node_data_dir
@@ -79,7 +79,7 @@ build.tar.gz
 build/*
 build-debug/*
 
-etc/actc/node_*
+etc/roxe/node_*
 var/lib/node_*
 .vscode
 .idea/

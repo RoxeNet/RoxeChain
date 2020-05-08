@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/actc/login_plugin/*.hpp")
+file(GLOB HEADERS "include/roxe/login_plugin/*.hpp")
 add_library( login_plugin
              login_plugin.cpp
              ${HEADERS} )

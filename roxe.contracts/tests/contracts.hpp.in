@@ -1,0 +1,27 @@
+#pragma once
+#include <roxe/testing/tester.hpp>
+
+namespace roxe { namespace testing {
+
+struct contracts {
+   static std::vector<uint8_t> system_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/roxe.system/roxe.system.wasm"); }
+   static std::vector<char>    system_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/roxe.system/roxe.system.abi"); }
+   static std::vector<uint8_t> token_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/roxe.token/roxe.token.wasm"); }
+   static std::vector<char>    token_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/roxe.token/roxe.token.abi"); }
+   static std::vector<uint8_t> msig_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/roxe.msig/roxe.msig.wasm"); }
+   static std::vector<char>    msig_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/roxe.msig/roxe.msig.abi"); }
+   static std::vector<uint8_t> wrap_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/roxe.wrap/roxe.wrap.wasm"); }
+   static std::vector<char>    wrap_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/roxe.wrap/roxe.wrap.abi"); }
+   static std::vector<uint8_t> bios_wasm() { return read_wasm("${CMAKE_BINARY_DIR}/../contracts/roxe.bios/roxe.bios.wasm"); }
+   static std::vector<char>    bios_abi() { return read_abi("${CMAKE_BINARY_DIR}/../contracts/roxe.bios/roxe.bios.abi"); }
+
+   struct util {
+      static std::vector<uint8_t> reject_all_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/reject_all.wasm"); }
+      static std::vector<uint8_t> exchange_wasm() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/exchange.wasm"); }
+      static std::vector<uint8_t> system_wasm_old() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/roxe.system.old/roxe.system.wasm"); }
+      static std::vector<char>    system_abi_old() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/roxe.system.old/roxe.system.abi"); }
+      static std::vector<uint8_t> msig_wasm_old() { return read_wasm("${CMAKE_SOURCE_DIR}/test_contracts/roxe.msig.old/roxe.msig.wasm"); }
+      static std::vector<char>    msig_abi_old() { return read_abi("${CMAKE_SOURCE_DIR}/test_contracts/roxe.msig.old/roxe.msig.abi"); }
+   };
+};
+}} //ns roxe::testing

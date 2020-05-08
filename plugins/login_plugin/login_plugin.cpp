@@ -1,18 +1,18 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/authorization_manager.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/login_plugin/login_plugin.hpp>
+#include <roxe/chain/authorization_manager.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/login_plugin/login_plugin.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace actc {
+namespace roxe {
 
 static appbase::abstract_plugin& _login_plugin = app().register_plugin<login_plugin>();
 
-using namespace actc;
+using namespace roxe;
 
 struct login_request {
    chain::private_key_type server_ephemeral_priv_key{};
@@ -92,10 +92,10 @@ void login_plugin::plugin_shutdown() {}
 login_plugin::start_login_request_results
 login_plugin::start_login_request(const login_plugin::start_login_request_params& params) {
    my->expire_requests();
-   ACTC_ASSERT(params.expiration_time > fc::time_point::now(), fc::timeout_exception,
+   ROXE_ASSERT(params.expiration_time > fc::time_point::now(), fc::timeout_exception,
               "Requested expiration time ${expiration_time} is in the past",
               ("expiration_time", params.expiration_time));
-   ACTC_ASSERT(my->requests.size() < my->max_login_requests, fc::timeout_exception, "Too many pending login requests");
+   ROXE_ASSERT(my->requests.size() < my->max_login_requests, fc::timeout_exception, "Too many pending login requests");
    login_request request;
    request.server_ephemeral_priv_key = chain::private_key_type::generate_r1();
    request.server_ephemeral_pub_key = request.server_ephemeral_priv_key.get_public_key();
@@ -161,4 +161,4 @@ login_plugin::do_not_use_get_secret(const login_plugin::do_not_use_get_secret_pa
    return {params.priv_key.generate_shared_secret(params.pub_key)};
 }
 
-} // namespace actc
+} // namespace roxe

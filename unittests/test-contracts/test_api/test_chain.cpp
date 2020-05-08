@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actclib/action.h>
-#include <actclib/chain.h>
-#include <actclib/actc.hpp>
+#include <roxelib/action.h>
+#include <roxelib/chain.h>
+#include <roxelib/roxe.hpp>
 
 #include "test_api.hpp"
 
@@ -19,11 +19,11 @@ void test_chain::test_activeprods() {
   producers act_prods;
   read_action_data( &act_prods, sizeof(producers) );
    
-  actc_assert( act_prods.len == 21, "producers.len != 21" );
+  roxe_assert( act_prods.len == 21, "producers.len != 21" );
 
   producers api_prods;
-  get_active_producers( api_prods.producers, sizeof(actc::name)*21 );
+  get_active_producers( api_prods.producers, sizeof(roxe::name)*21 );
 
   for( int i = 0; i < 21 ; ++i )
-      actc_assert( api_prods.producers[i] == act_prods.producers[i], "Active producer" );
+      roxe_assert( api_prods.producers[i] == act_prods.producers[i], "Active producer" );
 }

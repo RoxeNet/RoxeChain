@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  *
  * \warning This file is machine generated. DO NOT EDIT.  See config.hpp.in for changes.
  */
@@ -9,8 +9,8 @@
 #ifndef CONFIG_HPP_IN
 #define CONFIG_HPP_IN
 
-namespace actc { namespace nodactc { namespace config {
-  constexpr uint64_t version = 0x${nodactc_BUILD_VERSION};
+namespace roxe { namespace nodroxe { namespace config {
+  constexpr uint64_t version = 0x${nodroxe_BUILD_VERSION};
   const string node_executable_name = "${NODE_EXECUTABLE_NAME}";
 }}}
 

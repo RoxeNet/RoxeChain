@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
 #include <appbase/application.hpp>
 
-#include <actc/chain_plugin/chain_plugin.hpp>
-#include <actc/http_plugin/http_plugin.hpp>
-#include <actc/net_plugin/net_plugin.hpp>
-#include <actc/producer_plugin/producer_plugin.hpp>
+#include <roxe/chain_plugin/chain_plugin.hpp>
+#include <roxe/http_plugin/http_plugin.hpp>
+#include <roxe/net_plugin/net_plugin.hpp>
+#include <roxe/producer_plugin/producer_plugin.hpp>
 
 #include <fc/log/logger_config.hpp>
 #include <fc/log/appender.hpp>
@@ -19,7 +19,7 @@
 #include "config.hpp"
 
 using namespace appbase;
-using namespace actc;
+using namespace roxe;
 
 namespace detail {
 
@@ -78,11 +78,11 @@ enum return_codes {
 int main(int argc, char** argv)
 {
    try {
-      app().set_version(actc::nodactc::config::version);
+      app().set_version(roxe::nodroxe::config::version);
 
       auto root = fc::app_path();
-      app().set_default_data_dir(root / "actc" / nodactc::config::node_executable_name / "data" );
-      app().set_default_config_dir(root / "actc" / nodactc::config::node_executable_name / "config" );
+      app().set_default_data_dir(root / "roxe" / nodroxe::config::node_executable_name / "data" );
+      app().set_default_config_dir(root / "roxe" / nodroxe::config::node_executable_name / "config" );
       http_plugin::set_defaults({
          .default_unix_socket_path = "",
          .default_http_port = 8888
@@ -90,9 +90,9 @@ int main(int argc, char** argv)
       if(!app().initialize<chain_plugin, net_plugin, producer_plugin>(argc, argv))
          return INITIALIZE_FAIL;
       initialize_logging();
-      ilog("${name} version ${ver}", ("name", nodactc::config::node_executable_name)("ver", app().version_string()));
-      ilog("${name} using configuration file ${c}", ("name", nodactc::config::node_executable_name)("c", app().full_config_file_path().string()));
-      ilog("${name} data directory is ${d}", ("name", nodactc::config::node_executable_name)("d", app().data_dir().string()));
+      ilog("${name} version ${ver}", ("name", nodroxe::config::node_executable_name)("ver", app().version_string()));
+      ilog("${name} using configuration file ${c}", ("name", nodroxe::config::node_executable_name)("c", app().full_config_file_path().string()));
+      ilog("${name} data directory is ${d}", ("name", nodroxe::config::node_executable_name)("d", app().data_dir().string()));
       app().startup();
       app().exec();
    } catch( const extract_genesis_state_exception& e ) {
@@ -138,6 +138,6 @@ int main(int argc, char** argv)
       return OTHER_FAIL;
    }
 
-   ilog("${name} successfully exiting", ("name", nodactc::config::node_executable_name));
+   ilog("${name} successfully exiting", ("name", nodroxe::config::node_executable_name));
    return SUCCESS;
 }

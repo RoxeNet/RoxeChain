@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
 
-#include <actc/chain/thread_utils.hpp>
+#include <roxe/chain/thread_utils.hpp>
 #include <fc/log/logger_config.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 
 //
@@ -37,4 +37,4 @@ void named_thread_pool::stop() {
 }
 
 
-} } // actc::chain
+} } // roxe::chain

@@ -1,6 +1,6 @@
-if( ACTC_COMPILE_TEST_CONTRACTS )
-   set(ACTC_WASM_OLD_BEHAVIOR "Off")
-   find_package( actc.cdt REQUIRED )
+if( ROXE_COMPILE_TEST_CONTRACTS )
+   set(ROXE_WASM_OLD_BEHAVIOR "Off")
+   find_package( roxe.cdt REQUIRED )
 endif()
 
 if ("${CMAKE_GENERATOR}" STREQUAL "Ninja")

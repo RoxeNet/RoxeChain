@@ -50,8 +50,8 @@ class NamedAccounts:
 
 
 ###############################################################
-# nodactc_voting_test
-# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodroxe_voting_test
+# --dump-error-details <Upon error print etc/roxe/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -67,11 +67,11 @@ walletPort=args.wallet_port
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.ActcWalletName
-ClientName="clactc"
+WalletdName=Utils.RoxeWalletName
+ClientName="clroxe"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -84,10 +84,10 @@ try:
     minRAMValue=1002
     maxRAMFlag="--chain-state-db-size-mb"
     maxRAMValue=1010
-    extraNodactcArgs=" %s %d %s %d " % (minRAMFlag, minRAMValue, maxRAMFlag, maxRAMValue)
-    if cluster.launch(onlyBios=False, pnodes=totalNodes, totalNodes=totalNodes, totalProducers=totalNodes, extraNodactcArgs=extraNodactcArgs, useBiosBootFile=False) is False:
+    extraNodroxeArgs=" %s %d %s %d " % (minRAMFlag, minRAMValue, maxRAMFlag, maxRAMValue)
+    if cluster.launch(onlyBios=False, pnodes=totalNodes, totalNodes=totalNodes, totalProducers=totalNodes, extraNodroxeArgs=extraNodroxeArgs, useBiosBootFile=False) is False:
         Utils.cmdError("launcher")
-        errorExit("Failed to stand up actc cluster.")
+        errorExit("Failed to stand up roxe cluster.")
 
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
@@ -99,7 +99,7 @@ try:
     testWalletName="test"
 
     Print("Creating wallet \"%s\"." % (testWalletName))
-    testWallet=walletMgr.create(testWalletName, [cluster.actcAccount])
+    testWallet=walletMgr.create(testWalletName, [cluster.roxeAccount])
 
     for _, account in cluster.defProducerAccounts.items():
         walletMgr.importKey(account, testWallet, ignoreDupKeyWarning=True)
@@ -116,23 +116,23 @@ try:
     for account in accounts:
         walletMgr.importKey(account, testWallet)
 
-    # create accounts via actc as otherwise a bid is needed
+    # create accounts via roxe as otherwise a bid is needed
     for account in accounts:
-        Print("Create new account %s via %s" % (account.name, cluster.actcAccount.name))
-        trans=nodes[0].createInitializeAccount(account, cluster.actcAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
+        Print("Create new account %s via %s" % (account.name, cluster.roxeAccount.name))
+        trans=nodes[0].createInitializeAccount(account, cluster.roxeAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
         transferAmount="70000000.0000 {0}".format(CORE_SYMBOL)
-        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.actcAccount.name, account.name))
-        nodes[0].transferFunds(cluster.actcAccount, account, transferAmount, "test transfer")
+        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.roxeAccount.name, account.name))
+        nodes[0].transferFunds(cluster.roxeAccount, account, transferAmount, "test transfer")
         trans=nodes[0].delegatebw(account, 1000000.0000, 68000000.0000, waitForTransBlock=True, exitOnError=True)
 
     contractAccount=cluster.createAccountKeys(1)[0]
     contractAccount.name="contracttest"
     walletMgr.importKey(contractAccount, testWallet)
-    Print("Create new account %s via %s" % (contractAccount.name, cluster.actcAccount.name))
-    trans=nodes[0].createInitializeAccount(contractAccount, cluster.actcAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
+    Print("Create new account %s via %s" % (contractAccount.name, cluster.roxeAccount.name))
+    trans=nodes[0].createInitializeAccount(contractAccount, cluster.roxeAccount, stakedDeposit=500000, waitForTransBlock=False, stakeNet=50000, stakeCPU=50000, buyRAM=50000, exitOnError=True)
     transferAmount="90000000.0000 {0}".format(CORE_SYMBOL)
-    Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.actcAccount.name, contractAccount.name))
-    nodes[0].transferFunds(cluster.actcAccount, contractAccount, transferAmount, "test transfer")
+    Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.roxeAccount.name, contractAccount.name))
+    nodes[0].transferFunds(cluster.roxeAccount, contractAccount, transferAmount, "test transfer")
     trans=nodes[0].delegatebw(contractAccount, 1000000.0000, 88000000.0000, waitForTransBlock=True, exitOnError=True)
 
     contractDir="unittests/test-contracts/integration_test"
@@ -167,11 +167,11 @@ try:
                 if trans is None or not trans[0]:
                     timeOutCount+=1
                     if timeOutCount>=3:
-                        Print("Failed to push create action to actc contract for %d consecutive times, looks like nodactc already exited." % (timeOutCount))
+                        Print("Failed to push create action to roxe contract for %d consecutive times, looks like nodroxe already exited." % (timeOutCount))
                         keepProcessing=False
                         break
 
-                    Print("Failed to push create action to actc contract. sleep for 5 seconds")
+                    Print("Failed to push create action to roxe contract. sleep for 5 seconds")
                     count-=1 # failed attempt shouldn't be counted
                     time.sleep(5)
                 else:
@@ -184,7 +184,7 @@ try:
     #spread the actions to all accounts, to use each accounts tps bandwidth
     fromIndexStart=fromIndex+1 if fromIndex+1<namedAccounts.numAccounts else 0
 
-    # min and max are subjective, just assigned to make sure that many small changes in nodactc don't
+    # min and max are subjective, just assigned to make sure that many small changes in nodroxe don't
     # result in the test not correctly validating behavior
     if count < 5 or count > 20:
         strMsg="little" if count < 20 else "much"
@@ -255,7 +255,7 @@ try:
             try:
                 trans=nodes[0].pushMessage(contract, action, data, opts)
                 if trans is None or not trans[0]:
-                    Print("Failed to push create action to actc contract. sleep for 60 seconds")
+                    Print("Failed to push create action to roxe contract. sleep for 60 seconds")
                     time.sleep(60)
                 time.sleep(1)
             except TypeError as ex:
@@ -314,7 +314,7 @@ try:
         try:
             trans=nodes[0].pushMessage(contract, action, data, opts)
             if trans is None or not trans[0]:
-                Print("Failed to push create action to actc contract. sleep for 60 seconds")
+                Print("Failed to push create action to roxe contract. sleep for 60 seconds")
                 time.sleep(60)
                 continue
             time.sleep(1)
@@ -331,6 +331,6 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killActcInstances=killActcInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killRoxeInstances=killRoxeInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
 exit(0)

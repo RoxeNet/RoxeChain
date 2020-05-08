@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/protocol_state_object.hpp>
+#include <roxe/chain/protocol_state_object.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
    namespace detail {
 

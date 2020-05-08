@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] payloadless : public actc::contract {
+class [[roxe::contract]] payloadless : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
+   [[roxe::action]]
    void doit();
 };

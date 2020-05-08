@@ -20,7 +20,7 @@ Utils.Debug=args.v
 killAll=args.clean_run
 dumpErrorDetails=args.dump_error_details
 dontKill=args.leave_running
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 keepLogs=args.keep_logs
 alternateVersionLabelsFile=args.alternate_version_labels_file
@@ -29,11 +29,11 @@ walletMgr=WalletMgr(True)
 cluster=Cluster(walletd=True)
 cluster.setWalletMgr(walletMgr)
 
-def restartNode(node: Node, nodeId, chainArg=None, addOrSwapFlags=None, nodactcPath=None):
+def restartNode(node: Node, nodeId, chainArg=None, addOrSwapFlags=None, nodroxePath=None):
     if not node.killed:
         node.kill(signal.SIGTERM)
     isRelaunchSuccess = node.relaunch(nodeId, chainArg, addOrSwapFlags=addOrSwapFlags,
-                                      timeout=5, cachePopen=True, nodactcPath=nodactcPath)
+                                      timeout=5, cachePopen=True, nodroxePath=nodroxePath)
     assert isRelaunchSuccess, "Fail to relaunch"
 
 def shouldNodeContainPreactivateFeature(node):
@@ -85,7 +85,7 @@ try:
     Utils.Print("Alternate Version Labels File is {}".format(alternateVersionLabelsFile))
     assert exists(alternateVersionLabelsFile), "Alternate version labels file does not exist"
     assert cluster.launch(pnodes=4, totalNodes=4, prodCount=1, totalProducers=4,
-                          extraNodactcArgs=" --plugin actc::producer_api_plugin ",
+                          extraNodroxeArgs=" --plugin roxe::producer_api_plugin ",
                           useBiosBootFile=False,
                           onlySetProds=True,
                           pfSetupPolicy=PFSetupPolicy.NONE,
@@ -172,16 +172,16 @@ try:
     # Restart old node with newest version
     # Before we are migrating to new version, use --export-reversible-blocks as the old version
     # and --import-reversible-blocks with the new version to ensure the compatibility of the reversible blocks
-    # Finally, when we restart the 4th node with the version of nodactc that supports protocol feature,
+    # Finally, when we restart the 4th node with the version of nodroxe that supports protocol feature,
     # all nodes should be in sync, and the 4th node will also contain PREACTIVATE_FEATURE
     portableRevBlkPath = os.path.join(Utils.getNodeDataDir(oldNodeId), "rev_blk_portable_format")
     oldNode.kill(signal.SIGTERM)
     # Note, for the following relaunch, these will fail to relaunch immediately (expected behavior of export/import), so the chainArg will not replace the old cmd
     oldNode.relaunch(oldNodeId, chainArg="--export-reversible-blocks {}".format(portableRevBlkPath), timeout=1)
-    oldNode.relaunch(oldNodeId, chainArg="--import-reversible-blocks {}".format(portableRevBlkPath), timeout=1, nodactcPath="programs/nodactc/nodactc")
+    oldNode.relaunch(oldNodeId, chainArg="--import-reversible-blocks {}".format(portableRevBlkPath), timeout=1, nodroxePath="programs/nodroxe/nodroxe")
     os.remove(portableRevBlkPath)
 
-    restartNode(oldNode, oldNodeId, chainArg="--replay", nodactcPath="programs/nodactc/nodactc")
+    restartNode(oldNode, oldNodeId, chainArg="--replay", nodroxePath="programs/nodroxe/nodroxe")
     time.sleep(2) # Give some time to replay
 
     assert shouldNodesBeInSync(allNodes), "All nodes should be in sync"
@@ -189,7 +189,7 @@ try:
 
     testSuccessful = True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killActcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful, killRoxeInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
 
 exitCode = 0 if testSuccessful else 1
 exit(exitCode)

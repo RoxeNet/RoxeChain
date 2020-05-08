@@ -18,8 +18,8 @@ import shutil
 
 
 ###############################################################
-# nodactc_irreversible_mode_test
-# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodroxe_irreversible_mode_test
+# --dump-error-details <Upon error print etc/roxe/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 # -v --leave-running --clean-run
 ###############################################################
@@ -37,7 +37,7 @@ Utils.Debug = args.v
 killAll=args.clean_run
 dumpErrorDetails=args.dump_error_details
 dontKill=args.leave_running
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 keepLogs=args.keep_logs
 
@@ -165,11 +165,11 @@ try:
       pnodes=1,
       useBiosBootFile=False,
       topo="mesh",
-      specificExtraNodactcArgs={
+      specificExtraNodroxeArgs={
          0:"--enable-stale-production",
          4:"--read-mode irreversible",
          6:"--read-mode irreversible",
-         9:"--plugin actc::producer_api_plugin"})
+         9:"--plugin roxe::producer_api_plugin"})
 
    producingNodeId = 0
    producingNode = cluster.getNode(producingNodeId)
@@ -399,7 +399,7 @@ try:
 
    testSuccessful = all(testResults)
 finally:
-   TestHelper.shutdown(cluster, walletMgr, testSuccessful, killActcInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
+   TestHelper.shutdown(cluster, walletMgr, testSuccessful, killRoxeInstances, killWallet, keepLogs, killAll, dumpErrorDetails)
    # Print test result
    for msg in testResultMsgs: Print(msg)
 

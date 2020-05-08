@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "integration_test.hpp"
 
-using namespace actc;
+using namespace roxe;
 
 void integration_test::store( name from, name to, uint64_t num ) {
    require_auth( from );

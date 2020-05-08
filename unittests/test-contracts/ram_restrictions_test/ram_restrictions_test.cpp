@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "ram_restrictions_test.hpp"
-#include <actc/transaction.hpp>
+#include <roxe/transaction.hpp>
 
-using namespace actc;
+using namespace roxe;
 
 template <typename Table>
 void _setdata(name self, int len, name payer) {
@@ -45,7 +45,7 @@ void ram_restrictions_test::on_notify_setdata( name acctonotify, uint32_t len1, 
 void ram_restrictions_test::senddefer( uint64_t senderid, name payer ) {
    transaction trx;
    trx.actions.emplace_back(
-      std::vector<actc::permission_level>{{_self, "active"_n}},
+      std::vector<roxe::permission_level>{{_self, "active"_n}},
       get_self(),
       "noop"_n,
       std::make_tuple()

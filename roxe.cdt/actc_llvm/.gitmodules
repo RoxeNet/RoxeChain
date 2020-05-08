@@ -1,0 +1,6 @@
+[submodule "tools/clang"]
+	path = tools/clang
+	url = https://github.com/roxe/clang.git
+[submodule "tools/lld"]
+	path = tools/lld
+	url = https://github.com/roxe/lld.git

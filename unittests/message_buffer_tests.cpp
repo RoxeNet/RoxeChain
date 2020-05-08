@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <iostream>
 
@@ -8,7 +8,7 @@
 
 #include <fc/network/message_buffer.hpp>
 
-namespace actc {
+namespace roxe {
 using namespace std;
 
 size_t mb_size(boost::asio::mutable_buffer& mb) {
@@ -359,4 +359,4 @@ BOOST_AUTO_TEST_CASE(message_buffer_datastream) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // namespace actc
+} // namespace roxe

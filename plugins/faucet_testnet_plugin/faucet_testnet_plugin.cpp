@@ -1,9 +1,9 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/faucet_testnet_plugin/faucet_testnet_plugin.hpp>
-#include <actc/chain_plugin/chain_plugin.hpp>
+#include <roxe/faucet_testnet_plugin/faucet_testnet_plugin.hpp>
+#include <roxe/chain_plugin/chain_plugin.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
@@ -16,7 +16,7 @@
 
 #include <utility>
 
-namespace actc { namespace detail {
+namespace roxe { namespace detail {
   struct faucet_testnet_empty {};
 
   struct faucet_testnet_keys {
@@ -39,17 +39,17 @@ namespace actc { namespace detail {
   };
 }}
 
-FC_REFLECT(actc::detail::faucet_testnet_empty, );
-FC_REFLECT(actc::detail::faucet_testnet_keys, (owner)(active));
-FC_REFLECT(actc::detail::faucet_testnet_create_account_params, (account)(keys));
-FC_REFLECT(actc::detail::faucet_testnet_create_account_alternates_response, (alternates)(message));
-FC_REFLECT(actc::detail::faucet_testnet_create_account_rate_limited_response, (message));
+FC_REFLECT(roxe::detail::faucet_testnet_empty, );
+FC_REFLECT(roxe::detail::faucet_testnet_keys, (owner)(active));
+FC_REFLECT(roxe::detail::faucet_testnet_create_account_params, (account)(keys));
+FC_REFLECT(roxe::detail::faucet_testnet_create_account_alternates_response, (alternates)(message));
+FC_REFLECT(roxe::detail::faucet_testnet_create_account_rate_limited_response, (message));
 
-namespace actc {
+namespace roxe {
 
 static appbase::abstract_plugin& _faucet_testnet_plugin = app().register_plugin<faucet_testnet_plugin>();
 
-using namespace actc::chain;
+using namespace roxe::chain;
 using public_key_type = chain::public_key_type;
 using key_pair = std::pair<std::string, std::string>;
 using results_pair = std::pair<uint32_t,fc::variant>;
@@ -186,7 +186,7 @@ struct faucet_testnet_plugin_impl {
          suggestion.pop_back();
       }
 
-      const actc::detail::faucet_testnet_create_account_alternates_response response{
+      const roxe::detail::faucet_testnet_create_account_alternates_response response{
          names, "Account name is already in use."};
       return { conflict_with_alternates, fc::variant(response) };
    }
@@ -194,7 +194,7 @@ struct faucet_testnet_plugin_impl {
    results_pair create_account(const std::string& new_account_name, const fc::crypto::public_key& owner_pub_key, const fc::crypto::public_key& active_pub_key) {
 
       auto creating_account = database().find<account_object, by_name>(_create_account_name);
-      ACTC_ASSERT(creating_account != nullptr, transaction_exception,
+      ROXE_ASSERT(creating_account != nullptr, transaction_exception,
                  "To create account using the faucet, must already have created account \"${a}\"",("a",_create_account_name));
 
       auto existing_account = database().find<account_object, by_name>(new_account_name);
@@ -205,7 +205,7 @@ struct faucet_testnet_plugin_impl {
 
       if (_blocking_accounts)
       {
-         actc::detail::faucet_testnet_create_account_rate_limited_response response{
+         roxe::detail::faucet_testnet_create_account_rate_limited_response response{
             "Rate limit exceeded, the max is 1 request per " + fc::to_string(_create_interval_msec) +
             " milliseconds. Come back later."};
          return std::make_pair(too_many_requests, fc::variant(response));
@@ -242,11 +242,11 @@ struct faucet_testnet_plugin_impl {
       _timer.expires_from_now(boost::posix_time::microseconds(_create_interval_msec * 1000));
       _timer.async_wait(boost::bind(&faucet_testnet_plugin_impl::timer_fired, this));
 
-      return std::make_pair(account_created, fc::variant(actc::detail::faucet_testnet_empty()));
+      return std::make_pair(account_created, fc::variant(roxe::detail::faucet_testnet_empty()));
    }
 
    results_pair create_faucet_account(const std::string& body) {
-      const actc::detail::faucet_testnet_create_account_params params = fc::json::from_string(body).as<actc::detail::faucet_testnet_create_account_params>();
+      const roxe::detail::faucet_testnet_create_account_params params = fc::json::from_string(body).as<roxe::detail::faucet_testnet_create_account_params>();
       return create_account(params.account, fc::crypto::public_key(params.keys.owner), fc::crypto::public_key(params.keys.active));
    }
 
@@ -276,7 +276,7 @@ const uint32_t faucet_testnet_plugin_impl::_default_create_interval_msec = 1000;
 const uint32_t faucet_testnet_plugin_impl::_default_create_alternates_to_return = 3;
 const std::string faucet_testnet_plugin_impl::_default_create_account_name = "faucet";
 // defaults to the public/private key of init accounts in private testnet genesis.json
-const key_pair faucet_testnet_plugin_impl::_default_key_pair = {"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"};
+const key_pair faucet_testnet_plugin_impl::_default_key_pair = {"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"};
 
 
 faucet_testnet_plugin::faucet_testnet_plugin()

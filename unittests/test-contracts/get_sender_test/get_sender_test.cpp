@@ -1,18 +1,18 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "get_sender_test.hpp"
-#include <actc/transaction.hpp>
+#include <roxe/transaction.hpp>
 
-using namespace actc;
+using namespace roxe;
 
 void get_sender_test::assertsender( name expected_sender ) {
    check( get_sender() == expected_sender, "sender did not match" );
 }
 
 void get_sender_test::sendinline( name to, name expected_sender ) {
-   assertsender_action a( to,  std::vector<actc::permission_level>{} );
+   assertsender_action a( to,  std::vector<roxe::permission_level>{} );
    a.send( expected_sender );
 }
 
@@ -22,7 +22,7 @@ void get_sender_test::notify( name to, name expected_sender, bool send_inline ) 
 
 void get_sender_test::on_notify( name to, name expected_sender, bool send_inline ) {
    if( send_inline ) {
-      assertsender_action a( get_first_receiver(),  std::vector<actc::permission_level>{} );
+      assertsender_action a( get_first_receiver(),  std::vector<roxe::permission_level>{} );
       a.send( expected_sender );
    } else {
       check( get_sender() == expected_sender, "sender did not match" );

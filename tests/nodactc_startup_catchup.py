@@ -16,7 +16,7 @@ import math
 import re
 
 ###############################################################
-# nodactc_startup_catchup
+# nodroxe_startup_catchup
 #  Test configures a producing node and <--txn-plugins count> non-producing nodes with the
 #  txn_test_gen_plugin.  Each non-producing node starts generating transactions and sending them
 #  to the producing node.
@@ -53,11 +53,11 @@ totalNodes=startedNonProdNodes+pnodes+catchupCount
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.ActcWalletName
-ClientName="clactc"
+WalletdName=Utils.RoxeWalletName
+ClientName="clroxe"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -65,14 +65,14 @@ try:
 
     cluster.killall(allInstances=killAll)
     cluster.cleanup()
-    specificExtraNodactcArgs={}
+    specificExtraNodroxeArgs={}
     txnGenNodeNum=pnodes  # next node after producer nodes
     for nodeNum in range(txnGenNodeNum, txnGenNodeNum+startedNonProdNodes):
-        specificExtraNodactcArgs[nodeNum]="--plugin actc::txn_test_gen_plugin --txn-test-gen-account-prefix txntestacct"
+        specificExtraNodroxeArgs[nodeNum]="--plugin roxe::txn_test_gen_plugin --txn-test-gen-account-prefix txntestacct"
     Print("Stand up cluster")
     if cluster.launch(prodCount=prodCount, onlyBios=False, pnodes=pnodes, totalNodes=totalNodes, totalProducers=pnodes*prodCount,
-                      useBiosBootFile=False, specificExtraNodactcArgs=specificExtraNodactcArgs, unstartedNodes=catchupCount, loadSystemContract=False) is False:
-        Utils.errorExit("Failed to stand up actc cluster.")
+                      useBiosBootFile=False, specificExtraNodroxeArgs=specificExtraNodroxeArgs, unstartedNodes=catchupCount, loadSystemContract=False) is False:
+        Utils.errorExit("Failed to stand up roxe cluster.")
 
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
@@ -83,7 +83,7 @@ try:
         txnGenNodes.append(cluster.getNode(nodeNum))
 
     Print("Create accounts for generated txns")
-    txnGenNodes[0].txnGenCreateTestAccounts(cluster.actcAccount.name, cluster.actcAccount.activePrivateKey)
+    txnGenNodes[0].txnGenCreateTestAccounts(cluster.roxeAccount.name, cluster.roxeAccount.activePrivateKey)
 
     def lib(node):
         return node.getBlockNum(BlockType.lib)
@@ -187,6 +187,6 @@ try:
     testSuccessful=True
 
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killActcInstances=killActcInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killRoxeInstances=killRoxeInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
 exit(0)

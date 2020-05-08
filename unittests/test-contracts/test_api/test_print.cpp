@@ -1,8 +1,8 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actclib/actc.hpp>
+#include <roxelib/roxe.hpp>
 
 #include "test_api.hpp"
 
@@ -61,25 +61,25 @@ void test_print::test_printui128() {
 }
 
 void test_print::test_printn() {
-   printn(actc::name{"1"}.value);
-   printn(actc::name{"5"}.value);
-   printn(actc::name{"a"}.value);
-   printn(actc::name{"z"}.value);
+   printn(roxe::name{"1"}.value);
+   printn(roxe::name{"5"}.value);
+   printn(roxe::name{"a"}.value);
+   printn(roxe::name{"z"}.value);
 
-   printn(actc::name{"abc"}.value);
-   printn(actc::name{"123"}.value);
+   printn(roxe::name{"abc"}.value);
+   printn(roxe::name{"123"}.value);
 
-   printn(actc::name{"abc.123"}.value);
-   printn(actc::name{"123.abc"}.value);
+   printn(roxe::name{"abc.123"}.value);
+   printn(roxe::name{"123.abc"}.value);
 
-   printn(actc::name{"12345abcdefgj"}.value);
-   printn(actc::name{"ijklmnopqrstj"}.value);
-   printn(actc::name{"vwxyz.12345aj"}.value);
+   printn(roxe::name{"12345abcdefgj"}.value);
+   printn(roxe::name{"ijklmnopqrstj"}.value);
+   printn(roxe::name{"vwxyz.12345aj"}.value);
 
-   printn(actc::name{"111111111111j"}.value);
-   printn(actc::name{"555555555555j"}.value);
-   printn(actc::name{"aaaaaaaaaaaaj"}.value);
-   printn(actc::name{"zzzzzzzzzzzzj"}.value);
+   printn(roxe::name{"111111111111j"}.value);
+   printn(roxe::name{"555555555555j"}.value);
+   printn(roxe::name{"aaaaaaaaaaaaj"}.value);
+   printn(roxe::name{"zzzzzzzzzzzzj"}.value);
 }
 
 
@@ -121,7 +121,7 @@ void test_print::test_printqf() {
 
 void test_print::test_print_simple() {
     const std::string cvalue = "cvalue";
-    actc::print(cvalue);
+    roxe::print(cvalue);
     std::string value = "value";
-    actc::print(std::move(value));
+    roxe::print(std::move(value));
 }

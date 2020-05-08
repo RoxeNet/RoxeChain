@@ -15,8 +15,8 @@ import re
 import signal
 
 ###############################################################
-# nodactc_forked_chain_test
-# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# nodroxe_forked_chain_test
+# --dump-error-details <Upon error print etc/roxe/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 Print=Utils.Print
@@ -131,11 +131,11 @@ walletPort=args.wallet_port
 
 walletMgr=WalletMgr(True, port=walletPort)
 testSuccessful=False
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 killWallet=not dontKill
 
-WalletdName=Utils.ActcWalletName
-ClientName="clactc"
+WalletdName=Utils.RoxeWalletName
+ClientName="clroxe"
 
 try:
     TestHelper.printSystemInfo("BEGIN")
@@ -144,9 +144,9 @@ try:
     cluster.killall(allInstances=killAll)
     cluster.cleanup()
     Print("Stand up cluster")
-    specificExtraNodactcArgs={}
+    specificExtraNodroxeArgs={}
     # producer nodes will be mapped to 0 through totalProducerNodes-1, so the number totalProducerNodes will be the non-producing node
-    specificExtraNodactcArgs[totalProducerNodes]="--plugin actc::test_control_api_plugin"
+    specificExtraNodroxeArgs[totalProducerNodes]="--plugin roxe::test_control_api_plugin"
 
 
     # ***   setup topogrophy   ***
@@ -156,9 +156,9 @@ try:
 
     if cluster.launch(prodCount=prodCount, topo="bridge", pnodes=totalProducerNodes,
                       totalNodes=totalNodes, totalProducers=totalProducers,
-                      useBiosBootFile=False, specificExtraNodactcArgs=specificExtraNodactcArgs) is False:
+                      useBiosBootFile=False, specificExtraNodroxeArgs=specificExtraNodroxeArgs) is False:
         Utils.cmdError("launcher")
-        Utils.errorExit("Failed to stand up actc cluster.")
+        Utils.errorExit("Failed to stand up roxe cluster.")
     Print("Validating system accounts after bootstrap")
     cluster.validateAccounts(None)
 
@@ -177,7 +177,7 @@ try:
     testWalletName="test"
 
     Print("Creating wallet \"%s\"." % (testWalletName))
-    testWallet=walletMgr.create(testWalletName, [cluster.actcAccount,accounts[0],accounts[1],accounts[2],accounts[3],accounts[4]])
+    testWallet=walletMgr.create(testWalletName, [cluster.roxeAccount,accounts[0],accounts[1],accounts[2],accounts[3],accounts[4]])
 
     for _, account in cluster.defProducerAccounts.items():
         walletMgr.importKey(account, testWallet, ignoreDupKeyWarning=True)
@@ -212,13 +212,13 @@ try:
     # ***   delegate bandwidth to accounts   ***
 
     node=prodNodes[0]
-    # create accounts via actc as otherwise a bid is needed
+    # create accounts via roxe as otherwise a bid is needed
     for account in accounts:
-        Print("Create new account %s via %s" % (account.name, cluster.actcAccount.name))
-        trans=node.createInitializeAccount(account, cluster.actcAccount, stakedDeposit=0, waitForTransBlock=True, stakeNet=1000, stakeCPU=1000, buyRAM=1000, exitOnError=True)
+        Print("Create new account %s via %s" % (account.name, cluster.roxeAccount.name))
+        trans=node.createInitializeAccount(account, cluster.roxeAccount, stakedDeposit=0, waitForTransBlock=True, stakeNet=1000, stakeCPU=1000, buyRAM=1000, exitOnError=True)
         transferAmount="100000000.0000 {0}".format(CORE_SYMBOL)
-        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.actcAccount.name, account.name))
-        node.transferFunds(cluster.actcAccount, account, transferAmount, "test transfer", waitForTransBlock=True)
+        Print("Transfer funds %s from account %s to %s" % (transferAmount, cluster.roxeAccount.name, account.name))
+        node.transferFunds(cluster.roxeAccount, account, transferAmount, "test transfer", waitForTransBlock=True)
         trans=node.delegatebw(account, 20000000.0000, 20000000.0000, waitForTransBlock=True, exitOnError=True)
 
 
@@ -468,7 +468,7 @@ try:
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killActcInstances=killActcInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killRoxeInstances=killRoxeInstances, killWallet=killWallet, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
     if not testSuccessful:
         Print(Utils.FileDivider)

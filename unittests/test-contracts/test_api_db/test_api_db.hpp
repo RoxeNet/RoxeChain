@@ -1,46 +1,46 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] test_api_db : public actc::contract {
+class [[roxe::contract]] test_api_db : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action("pg")]]
+   [[roxe::action("pg")]]
    void primary_i64_general();
 
-   [[actc::action("pl")]]
+   [[roxe::action("pl")]]
    void primary_i64_lowerbound();
 
-   [[actc::action("pu")]]
+   [[roxe::action("pu")]]
    void primary_i64_upperbound();
 
-   [[actc::action("s1g")]]
+   [[roxe::action("s1g")]]
    void idx64_general();
 
-   [[actc::action("s1l")]]
+   [[roxe::action("s1l")]]
    void idx64_lowerbound();
 
-   [[actc::action("s1u")]]
+   [[roxe::action("s1u")]]
    void idx64_upperbound();
 
-   [[actc::action("tia")]]
-   void test_invalid_access( actc::name code, uint64_t val, uint32_t index, bool store );
+   [[roxe::action("tia")]]
+   void test_invalid_access( roxe::name code, uint64_t val, uint32_t index, bool store );
 
-   [[actc::action("sdnancreate")]]
+   [[roxe::action("sdnancreate")]]
    void idx_double_nan_create_fail();
 
-   [[actc::action("sdnanmodify")]]
+   [[roxe::action("sdnanmodify")]]
    void idx_double_nan_modify_fail();
 
-   [[actc::action("sdnanlookup")]]
+   [[roxe::action("sdnanlookup")]]
    void idx_double_nan_lookup_fail( uint32_t lookup_type );
 
-   [[actc::action("sk32align")]]
+   [[roxe::action("sk32align")]]
    void misaligned_secondary_key256_tests();
 
 };

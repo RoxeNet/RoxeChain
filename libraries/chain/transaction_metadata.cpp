@@ -1,11 +1,11 @@
-#include <actc/chain/transaction_metadata.hpp>
-#include <actc/chain/thread_utils.hpp>
+#include <roxe/chain/transaction_metadata.hpp>
+#include <roxe/chain/thread_utils.hpp>
 #include <boost/asio/thread_pool.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 recovery_keys_type transaction_metadata::recover_keys( const chain_id_type& chain_id ) {
-   // Unlikely for more than one chain_id to be used in one nodactc instance
+   // Unlikely for more than one chain_id to be used in one nodroxe instance
    if( signing_keys_future.valid() ) {
       const std::tuple<chain_id_type, fc::microseconds, flat_set<public_key_type>>& sig_keys = signing_keys_future.get();
       if( std::get<0>( sig_keys ) == chain_id ) {
@@ -51,4 +51,4 @@ signing_keys_future_type transaction_metadata::start_recover_keys( const transac
 }
 
 
-} } // actc::chain
+} } // roxe::chain
