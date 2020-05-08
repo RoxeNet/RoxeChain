@@ -741,7 +741,7 @@ class Node(object):
 
     @staticmethod
     def currencyStrToInt(balanceStr):
-        """Converts currency string of form "12.3456 ACI" to int 123456"""
+        """Converts currency string of form "12.3456 ROC" to int 123456"""
         assert(isinstance(balanceStr, str))
         balanceStr=balanceStr.split()[0]
         #balance=int(decimal.Decimal(balanceStr[1:])*10000)
@@ -751,7 +751,7 @@ class Node(object):
 
     @staticmethod
     def currencyIntToStr(balance, symbol):
-        """Converts currency int of form 123456 to string "12.3456 ACI" where ACI is symbol string"""
+        """Converts currency int of form 123456 to string "12.3456 ROC" where ROC is symbol string"""
         assert(isinstance(balance, int))
         assert(isinstance(symbol, str))
         balanceStr="%.04f %s" % (balance/10000.0, symbol)
@@ -759,7 +759,7 @@ class Node(object):
         return balanceStr
 
     def validateFunds(self, initialBalances, transferAmount, source, accounts):
-        """Validate each account has the expected ACI balance. Validate cumulative balance matches expectedTotal."""
+        """Validate each account has the expected ROC balance. Validate cumulative balance matches expectedTotal."""
         assert(source)
         assert(isinstance(source, Account))
         assert(accounts)
@@ -870,7 +870,7 @@ class Node(object):
         return servants
 
     def getAccountRoxeBalanceStr(self, scope):
-        """Returns ACI currency0000 account balance from clroxe get table command. Returned balance is string following syntax "98.0311 ACI". """
+        """Returns ROC currency0000 account balance from clroxe get table command. Returned balance is string following syntax "98.0311 ROC". """
         assert isinstance(scope, str)
         amount=self.getTableAccountBalance("roxe.token", scope)
         if Utils.Debug: Utils.Print("getNodeAccountRoxeBalance %s %s" % (scope, amount))
@@ -878,7 +878,7 @@ class Node(object):
         return amount
 
     def getAccountRoxeBalance(self, scope):
-        """Returns ACI currency0000 account balance from clroxe get table command. Returned balance is an integer e.g. 980311. """
+        """Returns ROC currency0000 account balance from clroxe get table command. Returned balance is an integer e.g. 980311. """
         balanceStr=self.getAccountRoxeBalanceStr(scope)
         balance=Node.currencyStrToInt(balanceStr)
         return balance
