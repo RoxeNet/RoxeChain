@@ -1,4 +1,4 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/local/Cellar/cmake/3.15.5/bin/cmake -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -G "CodeBlocks - Unix Makefiles" /Users/shadow/git/actcio/actc
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/local/Cellar/cmake/3.15.5/bin/cmake -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -G "CodeBlocks - Unix Makefiles" /Users/shadow/git/roxeio/actc
 -- The C compiler identification is unknown
 -- The CXX compiler identification is GNU 9.2.0
 -- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9
@@ -12,9 +12,9 @@ CMake Error at /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.16/M
 
   It fails with the following output:
 
-    Change Dir: /Users/shadow/git/actcio/actc/cmake-build-debug/CMakeFiles/CMakeTmp
+    Change Dir: /Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeTmp
     
-    Run Build Command(s):/usr/local/Cellar/cmake/3.15.5/bin/cmake cmTC_199fc/fast && CMake Error: The source directory "/Users/shadow/git/actcio/actc/cmake-build-debug/CMakeFiles/CMakeTmp/cmTC_199fc/fast" does not exist.
+    Run Build Command(s):/usr/local/Cellar/cmake/3.15.5/bin/cmake cmTC_a4f15/fast && CMake Error: The source directory "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeTmp/cmTC_a4f15/fast" does not exist.
     Specify --help for usage, or press the help button on the CMake GUI.
     
     
@@ -27,5 +27,5 @@ Call Stack (most recent call first):
 
 
 -- Configuring incomplete, errors occurred!
-See also "/Users/shadow/git/actcio/actc/cmake-build-debug/CMakeFiles/CMakeOutput.log".
-See also "/Users/shadow/git/actcio/actc/cmake-build-debug/CMakeFiles/CMakeError.log".
+See also "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+See also "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeError.log".

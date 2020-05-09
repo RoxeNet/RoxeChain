@@ -7535,7 +7535,7 @@ defm INT_WMMA_m8n32k16: WMMA_LOAD_G<"m8n32k16">;
 //
 // wmma.store.d.sync.[row|col].m16n16k16[|.global|.shared].[f16|f32]
 //
-class WMMA_STORE_D_ROXETSO<string Geometry, string Layout, string Space,
+class WMMA_STORE_D_GLSTSO<string Geometry, string Layout, string Space,
                           string Type, NVPTXRegClass regclass,
                           bit WithStride, DAGOperand DstOp>
   : EmptyNVPTXInst,
@@ -7613,43 +7613,43 @@ class WMMA_STORE_INTR_HELPER<string Geometry, string Layout, string Space,
                       !if(!eq(Space, ".global"), match_global, match_generic));
 }
 
-multiclass WMMA_STORE_D_ROXETS<string Geometry, string Layout, string Space,
+multiclass WMMA_STORE_D_GLSTS<string Geometry, string Layout, string Space,
                               string Type, NVPTXRegClass regclass,
                               bit WithStride> {
-  def _avar:   WMMA_STORE_D_ROXETSO<Geometry, Layout, Space, Type, regclass,
+  def _avar:   WMMA_STORE_D_GLSTSO<Geometry, Layout, Space, Type, regclass,
                                    WithStride, imem>;
-  def _areg:   WMMA_STORE_D_ROXETSO<Geometry, Layout, Space, Type, regclass,
+  def _areg:   WMMA_STORE_D_GLSTSO<Geometry, Layout, Space, Type, regclass,
                                    WithStride, Int32Regs>;
-  def _areg64: WMMA_STORE_D_ROXETSO<Geometry, Layout, Space, Type, regclass,
+  def _areg64: WMMA_STORE_D_GLSTSO<Geometry, Layout, Space, Type, regclass,
                                    WithStride, Int64Regs>;
-  def _ari:    WMMA_STORE_D_ROXETSO<Geometry, Layout, Space, Type, regclass,
+  def _ari:    WMMA_STORE_D_GLSTSO<Geometry, Layout, Space, Type, regclass,
                                    WithStride, MEMri>;
-  def _ari64:  WMMA_STORE_D_ROXETSO<Geometry, Layout, Space, Type, regclass,
+  def _ari64:  WMMA_STORE_D_GLSTSO<Geometry, Layout, Space, Type, regclass,
                                    WithStride, MEMri64>;
 }
 
-multiclass WMMA_STORE_D_ROXETSh<string Geometry, string Layout, string Space,
+multiclass WMMA_STORE_D_GLSTSh<string Geometry, string Layout, string Space,
                                string Type, NVPTXRegClass regclass,
                                bit WithStride> {
   // Define a PatFrag that matches appropriate intrinsic that loads from the
   // given address space.
   def _Intr:    WMMA_STORE_INTR_HELPER<Geometry, Layout, Space, Type,
                                        WithStride>;
-  defm NAME:    WMMA_STORE_D_ROXETS<Geometry, Layout, Space, Type, regclass,
+  defm NAME:    WMMA_STORE_D_GLSTS<Geometry, Layout, Space, Type, regclass,
                                    WithStride>;
 }
 
-multiclass WMMA_STORE_D_ROXET<string Geometry, string Layout, string Space,
+multiclass WMMA_STORE_D_GLST<string Geometry, string Layout, string Space,
                              string Type, NVPTXRegClass regclass > {
-  defm _stride: WMMA_STORE_D_ROXETSh<Geometry, Layout, Space, Type, regclass, 1>;
-  defm NAME:    WMMA_STORE_D_ROXETSh<Geometry, Layout, Space, Type, regclass, 0>;
+  defm _stride: WMMA_STORE_D_GLSTSh<Geometry, Layout, Space, Type, regclass, 1>;
+  defm NAME:    WMMA_STORE_D_GLSTSh<Geometry, Layout, Space, Type, regclass, 0>;
 }
 
 multiclass WMMA_STORE_D_GLT<string Geometry, string Layout,
                            string Type, NVPTXRegClass regclass> {
-  defm _global: WMMA_STORE_D_ROXET<Geometry, Layout, ".global", Type, regclass>;
-  defm _shared: WMMA_STORE_D_ROXET<Geometry, Layout, ".shared", Type, regclass>;
-  defm NAME:    WMMA_STORE_D_ROXET<Geometry, Layout,        "", Type, regclass>;
+  defm _global: WMMA_STORE_D_GLST<Geometry, Layout, ".global", Type, regclass>;
+  defm _shared: WMMA_STORE_D_GLST<Geometry, Layout, ".shared", Type, regclass>;
+  defm NAME:    WMMA_STORE_D_GLST<Geometry, Layout,        "", Type, regclass>;
 }
 
 multiclass WMMA_STORE_D_GT<string Geometry, string Type,

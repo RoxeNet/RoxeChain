@@ -1441,13 +1441,13 @@ static bool isVMerge(ShuffleVectorSDNode *N, unsigned UnitSize,
   return true;
 }
 
-/// isVMRROXEhuffleMask - Return true if this is a shuffle mask suitable for
+/// isVMRGLShuffleMask - Return true if this is a shuffle mask suitable for
 /// a VMRGL* instruction with the specified unit size (1,2 or 4 bytes).
 /// The ShuffleKind distinguishes between big-endian merges with two
 /// different inputs (0), either-endian merges with two identical inputs (1),
 /// and little-endian merges with two different inputs (2).  For the latter,
 /// the input operands are swapped (see PPCInstrAltivec.td).
-bool PPC::isVMRROXEhuffleMask(ShuffleVectorSDNode *N, unsigned UnitSize,
+bool PPC::isVMRGLShuffleMask(ShuffleVectorSDNode *N, unsigned UnitSize,
                              unsigned ShuffleKind, SelectionDAG &DAG) {
   if (DAG.getDataLayout().isLittleEndian()) {
     if (ShuffleKind == 1) // unary
@@ -8407,9 +8407,9 @@ SDValue PPCTargetLowering::LowerVECTOR_SHUFFLE(SDValue Op,
         PPC::isVPKUWUMShuffleMask(SVOp, 1, DAG) ||
         PPC::isVPKUHUMShuffleMask(SVOp, 1, DAG) ||
         PPC::isVSLDOIShuffleMask(SVOp, 1, DAG) != -1 ||
-        PPC::isVMRROXEhuffleMask(SVOp, 1, 1, DAG) ||
-        PPC::isVMRROXEhuffleMask(SVOp, 2, 1, DAG) ||
-        PPC::isVMRROXEhuffleMask(SVOp, 4, 1, DAG) ||
+        PPC::isVMRGLShuffleMask(SVOp, 1, 1, DAG) ||
+        PPC::isVMRGLShuffleMask(SVOp, 2, 1, DAG) ||
+        PPC::isVMRGLShuffleMask(SVOp, 4, 1, DAG) ||
         PPC::isVMRGHShuffleMask(SVOp, 1, 1, DAG) ||
         PPC::isVMRGHShuffleMask(SVOp, 2, 1, DAG) ||
         PPC::isVMRGHShuffleMask(SVOp, 4, 1, DAG) ||
@@ -8428,9 +8428,9 @@ SDValue PPCTargetLowering::LowerVECTOR_SHUFFLE(SDValue Op,
   if (PPC::isVPKUWUMShuffleMask(SVOp, ShuffleKind, DAG) ||
       PPC::isVPKUHUMShuffleMask(SVOp, ShuffleKind, DAG) ||
       PPC::isVSLDOIShuffleMask(SVOp, ShuffleKind, DAG) != -1 ||
-      PPC::isVMRROXEhuffleMask(SVOp, 1, ShuffleKind, DAG) ||
-      PPC::isVMRROXEhuffleMask(SVOp, 2, ShuffleKind, DAG) ||
-      PPC::isVMRROXEhuffleMask(SVOp, 4, ShuffleKind, DAG) ||
+      PPC::isVMRGLShuffleMask(SVOp, 1, ShuffleKind, DAG) ||
+      PPC::isVMRGLShuffleMask(SVOp, 2, ShuffleKind, DAG) ||
+      PPC::isVMRGLShuffleMask(SVOp, 4, ShuffleKind, DAG) ||
       PPC::isVMRGHShuffleMask(SVOp, 1, ShuffleKind, DAG) ||
       PPC::isVMRGHShuffleMask(SVOp, 2, ShuffleKind, DAG) ||
       PPC::isVMRGHShuffleMask(SVOp, 4, ShuffleKind, DAG) ||

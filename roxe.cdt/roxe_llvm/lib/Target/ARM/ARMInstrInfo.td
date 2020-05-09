@@ -5092,13 +5092,13 @@ def CDP2 : ABXI<0b1110, (outs), (ins p_imm:$cop, imm0_15:$opc1,
   let DecoderNamespace = "CoProc";
 }
 
-class ROC<dag oops, dag iops, string opc, string asm,
+class ACI<dag oops, dag iops, string opc, string asm,
             list<dag> pattern, IndexMode im = IndexModeNone>
   : I<oops, iops, AddrModeNone, 4, im, BrFrm, NoItinerary,
       opc, asm, "", pattern> {
   let Inst{27-25} = 0b110;
 }
-class ROCnoP<dag oops, dag iops, string opc, string asm,
+class ACInoP<dag oops, dag iops, string opc, string asm,
           list<dag> pattern, IndexMode im = IndexModeNone>
   : InoP<oops, iops, AddrModeNone, 4, im, BrFrm, NoItinerary,
          opc, asm, "", pattern> {
@@ -5108,7 +5108,7 @@ class ROCnoP<dag oops, dag iops, string opc, string asm,
 
 let DecoderNamespace = "CoProc" in {
 multiclass LdStCop<bit load, bit Dbit, string asm, list<dag> pattern> {
-  def _OFFSET : ROC<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5:$addr),
+  def _OFFSET : ACI<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5:$addr),
                     asm, "\t$cop, $CRd, $addr", pattern> {
     bits<13> addr;
     bits<4> cop;
@@ -5124,7 +5124,7 @@ multiclass LdStCop<bit load, bit Dbit, string asm, list<dag> pattern> {
     let Inst{7-0} = addr{7-0};
     let DecoderMethod = "DecodeCopMemInstruction";
   }
-  def _PRE : ROC<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5_pre:$addr),
+  def _PRE : ACI<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5_pre:$addr),
                  asm, "\t$cop, $CRd, $addr!", [], IndexModePre> {
     bits<13> addr;
     bits<4> cop;
@@ -5140,7 +5140,7 @@ multiclass LdStCop<bit load, bit Dbit, string asm, list<dag> pattern> {
     let Inst{7-0} = addr{7-0};
     let DecoderMethod = "DecodeCopMemInstruction";
   }
-  def _POST: ROC<(outs), (ins p_imm:$cop, c_imm:$CRd, addr_offset_none:$addr,
+  def _POST: ACI<(outs), (ins p_imm:$cop, c_imm:$CRd, addr_offset_none:$addr,
                               postidx_imm8s4:$offset),
                  asm, "\t$cop, $CRd, $addr, $offset", [], IndexModePost> {
     bits<9> offset;
@@ -5158,7 +5158,7 @@ multiclass LdStCop<bit load, bit Dbit, string asm, list<dag> pattern> {
     let Inst{7-0} = offset{7-0};
     let DecoderMethod = "DecodeCopMemInstruction";
   }
-  def _OPTION : ROC<(outs),
+  def _OPTION : ACI<(outs),
                     (ins p_imm:$cop, c_imm:$CRd, addr_offset_none:$addr,
                          coproc_option_imm:$option),
       asm, "\t$cop, $CRd, $addr, $option", []> {
@@ -5179,7 +5179,7 @@ multiclass LdStCop<bit load, bit Dbit, string asm, list<dag> pattern> {
   }
 }
 multiclass LdSt2Cop<bit load, bit Dbit, string asm, list<dag> pattern> {
-  def _OFFSET : ROCnoP<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5:$addr),
+  def _OFFSET : ACInoP<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5:$addr),
                        asm, "\t$cop, $CRd, $addr", pattern> {
     bits<13> addr;
     bits<4> cop;
@@ -5195,7 +5195,7 @@ multiclass LdSt2Cop<bit load, bit Dbit, string asm, list<dag> pattern> {
     let Inst{7-0} = addr{7-0};
     let DecoderMethod = "DecodeCopMemInstruction";
   }
-  def _PRE : ROCnoP<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5_pre:$addr),
+  def _PRE : ACInoP<(outs), (ins p_imm:$cop, c_imm:$CRd, addrmode5_pre:$addr),
                     asm, "\t$cop, $CRd, $addr!", [], IndexModePre> {
     bits<13> addr;
     bits<4> cop;
@@ -5211,7 +5211,7 @@ multiclass LdSt2Cop<bit load, bit Dbit, string asm, list<dag> pattern> {
     let Inst{7-0} = addr{7-0};
     let DecoderMethod = "DecodeCopMemInstruction";
   }
-  def _POST: ROCnoP<(outs), (ins p_imm:$cop, c_imm:$CRd, addr_offset_none:$addr,
+  def _POST: ACInoP<(outs), (ins p_imm:$cop, c_imm:$CRd, addr_offset_none:$addr,
                                  postidx_imm8s4:$offset),
                  asm, "\t$cop, $CRd, $addr, $offset", [], IndexModePost> {
     bits<9> offset;
@@ -5229,7 +5229,7 @@ multiclass LdSt2Cop<bit load, bit Dbit, string asm, list<dag> pattern> {
     let Inst{7-0} = offset{7-0};
     let DecoderMethod = "DecodeCopMemInstruction";
   }
-  def _OPTION : ROCnoP<(outs),
+  def _OPTION : ACInoP<(outs),
                        (ins p_imm:$cop, c_imm:$CRd, addr_offset_none:$addr,
                             coproc_option_imm:$option),
       asm, "\t$cop, $CRd, $addr, $option", []> {

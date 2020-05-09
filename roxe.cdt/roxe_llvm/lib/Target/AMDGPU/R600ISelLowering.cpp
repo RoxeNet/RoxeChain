@@ -1779,7 +1779,7 @@ SDValue R600TargetLowering::PerformDAGCombine(SDNode *N,
   // (i32 fp_to_sint (fneg (select_cc f32, f32, 1.0, 0.0 cc))) ->
   // (i32 select_cc f32, f32, -1, 0 cc)
   //
-  // Mesa's ROXEL frontend generates the above pattern a lot and we can lower
+  // Mesa's GLSL frontend generates the above pattern a lot and we can lower
   // this to one of the SET*_DX10 instructions.
   case ISD::FP_TO_SINT: {
     SDValue FNeg = N->getOperand(0);

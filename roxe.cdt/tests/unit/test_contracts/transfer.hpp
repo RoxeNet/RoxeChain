@@ -11,12 +11,6 @@ CONTRACT transfer_contract : public contract {
          require_recipient(from);
          print_f("transfered : % -> % ? % (%)\n", from, to, quantity, memo);
       }
-
-//      ///FIXME for transfer fee
-//      ACTION transfer(name from, name to, asset quantity, std::string memo) {
-//          require_recipient(from);
-//          print_f("transfered : % -> % ? % (%)\n", from, to, quantity, memo);
-//      }
       ACTION transfer2(name from, name to, asset quantity, std::string memo) {
          require_recipient(from);
          print_f("transfered : % -> % ? % (%)\n", from, to, quantity, memo);

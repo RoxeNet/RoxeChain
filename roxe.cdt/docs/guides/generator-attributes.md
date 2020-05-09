@@ -26,7 +26,7 @@ struct __attribute__((roxe_action)) testa {
    ROXELIB_SERIALIZE( testa, (n) )
 };
 ```
-If your action name is not a valid [ROXE name](https://developers.roxe.io/roxe-cpp/docs/naming-conventions) you can explicitly specify the name in the attribute ```c++ [[roxe::action("<valid action name>")]]```
+If your action name is not a valid [ROXE name](https://developers.eos.io/roxe-cpp/docs/naming-conventions) you can explicitly specify the name in the attribute ```c++ [[roxe::action("<valid action name>")]]```
 
 #### [[roxe::table]]
 Example (two ways to declare a table for ABI generation):
@@ -87,7 +87,7 @@ This will mark a function declaration as being a WebAssembly import.  This allow
 
 ### Fixing an ABI or Writing an ABI Manually
 - Advanced features of the newest version of the ABI will require manual construction of the ABI, and odd and advanced C++ patterns could capsize the generators type deductions. So having a good knowledge of how to write an ABI should be an essential piece of knowledge of a smart contract writer.
-- Please refer to [developers.roxe.io "How to Write an ABI File"](https://developers.roxe.io/roxe-cpp/docs/how-to-write-an-abi) to learn about the different sections of an ABI.
+- Please refer to [developers.eos.io "How to Write an ABI File"](https://developers.eos.io/roxe-cpp/docs/how-to-write-an-abi) to learn about the different sections of an ABI.
 
 ### Adding Ricardian Contracts and Clauses to ABI
 - As of ROXE.CDT v1.4.0 the ABI generator will try to automatically import contracts and clauses into the generated ABI.  There are a few caveats to this, one is a strict naming policy of the files and an HTML tag used to mark each Ricardian contract and each clause.

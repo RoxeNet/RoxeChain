@@ -443,7 +443,7 @@ let hasSideEffects = 1, Defs = [CC] in
 
 // Load sampling controls.
 let hasSideEffects = 1, Defs = [CC] in
-  def ROCTL : SideEffectUnaryS<"lsctl", 0xB287, null_frag, 0>;
+  def LSCTL : SideEffectUnaryS<"lsctl", 0xB287, null_frag, 0>;
 
 // Query sampling information.
 let hasSideEffects = 1 in

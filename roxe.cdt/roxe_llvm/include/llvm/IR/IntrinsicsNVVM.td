@@ -3928,7 +3928,7 @@ multiclass NVVM_WMMA_LD {
 defm int_nvvm_wmma: NVVM_WMMA_LD;
 
 // WMMA.STORE.D
-class NVVM_WMMA_STD_ROXETS<string Geometry, string Layout,
+class NVVM_WMMA_STD_GLSTS<string Geometry, string Layout,
                           string Type, LLVMType regty, int WithStride,
                           // This is only used to create a typed empty array we
                           // need to pass to !if below.
@@ -3951,8 +3951,8 @@ class NVVM_WMMA_STD_ROXETS<string Geometry, string Layout,
 
 multiclass NVVM_WMMA_STD_GLT<string Geometry, string Layout,
                              string Type, LLVMType regty> {
-  def _stride: NVVM_WMMA_STD_ROXETS<Geometry, Layout, Type, regty, 1>;
-  def NAME:    NVVM_WMMA_STD_ROXETS<Geometry, Layout, Type, regty, 0>;
+  def _stride: NVVM_WMMA_STD_GLSTS<Geometry, Layout, Type, regty, 1>;
+  def NAME:    NVVM_WMMA_STD_GLSTS<Geometry, Layout, Type, regty, 0>;
 }
 
 multiclass NVVM_WMMA_STD_GT<string Geometry, string Type, LLVMType regty> {

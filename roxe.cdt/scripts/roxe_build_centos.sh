@@ -43,7 +43,7 @@
 	printf "\\n\\tChecking Yum installation\\n"
 	if ! YUM=$( command -v yum 2>/dev/null )
 	then
-		printf "\\n\\tYum must be installed to compile ROXEchain.\\n"
+		printf "\\n\\tYum must be installed to compile ROXE.IO.\\n"
 		printf "\\tExiting now.\\n\\n"
 		exit 1;
 	fi

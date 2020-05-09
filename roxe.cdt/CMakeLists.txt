@@ -66,7 +66,7 @@ install(FILES ${CMAKE_BINARY_DIR}/scripts/ricardroxe.py DESTINATION ${CDT_INSTAL
 # section for package construction
 set(VENDOR "block.one")
 set(PROJECT_NAME "roxe.cdt")
-set(DESC "Toolchain and supporting tools for the ROXEchain platform")
+set(DESC "Toolchain and supporting tools for the ROXE.IO platform")
 set(URL "https://github.com/roxe/roxe.cdt")
 set(EMAIL "support@block.one")
 configure_file(${CMAKE_SOURCE_DIR}/scripts/generate_package.sh.in ${CMAKE_BINARY_DIR}/packages/generate_package.sh @ONLY)

@@ -300,11 +300,11 @@ bool LoopDataPrefetch::runOnLoop(Loop *L) {
 
       const SCEV *NextLSCEV = SE->getAddExpr(LSCEVAddRec, SE->getMulExpr(
         SE->getConstant(LSCEVAddRec->getType(), ItersAhead),
-        ROCEVAddRec->getStepRecurrence(*SE)));
+        LSCEVAddRec->getStepRecurrence(*SE)));
       if (!isSafeToExpand(NextLSCEV, *SE))
         continue;
 
-      PrefLoads.push_back(std::make_pair(MemI, ROCEVAddRec));
+      PrefLoads.push_back(std::make_pair(MemI, LSCEVAddRec));
 
       Type *I8Ptr = Type::getInt8PtrTy(BB->getContext(), PtrAddrSpace);
       SCEVExpander SCEVE(*SE, I.getModule()->getDataLayout(), "prefaddr");
