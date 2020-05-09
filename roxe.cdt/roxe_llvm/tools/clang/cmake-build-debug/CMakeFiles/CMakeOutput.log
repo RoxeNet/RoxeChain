@@ -1,0 +1,14 @@
+The system is: Darwin - 17.7.0 - x86_64
+Compiling the CXX compiler identification source file "CMakeCXXCompilerId.cpp" succeeded.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags:  
+
+The output was:
+0
+
+
+Compilation of the CXX compiler identification source "CMakeCXXCompilerId.cpp" produced "a.out"
+
+The CXX compiler identification is GNU, found in "/Users/shadow/git/clang/cmake-build-debug/CMakeFiles/3.12.0/CompilerIdCXX/a.out"
+

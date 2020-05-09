@@ -1,0 +1,168 @@
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags: -c 
+
+The output was:
+1
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags: -Aa 
+
+The output was:
+1
+<command-line>: error: missing '(' after predicate
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags: -D__CLASSIC_C__ 
+
+The output was:
+1
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+CMakeCCompilerId.c:319:29: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  319 | char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:566:29: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  566 | char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:567:25: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  567 | char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:587:3: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  587 |   "INFO" ":" "dialect_default[" C_DIALECT "]";
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:595:10: error: cannot declare '::main' to be a global variable
+  595 | int main(argc, argv) int argc; char *argv[];
+      |          ^~~~
+CMakeCCompilerId.c:595:10: error: 'argc' was not declared in this scope
+CMakeCCompilerId.c:595:16: error: 'argv' was not declared in this scope
+  595 | int main(argc, argv) int argc; char *argv[];
+      |                ^~~~
+CMakeCCompilerId.c:595:20: error: expression list treated as compound expression in initializer [-fpermissive]
+  595 | int main(argc, argv) int argc; char *argv[];
+      |                    ^
+CMakeCCompilerId.c:595:38: error: storage size of 'argv' isn't known
+  595 | int main(argc, argv) int argc; char *argv[];
+      |                                      ^~~~
+CMakeCCompilerId.c:599:1: error: expected unqualified-id before '{' token
+  599 | {
+      | ^
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags:  
+
+The output was:
+1
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags: -c 
+
+The output was:
+1
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags: -Aa 
+
+The output was:
+1
+<command-line>: error: missing '(' after predicate
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+
+
+Compiling the C compiler identification source file "CMakeCCompilerId.c" failed.
+Compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 
+Build flags: 
+Id flags: -D__CLASSIC_C__ 
+
+The output was:
+1
+CMakeCCompilerId.c:2:3: error: #error "A C++ compiler has been selected for C."
+    2 | # error "A C++ compiler has been selected for C."
+      |   ^~~~~
+CMakeCCompilerId.c:319:29: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  319 | char const* info_compiler = "INFO" ":" "compiler[" COMPILER_ID "]";
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:566:29: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  566 | char const* info_platform = "INFO" ":" "platform[" PLATFORM_ID "]";
+      |                             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:567:25: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  567 | char const* info_arch = "INFO" ":" "arch[" ARCHITECTURE_ID "]";
+      |                         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:587:3: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  587 |   "INFO" ":" "dialect_default[" C_DIALECT "]";
+      |   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+CMakeCCompilerId.c:595:10: error: cannot declare '::main' to be a global variable
+  595 | int main(argc, argv) int argc; char *argv[];
+      |          ^~~~
+CMakeCCompilerId.c:595:10: error: 'argc' was not declared in this scope
+CMakeCCompilerId.c:595:16: error: 'argv' was not declared in this scope
+  595 | int main(argc, argv) int argc; char *argv[];
+      |                ^~~~
+CMakeCCompilerId.c:595:20: error: expression list treated as compound expression in initializer [-fpermissive]
+  595 | int main(argc, argv) int argc; char *argv[];
+      |                    ^
+CMakeCCompilerId.c:595:38: error: storage size of 'argv' isn't known
+  595 | int main(argc, argv) int argc; char *argv[];
+      |                                      ^~~~
+CMakeCCompilerId.c:599:1: error: expected unqualified-id before '{' token
+  599 | {
+      | ^
+
+
+Checking whether the C compiler is IAR using "" did not match "IAR .+ Compiler":
+g++-9: fatal error: no input files
+compilation terminated.
+Checking whether the C compiler is IAR using "" did not match "IAR .+ Compiler":
+g++-9: fatal error: no input files
+compilation terminated.
+Determining if the C compiler works failed with the following output:
+Change Dir: /Users/shadow/git/clang/cmake-build-debug/CMakeFiles/CMakeTmp
+
+Run Build Command:"/usr/local/Cellar/cmake/3.15.5/bin/cmake" "cmTC_48fdd/fast"
+CMake Error: The source directory "/Users/shadow/git/clang/cmake-build-debug/CMakeFiles/CMakeTmp/cmTC_48fdd/fast" does not exist.
+Specify --help for usage, or press the help button on the CMake GUI.
+
+
