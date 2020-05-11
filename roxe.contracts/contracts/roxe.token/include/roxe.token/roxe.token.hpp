@@ -128,7 +128,7 @@ namespace roxe {
          using transfer_action = roxe::action_wrapper<"transfer"_n, &token::transfer>;
          using open_action = roxe::action_wrapper<"open"_n, &token::open>;
          using close_action = roxe::action_wrapper<"close"_n, &token::close>;
-         using setFee_action = roxe::action_wrapper<"setFee"_n, &token::setFee>;
+//         using setFee_action = roxe::action_wrapper<"setFee"_n, &token::setFee>;
       private:
          struct [[roxe::table]] account {
             asset    balance;
