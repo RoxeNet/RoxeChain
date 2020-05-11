@@ -95,7 +95,7 @@ If {{from}} is not already the RAM payer of their {{asset_to_symbol_code quantit
 If {{to}} does not have a balance for {{asset_to_symbol_code quantity}}, {{from}} will be designated as the RAM payer of the {{asset_to_symbol_code quantity}} token balance for {{to}}. As a result, RAM will be deducted from {{from}}’s resources to create the necessary records.
 
 
-<h1 class="contract">setFee</h1>
+<h1 class="contract">setfee</h1>
 
 ---
 spec_ver

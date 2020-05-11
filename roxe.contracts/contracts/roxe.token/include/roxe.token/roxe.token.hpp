@@ -105,7 +105,7 @@ namespace roxe {
           *
           */
          [[roxe::action]]   ///FIXME add transaction fee
-         void setFee( const name& owner, const symbol& symbol, const int64_t fee );
+         void setfee( const name& owner, const symbol& symbol, const int64_t fee );
 
          static asset get_supply( const name& token_contract_account, const symbol_code& sym_code )
          {
@@ -127,7 +127,7 @@ namespace roxe {
          using transfer_action = roxe::action_wrapper<"transfer"_n, &token::transfer>;
          using open_action = roxe::action_wrapper<"open"_n, &token::open>;
          using close_action = roxe::action_wrapper<"close"_n, &token::close>;
-//         using setFee_action = roxe::action_wrapper<"setFee"_n, &token::setFee>;
+//         using setfee_action = roxe::action_wrapper<"setfee"_n, &token::setfee>;
       private:
          struct [[roxe::table]] account {
             asset    balance;
