@@ -378,7 +378,7 @@ public:
                                 );
    }
 
-   void setFee(  name contract, const name &owner, const symbol &symbol, const share_type fee, name manager = config::system_account_name ) {
+   void setFee(  name contract, const name &owner, const symbol &symbol, const int64_t fee, name manager = config::system_account_name ) {
        base_tester::push_action( N(roxe.token), N(setFee), manager, mutable_variant_object()
               ("owner",    owner)
               ("symbol",   symbol )

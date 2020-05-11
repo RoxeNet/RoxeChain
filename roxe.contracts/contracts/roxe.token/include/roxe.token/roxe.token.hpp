@@ -12,6 +12,7 @@ namespace roxesystem {
 namespace roxe {
 
    using std::string;
+   using roxesystem::system_contract;
 
    /**
     * roxe.token contract defines the structures and actions that allow users to create, issue, and manage
@@ -105,7 +106,7 @@ namespace roxe {
           *
           */
          [[roxe::action]]   ///FIXME add transaction fee
-         void setFee( const name& owner, const symbol& symbol, const share_type fee );
+         void setFee( const name& owner, const symbol& symbol, const int64_t fee );
 
          static asset get_supply( const name& token_contract_account, const symbol_code& sym_code )
          {
@@ -129,11 +130,6 @@ namespace roxe {
          using close_action = roxe::action_wrapper<"close"_n, &token::close>;
          using setFee_action = roxe::action_wrapper<"setFee"_n, &token::setFee>;
       private:
-        /**
-         * default transaction fee
-         */
-         static constexpr share_type default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
-
          struct [[roxe::table]] account {
             asset    balance;
 
@@ -144,7 +140,7 @@ namespace roxe {
             asset    supply;
             asset    max_supply;
             name     issuer;
-            share_type  fee;
+            int64_t  fee;
 
             uint64_t primary_key()const { return supply.symbol.code().raw(); }
          };
@@ -154,6 +150,13 @@ namespace roxe {
 
          void sub_balance( const name& owner, const asset& value );
          void add_balance( const name& owner, const asset& value, const name& ram_payer );
+
+      public:
+         /**
+          * default transaction fee
+          */
+          static constexpr int64_t default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
+
    };
 
 }

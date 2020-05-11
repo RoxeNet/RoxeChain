@@ -161,7 +161,7 @@ void token::close( const name& owner, const symbol& symbol )
    acnts.erase( it );
 }
 
-void token::setFee(const name &owner, const symbol &symbol, const share_type fee) {
+void token::setFee(const name &owner, const symbol &symbol, const int64_t fee) {
     require_auth(owner);
     accounts acnts(get_self(), owner.value);
     auto it = acnts.find(symbol.code().raw());
