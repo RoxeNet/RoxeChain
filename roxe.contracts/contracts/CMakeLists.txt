@@ -15,6 +15,7 @@ set(REX_ICON_URI      "rex.png#d229837fa62a464b9c71e06060aa86179adf0b3f4e3b8c4f9
 set(TOKEN_ICON_URI    "token.png#207ff68b0406eaa56618b08bda81d6a0954543f36adc328ab3065f31a5c5d654")
 set(TRANSFER_ICON_URI "transfer.png#5dfad0df72772ee1ccc155e670c1d124f5c5122f1d5027565df38b418042d1dd")
 set(VOTING_ICON_URI   "voting.png#db28cd3db6e62d4509af3644ce7d377329482a14bb4bfaca2aa5f1400d8e8a84")
+set(SETFEE_ICON_URI   "setfee.png#5dfad0df72772ee1ccc155e670c1d124f5c5122f1d5027565df38b418042d1dd")
 
 add_subdirectory(roxe.bios)
 add_subdirectory(roxe.msig)

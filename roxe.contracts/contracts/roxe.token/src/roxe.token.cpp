@@ -162,7 +162,7 @@ void token::close( const name& owner, const symbol& symbol )
    acnts.erase( it );
 }
 
-void token::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
+void token::setFee(const name &owner, const symbol &symbol, const int64_t fee) {
     require_auth(owner);
     accounts acnts(get_self(), owner.value);
     auto it = acnts.find(symbol.code().raw());
@@ -171,7 +171,7 @@ void token::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
     stats statstable(get_self(), symbol.raw());
 
     auto existing = statstable.find(symbol.code().raw());
-    check(existing != statstable.end(), "token with symbol does not exist, create token before setfee");
+    check(existing != statstable.end(), "token with symbol does not exist, create token before setFee");
     const auto &st = *existing;
     statstable.modify(st, same_payer, [&](auto &s) {
         s.fee = fee;
