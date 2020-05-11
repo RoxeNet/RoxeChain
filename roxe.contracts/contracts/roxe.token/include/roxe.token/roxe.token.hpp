@@ -12,7 +12,6 @@ namespace roxesystem {
 namespace roxe {
 
    using std::string;
-   using roxesystem::system_contract;
 
    /**
     * roxe.token contract defines the structures and actions that allow users to create, issue, and manage

@@ -102,7 +102,8 @@ void token::transfer( const name&    from,
     sub_balance(from, quantity);
     sub_balance(from, fee);
     add_balance(to, quantity, payer);
-    add_balance(system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_savings
+    roxe::name saving_account{"roxe.saving"_n};
+    add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
 }
 
 void token::sub_balance( const name& owner, const asset& value ) {
