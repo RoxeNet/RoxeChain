@@ -1,9 +1,9 @@
-file(GLOB HEADERS "include/actc/test_control_plugin/*.hpp")
+file(GLOB HEADERS "include/roxe/test_control_plugin/*.hpp")
 
 add_library( test_control_plugin
              test_control_plugin.cpp
              ${HEADERS} )
 
-target_link_libraries( test_control_plugin producer_plugin chain_plugin http_client_plugin appbase actc_chain )
+target_link_libraries( test_control_plugin producer_plugin chain_plugin http_client_plugin appbase roxe_chain )
 target_include_directories( test_control_plugin
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" )

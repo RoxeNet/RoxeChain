@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/http_client_plugin/http_client_plugin.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/http_client_plugin/http_client_plugin.hpp>
+#include <roxe/chain/exceptions.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 #include <fstream>
 
-namespace actc {
+namespace roxe {
 
 http_client_plugin::http_client_plugin():my(new http_client()){}
 http_client_plugin::~http_client_plugin(){}
@@ -34,7 +34,7 @@ void http_client_plugin::plugin_initialize(const variables_map& options) {
                   std::stringstream sstr;
                   sstr << infile.rdbuf();
                   pem_str = sstr.str();
-                  ACTC_ASSERT( boost::algorithm::starts_with( pem_str, "-----BEGIN CERTIFICATE-----\n" ),
+                  ROXE_ASSERT( boost::algorithm::starts_with( pem_str, "-----BEGIN CERTIFICATE-----\n" ),
                               chain::invalid_http_client_root_cert,
                              "File does not appear to be a PEM encoded certificate" );
                } catch ( const fc::exception& e ) {

@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "deferred_test.hpp"
-#include <actc/transaction.hpp>
-#include <actc/datastream.hpp>
-#include <actc/crypto.hpp>
+#include <roxe/transaction.hpp>
+#include <roxe/datastream.hpp>
+#include <roxe/crypto.hpp>
 
-using namespace actc;
+using namespace roxe;
 
 void deferred_test::defercall( name payer, uint64_t sender_id, name contract, uint64_t payload ) {
    print( "defercall called on ", get_self(), "\n" );

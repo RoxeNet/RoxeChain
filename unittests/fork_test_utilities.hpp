@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/testing/tester.hpp>
+#include <roxe/testing/tester.hpp>
 
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe::chain;
+using namespace roxe::testing;
 
 private_key_type get_private_key( name keyname, string role );
 

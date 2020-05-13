@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "snapshot_test.hpp"
 
-using namespace actc;
+using namespace roxe;
 
 void snapshot_test::increment( uint32_t value ) {
    require_auth( get_self() );

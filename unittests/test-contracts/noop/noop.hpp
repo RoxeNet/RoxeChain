@@ -1,17 +1,17 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] noop : public actc::contract {
+class [[roxe::contract]] noop : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
-   void anyaction( actc::name                       from,
-                   const actc::ignore<std::string>& type,
-                   const actc::ignore<std::string>& data );
+   [[roxe::action]]
+   void anyaction( roxe::name                       from,
+                   const roxe::ignore<std::string>& type,
+                   const roxe::ignore<std::string>& data );
 };

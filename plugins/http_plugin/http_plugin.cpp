@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/http_plugin/http_plugin.hpp>
-#include <actc/http_plugin/local_endpoint.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/thread_utils.hpp>
+#include <roxe/http_plugin/http_plugin.hpp>
+#include <roxe/http_plugin/local_endpoint.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/thread_utils.hpp>
 
 #include <fc/network/ip.hpp>
 #include <fc/log/logger_config.hpp>
@@ -27,7 +27,7 @@
 #include <memory>
 #include <regex>
 
-namespace actc {
+namespace roxe {
 
    static appbase::abstract_plugin& _http_plugin = app().register_plugin<http_plugin>();
 
@@ -145,7 +145,7 @@ namespace actc {
          websocket_server_type    server;
 
          uint16_t                                    thread_pool_size = 2;
-         optional<actc::chain::named_thread_pool>   thread_pool;
+         optional<roxe::chain::named_thread_pool>   thread_pool;
          std::atomic<size_t>                         bytes_in_flight{0};
          size_t                                      max_bytes_in_flight = 0;
 
@@ -199,14 +199,14 @@ namespace actc {
 
                fc::ec_key ecdh = EC_KEY_new_by_curve_name(https_ecdh_curve == SECP384R1 ? NID_secp384r1 : NID_X9_62_prime256v1);
                if (!ecdh)
-                  ACTC_THROW(chain::http_exception, "Failed to set NID_secp384r1");
+                  ROXE_THROW(chain::http_exception, "Failed to set NID_secp384r1");
                if(SSL_CTX_set_tmp_ecdh(ctx->native_handle(), (EC_KEY*)ecdh) != 1)
-                  ACTC_THROW(chain::http_exception, "Failed to set ECDH PFS");
+                  ROXE_THROW(chain::http_exception, "Failed to set ECDH PFS");
 
                if(SSL_CTX_set_cipher_list(ctx->native_handle(), \
                   "EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:AES256:" \
                   "!DHE:!RSA:!AES128:!RC4:!DES:!3DES:!DSS:!SRP:!PSK:!EXP:!MD5:!LOW:!aNULL:!eNULL") != 1)
-                  ACTC_THROW(chain::http_exception, "Failed to set HTTPS cipher list");
+                  ROXE_THROW(chain::http_exception, "Failed to set HTTPS cipher list");
             } catch (const fc::exception& e) {
                elog("https server initialization error: ${w}", ("w", e.to_detail_string()));
             } catch(std::exception& e) {
@@ -518,7 +518,7 @@ namespace actc {
          verbose_http_errors = options.at( "verbose-http-errors" ).as<bool>();
 
          my->thread_pool_size = options.at( "http-threads" ).as<uint16_t>();
-         ACTC_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
+         ROXE_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
                      "http-threads ${num} must be greater than 0", ("num", my->thread_pool_size));
 
          my->max_bytes_in_flight = options.at( "http-max-bytes-in-flight-mb" ).as<uint32_t>() * 1024 * 1024;

@@ -58,7 +58,7 @@ namespace fc { namespace crypto {
    size_t hash_value(const signature& b) {
        return b._storage.visit(hash_visitor());
    }
-} } // actc::blockchain
+} } // roxe::blockchain
 
 namespace fc
 {

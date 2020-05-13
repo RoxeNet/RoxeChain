@@ -9,7 +9,7 @@ import subprocess
 import signal
 
 ###############################################################
-# Test for validating the dirty db flag sticks repeated nodactc restart attempts
+# Test for validating the dirty db flag sticks repeated nodroxe restart attempts
 ###############################################################
 
 
@@ -26,7 +26,7 @@ total_nodes = pnodes
 killCount=1
 killSignal=Utils.SigKillTag
 
-killActcInstances= not args.leave_running
+killRoxeInstances= not args.leave_running
 dumpErrorDetails=args.dump_error_details
 keepLogs=args.keep_logs
 killAll=args.clean_run
@@ -35,24 +35,24 @@ seed=1
 Utils.Debug=debug
 testSuccessful=False
 
-def runNodactcAndGetOutput(myTimeout=3):
-    """Startup nodactc, wait for timeout (before forced shutdown) and collect output. Stdout, stderr and return code are returned in a dictionary."""
-    Print("Launching nodactc process.")
-    cmd="programs/nodactc/nodactc --config-dir etc/actc/node_bios --data-dir var/lib/node_bios --verbose-http-errors --http-validate-host=false"
+def runNodroxeAndGetOutput(myTimeout=3):
+    """Startup nodroxe, wait for timeout (before forced shutdown) and collect output. Stdout, stderr and return code are returned in a dictionary."""
+    Print("Launching nodroxe process.")
+    cmd="programs/nodroxe/nodroxe --config-dir etc/roxe/node_bios --data-dir var/lib/node_bios --verbose-http-errors --http-validate-host=false"
     Print("cmd: %s" % (cmd))
     proc=subprocess.Popen(cmd.split(), stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    if debug: Print("Nodactc process launched.")
+    if debug: Print("Nodroxe process launched.")
 
     output={}
     try:
-        if debug: Print("Setting nodactc process timeout.")
+        if debug: Print("Setting nodroxe process timeout.")
         outs,errs = proc.communicate(timeout=myTimeout)
-        if debug: Print("Nodactc process has exited.")
+        if debug: Print("Nodroxe process has exited.")
         output["stdout"] = outs.decode("utf-8")
         output["stderr"] = errs.decode("utf-8")
         output["returncode"] = proc.returncode
     except (subprocess.TimeoutExpired) as _:
-        Print("ERROR: Nodactc is running beyond the defined wait time. Hard killing nodactc instance.")
+        Print("ERROR: Nodroxe is running beyond the defined wait time. Hard killing nodroxe instance.")
         proc.send_signal(signal.SIGKILL)
         return (False, None)
 
@@ -75,23 +75,23 @@ try:
 
     Print("Stand up cluster")
     if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay, dontBootstrap=True) is False:
-        errorExit("Failed to stand up actc cluster.")
+        errorExit("Failed to stand up roxe cluster.")
 
     node=cluster.getNode(0)
 
     Print("Kill cluster nodes.")
     cluster.killall(allInstances=killAll)
 
-    Print("Restart nodactc repeatedly to ensure dirty database flag sticks.")
+    Print("Restart nodroxe repeatedly to ensure dirty database flag sticks.")
     timeout=6
 
     for i in range(1,4):
         Print("Attempt %d." % (i))
-        ret = runNodactcAndGetOutput(timeout)
+        ret = runNodroxeAndGetOutput(timeout)
         assert(ret)
         assert(isinstance(ret, tuple))
         if not ret[0]:
-            errorExit("Failed to startup nodactc successfully on try number %d" % (i))
+            errorExit("Failed to startup nodroxe successfully on try number %d" % (i))
         assert(ret[1])
         assert(isinstance(ret[1], dict))
         # pylint: disable=unsubscriptable-object
@@ -108,7 +108,7 @@ try:
     testSuccessful=True
 finally:
     if debug: Print("Cleanup in finally block.")
-    TestHelper.shutdown(cluster, None, testSuccessful, killActcInstances, False, keepLogs, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, None, testSuccessful, killRoxeInstances, False, keepLogs, killAll, dumpErrorDetails)
 
 if debug: Print("Exiting test, exit value 0.")
 exit(0)

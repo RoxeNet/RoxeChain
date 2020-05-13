@@ -1,0 +1,1 @@
+add_subdirectory(roxe_plugin)

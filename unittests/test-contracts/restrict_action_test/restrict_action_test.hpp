@@ -1,34 +1,34 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] restrict_action_test : public actc::contract {
+class [[roxe::contract]] restrict_action_test : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
+   [[roxe::action]]
    void noop( );
 
-   [[actc::action]]
-   void sendinline( actc::name authorizer );
+   [[roxe::action]]
+   void sendinline( roxe::name authorizer );
 
-   [[actc::action]]
-   void senddefer( actc::name authorizer, uint32_t senderid );
+   [[roxe::action]]
+   void senddefer( roxe::name authorizer, uint32_t senderid );
 
 
-   [[actc::action]]
-   void notifyinline( actc::name acctonotify, actc::name authorizer );
+   [[roxe::action]]
+   void notifyinline( roxe::name acctonotify, roxe::name authorizer );
 
-   [[actc::action]]
-   void notifydefer( actc::name acctonotify, actc::name authorizer, uint32_t senderid );
+   [[roxe::action]]
+   void notifydefer( roxe::name acctonotify, roxe::name authorizer, uint32_t senderid );
 
-   [[actc::on_notify("testacc::notifyinline")]]
-   void on_notify_inline( actc::name acctonotify, actc::name authorizer );
+   [[roxe::on_notify("testacc::notifyinline")]]
+   void on_notify_inline( roxe::name acctonotify, roxe::name authorizer );
 
-   [[actc::on_notify("testacc::notifydefer")]]
-   void on_notify_defer( actc::name acctonotify, actc::name authorizer, uint32_t senderid );
+   [[roxe::on_notify("testacc::notifydefer")]]
+   void on_notify_defer( roxe::name acctonotify, roxe::name authorizer, uint32_t senderid );
 };

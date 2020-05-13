@@ -2,7 +2,7 @@
 #include "Runtime.h"
 #include "Platform/Platform.h"
 #include "RuntimePrivate.h"
-#include <actc/chain/wasm_actc_constraints.hpp>
+#include <roxe/chain/wasm_roxe_constraints.hpp>
 
 namespace Runtime
 {
@@ -18,7 +18,7 @@ namespace Runtime
 	{
 		TableInstance* table = new TableInstance(type);
 
-		const Uptr tableMaxBytes = sizeof(TableInstance::FunctionElement)*actc::chain::wasm_constraints::maximum_table_elements;
+		const Uptr tableMaxBytes = sizeof(TableInstance::FunctionElement)*roxe::chain::wasm_constraints::maximum_table_elements;
 		
 		const Uptr alignmentBytes = 1U << Platform::getPageSizeLog2();
 		table->baseAddress = (TableInstance::FunctionElement*)allocateVirtualPagesAligned(tableMaxBytes,alignmentBytes,table->reservedBaseAddress,table->reservedNumPlatformPages);

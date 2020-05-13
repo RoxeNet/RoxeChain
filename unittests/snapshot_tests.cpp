@@ -1,18 +1,18 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <sstream>
 
-#include <actc/chain/snapshot.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/snapshot.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <boost/mpl/list.hpp>
 #include <boost/test/unit_test.hpp>
 
 #include <contracts.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace testing;
 using namespace chain;
 

@@ -1,9 +1,9 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actclib/actc.hpp>
-#include <actclib/transaction.hpp>
+#include <roxelib/roxe.hpp>
+#include <roxelib/transaction.hpp>
 
 #include "test_api.hpp"
 
@@ -21,9 +21,9 @@ name global_receiver;
 
 extern "C" {
    void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-      if( code == "actc"_n.value && action == "onerror"_n.value ) {
-         auto error = actc::onerror::from_current_action();
-         actc::print("onerror called\n");
+      if( code == "roxe"_n.value && action == "onerror"_n.value ) {
+         auto error = roxe::onerror::from_current_action();
+         roxe::print("onerror called\n");
          auto error_trx = error.unpack_sent_trx();
          auto error_action = error_trx.actions.at(0).name;
 
@@ -163,7 +163,7 @@ extern "C" {
       WASM_TEST_HANDLER_EX( test_permission, test_account_creation_time );
 
       //unhandled test call
-      actc_assert( false, "Unknown Test" );
+      roxe_assert( false, "Unknown Test" );
 
    }
 }

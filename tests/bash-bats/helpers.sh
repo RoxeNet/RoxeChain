@@ -36,7 +36,7 @@ TEST_LABEL="[helpers]"
   [[ ! -z $(echo "${output}" | grep "home") ]] || exit
   NONINTERACTIVE=false
   PROCEED=false
-  INSTALL_LOCATION="/etc/actc"
+  INSTALL_LOCATION="/etc/roxe"
   run install-directory-prompt
   # Function received given input.
   [[ ! -z $(echo "${output}") ]] || exit
@@ -49,10 +49,10 @@ TEST_LABEL="[helpers]"
   run previous-install-prompt
   [[ -z $(echo "${output}") ]] || exit
   # Exists, prompt
-  mkdir -p $ACTC_INSTALL_DIR
+  mkdir -p $ROXE_INSTALL_DIR
   run previous-install-prompt
-  [[ ! -z $(echo "${output}" | grep "ACTC has already been installed into ${ACTC_INSTALL_DIR}") ]] || exit
-  rm -rf $ACTC_INSTALL_DIR
+  [[ ! -z $(echo "${output}" | grep "ROXE has already been installed into ${ROXE_INSTALL_DIR}") ]] || exit
+  rm -rf $ROXE_INSTALL_DIR
 }
 
 @test "${TEST_LABEL} > TEMP_DIR" {

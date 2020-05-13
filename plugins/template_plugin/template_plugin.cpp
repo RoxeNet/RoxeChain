@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/template_plugin/template_plugin.hpp>
+#include <roxe/template_plugin/template_plugin.hpp>
 
-namespace actc {
+namespace roxe {
    static appbase::abstract_plugin& _template_plugin = app().register_plugin<template_plugin>();
 
 class template_plugin_impl {

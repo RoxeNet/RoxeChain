@@ -1,8 +1,8 @@
-#include <actc/chain/block_header_state.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/chain/block_header_state.hpp>
+#include <roxe/chain/exceptions.hpp>
 #include <limits>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 
    bool block_header_state::is_active_producer( account_name n )const {
@@ -35,7 +35,7 @@ namespace actc { namespace chain {
       pending_block_header_state result;
 
       if( when != block_timestamp_type() ) {
-        ACTC_ASSERT( when > header.timestamp, block_validate_exception, "next block must be in the future" );
+        ROXE_ASSERT( when > header.timestamp, block_validate_exception, "next block must be in the future" );
       } else {
         (when = header.timestamp).slot++;
       }
@@ -44,7 +44,7 @@ namespace actc { namespace chain {
 
       auto itr = producer_to_last_produced.find( prokey.producer_name );
       if( itr != producer_to_last_produced.end() ) {
-        ACTC_ASSERT( itr->second < (block_num+1) - num_prev_blocks_to_confirm, producer_double_confirm,
+        ROXE_ASSERT( itr->second < (block_num+1) - num_prev_blocks_to_confirm, producer_double_confirm,
                     "producer ${prod} double-confirming known range",
                     ("prod", prokey.producer_name)("num", block_num+1)
                     ("confirmed", num_prev_blocks_to_confirm)("last_produced", itr->second) );
@@ -199,16 +199,16 @@ namespace actc { namespace chain {
                                                            const vector<digest_type>& )>& validator
    )&&
    {
-      ACTC_ASSERT( h.timestamp == timestamp, block_validate_exception, "timestamp mismatch" );
-      ACTC_ASSERT( h.previous == previous, unlinkable_block_exception, "previous mismatch" );
-      ACTC_ASSERT( h.confirmed == confirmed, block_validate_exception, "confirmed mismatch" );
-      ACTC_ASSERT( h.producer == producer, wrong_producer, "wrong producer specified" );
-      ACTC_ASSERT( h.schedule_version == active_schedule_version, producer_schedule_exception, "schedule_version in signed block is corrupted" );
+      ROXE_ASSERT( h.timestamp == timestamp, block_validate_exception, "timestamp mismatch" );
+      ROXE_ASSERT( h.previous == previous, unlinkable_block_exception, "previous mismatch" );
+      ROXE_ASSERT( h.confirmed == confirmed, block_validate_exception, "confirmed mismatch" );
+      ROXE_ASSERT( h.producer == producer, wrong_producer, "wrong producer specified" );
+      ROXE_ASSERT( h.schedule_version == active_schedule_version, producer_schedule_exception, "schedule_version in signed block is corrupted" );
 
       if( h.new_producers ) {
-         ACTC_ASSERT( !was_pending_promoted, producer_schedule_exception, "cannot set pending producer schedule in the same block in which pending was promoted to active" );
-         ACTC_ASSERT( h.new_producers->version == active_schedule.version + 1, producer_schedule_exception, "wrong producer schedule version specified" );
-         ACTC_ASSERT( prev_pending_schedule.schedule.producers.size() == 0, producer_schedule_exception,
+         ROXE_ASSERT( !was_pending_promoted, producer_schedule_exception, "cannot set pending producer schedule in the same block in which pending was promoted to active" );
+         ROXE_ASSERT( h.new_producers->version == active_schedule.version + 1, producer_schedule_exception, "wrong producer schedule version specified" );
+         ROXE_ASSERT( prev_pending_schedule.schedule.producers.size() == 0, producer_schedule_exception,
                     "cannot set new pending producers until last pending is confirmed" );
       }
 
@@ -315,7 +315,7 @@ namespace actc { namespace chain {
    void block_header_state::sign( const std::function<signature_type(const digest_type&)>& signer ) {
       auto d = sig_digest();
       header.producer_signature = signer( d );
-      ACTC_ASSERT( block_signing_key == fc::crypto::public_key( header.producer_signature, d ),
+      ROXE_ASSERT( block_signing_key == fc::crypto::public_key( header.producer_signature, d ),
                   wrong_signing_key, "block is signed with unexpected key" );
    }
 
@@ -324,7 +324,7 @@ namespace actc { namespace chain {
    }
 
    void block_header_state::verify_signee( const public_key_type& signee )const {
-      ACTC_ASSERT( block_signing_key == signee, wrong_signing_key,
+      ROXE_ASSERT( block_signing_key == signee, wrong_signing_key,
                   "block not signed by expected key",
                   ("block_signing_key", block_signing_key)( "signee", signee ) );
    }
@@ -341,4 +341,4 @@ namespace actc { namespace chain {
       return header_exts.front().get<protocol_feature_activation>().protocol_features;
    }
 
-} } /// namespace actc::chain
+} } /// namespace roxe::chain

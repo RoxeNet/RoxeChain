@@ -1,5 +1,5 @@
 {
-    "actc-multiversion-tests":
+    "roxe-multiversion-tests":
     {
         "environment":
         {
@@ -10,14 +10,14 @@
             "170=v1.7.0"
         ]
     },
-    "actc-docker-builds":
+    "roxe-docker-builds":
     {
         "environment":
         {
             "BUILDER_TAG": "v1.8.0"
         }
     },
-    "actc-sync-tests":
+    "roxe-sync-tests":
     {
         "environment":
         {
@@ -25,7 +25,7 @@
             "SKIP_V180": "false"
         }
     },
-    "actc-replay-tests":
+    "roxe-replay-tests":
     {
         "environment":
         {

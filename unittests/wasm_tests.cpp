@@ -1,16 +1,16 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
 #include <array>
 #include <utility>
 
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/wasm_actc_constraints.hpp>
-#include <actc/chain/wast_to_wasm.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/wasm_roxe_constraints.hpp>
+#include <roxe/chain/wast_to_wasm.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -33,9 +33,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace actc;
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe;
+using namespace roxe::chain;
+using namespace roxe::testing;
 using namespace fc;
 
 
@@ -117,7 +117,7 @@ BOOST_FIXTURE_TEST_CASE( basic_test, TESTER ) try {
       trx.sign( get_private_key( N(asserter), "active" ), control->get_chain_id() );
       yes_assert_id = trx.id();
 
-      BOOST_CHECK_THROW(push_transaction( trx ), actc_assert_message_exception);
+      BOOST_CHECK_THROW(push_transaction( trx ), roxe_assert_message_exception);
    }
 
    produce_blocks(1);
@@ -407,7 +407,7 @@ BOOST_FIXTURE_TEST_CASE( f32_f64_overflow_tests, tester ) try {
          BOOST_REQUIRE_EQUAL(true, chain_has_transaction(trx.id()));
          const auto& receipt = get_transaction_receipt(trx.id());
          return true;
-      } catch (actc::chain::wasm_execution_error &) {
+      } catch (roxe::chain::wasm_execution_error &) {
          return false;
       }
    };
@@ -631,7 +631,7 @@ BOOST_FIXTURE_TEST_CASE( big_memory, TESTER ) try {
    produce_block();
 
    string biggest_memory_wast_f = fc::format_string(biggest_memory_wast, fc::mutable_variant_object(
-                                          "MAX_WASM_PAGES", actc::chain::wasm_constraints::maximum_linear_memory/(64*1024)));
+                                          "MAX_WASM_PAGES", roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024)));
 
    set_code(N(bigmem), biggest_memory_wast_f.c_str());
    produce_blocks(1);
@@ -651,8 +651,8 @@ BOOST_FIXTURE_TEST_CASE( big_memory, TESTER ) try {
    produce_blocks(1);
 
    string too_big_memory_wast_f = fc::format_string(too_big_memory_wast, fc::mutable_variant_object(
-                                          "MAX_WASM_PAGES_PLUS_ONE", actc::chain::wasm_constraints::maximum_linear_memory/(64*1024)+1));
-   BOOST_CHECK_THROW(set_code(N(bigmem), too_big_memory_wast_f.c_str()), actc::chain::wasm_execution_error);
+                                          "MAX_WASM_PAGES_PLUS_ONE", roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024)+1));
+   BOOST_CHECK_THROW(set_code(N(bigmem), too_big_memory_wast_f.c_str()), roxe::chain::wasm_execution_error);
 
 } FC_LOG_AND_RETHROW()
 
@@ -665,7 +665,7 @@ BOOST_FIXTURE_TEST_CASE( table_init_tests, TESTER ) try {
    set_code(N(tableinit), valid_sparse_table);
    produce_blocks(1);
 
-   BOOST_CHECK_THROW(set_code(N(tableinit), too_big_table), actc::chain::wasm_execution_error);
+   BOOST_CHECK_THROW(set_code(N(tableinit), too_big_table), roxe::chain::wasm_execution_error);
 
 } FC_LOG_AND_RETHROW()
 
@@ -678,8 +678,8 @@ BOOST_FIXTURE_TEST_CASE( memory_init_border, TESTER ) try {
    set_code(N(memoryborder), memory_init_borderline);
    produce_blocks(1);
 
-   BOOST_CHECK_THROW(set_code(N(memoryborder), memory_init_toolong), actc::chain::wasm_execution_error);
-   BOOST_CHECK_THROW(set_code(N(memoryborder), memory_init_negative), actc::chain::wasm_execution_error);
+   BOOST_CHECK_THROW(set_code(N(memoryborder), memory_init_toolong), roxe::chain::wasm_execution_error);
+   BOOST_CHECK_THROW(set_code(N(memoryborder), memory_init_negative), roxe::chain::wasm_execution_error);
 
 } FC_LOG_AND_RETHROW()
 
@@ -726,7 +726,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       for(unsigned int i = 0; i < 1024; ++i)
          ss << ")";
       ss << "))";
-      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), actc::chain::wasm_execution_error);
+      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), roxe::chain::wasm_execution_error);
    }
 
    // nested blocks
@@ -748,7 +748,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       for(unsigned int i = 0; i < 1024; ++i)
          ss << ")";
       ss << "))";
-      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), actc::chain::wasm_execution_error);
+      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), roxe::chain::wasm_execution_error);
    }
    // nested ifs
    {
@@ -769,7 +769,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       for(unsigned int i = 0; i < 1024; ++i)
          ss << "))";
       ss << "))";
-      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), actc::chain::wasm_execution_error);
+      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), roxe::chain::wasm_execution_error);
    }
    // mixed nested
    {
@@ -802,7 +802,7 @@ BOOST_FIXTURE_TEST_CASE( nested_limit_test, TESTER ) try {
       for(unsigned int i = 0; i < 224; ++i)
          ss << "))";
       ss << "))";
-      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), actc::chain::wasm_execution_error);
+      BOOST_CHECK_THROW(set_code(N(nested), ss.str().c_str()), roxe::chain::wasm_execution_error);
    }
 
 } FC_LOG_AND_RETHROW()
@@ -833,7 +833,7 @@ BOOST_FIXTURE_TEST_CASE( lotso_globals, TESTER ) try {
    //1028 should fail
    BOOST_CHECK_THROW(set_code(N(globals),
       string(ss.str() + "(global $z (mut i64) (i64.const -12)))")
-   .c_str()), actc::chain::wasm_execution_error);
+   .c_str()), roxe::chain::wasm_execution_error);
 
 } FC_LOG_AND_RETHROW()
 
@@ -862,8 +862,8 @@ BOOST_FIXTURE_TEST_CASE( offset_check, TESTER ) try {
 
    for(const string& s : loadops) {
       std::stringstream ss;
-      ss << "(module (memory $0 " << actc::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
-      ss << "(drop (" << s << " offset=" << actc::chain::wasm_constraints::maximum_linear_memory-2 << " (i32.const 0)))";
+      ss << "(module (memory $0 " << roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
+      ss << "(drop (" << s << " offset=" << roxe::chain::wasm_constraints::maximum_linear_memory-2 << " (i32.const 0)))";
       ss << ") (export \"apply\" (func $apply)) )";
 
       set_code(N(offsets), ss.str().c_str());
@@ -871,8 +871,8 @@ BOOST_FIXTURE_TEST_CASE( offset_check, TESTER ) try {
    }
    for(const vector<string>& o : storeops) {
       std::stringstream ss;
-      ss << "(module (memory $0 " << actc::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
-      ss << "(" << o[0] << " offset=" << actc::chain::wasm_constraints::maximum_linear_memory-2 << " (i32.const 0) (" << o[1] << ".const 0))";
+      ss << "(module (memory $0 " << roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
+      ss << "(" << o[0] << " offset=" << roxe::chain::wasm_constraints::maximum_linear_memory-2 << " (i32.const 0) (" << o[1] << ".const 0))";
       ss << ") (export \"apply\" (func $apply)) )";
 
       set_code(N(offsets), ss.str().c_str());
@@ -881,20 +881,20 @@ BOOST_FIXTURE_TEST_CASE( offset_check, TESTER ) try {
 
    for(const string& s : loadops) {
       std::stringstream ss;
-      ss << "(module (memory $0 " << actc::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
-      ss << "(drop (" << s << " offset=" << actc::chain::wasm_constraints::maximum_linear_memory+4 << " (i32.const 0)))";
+      ss << "(module (memory $0 " << roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
+      ss << "(drop (" << s << " offset=" << roxe::chain::wasm_constraints::maximum_linear_memory+4 << " (i32.const 0)))";
       ss << ") (export \"apply\" (func $apply)) )";
 
-      BOOST_CHECK_THROW(set_code(N(offsets), ss.str().c_str()), actc::chain::wasm_execution_error);
+      BOOST_CHECK_THROW(set_code(N(offsets), ss.str().c_str()), roxe::chain::wasm_execution_error);
       produce_block();
    }
    for(const vector<string>& o : storeops) {
       std::stringstream ss;
-      ss << "(module (memory $0 " << actc::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
-      ss << "(" << o[0] << " offset=" << actc::chain::wasm_constraints::maximum_linear_memory+4 << " (i32.const 0) (" << o[1] << ".const 0))";
+      ss << "(module (memory $0 " << roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024) << ") (func $apply (param $0 i64) (param $1 i64) (param $2 i64)";
+      ss << "(" << o[0] << " offset=" << roxe::chain::wasm_constraints::maximum_linear_memory+4 << " (i32.const 0) (" << o[1] << ".const 0))";
       ss << ") (export \"apply\" (func $apply)) )";
 
-      BOOST_CHECK_THROW(set_code(N(offsets), ss.str().c_str()), actc::chain::wasm_execution_error);
+      BOOST_CHECK_THROW(set_code(N(offsets), ss.str().c_str()), roxe::chain::wasm_execution_error);
       produce_block();
    }
 
@@ -966,10 +966,10 @@ BOOST_FIXTURE_TEST_CASE(noop, TESTER) try {
 
  } FC_LOG_AND_RETHROW()
 
-// abi_serializer::to_variant failed because actc_system_abi modified via set_abi.
-// This test also verifies that chain_initializer::actc_contract_abi() does not conflict
-// with actc_system_abi as they are not allowed to contain duplicates.
-BOOST_FIXTURE_TEST_CASE(actc_abi, TESTER) try {
+// abi_serializer::to_variant failed because roxe_system_abi modified via set_abi.
+// This test also verifies that chain_initializer::roxe_contract_abi() does not conflict
+// with roxe_system_abi as they are not allowed to contain duplicates.
+BOOST_FIXTURE_TEST_CASE(roxe_abi, TESTER) try {
    produce_blocks(2);
 
    const auto& accnt  = control->db().get<account_object,by_name>(config::system_account_name);
@@ -992,7 +992,7 @@ BOOST_FIXTURE_TEST_CASE(actc_abi, TESTER) try {
    auto result = push_transaction( trx );
 
    fc::variant pretty_output;
-   // verify to_variant works on actc native contract type: newaccount
+   // verify to_variant works on roxe native contract type: newaccount
    // see abi_serializer::to_abi()
    abi_serializer::to_variant(*result, pretty_output, get_resolver(), abi_serializer_max_time);
 
@@ -1137,7 +1137,7 @@ BOOST_FIXTURE_TEST_CASE( check_table_maximum, TESTER ) try {
    trx.sign(get_private_key( N(tbl), "active" ), control->get_chain_id());
 
    //should fail, a check to make sure assert() in wasm is being evaluated correctly
-   BOOST_CHECK_THROW(push_transaction(trx), actc_assert_message_exception);
+   BOOST_CHECK_THROW(push_transaction(trx), roxe_assert_message_exception);
    }
 
    produce_blocks(1);
@@ -1153,7 +1153,7 @@ BOOST_FIXTURE_TEST_CASE( check_table_maximum, TESTER ) try {
    trx.sign(get_private_key( N(tbl), "active" ), control->get_chain_id());
 
    //should fail, this element index (5) does not exist
-   BOOST_CHECK_THROW(push_transaction(trx), actc::chain::wasm_execution_error);
+   BOOST_CHECK_THROW(push_transaction(trx), roxe::chain::wasm_execution_error);
    }
 
    produce_blocks(1);
@@ -1161,7 +1161,7 @@ BOOST_FIXTURE_TEST_CASE( check_table_maximum, TESTER ) try {
    {
    signed_transaction trx;
    action act;
-   act.name = actc::chain::wasm_constraints::maximum_table_elements+54334;
+   act.name = roxe::chain::wasm_constraints::maximum_table_elements+54334;
    act.account = N(tbl);
    act.authorization = vector<permission_level>{{N(tbl),config::active_name}};
    trx.actions.push_back(act);
@@ -1169,7 +1169,7 @@ BOOST_FIXTURE_TEST_CASE( check_table_maximum, TESTER ) try {
    trx.sign(get_private_key( N(tbl), "active" ), control->get_chain_id());
 
    //should fail, this element index is out of range
-   BOOST_CHECK_THROW(push_transaction(trx), actc::chain::wasm_execution_error);
+   BOOST_CHECK_THROW(push_transaction(trx), roxe::chain::wasm_execution_error);
    }
 
    produce_blocks(1);
@@ -1216,7 +1216,7 @@ BOOST_FIXTURE_TEST_CASE( check_table_maximum, TESTER ) try {
    trx.sign(get_private_key( N(tbl), "active" ), control->get_chain_id());
 
    //an element that is out of range and has no mmap access permission either (should be a trapped segv)
-   BOOST_CHECK_EXCEPTION(push_transaction(trx), actc::chain::wasm_execution_error, [](const actc::chain::wasm_execution_error &e) {return true;});
+   BOOST_CHECK_EXCEPTION(push_transaction(trx), roxe::chain::wasm_execution_error, [](const roxe::chain::wasm_execution_error &e) {return true;});
    }
 } FC_LOG_AND_RETHROW()
 
@@ -1724,8 +1724,8 @@ BOOST_FIXTURE_TEST_CASE( big_maligned_host_ptr, TESTER ) try {
    produce_block();
 
    string large_maligned_host_ptr_wast_f = fc::format_string(large_maligned_host_ptr, fc::mutable_variant_object()
-                                              ("MAX_WASM_PAGES", actc::chain::wasm_constraints::maximum_linear_memory/(64*1024))
-                                              ("MAX_NAME_ARRAY", (actc::chain::wasm_constraints::maximum_linear_memory-1)/sizeof(chain::account_name)));
+                                              ("MAX_WASM_PAGES", roxe::chain::wasm_constraints::maximum_linear_memory/(64*1024))
+                                              ("MAX_NAME_ARRAY", (roxe::chain::wasm_constraints::maximum_linear_memory-1)/sizeof(chain::account_name)));
 
    set_code(N(bigmaligned), large_maligned_host_ptr_wast_f.c_str());
    produce_blocks(1);
@@ -1753,7 +1753,7 @@ BOOST_FIXTURE_TEST_CASE(net_usage_tests, tester ) try {
       std::string code = R"=====(
    (module
    (import "env" "require_auth" (func $require_auth (param i64)))
-   (import "env" "actc_assert" (func $actc_assert (param i32 i32)))
+   (import "env" "roxe_assert" (func $roxe_assert (param i32 i32)))
       (table 0 anyfunc)
       (memory $0 1)
       (export "apply" (func $apply))
@@ -1767,7 +1767,7 @@ BOOST_FIXTURE_TEST_CASE(net_usage_tests, tester ) try {
       code += "))";
       produce_blocks(1);
       signed_transaction trx;
-      auto wasm = ::actc::chain::wast_to_wasm(code);
+      auto wasm = ::roxe::chain::wast_to_wasm(code);
       trx.actions.emplace_back( vector<permission_level>{{account,config::active_name}},
                               setcode{
                                  .account    = account,
@@ -1804,7 +1804,7 @@ BOOST_FIXTURE_TEST_CASE(weighted_net_usage_tests, tester ) try {
       std::string code = R"=====(
    (module
    (import "env" "require_auth" (func $require_auth (param i64)))
-   (import "env" "actc_assert" (func $actc_assert (param i32 i32)))
+   (import "env" "roxe_assert" (func $roxe_assert (param i32 i32)))
       (table 0 anyfunc)
       (memory $0 1)
       (export "apply" (func $apply))
@@ -1820,7 +1820,7 @@ BOOST_FIXTURE_TEST_CASE(weighted_net_usage_tests, tester ) try {
       code += "))"; ver++;
       produce_blocks(1);
       signed_transaction trx;
-      auto wasm = ::actc::chain::wast_to_wasm(code);
+      auto wasm = ::roxe::chain::wast_to_wasm(code);
       trx.actions.emplace_back( vector<permission_level>{{account,config::active_name}},
                               setcode{
                                  .account    = account,

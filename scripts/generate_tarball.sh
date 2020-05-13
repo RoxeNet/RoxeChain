@@ -2,36 +2,36 @@
 set -eo pipefail
 
 NAME=$1
-ACTC_PREFIX=${PREFIX}/${SUBPREFIX}
+ROXE_PREFIX=${PREFIX}/${SUBPREFIX}
 mkdir -p ${PREFIX}/bin/
 #mkdir -p ${PREFIX}/lib/cmake/${PROJECT}
-mkdir -p ${ACTC_PREFIX}/bin
-mkdir -p ${ACTC_PREFIX}/licenses/actc
-#mkdir -p ${ACTC_PREFIX}/include
-#mkdir -p ${ACTC_PREFIX}/lib/cmake/${PROJECT}
-#mkdir -p ${ACTC_PREFIX}/cmake
-#mkdir -p ${ACTC_PREFIX}/scripts
+mkdir -p ${ROXE_PREFIX}/bin
+mkdir -p ${ROXE_PREFIX}/licenses/roxe
+#mkdir -p ${ROXE_PREFIX}/include
+#mkdir -p ${ROXE_PREFIX}/lib/cmake/${PROJECT}
+#mkdir -p ${ROXE_PREFIX}/cmake
+#mkdir -p ${ROXE_PREFIX}/scripts
 
 # install binaries 
-cp -R ${BUILD_DIR}/bin/* ${ACTC_PREFIX}/bin  || exit 1
+cp -R ${BUILD_DIR}/bin/* ${ROXE_PREFIX}/bin  || exit 1
 
 # install licenses
-cp -R ${BUILD_DIR}/licenses/actc/* ${ACTC_PREFIX}/licenses || exit 1
+cp -R ${BUILD_DIR}/licenses/roxe/* ${ROXE_PREFIX}/licenses || exit 1
 
 # install libraries
-#cp -R ${BUILD_DIR}/lib/* ${ACTC_PREFIX}/lib
+#cp -R ${BUILD_DIR}/lib/* ${ROXE_PREFIX}/lib
 
 # install cmake modules
-#sed "s/_PREFIX_/\/${SPREFIX}/g" ${BUILD_DIR}/modules/ActcTesterPackage.cmake &> ${ACTC_PREFIX}/lib/cmake/${PROJECT}/ActcTester.cmake
-#sed "s/_PREFIX_/\/${SPREFIX}\/${SSUBPREFIX}/g" ${BUILD_DIR}/modules/${PROJECT}-config.cmake.package &> ${ACTC_PREFIX}/lib/cmake/${PROJECT}/${PROJECT}-config.cmake
+#sed "s/_PREFIX_/\/${SPREFIX}/g" ${BUILD_DIR}/modules/RoxeTesterPackage.cmake &> ${ROXE_PREFIX}/lib/cmake/${PROJECT}/RoxeTester.cmake
+#sed "s/_PREFIX_/\/${SPREFIX}\/${SSUBPREFIX}/g" ${BUILD_DIR}/modules/${PROJECT}-config.cmake.package &> ${ROXE_PREFIX}/lib/cmake/${PROJECT}/${PROJECT}-config.cmake
 
 # install includes
-#cp -R ${BUILD_DIR}/include/* ${ACTC_PREFIX}/include
+#cp -R ${BUILD_DIR}/include/* ${ROXE_PREFIX}/include
 
 # make symlinks
 #pushd ${PREFIX}/lib/cmake/${PROJECT} &> /dev/null
 #ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/${PROJECT}-config.cmake ${PROJECT}-config.cmake
-#ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/ActcTester.cmake ActcTester.cmake
+#ln -sf ../../../${SUBPREFIX}/lib/cmake/${PROJECT}/RoxeTester.cmake RoxeTester.cmake
 #popd &> /dev/null
 
 for f in $(ls "${BUILD_DIR}/bin/"); do

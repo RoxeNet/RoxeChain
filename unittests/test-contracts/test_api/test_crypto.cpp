@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actclib/crypto.h>
-#include <actclib/actc.hpp>
-#include <actclib/print.hpp>
+#include <roxelib/crypto.h>
+#include <roxelib/roxe.hpp>
+#include <roxelib/print.hpp>
 
 #include "test_api.hpp"
 
@@ -202,7 +202,7 @@ void test_crypto::test_recover_key_assert_false() {
    sig_hash_key sh;
    read_action_data( (char*)&sh, sizeof(sh) );
    assert_recover_key( &sh.hash, (const char*)&sh.sig, sizeof(sh.sig), (const char*)&sh.pk, sizeof(sh.pk) );
-   actc_assert( false, "should have thrown an error" );
+   roxe_assert( false, "should have thrown an error" );
 }
 
 void test_crypto::test_recover_key() {
@@ -212,211 +212,211 @@ void test_crypto::test_recover_key() {
    recover_key( &sh.hash, (const char*)&sh.sig, sizeof(sh.sig), pk.data, sizeof(pk) );
    for ( uint32_t i=0; i < sizeof(pk); i++ )
       if ( pk.data[i] != sh.pk.data[i] )
-         actc_assert( false, "public key does not match" );
+         roxe_assert( false, "public key does not match" );
 }
 
 void test_crypto::test_sha1() {
-   actc::checksum160 tmp;
+   roxe::checksum160 tmp;
 
-   tmp = actc::sha1( test1, my_strlen(test1) );
-   actc_assert( my_memcmp((void *)test1_ok_1, &tmp, sizeof(actc::checksum160)), "sha1 test1" );
+   tmp = roxe::sha1( test1, my_strlen(test1) );
+   roxe_assert( my_memcmp((void *)test1_ok_1, &tmp, sizeof(roxe::checksum160)), "sha1 test1" );
 
-   tmp = actc::sha1( test3, my_strlen(test3) );
-   actc_assert( my_memcmp((void *)test3_ok_1, &tmp, sizeof(actc::checksum160)), "sha1 test3" );
+   tmp = roxe::sha1( test3, my_strlen(test3) );
+   roxe_assert( my_memcmp((void *)test3_ok_1, &tmp, sizeof(roxe::checksum160)), "sha1 test3" );
 
-   tmp = actc::sha1( test4, my_strlen(test4) );
-   actc_assert( my_memcmp((void *)test4_ok_1, &tmp, sizeof(actc::checksum160)), "sha1 test4" );
+   tmp = roxe::sha1( test4, my_strlen(test4) );
+   roxe_assert( my_memcmp((void *)test4_ok_1, &tmp, sizeof(roxe::checksum160)), "sha1 test4" );
 
-   tmp = actc::sha1( test5, my_strlen(test5) );
-   actc_assert( my_memcmp((void *)test5_ok_1, &tmp, sizeof(actc::checksum160)), "sha1 test5" );
+   tmp = roxe::sha1( test5, my_strlen(test5) );
+   roxe_assert( my_memcmp((void *)test5_ok_1, &tmp, sizeof(roxe::checksum160)), "sha1 test5" );
 }
 
 void test_crypto::test_sha256() {
-  actc::checksum256 tmp;
+  roxe::checksum256 tmp;
 
-  tmp = actc::sha256( test1, my_strlen(test1) );
-  actc_assert( my_memcmp((void *)test1_ok_256, &tmp, sizeof(actc::checksum256)), "sha256 test1" );
+  tmp = roxe::sha256( test1, my_strlen(test1) );
+  roxe_assert( my_memcmp((void *)test1_ok_256, &tmp, sizeof(roxe::checksum256)), "sha256 test1" );
 
-  tmp = actc::sha256( test3, my_strlen(test3) );
-  actc_assert( my_memcmp((void *)test3_ok_256, &tmp, sizeof(actc::checksum256)), "sha256 test3" );
+  tmp = roxe::sha256( test3, my_strlen(test3) );
+  roxe_assert( my_memcmp((void *)test3_ok_256, &tmp, sizeof(roxe::checksum256)), "sha256 test3" );
 
-  tmp = actc::sha256( test4, my_strlen(test4) );
-  actc_assert( my_memcmp((void *)test4_ok_256, &tmp, sizeof(actc::checksum256)), "sha256 test4" );
+  tmp = roxe::sha256( test4, my_strlen(test4) );
+  roxe_assert( my_memcmp((void *)test4_ok_256, &tmp, sizeof(roxe::checksum256)), "sha256 test4" );
 
-  tmp = actc::sha256( test5, my_strlen(test5) );
-  actc_assert( my_memcmp((void *)test5_ok_256, &tmp, sizeof(actc::checksum256)), "sha256 test5" );
+  tmp = roxe::sha256( test5, my_strlen(test5) );
+  roxe_assert( my_memcmp((void *)test5_ok_256, &tmp, sizeof(roxe::checksum256)), "sha256 test5" );
 }
 
 void test_crypto::test_sha512() {
-  actc::checksum512 tmp;
+  roxe::checksum512 tmp;
 
-  tmp = actc::sha512( test1, my_strlen(test1) );
-  actc_assert( my_memcmp((void *)test1_ok_512, &tmp, sizeof(actc::checksum512)), "sha512 test1" );
+  tmp = roxe::sha512( test1, my_strlen(test1) );
+  roxe_assert( my_memcmp((void *)test1_ok_512, &tmp, sizeof(roxe::checksum512)), "sha512 test1" );
 
-  tmp = actc::sha512( test3, my_strlen(test3) );
-  actc_assert( my_memcmp((void *)test3_ok_512, &tmp, sizeof(actc::checksum512)), "sha512 test3" );
+  tmp = roxe::sha512( test3, my_strlen(test3) );
+  roxe_assert( my_memcmp((void *)test3_ok_512, &tmp, sizeof(roxe::checksum512)), "sha512 test3" );
 
-  tmp = actc::sha512( test4, my_strlen(test4) );
-  actc_assert( my_memcmp((void *)test4_ok_512, &tmp, sizeof(actc::checksum512)), "sha512 test4" );
+  tmp = roxe::sha512( test4, my_strlen(test4) );
+  roxe_assert( my_memcmp((void *)test4_ok_512, &tmp, sizeof(roxe::checksum512)), "sha512 test4" );
 
-  tmp = actc::sha512( test5, my_strlen(test5) );
-  actc_assert( my_memcmp((void *)test5_ok_512, &tmp, sizeof(actc::checksum512)), "sha512 test5" );
+  tmp = roxe::sha512( test5, my_strlen(test5) );
+  roxe_assert( my_memcmp((void *)test5_ok_512, &tmp, sizeof(roxe::checksum512)), "sha512 test5" );
 }
 
 void test_crypto::test_ripemd160() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::ripemd160( test1, my_strlen(test1) );
-  actc_assert( my_memcmp((void *)test1_ok_ripe, &tmp, sizeof(actc::checksum160)), "ripemd160 test1" );
+  tmp = roxe::ripemd160( test1, my_strlen(test1) );
+  roxe_assert( my_memcmp((void *)test1_ok_ripe, &tmp, sizeof(roxe::checksum160)), "ripemd160 test1" );
 
-  tmp = actc::ripemd160( test3, my_strlen(test3) );
-  actc_assert( my_memcmp((void *)test3_ok_ripe, &tmp, sizeof(actc::checksum160)), "ripemd160 test3" );
+  tmp = roxe::ripemd160( test3, my_strlen(test3) );
+  roxe_assert( my_memcmp((void *)test3_ok_ripe, &tmp, sizeof(roxe::checksum160)), "ripemd160 test3" );
 
-  tmp = actc::ripemd160( test4, my_strlen(test4) );
-  actc_assert( my_memcmp((void *)test4_ok_ripe, &tmp, sizeof(actc::checksum160)), "ripemd160 test4" );
+  tmp = roxe::ripemd160( test4, my_strlen(test4) );
+  roxe_assert( my_memcmp((void *)test4_ok_ripe, &tmp, sizeof(roxe::checksum160)), "ripemd160 test4" );
 
-  tmp = actc::ripemd160( test5, my_strlen(test5) );
-  actc_assert( my_memcmp((void *)test5_ok_ripe, &tmp, sizeof(actc::checksum160)), "ripemd160 test5" );
+  tmp = roxe::ripemd160( test5, my_strlen(test5) );
+  roxe_assert( my_memcmp((void *)test5_ok_ripe, &tmp, sizeof(roxe::checksum160)), "ripemd160 test5" );
 }
 
 void test_crypto::sha256_null() {
-  actc::checksum256 tmp;
-  tmp = actc::sha256( nullptr, 100);
-  actc_assert( false, "should've thrown an error" );
+  roxe::checksum256 tmp;
+  tmp = roxe::sha256( nullptr, 100);
+  roxe_assert( false, "should've thrown an error" );
 }
 
 void test_crypto::sha1_no_data() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::sha1( test2, my_strlen(test2) );
-  actc_assert( my_memcmp((void *)test2_ok_1, &tmp, sizeof(actc::checksum160)), "sha1 test2" );
+  tmp = roxe::sha1( test2, my_strlen(test2) );
+  roxe_assert( my_memcmp((void *)test2_ok_1, &tmp, sizeof(roxe::checksum160)), "sha1 test2" );
 }
 
 void test_crypto::sha256_no_data() {
-  actc::checksum256 tmp;
+  roxe::checksum256 tmp;
 
-  tmp = actc::sha256( test2, my_strlen(test2) );
-  actc_assert( my_memcmp((void *)test2_ok_256, &tmp, sizeof(actc::checksum256)), "sha256 test2" );
+  tmp = roxe::sha256( test2, my_strlen(test2) );
+  roxe_assert( my_memcmp((void *)test2_ok_256, &tmp, sizeof(roxe::checksum256)), "sha256 test2" );
 }
 
 void test_crypto::sha512_no_data() {
-  actc::checksum512 tmp;
+  roxe::checksum512 tmp;
 
-  tmp = actc::sha512( test2, my_strlen(test2) );
-  actc_assert( my_memcmp((void *)test2_ok_512, &tmp, sizeof(actc::checksum512)), "sha512 test2" );
+  tmp = roxe::sha512( test2, my_strlen(test2) );
+  roxe_assert( my_memcmp((void *)test2_ok_512, &tmp, sizeof(roxe::checksum512)), "sha512 test2" );
 }
 
 void test_crypto::ripemd160_no_data() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::ripemd160( test2, my_strlen(test2) );
-  actc_assert( my_memcmp((void *)test2_ok_ripe, &tmp, sizeof(actc::checksum160)), "ripemd160 test2" );
+  tmp = roxe::ripemd160( test2, my_strlen(test2) );
+  roxe_assert( my_memcmp((void *)test2_ok_ripe, &tmp, sizeof(roxe::checksum160)), "ripemd160 test2" );
 }
 
 
 void test_crypto::assert_sha256_false() {
-  actc::checksum256 tmp;
+  roxe::checksum256 tmp;
 
-  tmp = actc::sha256( test1, my_strlen(test1) );
+  tmp = roxe::sha256( test1, my_strlen(test1) );
   tmp.data()[0] ^= (uint64_t)(-1);
   assert_sha256( test1, my_strlen(test1), tmp );
    
-  actc_assert( false, "should have failed" );
+  roxe_assert( false, "should have failed" );
 }
 
 void test_crypto::assert_sha256_true() {
-  actc::checksum256 tmp;
+  roxe::checksum256 tmp;
 
-  tmp = actc::sha256( test1, my_strlen(test1) );
+  tmp = roxe::sha256( test1, my_strlen(test1) );
   assert_sha256( test1, my_strlen(test1), tmp );
 
-  tmp = actc::sha256( test3, my_strlen(test3) );
+  tmp = roxe::sha256( test3, my_strlen(test3) );
   assert_sha256( test3, my_strlen(test3), tmp );
 
-  tmp = actc::sha256( test4, my_strlen(test4) );
+  tmp = roxe::sha256( test4, my_strlen(test4) );
   assert_sha256( test4, my_strlen(test4), tmp );
 
-  tmp = actc::sha256( test5, my_strlen(test5) );
+  tmp = roxe::sha256( test5, my_strlen(test5) );
   assert_sha256( test5, my_strlen(test5), tmp );
 }
 
 void test_crypto::assert_sha1_false() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::sha1( test1, my_strlen(test1) );
+  tmp = roxe::sha1( test1, my_strlen(test1) );
   tmp.data()[0] ^= (uint64_t)(-1);
   assert_sha1( test1, my_strlen(test1), tmp );
    
-  actc_assert( false, "should have failed" );
+  roxe_assert( false, "should have failed" );
 }
 
 
 void test_crypto::assert_sha1_true() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::sha1( test1, my_strlen(test1) );
+  tmp = roxe::sha1( test1, my_strlen(test1) );
   assert_sha1( test1, my_strlen(test1), tmp );
 
-  tmp = actc::sha1( test3, my_strlen(test3) );
+  tmp = roxe::sha1( test3, my_strlen(test3) );
   assert_sha1( test3, my_strlen(test3), tmp );
 
-  tmp = actc::sha1( test4, my_strlen(test4) );
+  tmp = roxe::sha1( test4, my_strlen(test4) );
   assert_sha1( test4, my_strlen(test4), tmp );
 
-  tmp = actc::sha1( test5, my_strlen(test5) );
+  tmp = roxe::sha1( test5, my_strlen(test5) );
   assert_sha1( test5, my_strlen(test5), tmp );
 }
 
 void test_crypto::assert_sha512_false() { 
-  actc::checksum512 tmp;
+  roxe::checksum512 tmp;
 
-  tmp = actc::sha512( test1, my_strlen(test1) );
+  tmp = roxe::sha512( test1, my_strlen(test1) );
   tmp.data()[0] ^= (uint64_t)(-1);
   assert_sha512( test1, my_strlen(test1), tmp );
    
-  actc_assert(false, "should have failed");
+  roxe_assert(false, "should have failed");
 }
 
 
 void test_crypto::assert_sha512_true() {
-  actc::checksum512 tmp;
+  roxe::checksum512 tmp;
 
-  tmp = actc::sha512( test1, my_strlen(test1) );
+  tmp = roxe::sha512( test1, my_strlen(test1) );
   assert_sha512( test1, my_strlen(test1), tmp );
 
-  tmp = actc::sha512( test3, my_strlen(test3) );
+  tmp = roxe::sha512( test3, my_strlen(test3) );
   assert_sha512( test3, my_strlen(test3), tmp );
 
-  tmp = actc::sha512( test4, my_strlen(test4) );
+  tmp = roxe::sha512( test4, my_strlen(test4) );
   assert_sha512( test4, my_strlen(test4), tmp );
 
-  tmp = actc::sha512( test5, my_strlen(test5) );
+  tmp = roxe::sha512( test5, my_strlen(test5) );
   assert_sha512( test5, my_strlen(test5), tmp );
 }
 
 void test_crypto::assert_ripemd160_false() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::ripemd160( test1, my_strlen(test1) );
+  tmp = roxe::ripemd160( test1, my_strlen(test1) );
   tmp.data()[0] ^= (uint64_t)(-1);
   assert_ripemd160( test1, my_strlen(test1), tmp );
    
-  actc_assert( false, "should have failed" );
+  roxe_assert( false, "should have failed" );
 }
 
 
 void test_crypto::assert_ripemd160_true() {
-  actc::checksum160 tmp;
+  roxe::checksum160 tmp;
 
-  tmp = actc::ripemd160( test1, my_strlen(test1) );
+  tmp = roxe::ripemd160( test1, my_strlen(test1) );
   assert_ripemd160( test1, my_strlen(test1), tmp );
 
-  tmp = actc::ripemd160( test3, my_strlen(test3) );
+  tmp = roxe::ripemd160( test3, my_strlen(test3) );
   assert_ripemd160( test3, my_strlen(test3), tmp );
 
-  tmp = actc::ripemd160( test4, my_strlen(test4) );
+  tmp = roxe::ripemd160( test4, my_strlen(test4) );
   assert_ripemd160( test4, my_strlen(test4), tmp );
 
-  tmp = actc::ripemd160( test5, my_strlen(test5) );
+  tmp = roxe::ripemd160( test5, my_strlen(test5) );
   assert_ripemd160( test5, my_strlen(test5), tmp );
 }

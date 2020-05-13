@@ -1,14 +1,14 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/asset.hpp>
-#include <actc/chain/authority.hpp>
-#include <actc/chain/authority_checker.hpp>
-#include <actc/chain/chain_config.hpp>
-#include <actc/chain/types.hpp>
-#include <actc/chain/thread_utils.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/asset.hpp>
+#include <roxe/chain/authority.hpp>
+#include <roxe/chain/authority_checker.hpp>
+#include <roxe/chain/chain_config.hpp>
+#include <roxe/chain/types.hpp>
+#include <roxe/chain/thread_utils.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <fc/io/json.hpp>
 #include <fc/log/logger_config.hpp>
@@ -22,8 +22,8 @@
 #define TESTER validating_tester
 #endif
 
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe::chain;
+using namespace roxe::testing;
 
 #include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_int_distribution.hpp>
@@ -82,7 +82,7 @@ FC_REFLECT( base_reflect, (bv) )
 FC_REFLECT_DERIVED( derived_reflect, (base_reflect), (dv) )
 FC_REFLECT_DERIVED( final_reflect, (derived_reflect), (fv) )
 
-namespace actc
+namespace roxe
 {
 using namespace chain;
 using namespace std;
@@ -640,22 +640,22 @@ BOOST_AUTO_TEST_CASE(transaction_test) { try {
    variant pretty_trx = fc::mutable_variant_object()
       ("actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "actc")
+            ("account", "roxe")
             ("name", "reqauth")
             ("authorization", fc::variants({
                fc::mutable_variant_object()
-                  ("actor", "actc")
+                  ("actor", "roxe")
                   ("permission", "active")
             }))
             ("data", fc::mutable_variant_object()
-               ("from", "actc")
+               ("from", "roxe")
             )
          })
       )
       // lets also push a context free action, the multi chain test will then also include a context free action
       ("context_free_actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "actc")
+            ("account", "roxe")
             ("name", "nonce")
             ("data", fc::raw::pack(std::string("dummy")))
          })
@@ -785,21 +785,21 @@ BOOST_AUTO_TEST_CASE(transaction_metadata_test) { try {
    variant pretty_trx = fc::mutable_variant_object()
       ("actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "actc")
+            ("account", "roxe")
             ("name", "reqauth")
             ("authorization", fc::variants({
                fc::mutable_variant_object()
-                  ("actor", "actc")
+                  ("actor", "roxe")
                   ("permission", "active")
             }))
             ("data", fc::mutable_variant_object()
-               ("from", "actc")
+               ("from", "roxe")
             )
          })
       )
       ("context_free_actions", fc::variants({
          fc::mutable_variant_object()
-            ("account", "actc")
+            ("account", "roxe")
             ("name", "nonce")
             ("data", fc::raw::pack(std::string("dummy data")))
          })
@@ -1123,4 +1123,4 @@ BOOST_AUTO_TEST_CASE(stable_priority_queue_test) {
 
 BOOST_AUTO_TEST_SUITE_END()
 
-} // namespace actc
+} // namespace roxe

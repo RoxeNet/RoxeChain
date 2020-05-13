@@ -3,16 +3,16 @@ find_package( Gperftools QUIET )
 ### Build contracts with cdt if available ###
 include(ExternalProject)
 
-if( ACTC_COMPILE_TEST_CONTRACTS )
-   set(ACTC_WASM_OLD_BEHAVIOR "Off")
-   find_package(actc.cdt REQUIRED)
+if( ROXE_COMPILE_TEST_CONTRACTS )
+   set(ROXE_WASM_OLD_BEHAVIOR "Off")
+   find_package(roxe.cdt REQUIRED)
 
-   message( STATUS "Building contracts in directory `actc/unittests/test-contracts/`" )
+   message( STATUS "Building contracts in directory `roxe/unittests/test-contracts/`" )
    ExternalProject_Add(
       test_contracts_project
       SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/test-contracts
       BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/test-contracts
-      CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${ACTC_CDT_ROOT}/lib/cmake/actc.cdt/ActcWasmToolchain.cmake -DACTC_COMPILE_TEST_CONTRACTS=${ACTC_COMPILE_TEST_CONTRACTS}
+      CMAKE_ARGS -DCMAKE_TOOLCHAIN_FILE=${ROXE_CDT_ROOT}/lib/cmake/roxe.cdt/RoxeWasmToolchain.cmake -DROXE_COMPILE_TEST_CONTRACTS=${ROXE_COMPILE_TEST_CONTRACTS}
       UPDATE_COMMAND ""
       PATCH_COMMAND ""
       TEST_COMMAND ""
@@ -20,7 +20,7 @@ if( ACTC_COMPILE_TEST_CONTRACTS )
       BUILD_ALWAYS 1
    )
 else()
-  message( STATUS "Not building contracts in directory `actc/unittests/test-contracts/`" )
+  message( STATUS "Not building contracts in directory `roxe/unittests/test-contracts/`" )
   add_subdirectory(test-contracts)
 endif()
 
@@ -41,9 +41,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/contracts.hpp.in ${CMAKE_CURRENT_BINA
 file(GLOB UNIT_TESTS "*.cpp") # find all unit test suites
 add_executable( unit_test ${UNIT_TESTS}) # build unit tests as one executable
 
-target_link_libraries( unit_test actc_chain chainbase actc_testing fc appbase ${PLATFORM_SPECIFIC_LIBS} )
+target_link_libraries( unit_test roxe_chain chainbase roxe_testing fc appbase ${PLATFORM_SPECIFIC_LIBS} )
 
-target_compile_options(unit_test PUBLIC -DDISABLE_ACTCLIB_SERIALIZE)
+target_compile_options(unit_test PUBLIC -DDISABLE_ROXELIB_SERIALIZE)
 target_include_directories( unit_test PUBLIC
                             ${CMAKE_SOURCE_DIR}/libraries/testing/include
                             ${CMAKE_SOURCE_DIR}/test-contracts

@@ -1,11 +1,11 @@
-configure_file("actc.doxygen.in" "${CMAKE_BINARY_DIR}/actc.doxygen")
+configure_file("roxe.doxygen.in" "${CMAKE_BINARY_DIR}/roxe.doxygen")
 
 include(FindDoxygen)
 
 if(NOT DOXYGEN_FOUND)
   message(STATUS "Doxygen not found.  Contract documentation will not be generated.")
 else()
-  set(DOXY_ACTC_VERSION "${VERSION_FULL}" CACHE INTERNAL "Version string used in PROJECT_NUMBER.")
+  set(DOXY_ROXE_VERSION "${VERSION_FULL}" CACHE INTERNAL "Version string used in PROJECT_NUMBER.")
   # CMake strips trailing path separators off of variables it knows are paths,
   # so the trailing '/' Doxygen expects is embedded in the doxyfile.
   set(DOXY_DOC_DEST_DIR "${CMAKE_BINARY_DIR}/docs" CACHE PATH "Path to the doxygen output")
@@ -20,7 +20,7 @@ else()
     # Doxygen has issues making destination directories more than one level deep, so do it for it.
     add_custom_target(make_doc_dir ALL COMMAND ${CMAKE_COMMAND} -E make_directory "${DOXY_DOC_DEST_DIR}")
     add_custom_target(contract_documentation ALL
-      COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_BINARY_DIR}/actc.doxygen"
+      COMMAND "${DOXYGEN_EXECUTABLE}" "${CMAKE_BINARY_DIR}/roxe.doxygen"
       DEPENDS make_doc_dir
       WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
       COMMENT "Building doxygen documentation into ${DOXY_DOC_DEST_DIR}..."

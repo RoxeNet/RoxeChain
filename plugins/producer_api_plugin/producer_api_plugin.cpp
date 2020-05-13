@@ -1,28 +1,28 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/producer_api_plugin/producer_api_plugin.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/producer_api_plugin/producer_api_plugin.hpp>
+#include <roxe/chain/exceptions.hpp>
 
 #include <fc/variant.hpp>
 #include <fc/io/json.hpp>
 
 #include <chrono>
 
-namespace actc { namespace detail {
+namespace roxe { namespace detail {
   struct producer_api_plugin_response {
      std::string result;
   };
 }}
 
-FC_REFLECT(actc::detail::producer_api_plugin_response, (result));
+FC_REFLECT(roxe::detail::producer_api_plugin_response, (result));
 
-namespace actc {
+namespace roxe {
 
 static appbase::abstract_plugin& _producer_api_plugin = app().register_plugin<producer_api_plugin>();
 
-using namespace actc;
+using namespace roxe;
 
 struct async_result_visitor : public fc::visitor<fc::variant> {
    template<typename T>
@@ -77,16 +77,16 @@ struct async_result_visitor : public fc::visitor<fc::variant> {
 
 #define INVOKE_V_R(api_handle, call_name, in_param) \
      api_handle.call_name(fc::json::from_string(body).as<in_param>()); \
-     actc::detail::producer_api_plugin_response result{"ok"};
+     roxe::detail::producer_api_plugin_response result{"ok"};
 
 #define INVOKE_V_R_R(api_handle, call_name, in_param0, in_param1) \
      const auto& vs = fc::json::json::from_string(body).as<fc::variants>(); \
      api_handle.call_name(vs.at(0).as<in_param0>(), vs.at(1).as<in_param1>()); \
-     actc::detail::producer_api_plugin_response result{"ok"};
+     roxe::detail::producer_api_plugin_response result{"ok"};
 
 #define INVOKE_V_V(api_handle, call_name) \
      api_handle.call_name(); \
-     actc::detail::producer_api_plugin_response result{"ok"};
+     roxe::detail::producer_api_plugin_response result{"ok"};
 
 
 void producer_api_plugin::plugin_startup() {

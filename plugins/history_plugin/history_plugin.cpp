@@ -1,16 +1,16 @@
-#include <actc/history_plugin/history_plugin.hpp>
-#include <actc/history_plugin/account_control_history_object.hpp>
-#include <actc/history_plugin/public_key_history_object.hpp>
-#include <actc/chain/controller.hpp>
-#include <actc/chain/trace.hpp>
-#include <actc/chain_plugin/chain_plugin.hpp>
+#include <roxe/history_plugin/history_plugin.hpp>
+#include <roxe/history_plugin/account_control_history_object.hpp>
+#include <roxe/history_plugin/public_key_history_object.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/trace.hpp>
+#include <roxe/chain_plugin/chain_plugin.hpp>
 
 #include <fc/io/json.hpp>
 
 #include <boost/algorithm/string.hpp>
 #include <boost/signals2/connection.hpp>
 
-namespace actc {
+namespace roxe {
    using namespace chain;
    using boost::signals2::scoped_connection;
 
@@ -73,12 +73,12 @@ namespace actc {
       >
    >;
 
-} /// namespace actc
+} /// namespace roxe
 
-CHAINBASE_SET_INDEX_TYPE(actc::account_history_object, actc::account_history_index)
-CHAINBASE_SET_INDEX_TYPE(actc::action_history_object, actc::action_history_index)
+CHAINBASE_SET_INDEX_TYPE(roxe::account_history_object, roxe::account_history_index)
+CHAINBASE_SET_INDEX_TYPE(roxe::action_history_object, roxe::action_history_index)
 
-namespace actc {
+namespace roxe {
 
    template<typename MultiIndex, typename LookupType>
    static void remove(chainbase::database& db, const account_name& account_name, const permission_name& permission)
@@ -314,14 +314,14 @@ namespace actc {
             for( auto& s : fo ) {
                if( s == "*" || s == "\"*\"" ) {
                   my->bypass_filter = true;
-                  wlog( "--filter-on * enabled. This can fill shared_mem, causing nodactc to stop." );
+                  wlog( "--filter-on * enabled. This can fill shared_mem, causing nodroxe to stop." );
                   break;
                }
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               ACTC_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
+               ROXE_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-on", ("s", s));
                filter_entry fe{v[0], v[1], v[2]};
-               ACTC_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
+               ROXE_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-on", ("s", s));
                my->filter_on.insert( fe );
             }
@@ -331,16 +331,16 @@ namespace actc {
             for( auto& s : fo ) {
                std::vector<std::string> v;
                boost::split( v, s, boost::is_any_of( ":" ));
-               ACTC_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
+               ROXE_ASSERT( v.size() == 3, fc::invalid_arg_exception, "Invalid value ${s} for --filter-out", ("s", s));
                filter_entry fe{v[0], v[1], v[2]};
-               ACTC_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
+               ROXE_ASSERT( fe.receiver.value, fc::invalid_arg_exception,
                            "Invalid value ${s} for --filter-out", ("s", s));
                my->filter_out.insert( fe );
             }
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         ACTC_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         ROXE_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          auto& chain = my->chain_plug->chain();
 
          chainbase::database& db = const_cast<chainbase::database&>( chain.db() ); // Override read-only access to state DB (highly unrecommended practice!)
@@ -403,7 +403,7 @@ namespace actc {
            if( start > pos ) start = 0;
            end   = pos;
         }
-        ACTC_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
+        ROXE_ASSERT( end >= start, chain::plugin_exception, "end position is earlier than start position" );
 
         idump((start)(end));
 
@@ -448,7 +448,7 @@ namespace actc {
             FC_ASSERT( input_id_length <= 64, "hex string is too long to represent an actual transaction id" );
             FC_ASSERT( input_id_length >= 8,  "hex string representing transaction id should be at least 8 characters long to avoid excessive collisions" );
             input_id = transaction_id_type(p.id);
-         } ACTC_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
+         } ROXE_RETHROW_EXCEPTIONS(transaction_id_type_exception, "Invalid transaction ID: ${transaction_id}", ("transaction_id", p.id))
 
          auto txn_id_matched = [&input_id, input_id_size = input_id_length/2, no_half_byte_at_end = (input_id_length % 2 == 0)]
                                ( const transaction_id_type &id ) -> bool // hex prefix comparison
@@ -468,7 +468,7 @@ namespace actc {
          bool in_history = (itr != idx.end() && txn_id_matched(itr->trx_id) );
 
          if( !in_history && !p.block_num_hint ) {
-            ACTC_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
+            ROXE_THROW(tx_not_found, "Transaction ${id} not found in history and no block hint was given", ("id",p.id));
          }
 
          get_transaction_result result;
@@ -547,7 +547,7 @@ namespace actc {
             }
 
             if (!found) {
-               ACTC_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
+               ROXE_THROW(tx_not_found, "Transaction ${id} not found in history or in block number ${n}", ("id",p.id)("n", *p.block_num_hint));
             }
          }
 
@@ -578,4 +578,4 @@ namespace actc {
 
 
 
-} /// namespace actc
+} /// namespace roxe

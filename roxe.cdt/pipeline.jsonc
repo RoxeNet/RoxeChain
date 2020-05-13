@@ -1,0 +1,10 @@
+{
+    "roxe-dot-cdt":
+    {
+        "pipeline-branch": "master",
+        "dependencies": // dependencies to pull for cdt integration tests, by branch, tag, or commit hash
+        {
+            "roxe": "release/1.7.x"
+        }
+    }
+}

@@ -1,18 +1,18 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] asserter : public actc::contract {
+class [[roxe::contract]] asserter : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
+   [[roxe::action]]
    void procassert( int8_t condition, std::string message );
 
-   [[actc::action]]
+   [[roxe::action]]
    void provereset();
 };
