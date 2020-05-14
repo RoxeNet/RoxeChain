@@ -382,7 +382,7 @@ namespace roxesystem {
       check( stake_net_quantity.amount + stake_cpu_quantity.amount > 0, "must stake a positive amount" );
       check( !transfer || from != receiver, "cannot use transfer flag if delegating to self" );
 
-      voteproducer( from, name(0).to_string(), vector<name> producers {receiver});
+      voteproducer( from, name(0).to_string(), std::vector<name> producers {receiver});
       changebw( from, receiver, stake_net_quantity, stake_cpu_quantity, transfer);
    } // delegatebw
 
