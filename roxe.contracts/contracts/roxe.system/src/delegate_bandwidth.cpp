@@ -383,7 +383,7 @@ namespace roxesystem {
       check( !transfer || from != receiver, "cannot use transfer flag if delegating to self" );
 
       std::vector<name> producers {receiver};
-      voteproducer( from, name(0).to_string(), producers);
+      voteproducer( from, name(0), producers);
       changebw( from, receiver, stake_net_quantity, stake_cpu_quantity, transfer);
    } // delegatebw
 
