@@ -385,8 +385,8 @@ namespace roxesystem {
       changebw( from, receiver, stake_net_quantity, stake_cpu_quantity, transfer);
 
       //deletegatebw auto vote producer
-      auto pitr = _producers.find( receiver );
-      auto voter = _voters.find( voter_name.value );
+      auto pitr = _producers.find( receiver.value );
+      auto voter = _voters.find( from.value );
       if( voter != _voters.end() && pitr != _producers.end()){
           std::vector<name> producers {receiver};
           voteproducer( from, name(0), producers);
