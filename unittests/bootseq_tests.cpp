@@ -262,20 +262,20 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            register_producer(pro);
         }
 
-        // Vote for producers
-        auto votepro = [&]( account_name voter, vector<account_name> producers ) {
-          std::sort( producers.begin(), producers.end() );
-          base_tester::push_action(config::system_account_name, N(voteproducer), voter, mvo()
-                                ("voter",  name(voter))
-                                ("proxy", name(0) )
-                                ("producers", producers)
-                     );
-        };
-        votepro( N(b1), { N(proda), N(prodb), N(prodc), N(prodd), N(prode), N(prodf), N(prodg),
-                           N(prodh), N(prodi), N(prodj), N(prodk), N(prodl), N(prodm), N(prodn),
-                           N(prodo), N(prodp), N(prodq), N(prodr), N(prods), N(prodt), N(produ)} );
-        votepro( N(whale2), {N(runnerup1), N(runnerup2), N(runnerup3)} );
-        votepro( N(whale3), {N(proda), N(prodb), N(prodc), N(prodd), N(prode)} );
+//        // Vote for producers
+//        auto votepro = [&]( account_name voter, vector<account_name> producers ) {
+//          std::sort( producers.begin(), producers.end() );
+//          base_tester::push_action(config::system_account_name, N(voteproducer), voter, mvo()
+//                                ("voter",  name(voter))
+//                                ("proxy", name(0) )
+//                                ("producers", producers)
+//                     );
+//        };
+//        votepro( N(b1), { N(proda), N(prodb), N(prodc), N(prodd), N(prode), N(prodf), N(prodg),
+//                           N(prodh), N(prodi), N(prodj), N(prodk), N(prodl), N(prodm), N(prodn),
+//                           N(prodo), N(prodp), N(prodq), N(prodr), N(prods), N(prodt), N(produ)} );
+//        votepro( N(whale2), {N(runnerup1), N(runnerup2), N(runnerup3)} );
+//        votepro( N(whale3), {N(proda), N(prodb), N(prodc), N(prodd), N(prode)} );
 
         // Total Stakes = b1 + whale2 + whale3 stake = (100,000,000 - 1,000) + (20,000,000 - 1,000) + (30,000,000 - 1,000)
         vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(global), N(global) );

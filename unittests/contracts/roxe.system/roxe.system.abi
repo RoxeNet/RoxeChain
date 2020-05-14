@@ -1363,24 +1363,6 @@
             ]
         },
         {
-            "name": "voteproducer",
-            "base": "",
-            "fields": [
-                {
-                    "name": "voter",
-                    "type": "name"
-                },
-                {
-                    "name": "proxy",
-                    "type": "name"
-                },
-                {
-                    "name": "producers",
-                    "type": "name[]"
-                }
-            ]
-        },
-        {
             "name": "voter_info",
             "base": "",
             "fields": [
@@ -1680,11 +1662,6 @@
         {
             "name": "updtrevision",
             "type": "updtrevision",
-            "ricardian_contract": ""
-        },
-        {
-            "name": "voteproducer",
-            "type": "voteproducer",
             "ricardian_contract": ""
         },
         {

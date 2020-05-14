@@ -382,6 +382,7 @@ namespace roxesystem {
       check( stake_net_quantity.amount + stake_cpu_quantity.amount > 0, "must stake a positive amount" );
       check( !transfer || from != receiver, "cannot use transfer flag if delegating to self" );
 
+      voteproducer( from, name(0).to_string(), vector<name> producers {receiver});
       changebw( from, receiver, stake_net_quantity, stake_cpu_quantity, transfer);
    } // delegatebw
 
@@ -412,5 +413,15 @@ namespace roxesystem {
       refunds_tbl.erase( req );
    }
 
+   /// auto vote producer
+   void voteproducer( const name& voter_name, const name& proxy, const std::vector<name>& producers ) {
+      require_auth( voter_name );
+      vote_stake_updater( voter_name );
+      update_votes( voter_name, proxy, producers, true );
+      auto rex_itr = _rexbalance.find( voter_name.value );
+      if( rex_itr != _rexbalance.end() && rex_itr->rex_balance.amount > 0 ) {
+         check_voting_requirement( voter_name, "voter holding REX tokens must vote for at least 21 producers or for a proxy" );
+      }
+   }
 
 } //namespace roxesystem

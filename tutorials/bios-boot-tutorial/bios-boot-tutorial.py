@@ -203,14 +203,14 @@ def claimRewards():
             times.append(getJsonOutput(args.clroxe + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
     print('Elapsed time for claimrewards:', times)
 
-def proxyVotes(b, e):
-    # vote(firstProducer, firstProducer + 1)
-    proxy = accounts[firstProducer]['name']
-    retry(args.clroxe + 'system regproxy ' + proxy)
-    sleep(1.0)
-    for i in range(b, e):
-        voter = accounts[i]['name']
-        retry(args.clroxe + 'system voteproducer proxy ' + voter + ' ' + proxy)
+# def proxyVotes(b, e):
+#     # vote(firstProducer, firstProducer + 1)
+#     proxy = accounts[firstProducer]['name']
+#     retry(args.clroxe + 'system regproxy ' + proxy)
+#     sleep(1.0)
+#     for i in range(b, e):
+#         voter = accounts[i]['name']
+#         retry(args.clroxe + 'system voteproducer proxy ' + voter + ' ' + proxy)
 
 def updateAuth(account, permission, parent, controller):
     run(args.clroxe + 'push action roxe updateauth' + jsonArg({

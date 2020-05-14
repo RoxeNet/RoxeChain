@@ -1083,155 +1083,155 @@ struct unregister_producer_subcommand {
    }
 };
 
-struct vote_producer_proxy_subcommand {
-   string voter_str;
-   string proxy_str;
+//struct vote_producer_proxy_subcommand {
+//   string voter_str;
+//   string proxy_str;
+//
+//   vote_producer_proxy_subcommand(CLI::App* actionRoot) {
+//      auto vote_proxy = actionRoot->add_subcommand("proxy", localized("Vote your stake through a proxy"));
+//      vote_proxy->add_option("voter", voter_str, localized("The voting account"))->required();
+//      vote_proxy->add_option("proxy", proxy_str, localized("The proxy account"))->required();
+//      add_standard_transaction_options(vote_proxy, "voter@active");
+//
+//      vote_proxy->set_callback([this] {
+//         fc::variant act_payload = fc::mutable_variant_object()
+//                  ("voter", voter_str)
+//                  ("proxy", proxy_str)
+//                  ("producers", std::vector<account_name>{});
+//         auto accountPermissions = get_account_permissions(tx_permission, {voter_str,config::active_name});
+//         send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
+//      });
+//   }
+//};
 
-   vote_producer_proxy_subcommand(CLI::App* actionRoot) {
-      auto vote_proxy = actionRoot->add_subcommand("proxy", localized("Vote your stake through a proxy"));
-      vote_proxy->add_option("voter", voter_str, localized("The voting account"))->required();
-      vote_proxy->add_option("proxy", proxy_str, localized("The proxy account"))->required();
-      add_standard_transaction_options(vote_proxy, "voter@active");
+//struct vote_producers_subcommand {
+//   string voter_str;
+//   vector<roxe::name> producer_names;
+//
+//   vote_producers_subcommand(CLI::App* actionRoot) {
+//      auto vote_producers = actionRoot->add_subcommand("prods", localized("Vote for one or more producers"));
+//      vote_producers->add_option("voter", voter_str, localized("The voting account"))->required();
+//      vote_producers->add_option("producers", producer_names, localized("The account(s) to vote for. All options from this position and following will be treated as the producer list."))->required();
+//      add_standard_transaction_options(vote_producers, "voter@active");
+//
+//      vote_producers->set_callback([this] {
+//
+//         std::sort( producer_names.begin(), producer_names.end() );
+//
+//         fc::variant act_payload = fc::mutable_variant_object()
+//                  ("voter", voter_str)
+//                  ("proxy", "")
+//                  ("producers", producer_names);
+//         auto accountPermissions = get_account_permissions(tx_permission, {voter_str,config::active_name});
+//         send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
+//      });
+//   }
+//};
 
-      vote_proxy->set_callback([this] {
-         fc::variant act_payload = fc::mutable_variant_object()
-                  ("voter", voter_str)
-                  ("proxy", proxy_str)
-                  ("producers", std::vector<account_name>{});
-         auto accountPermissions = get_account_permissions(tx_permission, {voter_str,config::active_name});
-         send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
-      });
-   }
-};
+//struct approve_producer_subcommand {
+//   roxe::name voter;
+//   roxe::name producer_name;
+//
+//   approve_producer_subcommand(CLI::App* actionRoot) {
+//      auto approve_producer = actionRoot->add_subcommand("approve", localized("Add one producer to list of voted producers"));
+//      approve_producer->add_option("voter", voter, localized("The voting account"))->required();
+//      approve_producer->add_option("producer", producer_name, localized("The account to vote for"))->required();
+//      add_standard_transaction_options(approve_producer, "voter@active");
+//
+//      approve_producer->set_callback([this] {
+//            auto result = call(get_table_func, fc::mutable_variant_object("json", true)
+//                               ("code", name(config::system_account_name).to_string())
+//                               ("scope", name(config::system_account_name).to_string())
+//                               ("table", "voters")
+//                               ("table_key", "owner")
+//                               ("lower_bound", voter.value)
+//                               ("upper_bound", voter.value + 1)
+//                               // Less than ideal upper_bound usage preserved so clroxe can still work with old buggy nodroxe versions
+//                               // Change to voter.value when clroxe no longer needs to support nodroxe versions older than 1.5.0
+//                               ("limit", 1)
+//            );
+//            auto res = result.as<roxe::chain_apis::read_only::get_table_rows_result>();
+//            // Condition in if statement below can simply be res.rows.empty() when clroxe no longer needs to support nodroxe versions older than 1.5.0
+//            // Although since this subcommand will actually change the voter's vote, it is probably better to just keep this check to protect
+//            //  against future potential chain_plugin bugs.
+//            if( res.rows.empty() || res.rows[0].get_object()["owner"].as_string() != name(voter).to_string() ) {
+//               std::cerr << "Voter info not found for account " << voter << std::endl;
+//               return;
+//            }
+//            ROXE_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
+//            auto prod_vars = res.rows[0]["producers"].get_array();
+//            vector<roxe::name> prods;
+//            for ( auto& x : prod_vars ) {
+//               prods.push_back( name(x.as_string()) );
+//            }
+//            prods.push_back( producer_name );
+//            std::sort( prods.begin(), prods.end() );
+//            auto it = std::unique( prods.begin(), prods.end() );
+//            if (it != prods.end() ) {
+//               std::cerr << "Producer \"" << producer_name << "\" is already on the list." << std::endl;
+//               return;
+//            }
+//            fc::variant act_payload = fc::mutable_variant_object()
+//               ("voter", voter)
+//               ("proxy", "")
+//               ("producers", prods);
+//            auto accountPermissions = get_account_permissions(tx_permission, {voter,config::active_name});
+//            send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
+//      });
+//   }
+//};
 
-struct vote_producers_subcommand {
-   string voter_str;
-   vector<roxe::name> producer_names;
-
-   vote_producers_subcommand(CLI::App* actionRoot) {
-      auto vote_producers = actionRoot->add_subcommand("prods", localized("Vote for one or more producers"));
-      vote_producers->add_option("voter", voter_str, localized("The voting account"))->required();
-      vote_producers->add_option("producers", producer_names, localized("The account(s) to vote for. All options from this position and following will be treated as the producer list."))->required();
-      add_standard_transaction_options(vote_producers, "voter@active");
-
-      vote_producers->set_callback([this] {
-
-         std::sort( producer_names.begin(), producer_names.end() );
-
-         fc::variant act_payload = fc::mutable_variant_object()
-                  ("voter", voter_str)
-                  ("proxy", "")
-                  ("producers", producer_names);
-         auto accountPermissions = get_account_permissions(tx_permission, {voter_str,config::active_name});
-         send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
-      });
-   }
-};
-
-struct approve_producer_subcommand {
-   roxe::name voter;
-   roxe::name producer_name;
-
-   approve_producer_subcommand(CLI::App* actionRoot) {
-      auto approve_producer = actionRoot->add_subcommand("approve", localized("Add one producer to list of voted producers"));
-      approve_producer->add_option("voter", voter, localized("The voting account"))->required();
-      approve_producer->add_option("producer", producer_name, localized("The account to vote for"))->required();
-      add_standard_transaction_options(approve_producer, "voter@active");
-
-      approve_producer->set_callback([this] {
-            auto result = call(get_table_func, fc::mutable_variant_object("json", true)
-                               ("code", name(config::system_account_name).to_string())
-                               ("scope", name(config::system_account_name).to_string())
-                               ("table", "voters")
-                               ("table_key", "owner")
-                               ("lower_bound", voter.value)
-                               ("upper_bound", voter.value + 1)
-                               // Less than ideal upper_bound usage preserved so clroxe can still work with old buggy nodroxe versions
-                               // Change to voter.value when clroxe no longer needs to support nodroxe versions older than 1.5.0
-                               ("limit", 1)
-            );
-            auto res = result.as<roxe::chain_apis::read_only::get_table_rows_result>();
-            // Condition in if statement below can simply be res.rows.empty() when clroxe no longer needs to support nodroxe versions older than 1.5.0
-            // Although since this subcommand will actually change the voter's vote, it is probably better to just keep this check to protect
-            //  against future potential chain_plugin bugs.
-            if( res.rows.empty() || res.rows[0].get_object()["owner"].as_string() != name(voter).to_string() ) {
-               std::cerr << "Voter info not found for account " << voter << std::endl;
-               return;
-            }
-            ROXE_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
-            auto prod_vars = res.rows[0]["producers"].get_array();
-            vector<roxe::name> prods;
-            for ( auto& x : prod_vars ) {
-               prods.push_back( name(x.as_string()) );
-            }
-            prods.push_back( producer_name );
-            std::sort( prods.begin(), prods.end() );
-            auto it = std::unique( prods.begin(), prods.end() );
-            if (it != prods.end() ) {
-               std::cerr << "Producer \"" << producer_name << "\" is already on the list." << std::endl;
-               return;
-            }
-            fc::variant act_payload = fc::mutable_variant_object()
-               ("voter", voter)
-               ("proxy", "")
-               ("producers", prods);
-            auto accountPermissions = get_account_permissions(tx_permission, {voter,config::active_name});
-            send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
-      });
-   }
-};
-
-struct unapprove_producer_subcommand {
-   roxe::name voter;
-   roxe::name producer_name;
-
-   unapprove_producer_subcommand(CLI::App* actionRoot) {
-      auto approve_producer = actionRoot->add_subcommand("unapprove", localized("Remove one producer from list of voted producers"));
-      approve_producer->add_option("voter", voter, localized("The voting account"))->required();
-      approve_producer->add_option("producer", producer_name, localized("The account to remove from voted producers"))->required();
-      add_standard_transaction_options(approve_producer, "voter@active");
-
-      approve_producer->set_callback([this] {
-            auto result = call(get_table_func, fc::mutable_variant_object("json", true)
-                               ("code", name(config::system_account_name).to_string())
-                               ("scope", name(config::system_account_name).to_string())
-                               ("table", "voters")
-                               ("table_key", "owner")
-                               ("lower_bound", voter.value)
-                               ("upper_bound", voter.value + 1)
-                               // Less than ideal upper_bound usage preserved so clroxe can still work with old buggy nodroxe versions
-                               // Change to voter.value when clroxe no longer needs to support nodroxe versions older than 1.5.0
-                               ("limit", 1)
-            );
-            auto res = result.as<roxe::chain_apis::read_only::get_table_rows_result>();
-            // Condition in if statement below can simply be res.rows.empty() when clroxe no longer needs to support nodroxe versions older than 1.5.0
-            // Although since this subcommand will actually change the voter's vote, it is probably better to just keep this check to protect
-            //  against future potential chain_plugin bugs.
-            if( res.rows.empty() || res.rows[0].get_object()["owner"].as_string() != name(voter).to_string() ) {
-               std::cerr << "Voter info not found for account " << voter << std::endl;
-               return;
-            }
-            ROXE_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
-            auto prod_vars = res.rows[0]["producers"].get_array();
-            vector<roxe::name> prods;
-            for ( auto& x : prod_vars ) {
-               prods.push_back( name(x.as_string()) );
-            }
-            auto it = std::remove( prods.begin(), prods.end(), producer_name );
-            if (it == prods.end() ) {
-               std::cerr << "Cannot remove: producer \"" << producer_name << "\" is not on the list." << std::endl;
-               return;
-            }
-            prods.erase( it, prods.end() ); //should always delete only one element
-            fc::variant act_payload = fc::mutable_variant_object()
-               ("voter", voter)
-               ("proxy", "")
-               ("producers", prods);
-            auto accountPermissions = get_account_permissions(tx_permission, {voter,config::active_name});
-            send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
-      });
-   }
-};
+//struct unapprove_producer_subcommand {
+//   roxe::name voter;
+//   roxe::name producer_name;
+//
+//   unapprove_producer_subcommand(CLI::App* actionRoot) {
+//      auto approve_producer = actionRoot->add_subcommand("unapprove", localized("Remove one producer from list of voted producers"));
+//      approve_producer->add_option("voter", voter, localized("The voting account"))->required();
+//      approve_producer->add_option("producer", producer_name, localized("The account to remove from voted producers"))->required();
+//      add_standard_transaction_options(approve_producer, "voter@active");
+//
+//      approve_producer->set_callback([this] {
+//            auto result = call(get_table_func, fc::mutable_variant_object("json", true)
+//                               ("code", name(config::system_account_name).to_string())
+//                               ("scope", name(config::system_account_name).to_string())
+//                               ("table", "voters")
+//                               ("table_key", "owner")
+//                               ("lower_bound", voter.value)
+//                               ("upper_bound", voter.value + 1)
+//                               // Less than ideal upper_bound usage preserved so clroxe can still work with old buggy nodroxe versions
+//                               // Change to voter.value when clroxe no longer needs to support nodroxe versions older than 1.5.0
+//                               ("limit", 1)
+//            );
+//            auto res = result.as<roxe::chain_apis::read_only::get_table_rows_result>();
+//            // Condition in if statement below can simply be res.rows.empty() when clroxe no longer needs to support nodroxe versions older than 1.5.0
+//            // Although since this subcommand will actually change the voter's vote, it is probably better to just keep this check to protect
+//            //  against future potential chain_plugin bugs.
+//            if( res.rows.empty() || res.rows[0].get_object()["owner"].as_string() != name(voter).to_string() ) {
+//               std::cerr << "Voter info not found for account " << voter << std::endl;
+//               return;
+//            }
+//            ROXE_ASSERT( 1 == res.rows.size(), multiple_voter_info, "More than one voter_info for account" );
+//            auto prod_vars = res.rows[0]["producers"].get_array();
+//            vector<roxe::name> prods;
+//            for ( auto& x : prod_vars ) {
+//               prods.push_back( name(x.as_string()) );
+//            }
+//            auto it = std::remove( prods.begin(), prods.end(), producer_name );
+//            if (it == prods.end() ) {
+//               std::cerr << "Cannot remove: producer \"" << producer_name << "\" is not on the list." << std::endl;
+//               return;
+//            }
+//            prods.erase( it, prods.end() ); //should always delete only one element
+//            fc::variant act_payload = fc::mutable_variant_object()
+//               ("voter", voter)
+//               ("proxy", "")
+//               ("producers", prods);
+//            auto accountPermissions = get_account_permissions(tx_permission, {voter,config::active_name});
+//            send_actions({create_action(accountPermissions, config::system_account_name, N(voteproducer), act_payload)});
+//      });
+//   }
+//};
 
 struct list_producers_subcommand {
    bool print_json = false;
@@ -3874,12 +3874,12 @@ int main( int argc, char** argv ) {
    auto registerProducer = register_producer_subcommand(system);
    auto unregisterProducer = unregister_producer_subcommand(system);
 
-   auto voteProducer = system->add_subcommand("voteproducer", localized("Vote for a producer"));
-   voteProducer->require_subcommand();
-   auto voteProxy = vote_producer_proxy_subcommand(voteProducer);
-   auto voteProducers = vote_producers_subcommand(voteProducer);
-   auto approveProducer = approve_producer_subcommand(voteProducer);
-   auto unapproveProducer = unapprove_producer_subcommand(voteProducer);
+//   auto voteProducer = system->add_subcommand("voteproducer", localized("Vote for a producer"));
+//   voteProducer->require_subcommand();
+//   auto voteProxy = vote_producer_proxy_subcommand(voteProducer);
+//   auto voteProducers = vote_producers_subcommand(voteProducer);
+//   auto approveProducer = approve_producer_subcommand(voteProducer);
+//   auto unapproveProducer = unapprove_producer_subcommand(voteProducer);
 
    auto listProducers = list_producers_subcommand(system);
 
