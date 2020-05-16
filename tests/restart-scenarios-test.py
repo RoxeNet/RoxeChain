@@ -16,9 +16,9 @@ import random
 # -d <delay between nodes startup>
 # -v <verbose logging>
 # --kill-sig <kill signal [term|kill]>
-# --kill-count <nodactc instances to kill>
+# --kill-count <nodroxe instances to kill>
 # --dont-kill <Leave cluster running after test finishes>
-# --dump-error-details <Upon error print etc/actc/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
+# --dump-error-details <Upon error print etc/roxe/node_*/config.ini and var/lib/node_*/stderr.log to stdout>
 # --keep-logs <Don't delete var/lib/node_* folders upon test completion>
 ###############################################################
 
@@ -36,7 +36,7 @@ debug=args.v
 total_nodes = pnodes
 killCount=args.kill_count if args.kill_count > 0 else 1
 killSignal=args.kill_sig
-killActcInstances= not args.leave_running
+killRoxeInstances= not args.leave_running
 dumpErrorDetails=args.dump_error_details
 keepLogs=args.keep_logs
 killAll=args.clean_run
@@ -66,32 +66,32 @@ try:
 
     Print("Stand up cluster")
     if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, topo=topo, delay=delay) is False:
-        errorExit("Failed to stand up actc cluster.")
+        errorExit("Failed to stand up roxe cluster.")
 
     Print ("Wait for Cluster stabilization")
     # wait for cluster to start producing blocks
     if not cluster.waitOnClusterBlockNumSync(3):
         errorExit("Cluster never stabilized")
 
-    Print("Stand up ACTC wallet kactcd")
+    Print("Stand up ROXE wallet kroxed")
     accountsCount=total_nodes
     walletName="MyWallet"
     Print("Creating wallet %s if one doesn't already exist." % walletName)
-    wallet=walletMgr.create(walletName, [cluster.actcAccount,cluster.defproduceraAccount,cluster.defproducerbAccount])
+    wallet=walletMgr.create(walletName, [cluster.roxeAccount,cluster.defproduceraAccount,cluster.defproducerbAccount])
 
     Print ("Populate wallet with %d accounts." % (accountsCount))
     if not cluster.populateWallet(accountsCount, wallet):
         errorExit("Wallet initialization failed.")
 
     defproduceraAccount=cluster.defproduceraAccount
-    actcAccount=cluster.actcAccount
+    roxeAccount=cluster.roxeAccount
 
     Print("Importing keys for account %s into wallet %s." % (defproduceraAccount.name, wallet.name))
     if not walletMgr.importKey(defproduceraAccount, wallet):
         errorExit("Failed to import key for account %s" % (defproduceraAccount.name))
 
     Print("Create accounts.")
-    if not cluster.createAccounts(actcAccount):
+    if not cluster.createAccounts(roxeAccount):
         errorExit("Accounts creation failed.")
 
     Print("Wait on cluster sync.")
@@ -99,9 +99,9 @@ try:
         errorExit("Cluster sync wait failed.")
 
     Print("Kill %d cluster node instances." % (killCount))
-    if cluster.killSomeActcInstances(killCount, killSignal) is False:
-        errorExit("Failed to kill Actc instances")
-    Print("nodactc instances killed.")
+    if cluster.killSomeRoxeInstances(killCount, killSignal) is False:
+        errorExit("Failed to kill Roxe instances")
+    Print("nodroxe instances killed.")
 
     Print("Spread funds and validate")
     if not cluster.spreadFundsAndValidate(10):
@@ -112,9 +112,9 @@ try:
         errorExit("Cluster sync wait failed.")
 
     Print ("Relaunch dead cluster nodes instances.")
-    if cluster.relaunchActcInstances(cachePopen=True) is False:
-        errorExit("Failed to relaunch Actc instances")
-    Print("nodactc instances relaunched.")
+    if cluster.relaunchRoxeInstances(cachePopen=True) is False:
+        errorExit("Failed to relaunch Roxe instances")
+    Print("nodroxe instances relaunched.")
 
     Print ("Resyncing cluster nodes.")
     if not cluster.waitOnClusterSync():
@@ -129,16 +129,16 @@ try:
     if not cluster.waitOnClusterSync():
         errorExit("Cluster sync wait failed.")
 
-    if killActcInstances:
+    if killRoxeInstances:
         atLeastOne=False
         for node in cluster.getNodes():
             if node.popenProc is not None:
                 atLeastOne=True
                 node.interruptAndVerifyExitStatus()
-        assert atLeastOne, "Test is setup to verify that a cleanly interrupted nodactc exits with an exit status of 0, but this test may no longer be setup to do that"
+        assert atLeastOne, "Test is setup to verify that a cleanly interrupted nodroxe exits with an exit status of 0, but this test may no longer be setup to do that"
 
     testSuccessful=True
 finally:
-    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killActcInstances=killActcInstances, killWallet=killActcInstances, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
+    TestHelper.shutdown(cluster, walletMgr, testSuccessful=testSuccessful, killRoxeInstances=killRoxeInstances, killWallet=killRoxeInstances, keepLogs=keepLogs, cleanRun=killAll, dumpErrorDetails=dumpErrorDetails)
 
 exit(0)

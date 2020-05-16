@@ -1,20 +1,20 @@
 #include <algorithm>
-#include <actc/chain/apply_context.hpp>
-#include <actc/chain/controller.hpp>
-#include <actc/chain/transaction_context.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/wasm_interface.hpp>
-#include <actc/chain/generated_transaction_object.hpp>
-#include <actc/chain/authorization_manager.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/account_object.hpp>
-#include <actc/chain/code_object.hpp>
-#include <actc/chain/global_property_object.hpp>
+#include <roxe/chain/apply_context.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/transaction_context.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/wasm_interface.hpp>
+#include <roxe/chain/generated_transaction_object.hpp>
+#include <roxe/chain/authorization_manager.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/account_object.hpp>
+#include <roxe/chain/code_object.hpp>
+#include <roxe/chain/global_property_object.hpp>
 #include <boost/container/flat_set.hpp>
 
 using boost::container::flat_set;
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 static inline void print_debug(account_name receiver, const action_trace& ar) {
    if (!ar.console.empty()) {
@@ -99,11 +99,11 @@ void apply_context::exec_one()
                   counter = 0;
                }
                if( itr->delta > 0 && itr->account != receiver ) {
-                  ACTC_ASSERT( not_in_notify_context, unauthorized_ram_usage_increase,
+                  ROXE_ASSERT( not_in_notify_context, unauthorized_ram_usage_increase,
                               "unprivileged contract cannot increase RAM usage of another account within a notify context: ${account}",
                               ("account", itr->account)
                   );
-                  ACTC_ASSERT( has_authorization( itr->account ), unauthorized_ram_usage_increase,
+                  ROXE_ASSERT( has_authorization( itr->account ), unauthorized_ram_usage_increase,
                               "unprivileged contract cannot increase RAM usage of another account that has not authorized the action: ${account}",
                               ("account", itr->account)
                   );
@@ -122,7 +122,7 @@ void apply_context::exec_one()
    // Note: It should not be possible for receiver_account to be invalidated because:
    //    * a pointer to an object in a chainbase index is not invalidated if other objects in that index are modified, removed, or added;
    //    * a pointer to an object in a chainbase index is not invalidated if the fields of that object are modified;
-   //    * and, the *receiver_account object itself cannot be removed because accounts cannot be deleted in ACTC.
+   //    * and, the *receiver_account object itself cannot be removed because accounts cannot be deleted in ROXE.
 
    r.global_sequence  = next_global_sequence();
    r.recv_sequence    = next_recv_sequence( *receiver_account );
@@ -174,7 +174,7 @@ void apply_context::exec()
    }
 
    if( _cfa_inline_actions.size() > 0 || _inline_actions.size() > 0 ) {
-      ACTC_ASSERT( recurse_depth < control.get_global_properties().configuration.max_inline_action_depth,
+      ROXE_ASSERT( recurse_depth < control.get_global_properties().configuration.max_inline_action_depth,
                   transaction_exception, "max inline action depth per transaction reached" );
    }
 
@@ -198,7 +198,7 @@ void apply_context::require_authorization( const account_name& account ) {
         return;
      }
    }
-   ACTC_ASSERT( false, missing_auth_exception, "missing authority of ${account}", ("account",account));
+   ROXE_ASSERT( false, missing_auth_exception, "missing authority of ${account}", ("account",account));
 }
 
 bool apply_context::has_authorization( const account_name& account )const {
@@ -216,7 +216,7 @@ void apply_context::require_authorization(const account_name& account,
            return;
         }
      }
-  ACTC_ASSERT( false, missing_auth_exception, "missing authority of ${account}/${permission}",
+  ROXE_ASSERT( false, missing_auth_exception, "missing authority of ${account}/${permission}",
               ("account",account)("permission",permission) );
 }
 
@@ -254,7 +254,7 @@ void apply_context::require_recipient( account_name recipient ) {
  */
 void apply_context::execute_inline( action&& a ) {
    auto* code = control.db().find<account_object, by_name>(a.account);
-   ACTC_ASSERT( code != nullptr, action_validate_exception,
+   ROXE_ASSERT( code != nullptr, action_validate_exception,
                "inline action's code account ${account} does not exist", ("account", a.account) );
 
    bool enforce_actor_whitelist_blacklist = trx_context.enforce_whiteblacklist && control.is_producing_block();
@@ -271,9 +271,9 @@ void apply_context::execute_inline( action&& a ) {
 
    for( const auto& auth : a.authorization ) {
       auto* actor = control.db().find<account_object, by_name>(auth.actor);
-      ACTC_ASSERT( actor != nullptr, action_validate_exception,
+      ROXE_ASSERT( actor != nullptr, action_validate_exception,
                   "inline action's authorizing actor ${account} does not exist", ("account", auth.actor) );
-      ACTC_ASSERT( control.get_authorization_manager().find_permission(auth) != nullptr, action_validate_exception,
+      ROXE_ASSERT( control.get_authorization_manager().find_permission(auth) != nullptr, action_validate_exception,
                   "inline action's authorizations include a non-existent permission: ${permission}",
                   ("permission", auth) );
       if( enforce_actor_whitelist_blacklist )
@@ -294,7 +294,7 @@ void apply_context::execute_inline( action&& a ) {
          control.get_authorization_manager()
                 .check_authorization( {a},
                                       {},
-                                      {{receiver, config::actc_code_name}},
+                                      {{receiver, config::roxe_code_name}},
                                       control.pending_block_time() - trx_context.published,
                                       std::bind(&transaction_context::checktime, &this->trx_context),
                                       false,
@@ -318,7 +318,7 @@ void apply_context::execute_inline( action&& a ) {
          if( disallow_send_to_self_bypass || !send_to_self ) {
             throw;
          } else if( control.is_producing_block() ) {
-            ACTC_THROW(subjective_block_production_exception, "Unexpected exception occurred validating inline action sent to self");
+            ROXE_THROW(subjective_block_production_exception, "Unexpected exception occurred validating inline action sent to self");
          }
       }
    }
@@ -331,10 +331,10 @@ void apply_context::execute_inline( action&& a ) {
 
 void apply_context::execute_context_free_inline( action&& a ) {
    auto* code = control.db().find<account_object, by_name>(a.account);
-   ACTC_ASSERT( code != nullptr, action_validate_exception,
+   ROXE_ASSERT( code != nullptr, action_validate_exception,
                "inline action's code account ${account} does not exist", ("account", a.account) );
 
-   ACTC_ASSERT( a.authorization.size() == 0, action_validate_exception,
+   ROXE_ASSERT( a.authorization.size() == 0, action_validate_exception,
                "context-free actions cannot have authorizations" );
 
 
@@ -346,7 +346,7 @@ void apply_context::execute_context_free_inline( action&& a ) {
 
 
 void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, account_name payer, transaction&& trx, bool replace_existing ) {
-   ACTC_ASSERT( trx.context_free_actions.size() == 0, cfa_inside_generated_tx, "context free actions are not currently allowed in generated transactions" );
+   ROXE_ASSERT( trx.context_free_actions.size() == 0, cfa_inside_generated_tx, "context free actions are not currently allowed in generated transactions" );
 
    bool enforce_actor_whitelist_blacklist = trx_context.enforce_whiteblacklist && control.is_producing_block()
                                              && !control.sender_avoids_whitelist_blacklist_enforcement( receiver );
@@ -355,19 +355,19 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
    if( control.is_builtin_activated( builtin_protocol_feature_t::no_duplicate_deferred_id ) ) {
       auto exts = trx.validate_and_extract_extensions();
       if( exts.size() > 0 ) {
-         ACTC_ASSERT( exts.size() == 1, invalid_transaction_extension,
+         ROXE_ASSERT( exts.size() == 1, invalid_transaction_extension,
                      "only one extension is currently supported for deferred transactions"
          );
          const auto& context = exts.front().get<deferred_transaction_generation_context>();
-         ACTC_ASSERT( context.sender == receiver, ill_formed_deferred_transaction_generation_context,
+         ROXE_ASSERT( context.sender == receiver, ill_formed_deferred_transaction_generation_context,
                      "deferred transaction generaction context contains mismatching sender",
                      ("expected", receiver)("actual", context.sender)
          );
-         ACTC_ASSERT( context.sender_id == sender_id, ill_formed_deferred_transaction_generation_context,
+         ROXE_ASSERT( context.sender_id == sender_id, ill_formed_deferred_transaction_generation_context,
                      "deferred transaction generaction context contains mismatching sender_id",
                      ("expected", sender_id)("actual", context.sender_id)
          );
-         ACTC_ASSERT( context.sender_trx_id == trx_context.id, ill_formed_deferred_transaction_generation_context,
+         ROXE_ASSERT( context.sender_trx_id == trx_context.id, ill_formed_deferred_transaction_generation_context,
                      "deferred transaction generaction context contains mismatching sender_trx_id",
                      ("expected", trx_context.id)("actual", context.sender_trx_id)
          );
@@ -399,10 +399,10 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
    if( !control.skip_auth_check() && !privileged ) { // Do not need to check authorization if replayng irreversible block or if contract is privileged
       if( payer != receiver ) {
          if( ram_restrictions_activated ) {
-            ACTC_ASSERT( receiver == act->account, action_validate_exception,
+            ROXE_ASSERT( receiver == act->account, action_validate_exception,
                         "cannot bill RAM usage of deferred transactions to another account within notify context"
             );
-            ACTC_ASSERT( has_authorization( payer ), action_validate_exception,
+            ROXE_ASSERT( has_authorization( payer ), action_validate_exception,
                         "cannot bill RAM usage of deferred transaction to another account that has not authorized the action: ${payer}",
                         ("payer", payer)
             );
@@ -438,7 +438,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
          control.get_authorization_manager()
                 .check_authorization( trx.actions,
                                       {},
-                                      {{receiver, config::actc_code_name}},
+                                      {{receiver, config::roxe_code_name}},
                                       delay,
                                       std::bind(&transaction_context::checktime, &this->trx_context),
                                       false
@@ -457,18 +457,18 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
          if( disallow_send_to_self_bypass || !is_sending_only_to_self(receiver) ) {
             throw;
          } else if( control.is_producing_block() ) {
-            ACTC_THROW(subjective_block_production_exception, "Unexpected exception occurred validating sent deferred transaction consisting only of actions to self");
+            ROXE_THROW(subjective_block_production_exception, "Unexpected exception occurred validating sent deferred transaction consisting only of actions to self");
          }
       }
    }
 
    uint32_t trx_size = 0;
    if ( auto ptr = db.find<generated_transaction_object,by_sender_id>(boost::make_tuple(receiver, sender_id)) ) {
-      ACTC_ASSERT( replace_existing, deferred_tx_duplicate, "deferred transaction with the same sender_id and payer already exists" );
+      ROXE_ASSERT( replace_existing, deferred_tx_duplicate, "deferred transaction with the same sender_id and payer already exists" );
 
       bool replace_deferred_activated = control.is_builtin_activated(builtin_protocol_feature_t::replace_deferred);
 
-      ACTC_ASSERT( replace_deferred_activated || !control.is_producing_block()
+      ROXE_ASSERT( replace_deferred_activated || !control.is_producing_block()
                      || control.all_subjective_mitigations_disabled(),
                   subjective_block_production_exception,
                   "Replacing a deferred transaction is temporarily disabled." );
@@ -514,7 +514,7 @@ void apply_context::schedule_deferred_transaction( const uint128_t& sender_id, a
       } );
    }
 
-   ACTC_ASSERT( ram_restrictions_activated
+   ROXE_ASSERT( ram_restrictions_activated
                || control.is_ram_billing_in_notify_allowed()
                || (receiver == act->account) || (receiver == payer) || privileged,
                subjective_block_production_exception,
@@ -598,7 +598,7 @@ void apply_context::update_db_usage( const account_name& payer, int64_t delta ) 
       if( !(privileged || payer == account_name(receiver)
                || control.is_builtin_activated( builtin_protocol_feature_t::ram_restrictions ) ) )
       {
-         ACTC_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act->account),
+         ROXE_ASSERT( control.is_ram_billing_in_notify_allowed() || (receiver == act->account),
                      subjective_block_production_exception, "Cannot charge RAM to other accounts during notify." );
          require_authorization( payer );
       }
@@ -623,7 +623,7 @@ int apply_context::get_action( uint32_t type, uint32_t index, char* buffer, size
       act_ptr = &trx.actions[index];
    }
 
-   ACTC_ASSERT(act_ptr, action_not_found_exception, "action is not found" );
+   ROXE_ASSERT(act_ptr, action_not_found_exception, "action is not found" );
 
    auto ps = fc::raw::pack_size( *act_ptr );
    if( ps <= buffer_size ) {
@@ -657,7 +657,7 @@ int apply_context::db_store_i64( uint64_t code, uint64_t scope, uint64_t table, 
    const auto& tab = find_or_create_table( code, scope, table, payer );
    auto tableid = tab.id;
 
-   ACTC_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
+   ROXE_ASSERT( payer != account_name(), invalid_table_payer, "must specify a valid account to pay for new record" );
 
    const auto& obj = db.create<key_value_object>( [&]( auto& o ) {
       o.t_id        = tableid;
@@ -681,7 +681,7 @@ void apply_context::db_update_i64( int iterator, account_name payer, const char*
    const key_value_object& obj = keyval_cache.get( iterator );
 
    const auto& table_obj = keyval_cache.get_table( obj.t_id );
-   ACTC_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
+   ROXE_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
 
 //   require_write_lock( table_obj.scope );
 
@@ -711,7 +711,7 @@ void apply_context::db_remove_i64( int iterator ) {
    const key_value_object& obj = keyval_cache.get( iterator );
 
    const auto& table_obj = keyval_cache.get_table( obj.t_id );
-   ACTC_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
+   ROXE_ASSERT( table_obj.code == receiver, table_access_violation, "db access violation" );
 
 //   require_write_lock( table_obj.scope );
 
@@ -762,7 +762,7 @@ int apply_context::db_previous_i64( int iterator, uint64_t& primary ) {
    if( iterator < -1 ) // is end iterator
    {
       auto tab = keyval_cache.find_table_by_end_iterator(iterator);
-      ACTC_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
+      ROXE_ASSERT( tab, invalid_table_iterator, "not a valid end iterator" );
 
       auto itr = idx.upper_bound(tab->id);
       if( idx.begin() == idx.end() || itr == idx.begin() ) return -1; // Empty table
@@ -883,4 +883,4 @@ action_name apply_context::get_sender() const {
    return 0;
 }
 
-} } /// actc::chain
+} } /// roxe::chain

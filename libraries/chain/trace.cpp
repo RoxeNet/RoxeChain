@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/trace.hpp>
+#include <roxe/chain/trace.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 action_trace::action_trace(
    const transaction_trace& trace, const action& act, account_name receiver, bool context_free,
@@ -38,4 +38,4 @@ action_trace::action_trace(
 ,producer_block_id( trace.producer_block_id )
 {}
 
-} } // actc::chain
+} } // roxe::chain

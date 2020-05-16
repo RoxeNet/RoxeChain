@@ -107,7 +107,7 @@ exchangeAccount.ownerPublicKey=PUB_KEY2
 print("Stand up walletd")
 if walletMgr.launch() is False:
     cmdError("%s" % (WalletdName))
-    errorExit("Failed to stand up actc walletd.")
+    errorExit("Failed to stand up roxe walletd.")
 
 testWalletName="test"
 Print("Creating wallet \"%s\"." % (testWalletName))
@@ -133,31 +133,31 @@ if not walletMgr.importKey(defproduceraAccount, defproduceraWallet):
 
 node0=cluster.getNode(0)
 
-# actc should have the same key as defproducera
-actc = copy.copy(defproduceraAccount)
-actc.name = "actc"
+# roxe should have the same key as defproducera
+roxe = copy.copy(defproduceraAccount)
+roxe.name = "roxe"
 
 Print("Info of each node:")
 for i in range(len(hosts)):
     node = node0
-    cmd="%s %s get info" % (testUtils.Utils.ActcClientPath, node.endpointArgs)
+    cmd="%s %s get info" % (testUtils.Utils.RoxeClientPath, node.endpointArgs)
     trans = node.runCmdReturnJson(cmd)
     Print("host %s: %s" % (hosts[i], trans))
 
 
-wasmFile="actc.system.wasm"
-abiFile="actc.system.abi"
+wasmFile="roxe.system.wasm"
+abiFile="roxe.system.abi"
 Print("\nPush system contract %s %s" % (wasmFile, abiFile))
-trans=node0.publishContract(actc.name, wasmFile, abiFile, waitForTransBlock=True)
+trans=node0.publishContract(roxe.name, wasmFile, abiFile, waitForTransBlock=True)
 if trans is None:
-    Utils.errorExit("Failed to publish actc.system.")
+    Utils.errorExit("Failed to publish roxe.system.")
 else:
     Print("transaction id %s" % (node0.getTransId(trans)))
 
 try:
     maxIndex = module.maxIndex()
     for cmdInd in range(maxIndex):
-        (transIdList, checkacct, expBal, errmsg) = module.execute(cmdInd, node0, testeraAccount, actc)
+        (transIdList, checkacct, expBal, errmsg) = module.execute(cmdInd, node0, testeraAccount, roxe)
 
         if len(transIdList) == 0 and len(checkacct) == 0:
             errorExit("failed to execute command in host %s:%s" % (hosts[0], errmsg))

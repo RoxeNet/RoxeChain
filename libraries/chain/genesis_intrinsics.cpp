@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 
-#include <actc/chain/genesis_intrinsics.hpp>
+#include <roxe/chain/genesis_intrinsics.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 const std::vector<const char*> genesis_intrinsics = {
    "__ashrti3",
@@ -138,10 +138,10 @@ const std::vector<const char*> genesis_intrinsics = {
    "current_time",
    "publication_time",
    "abort",
-   "actc_assert",
-   "actc_assert_message",
-   "actc_assert_code",
-   "actc_exit",
+   "roxe_assert",
+   "roxe_assert_message",
+   "roxe_assert_code",
+   "roxe_exit",
    "read_action_data",
    "action_data_size",
    "current_receiver",
@@ -178,4 +178,4 @@ const std::vector<const char*> genesis_intrinsics = {
    "memset"
 };
 
-} } // namespace actc::chain
+} } // namespace roxe::chain

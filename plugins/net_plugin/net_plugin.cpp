@@ -1,18 +1,18 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/types.hpp>
+#include <roxe/chain/types.hpp>
 
-#include <actc/net_plugin/net_plugin.hpp>
-#include <actc/net_plugin/protocol.hpp>
-#include <actc/chain/controller.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/block.hpp>
-#include <actc/chain/plugin_interface.hpp>
-#include <actc/chain/thread_utils.hpp>
-#include <actc/producer_plugin/producer_plugin.hpp>
-#include <actc/chain/contract_types.hpp>
+#include <roxe/net_plugin/net_plugin.hpp>
+#include <roxe/net_plugin/protocol.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/block.hpp>
+#include <roxe/chain/plugin_interface.hpp>
+#include <roxe/chain/thread_utils.hpp>
+#include <roxe/producer_plugin/producer_plugin.hpp>
+#include <roxe/chain/contract_types.hpp>
 
 #include <fc/network/message_buffer.hpp>
 #include <fc/network/ip.hpp>
@@ -28,9 +28,9 @@
 #include <boost/asio/ip/host_name.hpp>
 #include <boost/asio/steady_timer.hpp>
 
-using namespace actc::chain::plugin_interface::compat;
+using namespace roxe::chain::plugin_interface::compat;
 
-namespace actc {
+namespace roxe {
    static appbase::abstract_plugin& _net_plugin = app().register_plugin<net_plugin>();
 
    using std::vector;
@@ -42,8 +42,8 @@ namespace actc {
 
    using fc::time_point;
    using fc::time_point_sec;
-   using actc::chain::transaction_id_type;
-   using actc::chain::sha256_less;
+   using roxe::chain::transaction_id_type;
+   using roxe::chain::sha256_less;
 
    class connection;
 
@@ -147,7 +147,7 @@ namespace actc {
       channels::transaction_ack::channel_type::handle  incoming_transaction_ack_subscription;
 
       uint16_t                                  thread_pool_size = 1;
-      optional<actc::chain::named_thread_pool> thread_pool;
+      optional<roxe::chain::named_thread_pool> thread_pool;
 
       void connect( const connection_ptr& c );
       void connect( const connection_ptr& c, const std::shared_ptr<tcp::resolver>& resolver, tcp::resolver::results_type endpoints );
@@ -352,10 +352,10 @@ namespace actc {
    };
 
    typedef multi_index_container<
-      actc::peer_block_state,
+      roxe::peer_block_state,
       indexed_by<
-         ordered_unique< tag<by_id>, member<actc::peer_block_state, block_id_type, &actc::peer_block_state::id >, sha256_less >,
-         ordered_unique< tag<by_block_num>, member<actc::peer_block_state, uint32_t, &actc::peer_block_state::block_num > >
+         ordered_unique< tag<by_id>, member<roxe::peer_block_state, block_id_type, &roxe::peer_block_state::id >, sha256_less >,
+         ordered_unique< tag<by_block_num>, member<roxe::peer_block_state, uint32_t, &roxe::peer_block_state::block_num > >
          >
       > peer_block_state_index;
 
@@ -432,7 +432,7 @@ namespace actc {
             fill_out_buffer( bufs, _sync_write_queue );
          } else { // postpone real_time write_queue if sync queue is not empty
             fill_out_buffer( bufs, _write_queue );
-            ACTC_ASSERT( _write_queue_size == 0, plugin_exception, "write queue size expected to be zero" );
+            ROXE_ASSERT( _write_queue_size == 0, plugin_exception, "write queue size expected to be zero" );
          }
       }
 
@@ -626,16 +626,16 @@ namespace actc {
       msg_handler( net_plugin_impl &imp, const connection_ptr& conn) : impl(imp), c(conn) {}
 
       void operator()( const signed_block& msg ) const {
-         ACTC_ASSERT( false, plugin_config_exception, "operator()(signed_block&&) should be called" );
+         ROXE_ASSERT( false, plugin_config_exception, "operator()(signed_block&&) should be called" );
       }
       void operator()( signed_block& msg ) const {
-         ACTC_ASSERT( false, plugin_config_exception, "operator()(signed_block&&) should be called" );
+         ROXE_ASSERT( false, plugin_config_exception, "operator()(signed_block&&) should be called" );
       }
       void operator()( const packed_transaction& msg ) const {
-         ACTC_ASSERT( false, plugin_config_exception, "operator()(packed_transaction&&) should be called" );
+         ROXE_ASSERT( false, plugin_config_exception, "operator()(packed_transaction&&) should be called" );
       }
       void operator()( packed_transaction& msg ) const {
-         ACTC_ASSERT( false, plugin_config_exception, "operator()(packed_transaction&&) should be called" );
+         ROXE_ASSERT( false, plugin_config_exception, "operator()(packed_transaction&&) should be called" );
       }
 
       void operator()( signed_block&& msg ) const {
@@ -1238,7 +1238,7 @@ namespace actc {
       ,state(in_sync)
    {
       chain_plug = app().find_plugin<chain_plugin>();
-      ACTC_ASSERT( chain_plug, chain::missing_chain_plugin_exception, ""  );
+      ROXE_ASSERT( chain_plug, chain::missing_chain_plugin_exception, ""  );
    }
 
    constexpr auto sync_manager::stage_str(stages s) {
@@ -2088,7 +2088,7 @@ namespace actc {
                         fc_elog( logger,"async_read_some callback: bytes_transfered = ${bt}, buffer.bytes_to_write = ${btw}",
                                  ("bt",bytes_transferred)("btw",conn->pending_message_buffer.bytes_to_write()) );
                      }
-                     ACTC_ASSERT(bytes_transferred <= conn->pending_message_buffer.bytes_to_write(), plugin_exception, "");
+                     ROXE_ASSERT(bytes_transferred <= conn->pending_message_buffer.bytes_to_write(), plugin_exception, "");
                      conn->pending_message_buffer.advance_write_ptr(bytes_transferred);
                      while (conn->pending_message_buffer.bytes_to_read() > 0) {
                         uint32_t bytes_in_buffer = conn->pending_message_buffer.bytes_to_read();
@@ -2544,7 +2544,7 @@ namespace actc {
       fc_dlog(logger, "got a packed transaction, cancel wait");
       peer_ilog(c, "received packed_transaction");
       controller& cc = my_impl->chain_plug->chain();
-      if( cc.get_read_mode() == actc::db_read_mode::READ_ONLY ) {
+      if( cc.get_read_mode() == roxe::db_read_mode::READ_ONLY ) {
          fc_dlog(logger, "got a txn in read-only mode - dropping");
          return;
       }
@@ -2945,7 +2945,7 @@ namespace actc {
          ( "p2p-server-address", bpo::value<string>(), "An externally accessible host:port for identifying this node. Defaults to p2p-listen-endpoint.")
          ( "p2p-peer-address", bpo::value< vector<string> >()->composing(), "The public endpoint of a peer node to connect to. Use multiple p2p-peer-address options as needed to compose a network.")
          ( "p2p-max-nodes-per-host", bpo::value<int>()->default_value(def_max_nodes_per_host), "Maximum number of client nodes from any single IP address")
-         ( "agent-name", bpo::value<string>()->default_value("\"ACTC Test Agent\""), "The name supplied to identify this node amongst the peers.")
+         ( "agent-name", bpo::value<string>()->default_value("\"ROXE Test Agent\""), "The name supplied to identify this node amongst the peers.")
          ( "allowed-connection", bpo::value<vector<string>>()->multitoken()->default_value({"any"}, "any"), "Can be 'any' or 'producers' or 'specified' or 'none'. If 'specified', peer-key must be specified at least once. If only 'producers', peer-key is not required. 'producers' and 'specified' may be combined.")
          ( "peer-key", bpo::value<vector<string>>()->composing()->multitoken(), "Optional public key of peer allowed to connect.  May be used multiple times.")
          ( "peer-private-key", boost::program_options::value<vector<string>>()->composing()->multitoken(),
@@ -3008,7 +3008,7 @@ namespace actc {
          }
 
          my->thread_pool_size = options.at( "net-threads" ).as<uint16_t>();
-         ACTC_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
+         ROXE_ASSERT( my->thread_pool_size > 0, chain::plugin_config_exception,
                      "net-threads ${num} must be greater than 0", ("num", my->thread_pool_size) );
 
          if( options.count( "p2p-peer-address" )) {
@@ -3033,7 +3033,7 @@ namespace actc {
          }
 
          if( my->allowed_connections & net_plugin_impl::Specified )
-            ACTC_ASSERT( options.count( "peer-key" ),
+            ROXE_ASSERT( options.count( "peer-key" ),
                         plugin_config_exception,
                        "At least one peer-key must accompany 'allowed-connection=specified'" );
 
@@ -3054,7 +3054,7 @@ namespace actc {
          }
 
          my->chain_plug = app().find_plugin<chain_plugin>();
-         ACTC_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
+         ROXE_ASSERT( my->chain_plug, chain::missing_chain_plugin_exception, ""  );
          my->chain_id = my->chain_plug->get_chain_id();
          fc::rand_pseudo_bytes( my->node_id.data(), my->node_id.data_size());
          fc_ilog( logger, "my node_id is ${id}", ("id", my->node_id ));

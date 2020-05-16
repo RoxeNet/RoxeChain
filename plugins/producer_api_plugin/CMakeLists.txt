@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/actc/producer_api_plugin/*.hpp")
+file(GLOB HEADERS "include/roxe/producer_api_plugin/*.hpp")
 add_library( producer_api_plugin
              producer_api_plugin.cpp
              ${HEADERS} )

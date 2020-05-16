@@ -12,17 +12,17 @@ from testUtils import Utils
 Wallet=namedtuple("Wallet", "name password host port")
 # pylint: disable=too-many-instance-attributes
 class WalletMgr(object):
-    __walletLogOutFile="test_kactcd_out.log"
-    __walletLogErrFile="test_kactcd_err.log"
+    __walletLogOutFile="test_kroxed_out.log"
+    __walletLogErrFile="test_kroxed_err.log"
     __walletDataDir="test_wallet_0"
     __MaxPort=9999
 
     # pylint: disable=too-many-arguments
-    # walletd [True|False] True=Launch wallet(kactcd) process; False=Manage launch process externally.
-    def __init__(self, walletd, nodactcPort=8888, nodactcHost="localhost", port=9899, host="localhost"):
+    # walletd [True|False] True=Launch wallet(kroxed) process; False=Manage launch process externally.
+    def __init__(self, walletd, nodroxePort=8888, nodroxeHost="localhost", port=9899, host="localhost"):
         self.walletd=walletd
-        self.nodactcPort=nodactcPort
-        self.nodactcHost=nodactcHost
+        self.nodroxePort=nodroxePort
+        self.nodroxeHost=nodroxeHost
         self.port=port
         self.host=host
         self.wallets={}
@@ -35,7 +35,7 @@ class WalletMgr(object):
         return " --wallet-url http://%s:%d" % (self.host, self.port)
 
     def getArgs(self):
-        return " --url http://%s:%d%s %s" % (self.nodactcHost, self.nodactcPort, self.getWalletEndpointArgs(), Utils.MiscActcClientArgs)
+        return " --url http://%s:%d%s %s" % (self.nodroxeHost, self.nodroxePort, self.getWalletEndpointArgs(), Utils.MiscRoxeClientArgs)
 
     def isLaunched(self):
         return self.__walletPid is not None
@@ -50,13 +50,13 @@ class WalletMgr(object):
                 port-=WalletMgr.__MaxPort
             if Utils.arePortsAvailable(port):
                 return port
-            if Utils.Debug: Utils.Print("Port %d not available for %s" % (port, Utils.ActcWalletPath))
+            if Utils.Debug: Utils.Print("Port %d not available for %s" % (port, Utils.RoxeWalletPath))
 
-        Utils.errorExit("Failed to find free port to use for %s" % (Utils.ActcWalletPath))
+        Utils.errorExit("Failed to find free port to use for %s" % (Utils.RoxeWalletPath))
 
     def launch(self):
         if not self.walletd:
-            Utils.Print("ERROR: Wallet Manager wasn't configured to launch kactcd")
+            Utils.Print("ERROR: Wallet Manager wasn't configured to launch kroxed")
             return False
 
         if self.isLaunched():
@@ -65,7 +65,7 @@ class WalletMgr(object):
         if self.isLocal():
             self.port=self.findAvailablePort()
 
-        pgrepCmd=Utils.pgrepCmd(Utils.ActcWalletName)
+        pgrepCmd=Utils.pgrepCmd(Utils.RoxeWalletName)
         if Utils.Debug:
             portTaken=False
             if self.isLocal():
@@ -78,22 +78,22 @@ class WalletMgr(object):
                     statusMsg+=" %s - {%s}." % (pgrepCmd, psOut)
                 if portTaken:
                     statusMsg+=" port %d is NOT available." % (self.port)
-                Utils.Print("Launching %s, note similar processes running. %s" % (Utils.ActcWalletName, statusMsg))
+                Utils.Print("Launching %s, note similar processes running. %s" % (Utils.RoxeWalletName, statusMsg))
 
         cmd="%s --data-dir %s --config-dir %s --http-server-address=%s:%d --verbose-http-errors" % (
-            Utils.ActcWalletPath, WalletMgr.__walletDataDir, WalletMgr.__walletDataDir, self.host, self.port)
+            Utils.RoxeWalletPath, WalletMgr.__walletDataDir, WalletMgr.__walletDataDir, self.host, self.port)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         with open(WalletMgr.__walletLogOutFile, 'w') as sout, open(WalletMgr.__walletLogErrFile, 'w') as serr:
             popen=subprocess.Popen(cmd.split(), stdout=sout, stderr=serr)
             self.__walletPid=popen.pid
 
-        # Give kactcd time to warm up
+        # Give kroxed time to warm up
         time.sleep(2)
 
         try:
-            if Utils.Debug: Utils.Print("Checking if %s launched. %s" % (Utils.ActcWalletName, pgrepCmd))
+            if Utils.Debug: Utils.Print("Checking if %s launched. %s" % (Utils.RoxeWalletName, pgrepCmd))
             psOut=Utils.checkOutput(pgrepCmd.split())
-            if Utils.Debug: Utils.Print("Launched %s. {%s}" % (Utils.ActcWalletName, psOut))
+            if Utils.Debug: Utils.Print("Launched %s. {%s}" % (Utils.RoxeWalletName, psOut))
         except subprocess.CalledProcessError as ex:
             Utils.errorExit("Failed to launch the wallet manager")
 
@@ -106,7 +106,7 @@ class WalletMgr(object):
             return wallet
         p = re.compile(r'\n\"(\w+)\"\n', re.MULTILINE)
         cmdDesc="wallet create"
-        cmd="%s %s %s --name %s --to-console" % (Utils.ActcClientPath, self.getArgs(), cmdDesc, name)
+        cmd="%s %s %s --name %s --to-console" % (Utils.RoxeClientPath, self.getArgs(), cmdDesc, name)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         retStr=None
         maxRetryCount=4
@@ -119,7 +119,7 @@ class WalletMgr(object):
                 retryCount+=1
                 if retryCount<maxRetryCount:
                     delay=10
-                    pgrepCmd=Utils.pgrepCmd(Utils.ActcWalletName)
+                    pgrepCmd=Utils.pgrepCmd(Utils.RoxeWalletName)
                     psOut=Utils.checkOutput(pgrepCmd.split())
                     portStatus="N/A"
                     if self.isLocal():
@@ -165,7 +165,7 @@ class WalletMgr(object):
     def importKey(self, account, wallet, ignoreDupKeyWarning=False):
         warningMsg="Key already in wallet"
         cmd="%s %s wallet import --name %s --private-key %s" % (
-            Utils.ActcClientPath, self.getArgs(), wallet.name, account.ownerPrivateKey)
+            Utils.RoxeClientPath, self.getArgs(), wallet.name, account.ownerPrivateKey)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         try:
             Utils.checkOutput(cmd.split())
@@ -182,7 +182,7 @@ class WalletMgr(object):
             Utils.Print("WARNING: Active private key is not defined for account \"%s\"" % (account.name))
         else:
             cmd="%s %s wallet import --name %s  --private-key %s" % (
-                Utils.ActcClientPath, self.getArgs(), wallet.name, account.activePrivateKey)
+                Utils.RoxeClientPath, self.getArgs(), wallet.name, account.activePrivateKey)
             if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
             try:
                 Utils.checkOutput(cmd.split())
@@ -199,7 +199,7 @@ class WalletMgr(object):
         return True
 
     def lockWallet(self, wallet):
-        cmd="%s %s wallet lock --name %s" % (Utils.ActcClientPath, self.getArgs(), wallet.name)
+        cmd="%s %s wallet lock --name %s" % (Utils.RoxeClientPath, self.getArgs(), wallet.name)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
             Utils.Print("ERROR: Failed to lock wallet %s." % (wallet.name))
@@ -208,7 +208,7 @@ class WalletMgr(object):
         return True
 
     def unlockWallet(self, wallet):
-        cmd="%s %s wallet unlock --name %s" % (Utils.ActcClientPath, self.getArgs(), wallet.name)
+        cmd="%s %s wallet unlock --name %s" % (Utils.RoxeClientPath, self.getArgs(), wallet.name)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         popen=subprocess.Popen(cmd.split(), stdout=Utils.FNull, stdin=subprocess.PIPE)
         _, errs = popen.communicate(input=wallet.password.encode("utf-8"))
@@ -219,7 +219,7 @@ class WalletMgr(object):
         return True
 
     def lockAllWallets(self):
-        cmd="%s %s wallet lock_all" % (Utils.ActcClientPath, self.getArgs())
+        cmd="%s %s wallet lock_all" % (Utils.RoxeClientPath, self.getArgs())
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         if 0 != subprocess.call(cmd.split(), stdout=Utils.FNull):
             Utils.Print("ERROR: Failed to lock all wallets.")
@@ -231,7 +231,7 @@ class WalletMgr(object):
         wallets=[]
 
         p = re.compile(r'\s+\"(\w+)\s\*\",?\n', re.MULTILINE)
-        cmd="%s %s wallet list" % (Utils.ActcClientPath, self.getArgs())
+        cmd="%s %s wallet list" % (Utils.RoxeClientPath, self.getArgs())
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         retStr=None
         try:
@@ -253,7 +253,7 @@ class WalletMgr(object):
         keys=[]
 
         p = re.compile(r'\n\s+\"(\w+)\"\n', re.MULTILINE)
-        cmd="%s %s wallet private_keys --name %s --password %s " % (Utils.ActcClientPath, self.getArgs(), wallet.name, wallet.password)
+        cmd="%s %s wallet private_keys --name %s --password %s " % (Utils.RoxeClientPath, self.getArgs(), wallet.name, wallet.password)
         if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
         retStr=None
         try:
@@ -284,13 +284,13 @@ class WalletMgr(object):
                 shutil.copyfileobj(f, sys.stdout)
 
     def killall(self, allInstances=False):
-        """Kill kactc instances. allInstances will kill all kactc instances running on the system."""
+        """Kill kroxe instances. allInstances will kill all kroxe instances running on the system."""
         if self.__walletPid:
             Utils.Print("Killing wallet manager process %d" % (self.__walletPid))
             os.kill(self.__walletPid, signal.SIGKILL)
 
         if allInstances:
-            cmd="pkill -9 %s" % (Utils.ActcWalletName)
+            cmd="pkill -9 %s" % (Utils.RoxeWalletName)
             if Utils.Debug: Utils.Print("cmd: %s" % (cmd))
             subprocess.call(cmd.split())
 

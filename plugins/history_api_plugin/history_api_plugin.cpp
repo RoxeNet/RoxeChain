@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/history_api_plugin/history_api_plugin.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/history_api_plugin/history_api_plugin.hpp>
+#include <roxe/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace actc {
+namespace roxe {
 
-using namespace actc;
+using namespace roxe;
 
 static appbase::abstract_plugin& _history_api_plugin = app().register_plugin<history_api_plugin>();
 

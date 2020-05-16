@@ -1,0 +1,31 @@
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/local/Cellar/cmake/3.15.5/bin/cmake -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -G "CodeBlocks - Unix Makefiles" /Users/shadow/git/clang
+-- The C compiler identification is unknown
+-- The CXX compiler identification is GNU 9.2.0
+-- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9
+-- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -- broken
+CMake Error at /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.12/Modules/CMakeTestCCompiler.cmake:52 (message):
+  The C compiler
+
+    "/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9"
+
+  is not able to compile a simple test program.
+
+  It fails with the following output:
+
+    Change Dir: /Users/shadow/git/clang/cmake-build-debug/CMakeFiles/CMakeTmp
+    
+    Run Build Command:"/usr/local/Cellar/cmake/3.15.5/bin/cmake" "cmTC_48fdd/fast"
+    CMake Error: The source directory "/Users/shadow/git/clang/cmake-build-debug/CMakeFiles/CMakeTmp/cmTC_48fdd/fast" does not exist.
+    Specify --help for usage, or press the help button on the CMake GUI.
+    
+
+  
+
+  CMake will not be able to correctly generate this project.
+Call Stack (most recent call first):
+  CMakeLists.txt:6 (project)
+
+
+-- Configuring incomplete, errors occurred!
+See also "/Users/shadow/git/clang/cmake-build-debug/CMakeFiles/CMakeOutput.log".
+See also "/Users/shadow/git/clang/cmake-build-debug/CMakeFiles/CMakeError.log".

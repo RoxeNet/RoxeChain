@@ -1,0 +1,1 @@
+add_llvm_loadable_module(roxe_plugin roxe_autogen.cpp PLUGIN_TOOL clang)

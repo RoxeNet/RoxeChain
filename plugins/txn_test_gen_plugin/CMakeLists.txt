@@ -1,9 +1,9 @@
-file(GLOB HEADERS "include/actc/txn_test_gen_plugin/*.hpp")
+file(GLOB HEADERS "include/roxe/txn_test_gen_plugin/*.hpp")
 add_library( txn_test_gen_plugin
              txn_test_gen_plugin.cpp
              ${HEADERS} )
              
-target_link_libraries( txn_test_gen_plugin appbase fc http_plugin chain_plugin actc_testing )
+target_link_libraries( txn_test_gen_plugin appbase fc http_plugin chain_plugin roxe_testing )
 target_include_directories( txn_test_gen_plugin PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
                             txn_test_gen_plugin PUBLIC ${CMAKE_SOURCE_DIR}/libraries/testing/include
                             txn_test_gen_plugin PUBLIC ${CMAKE_BINARY_DIR}/unittests/include )

@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE
  */
 #include <algorithm>
 #include <vector>
@@ -15,20 +15,17 @@
 #include <fc/log/logger.hpp>
 #include <fc/scoped_exit.hpp>
 
-#include <actc/chain/contract_types.hpp>
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/chain/actc_contract.hpp>
-#include <actc/abi_generator/abi_generator.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/contract_types.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/chain/roxe_contract.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <boost/test/framework.hpp>
-
-#include <config.hpp>
 
 #include <deep_nested.abi.hpp>
 #include <large_nested.abi.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace chain;
 
 BOOST_AUTO_TEST_SUITE(abi_tests)
@@ -70,7 +67,7 @@ void verify_round_trip_conversion( const abi_serializer& abis, const type_name& 
 auto get_resolver(const abi_def& abi = abi_def())
 {
    return [&abi](const account_name &name) -> optional<abi_serializer> {
-      return abi_serializer(actc_contract_abi(abi), max_serialization_time);
+      return abi_serializer(roxe_contract_abi(abi), max_serialization_time);
    };
 }
 
@@ -100,7 +97,7 @@ fc::variant verify_type_round_trip_conversion( const abi_serializer& abis, const
 
     const char* my_abi = R"=====(
 {
-   "version": "actc::abi/1.0",
+   "version": "roxe::abi/1.0",
    "types": [{
       "new_type_name": "type_name",
       "type": "string"
@@ -495,7 +492,7 @@ BOOST_AUTO_TEST_CASE(uint_types)
 
    const char* currency_abi = R"=====(
    {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [],
        "structs": [{
            "name": "transfer",
@@ -522,7 +519,7 @@ BOOST_AUTO_TEST_CASE(uint_types)
 
    auto abi = fc::json::from_string(currency_abi).as<abi_def>();
 
-   abi_serializer abis(actc_contract_abi(abi), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi), max_serialization_time);
 
    const char* test_data = R"=====(
    {
@@ -539,1312 +536,20 @@ BOOST_AUTO_TEST_CASE(uint_types)
 
 } FC_LOG_AND_RETHROW() }
 
-using namespace actc::unittests::config;
-
-struct abi_gen_helper {
-
-  abi_gen_helper() {}
-
-  static bool is_abi_generation_exception(const actc::abi_generation_exception& e) { return true; };
-
-  bool generate_abi(const char* source, const char* abi, bool opt_sfs=false) {
-
-    std::string include_param = std::string("-I") + actclib_path;
-    std::string core_sym_include_param = std::string("-I") + core_symbol_path;
-    std::string pfr_include_param = std::string("-I") + pfr_include_path;
-    std::string boost_include_param = std::string("-I") + boost_include_path;
-    std::string stdcpp_include_param = std::string("-I") + actclib_path + "/libc++/upstream/include";
-    std::string stdc_include_param = std::string("-I") + actclib_path +  "/musl/upstream/include";
-
-    abi_def output;
-    output.version = "actc::abi/1.0";
-
-    std::string contract;
-    std::vector<std::string> actions;
-
-    auto extra_args = std::vector<std::string>{"-fparse-all-comments", "--std=c++14", "--target=wasm32", "-ffreestanding", "-nostdlib",
-      "-nostdlibinc", "-fno-threadsafe-statics", "-fno-rtti",  "-fno-exceptions",
-      include_param, boost_include_param, stdcpp_include_param,
-      stdc_include_param, pfr_include_param, core_sym_include_param };
-
-    bool res = runToolOnCodeWithArgs(
-      new find_actc_abi_macro_action(contract, actions, ""),
-      source,
-      extra_args
-    );
-    FC_ASSERT(res == true);
-
-    res = runToolOnCodeWithArgs(
-      new generate_abi_action(false, opt_sfs, "", output, contract, actions),
-      source,
-      extra_args
-    );
-    FC_ASSERT(res == true);
-
-    abi_serializer abis(output, max_serialization_time);
-
-    auto abi1 = fc::json::from_string(abi).as<abi_def>();
-
-    auto e = fc::to_hex(fc::raw::pack(abi1)) == fc::to_hex(fc::raw::pack(output));
-
-    if(!e) {
-      BOOST_TEST_MESSAGE("Generate ABI:\n" <<
-                        "expected: \n" << fc::json::to_pretty_string(abi1) << "\n" <<
-                        "generated: \n" << fc::json::to_pretty_string(output));
-    }
-
-    return e;
-  }
-
-};
-
-BOOST_FIXTURE_TEST_CASE(abigen_unknown_type, abi_gen_helper)
-{ try {
-
-   const char* unknown_type = R"=====(
-   #include <actclib/types.h>
-   //@abi action
-   struct transfer {
-      uint64_t param1;
-      char*    param2;
-   };
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(unknown_type, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_all_types, abi_gen_helper)
-{  try {
-
-   const char* all_types = R"=====(
-   #pragma GCC diagnostic ignored "-Wpointer-bool-conversion"
-   #include <actclib/types.hpp>
-   #include <actclib/varint.hpp>
-   #include <actclib/asset.hpp>
-   #include <actclib/time.hpp>
-
-   using namespace actc;
-
-   typedef signed_int varint32;
-   typedef unsigned_int varuint32;
-   typedef symbol_type symbol;
-
-   //@abi action
-   struct test_struct {
-      bool                    field1;
-      int8_t                  field2;
-      uint8_t                 field3;
-      int16_t                 field4;
-      uint16_t                field5;
-      int32_t                 field6;
-      uint32_t                field7;
-      int64_t                 field8;
-      uint64_t                field9;
-      int128_t                field10;
-      uint128_t               field11;
-      varint32                field12;
-      varuint32               field13;
-      time_point              field14;
-      time_point_sec          field15;
-      block_timestamp_type    field16;
-      name                    field17;
-      bytes                   field18;
-      std::string             field19;
-      checksum160             field20;
-      checksum256             field21;
-      checksum512             field22;
-      public_key              field23;
-      signature               field24;
-      symbol                  field25;
-      asset                   field26;
-      extended_asset          field27;
-   };
-   )=====";
-
-   const char* all_types_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-      "name": "test_struct",
-      "base": "",
-      "fields": [{
-          "name": "field1",
-          "type": "bool"
-        },{
-          "name": "field2",
-          "type": "int8"
-        },{
-          "name": "field3",
-          "type": "uint8"
-        },{
-          "name": "field4",
-          "type": "int16"
-        },{
-          "name": "field5",
-          "type": "uint16"
-        },{
-          "name": "field6",
-          "type": "int32"
-        },{
-          "name": "field7",
-          "type": "uint32"
-        },{
-          "name": "field8",
-          "type": "int64"
-        },{
-          "name": "field9",
-          "type": "uint64"
-        },{
-          "name": "field10",
-          "type": "int128"
-        },{
-          "name": "field11",
-          "type": "uint128"
-        },{
-          "name": "field12",
-          "type": "varint32"
-        },{
-          "name": "field13",
-          "type": "varuint32"
-        },{
-          "name": "field14",
-          "type": "time_point"
-        },{
-          "name": "field15",
-          "type": "time_point_sec"
-        },{
-          "name": "field16",
-          "type": "block_timestamp_type"
-        },{
-          "name": "field17",
-          "type": "name"
-        },{
-          "name": "field18",
-          "type": "bytes"
-        },{
-          "name": "field19",
-          "type": "string"
-        },{
-          "name": "field20",
-          "type": "checksum160"
-        },{
-          "name": "field21",
-          "type": "checksum256"
-        },{
-          "name": "field22",
-          "type": "checksum512"
-        },{
-          "name": "field23",
-          "type": "public_key"
-        },{
-          "name": "field24",
-          "type": "signature"
-        },{
-          "name": "field25",
-          "type": "symbol"
-        },{
-          "name": "field26",
-          "type": "asset"
-        },{
-          "name": "field27",
-          "type": "extended_asset"
-        }
-      ]
-     }],
-     "actions": [{
-         "name": "teststruct",
-         "type": "test_struct",
-         "ricardian_contract": ""
-       }
-     ],
-     "tables": [],
-     "ricardian_clauses": []
-   }
-   )=====";
-   BOOST_TEST( generate_abi(all_types, all_types_abi) == true);
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_double_base, abi_gen_helper)
-{ try {
-
-   const char* double_base = R"=====(
-   #include <actclib/types.h>
-
-   struct A {
-      uint64_t param3;
-   };
-   struct B {
-      uint64_t param2;
-   };
-
-   //@abi action
-   struct C : A,B {
-      uint64_t param1;
-   };
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(double_base, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-
-BOOST_FIXTURE_TEST_CASE(abigen_double_action, abi_gen_helper)
-{ try {
-
-   const char* double_action = R"=====(
-   #include <actclib/types.h>
-
-   struct A {
-      uint64_t param3;
-   };
-   struct B : A {
-      uint64_t param2;
-   };
-
-   //@abi action action1 action2
-   struct C : B {
-      uint64_t param1;
-   };
-   )=====";
-
-   const char* double_action_abi = R"=====(
-   {
-       "version": "actc::abi/1.0",
-       "types": [],
-       "structs": [{
-          "name" : "A",
-          "base" : "",
-          "fields" : [{
-            "name" : "param3",
-            "type" : "uint64"
-          }]
-       },{
-          "name" : "B",
-          "base" : "A",
-          "fields" : [{
-            "name" : "param2",
-            "type" : "uint64"
-          }]
-       },{
-          "name" : "C",
-          "base" : "B",
-          "fields" : [{
-            "name" : "param1",
-            "type" : "uint64"
-          }]
-       }],
-       "actions": [{
-          "name" : "action1",
-          "type" : "C",
-          "ricardian_contract" : ""
-       },{
-          "name" : "action2",
-          "type" : "C",
-          "ricardian_contract" : ""
-       }],
-       "tables": [],
-       "ricardian_clauses":[]
-   }
-   )=====";
-
-
-   BOOST_TEST( generate_abi(double_action, double_action_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-
-BOOST_FIXTURE_TEST_CASE(abigen_all_indexes, abi_gen_helper)
-{ try {
-
-   const char* all_indexes = R"=====(
-   #include <actclib/types.hpp>
-   #include <string>
-
-   using namespace actc;
-
-   //@abi table
-   struct table1 {
-      uint64_t field1;
-   };
-
-   )=====";
-
-   const char* all_indexes_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-         "name": "table1",
-         "base": "",
-         "fields": [{
-             "name": "field1",
-             "type": "uint64"
-           }
-         ]
-       }
-     ],
-     "actions": [],
-     "tables": [{
-         "name": "table1",
-         "index_type": "i64",
-         "key_names": [
-           "field1"
-         ],
-         "key_types": [
-           "uint64"
-         ],
-         "type": "table1"
-       }
-     ],
-     "ricardian_clauses": [],
-     "error_messages": [],
-     "abi_extensions": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(all_indexes, all_indexes_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_unable_to_determine_index, abi_gen_helper)
-{ try {
-
-   const char* unable_to_determine_index = R"=====(
-   #include <actclib/types.h>
-
-   //@abi table
-   struct table1 {
-      uint32_t field1;
-      uint64_t field2;
-   };
-
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(unable_to_determine_index, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_long_field_name, abi_gen_helper)
-{ try {
-
-   //TODO: full action / full table
-  // typedef fixed_string16 FieldName;
-   const char* long_field_name = R"=====(
-   #include <actclib/types.h>
-
-   //@abi table
-   struct table1 {
-      uint64_t thisisaverylongfieldname;
-   };
-
-   )=====";
-
-   BOOST_TEST( generate_abi(long_field_name, "{}") == false );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_long_type_name, abi_gen_helper)
-{ try {
-
-   const char* long_type_name = R"=====(
-   #include <actclib/types.h>
-
-   struct this_is_a_very_very_very_very_long_type_name {
-      uint64_t field;
-   };
-
-   //@abi table
-   struct table1 {
-      this_is_a_very_very_very_very_long_type_name field1;
-   };
-
-   )=====";
-
-
-   BOOST_TEST( generate_abi(long_type_name, "{}") == false );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_same_type_different_namespace, abi_gen_helper)
-{ try {
-
-   const char* same_type_different_namespace = R"=====(
-   #include <actclib/types.h>
-
-   namespace A {
-     //@abi table
-     struct table1 {
-        uint64_t field1;
-     };
-   }
-
-   namespace B {
-     //@abi table
-     struct table1 {
-        uint64_t field2;
-     };
-   }
-
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(same_type_different_namespace, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_bad_index_type, abi_gen_helper)
-{ try {
-
-   const char* bad_index_type = R"=====(
-   #include <actclib/types.h>
-
-   //@abi table table1 i128i128
-   struct table1 {
-      uint32_t key;
-      uint64_t field1;
-      uint64_t field2;
-   };
-
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(bad_index_type, "{}"), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_full_table_decl, abi_gen_helper)
-{ try {
-
-   const char* full_table_decl = R"=====(
-   #include <actclib/types.hpp>
-
-   //@abi table table1 i64
-   class table1 {
-   public:
-      uint64_t  id;
-      actc::name name;
-      uint32_t  age;
-   };
-
-   )=====";
-
-   const char* full_table_decl_abi = R"=====(
-   {
-       "version": "actc::abi/1.0",
-       "types": [],
-       "structs": [{
-          "name" : "table1",
-          "base" : "",
-          "fields" : [{
-            "name" : "id",
-            "type" : "uint64"
-          },{
-            "name" : "name",
-            "type" : "name"
-          },{
-            "name" : "age",
-            "type" : "uint32"
-          }]
-       }],
-       "actions": [],
-       "tables": [
-        {
-          "name": "table1",
-          "type": "table1",
-          "index_type": "i64",
-          "key_names": [
-            "id"
-          ],
-          "key_types": [
-            "uint64"
-          ]
-        }],
-       "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(full_table_decl, full_table_decl_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_union_table, abi_gen_helper)
-{ try {
-
-   const char* union_table = R"=====(
-   #include <actclib/types.h>
-
-   //@abi table
-   union table1 {
-      uint64_t field1;
-      uint32_t field2;
-   };
-
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(union_table, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_same_action_different_type, abi_gen_helper)
-{ try {
-
-   const char* same_action_different_type = R"=====(
-   #include <actclib/types.h>
-
-   //@abi action action1
-   struct table1 {
-      uint64_t field1;
-   };
-
-   //@abi action action1
-   struct table2 {
-      uint64_t field1;
-   };
-
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(same_action_different_type, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_template_base, abi_gen_helper)
-{ try {
-
-   const char* template_base = R"=====(
-   #include <actclib/types.h>
-
-   template<typename T>
-   class base {
-      T field;
-   };
-
-   typedef base<uint32_t> base32;
-
-   //@abi table table1 i64
-   class table1 : base32 {
-   public:
-      uint64_t id;
-   };
-
-   )=====";
-
-   const char* template_base_abi = R"=====(
-   {
-       "version": "actc::abi/1.0",
-       "types": [],
-       "structs": [{
-          "name" : "base32",
-          "base" : "",
-          "fields" : [{
-            "name" : "field",
-            "type" : "uint32"
-          }]
-       },{
-          "name" : "table1",
-          "base" : "base32",
-          "fields" : [{
-            "name" : "id",
-            "type" : "uint64"
-          }]
-       }],
-       "actions": [],
-       "tables": [
-        {
-          "name": "table1",
-          "type": "table1",
-          "index_type": "i64",
-          "key_names": [
-            "id"
-          ],
-          "key_types": [
-            "uint64"
-          ]
-        }],
-       "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(template_base, template_base_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_action_and_table, abi_gen_helper)
-{ try {
-
-   const char* action_and_table = R"=====(
-   #include <actclib/types.h>
-
-  /* @abi table
-   * @abi action
-   */
-   class table_action {
-   public:
-      uint64_t id;
-   };
-
-   )=====";
-
-   const char* action_and_table_abi = R"=====(
-   {
-       "version": "actc::abi/1.0",
-       "types": [],
-       "structs": [{
-          "name" : "table_action",
-          "base" : "",
-          "fields" : [{
-            "name" : "id",
-            "type" : "uint64"
-          }]
-       }],
-       "actions": [{
-          "name" : "tableaction",
-          "type" : "table_action",
-          "ricardian_contract" : ""
-       }],
-       "tables": [
-        {
-          "name": "tableaction",
-          "type": "table_action",
-          "index_type": "i64",
-          "key_names": [
-            "id"
-          ],
-          "key_types": [
-            "uint64"
-          ]
-        }],
-       "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(action_and_table, action_and_table_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_simple_typedef, abi_gen_helper)
-{ try {
-
-   const char* simple_typedef = R"=====(
-   #include <actclib/types.hpp>
-
-   using namespace actc;
-
-   struct common_params {
-      uint64_t c1;
-      uint64_t c2;
-      uint64_t c3;
-   };
-
-   typedef common_params my_base_alias;
-
-   //@abi action
-   struct main_action : my_base_alias {
-      uint64_t param1;
-   };
-
-   )=====";
-
-   const char* simple_typedef_abi = R"=====(
-   {
-       "version": "actc::abi/1.0",
-       "types": [{
-          "new_type_name" : "my_base_alias",
-          "type" : "common_params"
-       }],
-       "structs": [{
-          "name" : "common_params",
-          "base" : "",
-          "fields" : [{
-            "name" : "c1",
-            "type" : "uint64"
-          },{
-            "name" : "c2",
-            "type" : "uint64"
-          },{
-            "name" : "c3",
-            "type" : "uint64"
-          }]
-       },{
-          "name" : "main_action",
-          "base" : "my_base_alias",
-          "fields" : [{
-            "name" : "param1",
-            "type" : "uint64"
-          }]
-       }],
-       "actions": [{
-          "name" : "mainaction",
-          "type" : "main_action",
-          "ricardian_contract" : ""
-       }],
-       "tables": [],
-       "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(simple_typedef, simple_typedef_abi) == true );
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_field_typedef, abi_gen_helper)
-{ try {
-
-   const char* field_typedef = R"=====(
-   #include <actclib/types.hpp>
-
-   using namespace actc;
-
-   typedef name my_name_alias;
-
-   struct complex_field {
-      uint64_t  f1;
-      uint32_t  f2;
-   };
-
-   typedef complex_field my_complex_field_alias;
-
-   //@abi table
-   struct table1 {
-      uint64_t               field1;
-      my_complex_field_alias field2;
-      my_name_alias          name;
-   };
-
-   )=====";
-
-   const char* field_typedef_abi = R"=====(
-   {
-       "version": "actc::abi/1.0",
-       "types": [{
-          "new_type_name" : "my_complex_field_alias",
-          "type" : "complex_field"
-       },{
-          "new_type_name" : "my_name_alias",
-          "type" : "name"
-       }],
-       "structs": [{
-          "name" : "complex_field",
-          "base" : "",
-          "fields" : [{
-            "name": "f1",
-            "type": "uint64"
-          }, {
-            "name": "f2",
-            "type": "uint32"
-          }]
-       },{
-          "name" : "table1",
-          "base" : "",
-          "fields" : [{
-            "name": "field1",
-            "type": "uint64"
-          },{
-            "name": "field2",
-            "type": "my_complex_field_alias"
-          },{
-            "name": "name",
-            "type": "my_name_alias"
-          }]
-       }],
-       "actions": [],
-       "tables": [{
-          "name": "table1",
-          "type": "table1",
-          "index_type": "i64",
-          "key_names": [
-            "field1"
-          ],
-          "key_types": [
-            "uint64"
-          ]
-        }],
-       "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(field_typedef, field_typedef_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_vector_of_POD, abi_gen_helper)
-{ try {
-
-   const char* abigen_vector_of_POD = R"=====(
-   #include <vector>
-   #include <string>
-   #include <actclib/types.hpp>
-
-   using namespace actc;
-   using namespace std;
-
-   //@abi table
-   struct table1 {
-      uint64_t         field1;
-      vector<uint64_t> uints64;
-      vector<uint32_t> uints32;
-      vector<uint16_t> uints16;
-      vector<uint8_t>  uints8;
-   };
-
-   )=====";
-
-   const char* abigen_vector_of_POD_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-         "name": "table1",
-         "base": "",
-         "fields": [{
-             "name": "field1",
-             "type": "uint64"
-           },{
-             "name": "uints64",
-             "type": "uint64[]"
-           },{
-             "name": "uints32",
-             "type": "uint32[]"
-           },{
-             "name": "uints16",
-             "type": "uint16[]"
-           },{
-             "name": "uints8",
-             "type": "uint8[]"
-           }
-         ]
-       }
-     ],
-     "actions": [],
-     "tables": [{
-         "name": "table1",
-         "index_type": "i64",
-         "key_names": [
-           "field1"
-         ],
-         "key_types": [
-           "uint64"
-         ],
-         "type": "table1"
-       }
-     ],
-    "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(abigen_vector_of_POD, abigen_vector_of_POD_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_vector_of_structs, abi_gen_helper)
-{ try {
-
-   const char* abigen_vector_of_structs = R"=====(
-   #include <vector>
-   #include <string>
-   #include <actclib/types.hpp>
-
-   using namespace actc;
-   using namespace std;
-
-   struct my_struct {
-      vector<uint64_t> uints64;
-      vector<uint32_t> uints32;
-      vector<uint16_t> uints16;
-      vector<uint8_t>  uints8;
-      string           str;
-   };
-
-   //@abi table
-   struct table1 {
-      uint64_t          field1;
-      vector<my_struct> field2;
-   };
-
-   )=====";
-
-   const char* abigen_vector_of_structs_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-         "name": "my_struct",
-         "base": "",
-         "fields": [{
-             "name": "uints64",
-             "type": "uint64[]"
-           },{
-             "name": "uints32",
-             "type": "uint32[]"
-           },{
-             "name": "uints16",
-             "type": "uint16[]"
-           },{
-             "name": "uints8",
-             "type": "uint8[]"
-           },{
-             "name": "str",
-             "type": "string"
-           }
-         ]
-       },{
-         "name": "table1",
-         "base": "",
-         "fields": [{
-             "name": "field1",
-             "type": "uint64"
-           },{
-             "name": "field2",
-             "type": "my_struct[]"
-           }
-         ]
-       }
-     ],
-     "actions": [],
-     "tables": [{
-         "name": "table1",
-         "index_type": "i64",
-         "key_names": [
-           "field1"
-         ],
-         "key_types": [
-           "uint64"
-         ],
-         "type": "table1"
-       }
-     ],
-    "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(abigen_vector_of_structs, abigen_vector_of_structs_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_vector_multidimension, abi_gen_helper)
-{ try {
-
-   const char* abigen_vector_multidimension = R"=====(
-   #include <vector>
-   #include <string>
-   #include <actclib/types.hpp>
-
-   using namespace actc;
-   using namespace std;
-
-   //@abi table
-   struct table1 {
-      uint64_t                 field1;
-      vector<vector<uint64_t>> field2;
-   };
-
-   )=====";
-
-   BOOST_CHECK_EXCEPTION( generate_abi(abigen_vector_multidimension, ""), actc::abi_generation_exception, abi_gen_helper::is_abi_generation_exception );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_vector_alias, abi_gen_helper)
-{ try {
-
-   const char* abigen_vector_alias = R"=====(
-   #include <string>
-   #include <vector>
-   #include <actclib/types.hpp>
-   #include <actclib/print.hpp>
-
-   using namespace std;
-
-   struct row {
-    std::vector<uint32_t> cells;
-   };
-
-   typedef vector<row> array_of_rows;
-
-   //@abi action
-   struct my_action {
-     uint64_t id;
-     array_of_rows rows;
-   };
-
-   )=====";
-
-   const char* abigen_vector_alias_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [{
-         "new_type_name": "array_of_rows",
-         "type": "row[]"
-       }
-     ],
-     "structs": [{
-         "name": "row",
-         "base": "",
-         "fields": [{
-             "name": "cells",
-             "type": "uint32[]"
-           }
-         ]
-       },{
-         "name": "my_action",
-         "base": "",
-         "fields": [{
-             "name": "id",
-             "type": "uint64"
-           },{
-             "name": "rows",
-             "type": "array_of_rows"
-           }
-         ]
-       }
-     ],
-     "actions": [{
-         "name": "myaction",
-         "type": "my_action",
-         "ricardian_contract": ""
-       }
-     ],
-     "tables": [],
-     "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(abigen_vector_alias, abigen_vector_alias_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_actcabi_macro, abi_gen_helper)
-{ try {
-
-   const char* abigen_actcabi_macro = R"=====(
-
-      #pragma GCC diagnostic push
-      #pragma GCC diagnostic ignored "-Wpointer-bool-conversion"
-
-      #include <actclib/actc.hpp>
-      #include <actclib/print.hpp>
-
-
-      using namespace actc;
-
-      struct hello : public actc::contract {
-        public:
-            using contract::contract;
-
-            void hi( name user ) {
-               print( "Hello, ", name{user} );
-            }
-
-            void bye( name user ) {
-               print( "Bye, ", name{user} );
-            }
-      };
-
-      actc_ABI(hello,(hi))
-
-      #pragma GCC diagnostic pop
-
-   )=====";
-
-   const char* abigen_actcabi_macro_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-         "name": "hi",
-         "base": "",
-         "fields": [{
-             "name": "user",
-             "type": "name"
-           }
-         ]
-       }
-     ],
-     "actions": [{
-         "name": "hi",
-         "type": "hi"
-       }
-     ],
-     "tables": [],
-     "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(abigen_actcabi_macro, abigen_actcabi_macro_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_contract_inheritance, abi_gen_helper)
-{ try {
-
-   const char* abigen_contract_inheritance = R"=====(
-      #pragma GCC diagnostic push
-      #pragma GCC diagnostic ignored "-Wpointer-bool-conversion"
-
-      #include <actclib/actc.hpp>
-      #include <actclib/print.hpp>
-
-
-      using namespace actc;
-
-      struct hello : public actc::contract {
-        public:
-            using contract::contract;
-
-            void hi( name user ) {
-               print( "Hello, ", name{user} );
-            }
-      };
-
-      struct new_hello : hello {
-        public:
-            new_hello(account_name self) : hello(self) {}
-            void bye( name user ) {
-               print( "Bye, ", name{user} );
-            }
-      };
-
-      actc_ABI(new_hello,(hi)(bye))
-
-      #pragma GCC diagnostic pop
-   )=====";
-
-   const char* abigen_contract_inheritance_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-         "name": "hi",
-         "base": "",
-         "fields": [{
-             "name": "user",
-             "type": "name"
-           }
-         ]
-       },{
-         "name": "bye",
-         "base": "",
-         "fields": [{
-             "name": "user",
-             "type": "name"
-           }
-         ]
-       }
-     ],
-     "actions": [{
-         "name": "hi",
-         "type": "hi"
-       },{
-         "name": "bye",
-         "type": "bye"
-       }
-     ],
-     "tables": [],
-     "ricardian_clauses": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(abigen_contract_inheritance, abigen_contract_inheritance_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
-
-BOOST_FIXTURE_TEST_CASE(abigen_no_actcabi_macro, abi_gen_helper)
-{ try {
-
-   const char* abigen_no_actcabi_macro = R"=====(
-      #pragma GCC diagnostic push
-      #pragma GCC diagnostic ignored "-Wpointer-bool-conversion"
-      #include <actclib/actc.hpp>
-      #include <actclib/print.hpp>
-      #pragma GCC diagnostic pop
-
-      using namespace actc;
-
-      struct hello : public actc::contract {
-        public:
-            using contract::contract;
-
-            //@abi action
-            void hi( name user ) {
-               print( "Hello, ", name{user} );
-            }
-
-            //@abi action
-            void bye( name user ) {
-               print( "Bye, ", name{user} );
-            }
-
-           void apply( account_name contract, account_name act ) {
-              auto& thiscontract = *this;
-              switch( act ) {
-                 actc_API( hello, (hi)(bye))
-              };
-           }
-      };
-
-      extern "C" {
-         [[noreturn]] void apply( uint64_t receiver, uint64_t code, uint64_t action ) {
-            hello  h( receiver );
-            h.apply( code, action );
-            actc_exit(0);
-         }
-      }
-   )=====";
-
-   const char* abigen_no_actcabi_macro_abi = R"=====(
-   {
-     "version": "actc::abi/1.0",
-     "types": [],
-     "structs": [{
-         "name": "hi",
-         "base": "",
-         "fields": [{
-             "name": "user",
-             "type": "name"
-           }
-         ]
-       },{
-         "name": "bye",
-         "base": "",
-         "fields": [{
-             "name": "user",
-             "type": "name"
-           }
-         ]
-       }
-     ],
-     "actions": [{
-         "name": "hi",
-         "type": "hi",
-         "ricardian_contract": ""
-       },{
-         "name": "bye",
-         "type": "bye",
-         "ricardian_contract": ""
-       }
-     ],
-     "tables": [],
-     "ricardian_clauses": [],
-     "error_messages": [],
-     "abi_extensions": []
-   }
-   )=====";
-
-   BOOST_TEST( generate_abi(abigen_no_actcabi_macro, abigen_no_actcabi_macro_abi) == true );
-
-} FC_LOG_AND_RETHROW() }
 
 BOOST_AUTO_TEST_CASE(general)
 { try {
 
-   auto abi = actc_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
 
    abi_serializer abis(abi, max_serialization_time);
 
    const char *my_other = R"=====(
     {
-      "publickey"     :  "actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
-      "publickey_arr" :  ["actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV","actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV"],
-      "asset"         : "100.0000 SYS",
-      "asset_arr"     : ["100.0000 SYS","100.0000 SYS"],
+      "publickey"     :  "ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt",
+      "publickey_arr" :  ["ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt"],
+      "asset"         : "100.0000 ROC",
+      "asset_arr"     : ["100.0000 ROC","100.0000 ROC"],
 
       "string"            : "ola ke ase",
       "string_arr"        : ["ola ke ase","ola ke desi"],
@@ -1978,22 +683,22 @@ BOOST_AUTO_TEST_CASE(general)
         "delay_sec":0,
         "transaction_extensions": []
       }],
-      "keyweight": {"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},
-      "keyweight_arr": [{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
+      "keyweight": {"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},
+      "keyweight_arr": [{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
       "authority": {
          "threshold":"10",
-         "keys":[{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":100},{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":200}],
+         "keys":[{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":100},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":200}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        },
       "authority_arr": [{
          "threshold":"10",
-         "keys":[{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
+         "keys":[{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        },{
          "threshold":"10",
-         "keys":[{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"100"},{"key":"actc6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV", "weight":"200"}],
+         "keys":[{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        }],
@@ -2007,7 +712,7 @@ BOOST_AUTO_TEST_CASE(general)
          {"name":"table2","index_type":"indextype2","key_names":["keyname2"],"key_types":["typename2"],"type":"type2"}
       ],
       "abidef":{
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types" : [{"new_type_name":"new", "type":"old"}],
         "structs" : [{"name":"struct1", "base":"base1", "fields": [{"name":"name1", "type": "type1"}, {"name":"name2", "type": "type2"}] }],
         "actions" : [{"name":"action1","type":"type1", "ricardian_contract":""}],
@@ -2016,7 +721,7 @@ BOOST_AUTO_TEST_CASE(general)
         "abi_extensions": []
       },
       "abidef_arr": [{
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types" : [{"new_type_name":"new", "type":"old"}],
         "structs" : [{"name":"struct1", "base":"base1", "fields": [{"name":"name1", "type": "type1"}, {"name":"name2", "type": "type2"}] }],
         "actions" : [{"name":"action1","type":"type1", "ricardian_contract":""}],
@@ -2024,7 +729,7 @@ BOOST_AUTO_TEST_CASE(general)
         "ricardian_clauses": [],
         "abi_extensions": []
       },{
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types" : [{"new_type_name":"new", "type":"old"}],
         "structs" : [{"name":"struct1", "base":"base1", "fields": [{"name":"name1", "type": "type1"}, {"name":"name2", "type": "type2"}] }],
         "actions" : [{"name":"action1","type":"type1", "ricardian_contract": ""}],
@@ -2061,7 +766,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
 
    const char* struct_cycle_abi = R"=====(
    {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [],
        "structs": [{
          "name": "A",
@@ -2082,7 +787,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(typedef_cycle_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(typedef_cycle_abi).as<abi_def>());
 
    auto is_assert_exception = [](const auto& e) -> bool {
       wlog(e.to_string()); return true;
@@ -2098,7 +803,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
 BOOST_AUTO_TEST_CASE(linkauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -2132,7 +837,7 @@ BOOST_AUTO_TEST_CASE(linkauth_test)
 BOOST_AUTO_TEST_CASE(unlinkauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -2163,7 +868,7 @@ BOOST_AUTO_TEST_CASE(unlinkauth_test)
 BOOST_AUTO_TEST_CASE(updateauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -2173,8 +878,8 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
      "parent" : "updauth.prnt",
      "auth" : {
         "threshold" : "2147483145",
-        "keys" : [ {"key" : "actc65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "actc5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 } ],
         "waits" : []
@@ -2190,13 +895,13 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
    BOOST_TEST("updauth.prnt" == updauth.parent);
    BOOST_TEST(2147483145u == updauth.auth.threshold);
 
-   BOOST_TEST_REQUIRE(2 == updauth.auth.keys.size());
-   BOOST_TEST("actc65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)updauth.auth.keys[0].key);
+   BOOST_TEST_REQUIRE(2u == updauth.auth.keys.size());
+   BOOST_TEST("ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)updauth.auth.keys[0].key);
    BOOST_TEST(57005u == updauth.auth.keys[0].weight);
-   BOOST_TEST("actc5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)updauth.auth.keys[1].key);
+   BOOST_TEST("ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)updauth.auth.keys[1].key);
    BOOST_TEST(57605u == updauth.auth.keys[1].weight);
 
-   BOOST_TEST_REQUIRE(2 == updauth.auth.accounts.size());
+   BOOST_TEST_REQUIRE(2u == updauth.auth.accounts.size());
    BOOST_TEST("prm.acct1" == updauth.auth.accounts[0].permission.actor);
    BOOST_TEST("prm.prm1" == updauth.auth.accounts[0].permission.permission);
    BOOST_TEST(53005u == updauth.auth.accounts[0].weight);
@@ -2233,7 +938,7 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
 BOOST_AUTO_TEST_CASE(deleteauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -2261,7 +966,7 @@ BOOST_AUTO_TEST_CASE(deleteauth_test)
 BOOST_AUTO_TEST_CASE(newaccount_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -2270,16 +975,16 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
      "name" : "newacct.name",
      "owner" : {
         "threshold" : 2147483145,
-        "keys" : [ {"key" : "actc65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "actc5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 }],
         "waits" : []
      },
      "active" : {
         "threshold" : 2146483145,
-        "keys" : [ {"key" : "actc65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "actc5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 }],
         "waits" : []
@@ -2294,13 +999,13 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
 
    BOOST_TEST(2147483145u == newacct.owner.threshold);
 
-   BOOST_TEST_REQUIRE(2 == newacct.owner.keys.size());
-   BOOST_TEST("actc65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.owner.keys[0].key);
+   BOOST_TEST_REQUIRE(2u == newacct.owner.keys.size());
+   BOOST_TEST("ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.owner.keys[0].key);
    BOOST_TEST(57005u == newacct.owner.keys[0].weight);
-   BOOST_TEST("actc5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.owner.keys[1].key);
+   BOOST_TEST("ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.owner.keys[1].key);
    BOOST_TEST(57605u == newacct.owner.keys[1].weight);
 
-   BOOST_TEST_REQUIRE(2 == newacct.owner.accounts.size());
+   BOOST_TEST_REQUIRE(2u == newacct.owner.accounts.size());
    BOOST_TEST("prm.acct1" == newacct.owner.accounts[0].permission.actor);
    BOOST_TEST("prm.prm1" == newacct.owner.accounts[0].permission.permission);
    BOOST_TEST(53005u == newacct.owner.accounts[0].weight);
@@ -2310,13 +1015,13 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
 
    BOOST_TEST(2146483145u == newacct.active.threshold);
 
-   BOOST_TEST_REQUIRE(2 == newacct.active.keys.size());
-   BOOST_TEST("actc65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.active.keys[0].key);
+   BOOST_TEST_REQUIRE(2u == newacct.active.keys.size());
+   BOOST_TEST("ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.active.keys[0].key);
    BOOST_TEST(57005u == newacct.active.keys[0].weight);
-   BOOST_TEST("actc5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.active.keys[1].key);
+   BOOST_TEST("ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.active.keys[1].key);
    BOOST_TEST(57605u == newacct.active.keys[1].weight);
 
-   BOOST_TEST_REQUIRE(2 == newacct.active.accounts.size());
+   BOOST_TEST_REQUIRE(2u == newacct.active.accounts.size());
    BOOST_TEST("prm.acct1" == newacct.active.accounts[0].permission.actor);
    BOOST_TEST("prm.prm1" == newacct.active.accounts[0].permission.permission);
    BOOST_TEST(53005u == newacct.active.accounts[0].weight);
@@ -2371,7 +1076,7 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
 BOOST_AUTO_TEST_CASE(setcode_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    const char* test_data = R"=====(
    {
@@ -2406,7 +1111,7 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    const char* abi_def_abi = R"=====(
       {
-         "version": "actc::abi/1.0",
+         "version": "roxe::abi/1.0",
          "types": [{
             "new_type_name": "type_name",
             "type": "string"
@@ -2534,11 +1239,11 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    auto v = fc::json::from_string(abi_def_abi);
 
-   abi_serializer abis(actc_contract_abi(v.as<abi_def>()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(v.as<abi_def>()), max_serialization_time);
 
    const char* abi_string = R"=====(
       {
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types": [{
             "new_type_name": "account_name",
             "type": "name"
@@ -2598,22 +1303,22 @@ BOOST_AUTO_TEST_CASE(setabi_test)
    auto var = fc::json::from_string(abi_string);
    auto abi = var.as<abi_def>();
 
-   BOOST_TEST_REQUIRE(1 == abi.types.size());
+   BOOST_TEST_REQUIRE(1u == abi.types.size());
 
    BOOST_TEST("account_name" == abi.types[0].new_type_name);
    BOOST_TEST("name" == abi.types[0].type);
 
-   BOOST_TEST_REQUIRE(3 == abi.structs.size());
+   BOOST_TEST_REQUIRE(3u == abi.structs.size());
 
    BOOST_TEST("transfer_base" == abi.structs[0].name);
    BOOST_TEST("" == abi.structs[0].base);
-   BOOST_TEST_REQUIRE(1 == abi.structs[0].fields.size());
+   BOOST_TEST_REQUIRE(1u == abi.structs[0].fields.size());
    BOOST_TEST("memo" == abi.structs[0].fields[0].name);
    BOOST_TEST("string" == abi.structs[0].fields[0].type);
 
    BOOST_TEST("transfer" == abi.structs[1].name);
    BOOST_TEST("transfer_base" == abi.structs[1].base);
-   BOOST_TEST_REQUIRE(3 == abi.structs[1].fields.size());
+   BOOST_TEST_REQUIRE(3u == abi.structs[1].fields.size());
    BOOST_TEST("from" == abi.structs[1].fields[0].name);
    BOOST_TEST("account_name" == abi.structs[1].fields[0].type);
    BOOST_TEST("to" == abi.structs[1].fields[1].name);
@@ -2623,23 +1328,23 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    BOOST_TEST("account" == abi.structs[2].name);
    BOOST_TEST("" == abi.structs[2].base);
-   BOOST_TEST_REQUIRE(2 == abi.structs[2].fields.size());
+   BOOST_TEST_REQUIRE(2u == abi.structs[2].fields.size());
    BOOST_TEST("account" == abi.structs[2].fields[0].name);
    BOOST_TEST("name" == abi.structs[2].fields[0].type);
    BOOST_TEST("balance" == abi.structs[2].fields[1].name);
    BOOST_TEST("uint64" == abi.structs[2].fields[1].type);
 
-   BOOST_TEST_REQUIRE(1 == abi.actions.size());
+   BOOST_TEST_REQUIRE(1u == abi.actions.size());
    BOOST_TEST("transfer" == abi.actions[0].name);
    BOOST_TEST("transfer" == abi.actions[0].type);
 
-   BOOST_TEST_REQUIRE(1 == abi.tables.size());
+   BOOST_TEST_REQUIRE(1u == abi.tables.size());
    BOOST_TEST("account" == abi.tables[0].name);
    BOOST_TEST("account" == abi.tables[0].type);
    BOOST_TEST("i64" == abi.tables[0].index_type);
-   BOOST_TEST_REQUIRE(1 == abi.tables[0].key_names.size());
+   BOOST_TEST_REQUIRE(1u == abi.tables[0].key_names.size());
    BOOST_TEST("account" == abi.tables[0].key_names[0]);
-   BOOST_TEST_REQUIRE(1 == abi.tables[0].key_types.size());
+   BOOST_TEST_REQUIRE(1u == abi.tables[0].key_types.size());
    BOOST_TEST("name" == abi.tables[0].key_types[0]);
 
    auto var2 = verify_byte_round_trip_conversion( abis, "abi_def", var );
@@ -2768,7 +1473,7 @@ public_key_type  get_public_key( name keyname, string role ) {
 BOOST_AUTO_TEST_CASE(packed_transaction)
 { try {
 
-   chain::transaction txn;
+   chain::signed_transaction txn;
    txn.ref_block_num = 1;
    txn.ref_block_prefix = 2;
    txn.expiration.from_iso_string("2021-12-20T15:30");
@@ -2798,7 +1503,7 @@ BOOST_AUTO_TEST_CASE(packed_transaction)
 
    const char* packed_transaction_abi = R"=====(
    {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [{
           "new_type_name": "compression_type",
           "type": "int64"
@@ -2881,7 +1586,7 @@ BOOST_AUTO_TEST_CASE(abi_type_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -2932,7 +1637,7 @@ BOOST_AUTO_TEST_CASE(abi_type_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    auto is_table_exception = [](fc::exception const & e) -> bool { return e.to_detail_string().find("type already exists") != std::string::npos; };
    BOOST_CHECK_EXCEPTION( abi_serializer abis(abi, max_serialization_time), duplicate_abi_type_def_exception, is_table_exception );
 } FC_LOG_AND_RETHROW() }
@@ -2942,7 +1647,7 @@ BOOST_AUTO_TEST_CASE(abi_struct_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -2990,7 +1695,7 @@ BOOST_AUTO_TEST_CASE(abi_struct_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, max_serialization_time), duplicate_abi_struct_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -2999,7 +1704,7 @@ BOOST_AUTO_TEST_CASE(abi_action_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -3050,7 +1755,7 @@ BOOST_AUTO_TEST_CASE(abi_action_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, max_serialization_time), duplicate_abi_action_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -3059,7 +1764,7 @@ BOOST_AUTO_TEST_CASE(abi_table_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -3113,7 +1818,7 @@ BOOST_AUTO_TEST_CASE(abi_table_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, max_serialization_time), duplicate_abi_table_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -3122,7 +1827,7 @@ BOOST_AUTO_TEST_CASE(abi_type_def)
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "name"
@@ -3175,7 +1880,7 @@ BOOST_AUTO_TEST_CASE(abi_type_loop)
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "name"
@@ -3219,7 +1924,7 @@ BOOST_AUTO_TEST_CASE(abi_type_redefine)
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "account_name"
@@ -3260,7 +1965,7 @@ BOOST_AUTO_TEST_CASE(abi_type_redefine_to_name)
       // inifinite loop in types
       const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "name",
          "type": "name"
@@ -3282,7 +1987,7 @@ BOOST_AUTO_TEST_CASE(abi_type_nested_in_vector)
       // inifinite loop in types
       const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [],
      "structs": [{
          "name": "store_t",
@@ -3303,12 +2008,12 @@ BOOST_AUTO_TEST_CASE(abi_type_nested_in_vector)
 
 } FC_LOG_AND_RETHROW() }
 
-BOOST_AUTO_TEST_CASE(abi_account_name_in_actc_abi)
+BOOST_AUTO_TEST_CASE(abi_account_name_in_roxe_abi)
 { try {
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "name"
@@ -3339,7 +2044,7 @@ BOOST_AUTO_TEST_CASE(abi_account_name_in_actc_abi)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    auto is_type_exception = [](fc::assert_exception const & e) -> bool { return e.to_detail_string().find("abi.types.size") != std::string::npos; };
 
 } FC_LOG_AND_RETHROW() }
@@ -3351,7 +2056,7 @@ BOOST_AUTO_TEST_CASE(abi_large_array)
    try {
       const char* abi_str = R"=====(
       {
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types": [],
         "structs": [{
            "name": "hi",
@@ -3372,7 +2077,7 @@ BOOST_AUTO_TEST_CASE(abi_large_array)
 
       abi_serializer abis( fc::json::from_string( abi_str ).as<abi_def>(), max_serialization_time );
       // indicate a very large array, but don't actually provide a large array
-      // curl http://127.0.0.1:8888/v1/chain/abi_bin_to_json -X POST -d '{"code":"actc", "action":"hi", "binargs":"ffffffff08"}'
+      // curl http://127.0.0.1:8888/v1/chain/abi_bin_to_json -X POST -d '{"code":"roxe", "action":"hi", "binargs":"ffffffff08"}'
       bytes bin = {static_cast<char>(0xff),
                    static_cast<char>(0xff),
                    static_cast<char>(0xff),
@@ -3389,7 +2094,7 @@ BOOST_AUTO_TEST_CASE(abi_is_type_recursion)
    try {
       const char* abi_str = R"=====(
       {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [
         {
             "new_type_name": "a[]",
@@ -3433,7 +2138,7 @@ BOOST_AUTO_TEST_CASE(abi_recursive_structs)
    try {
       const char* abi_str = R"=====(
       {
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types": [],
         "structs": [
           {
@@ -3490,7 +2195,7 @@ BOOST_AUTO_TEST_CASE(abi_recursive_structs)
       )=====";
 
       abi_serializer abis(fc::json::from_string(abi_str).as<abi_def>(), max_serialization_time);
-      string hi_data = "{\"user\":\"actc\"}";
+      string hi_data = "{\"user\":\"roxe\"}";
       auto bin = abis.variant_to_binary("hi2", fc::json::from_string(hi_data), max_serialization_time);
       BOOST_CHECK_THROW( abis.binary_to_variant("hi", bin, max_serialization_time);, fc::exception );
 
@@ -3528,10 +2233,10 @@ BOOST_AUTO_TEST_CASE(abi_deep_structs_validate)
 
 BOOST_AUTO_TEST_CASE(variants)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto duplicate_variant_abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "variants": [
          {"name": "v1", "types": ["int8", "string", "bool"]},
          {"name": "v1", "types": ["int8", "string", "bool"]},
@@ -3539,14 +2244,14 @@ BOOST_AUTO_TEST_CASE(variants)
    })";
 
    auto variant_abi_invalid_type = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "variants": [
          {"name": "v1", "types": ["int91", "string", "bool"]},
       ],
    })";
 
    auto variant_abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "foo", "type": "s"},
          {"new_type_name": "bar", "type": "s"},
@@ -3601,10 +2306,10 @@ BOOST_AUTO_TEST_CASE(variants)
 
 BOOST_AUTO_TEST_CASE(extend)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "structs": [
          {"name": "s", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -3658,18 +2363,18 @@ BOOST_AUTO_TEST_CASE(version)
    try {
       BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
       BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({"version": ""})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
-      BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({"version": "actc::abi/9.0"})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
-      abi_serializer(fc::json::from_string(R"({"version": "actc::abi/1.0"})").as<abi_def>(), max_serialization_time);
-      abi_serializer(fc::json::from_string(R"({"version": "actc::abi/1.1"})").as<abi_def>(), max_serialization_time);
+      BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({"version": "roxe::abi/9.0"})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
+      abi_serializer(fc::json::from_string(R"({"version": "roxe::abi/1.0"})").as<abi_def>(), max_serialization_time);
+      abi_serializer(fc::json::from_string(R"({"version": "roxe::abi/1.1"})").as<abi_def>(), max_serialization_time);
    } FC_LOG_AND_RETHROW()
 }
 
 BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_array)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -3695,10 +2400,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_array)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_object)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s1", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -3727,10 +2432,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_object)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_json_mismatching_type)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s1", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -3753,12 +2458,36 @@ BOOST_AUTO_TEST_CASE(abi_serialize_json_mismatching_type)
    } FC_LOG_AND_RETHROW()
 }
 
-BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
+// it is a bit odd to have an empty name for a field, but json seems to allow it
+BOOST_AUTO_TEST_CASE(abi_serialize_json_empty_name)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.0",
+      "structs": [
+         {"name": "s1", "base": "", "fields": [
+            {"name": "", "type": "int8"},
+         ]}
+      ],
+   })";
+
+   try {
+      abi_serializer abis( fc::json::from_string(abi).as<abi_def>(), max_serialization_time );
+
+      auto bin = abis.variant_to_binary("s1", fc::json::from_string(R"({"":1})"), max_serialization_time);
+
+      verify_round_trip_conversion(abis, "s1", R"({"":1})", "01");
+
+   } FC_LOG_AND_RETHROW()
+}
+
+BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
+{
+   using roxe::testing::fc_exception_message_is;
+
+   auto abi = R"({
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "foo", "type": "s2"},
          {"new_type_name": "bar", "type": "foo"},
@@ -3832,10 +2561,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_short_error_messages)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "foo", "type": "s2"},
          {"new_type_name": "bar", "type": "foo"},
@@ -3912,10 +2641,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_short_error_messages)
 
 BOOST_AUTO_TEST_CASE(abi_deserialize_detailed_error_messages)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "oint", "type": "int8?"},
          {"new_type_name": "os1", "type": "s1?"}

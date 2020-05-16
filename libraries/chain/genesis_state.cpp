@@ -1,18 +1,19 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 
-#include <actc/chain/genesis_state.hpp>
+#include <roxe/chain/genesis_state.hpp>
 
 // these are required to serialize a genesis_state
 #include <fc/smart_ref_impl.hpp>   // required for gcc in release mode
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 genesis_state::genesis_state() {
-   initial_timestamp = fc::time_point::from_iso_string( "2018-06-01T12:00:00" );
-   initial_key = fc::variant(actc_root_key).as<public_key_type>();
+    /// TODO genesis time
+   initial_timestamp = fc::time_point::from_iso_string( "2020-01-01T12:00:00" );
+   initial_key = fc::variant(roxe_root_key).as<public_key_type>();
 }
 
 chain::chain_id_type genesis_state::compute_chain_id() const {
@@ -21,4 +22,4 @@ chain::chain_id_type genesis_state::compute_chain_id() const {
    return chain_id_type{enc.result()};
 }
 
-} } // namespace actc::chain
+} } // namespace roxe::chain

@@ -396,13 +396,13 @@ public:
 #ifdef BOOST_ASIO_HAS_LOCAL_SOCKETS
    /*
       Unix URLs work a little special here. They'll originally be in the format of
-      unix:///home/username/actc-wallet/kactcd.sock/v1/wallet/sign_digest
+      unix:///home/username/roxe-wallet/kroxed.sock/v1/wallet/sign_digest
       for example. When the fc::url is given to http_client in post_sync(), this will
-      have proto=unix and host=/home/username/actc-wallet/kactcd.sock/v1/wallet/sign_digest
+      have proto=unix and host=/home/username/roxe-wallet/kroxed.sock/v1/wallet/sign_digest
 
       At this point we still don't know what part of the above string is the unix socket path
       and which part is the path to access on the server. This function discovers that
-      host=/home/username/actc-wallet/kactcd.sock and path=/v1/wallet/sign_digest
+      host=/home/username/roxe-wallet/kroxed.sock and path=/v1/wallet/sign_digest
       and creates another fc::url that will be used downstream of the http_client::post_sync()
       call.
    */

@@ -1,17 +1,17 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
 #include <boost/test/unit_test.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <actc/testing/tester.hpp>
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/chain/wasm_actc_constraints.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/wast_to_wasm.hpp>
-#include <actc/chain_plugin/chain_plugin.hpp>
+#include <roxe/testing/tester.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/chain/wasm_roxe_constraints.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/wast_to_wasm.hpp>
+#include <roxe/chain_plugin/chain_plugin.hpp>
 
 #include <contracts.hpp>
 
@@ -31,9 +31,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace actc;
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe;
+using namespace roxe::chain;
+using namespace roxe::testing;
 using namespace fc;
 
 BOOST_AUTO_TEST_SUITE(chain_plugin_tests)

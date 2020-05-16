@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 
-#include <actc/chain/genesis_state.hpp>
+#include <roxe/chain/genesis_state.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
-const string genesis_state::actc_root_key = "${ACTC_ROOT_KEY}";
+const string genesis_state::roxe_root_key = "${ROXE_ROOT_KEY}";
 
-} } // namespace actc::chain
+} } // namespace roxe::chain

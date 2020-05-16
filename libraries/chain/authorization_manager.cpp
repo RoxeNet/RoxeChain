@@ -1,22 +1,22 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 
-#include <actc/chain/authorization_manager.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/permission_object.hpp>
-#include <actc/chain/permission_link_object.hpp>
-#include <actc/chain/authority_checker.hpp>
-#include <actc/chain/controller.hpp>
-#include <actc/chain/global_property_object.hpp>
-#include <actc/chain/contract_types.hpp>
-#include <actc/chain/generated_transaction_object.hpp>
+#include <roxe/chain/authorization_manager.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/permission_object.hpp>
+#include <roxe/chain/permission_link_object.hpp>
+#include <roxe/chain/authority_checker.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/global_property_object.hpp>
+#include <roxe/chain/contract_types.hpp>
+#include <roxe/chain/generated_transaction_object.hpp>
 #include <boost/tuple/tuple_io.hpp>
-#include <actc/chain/database_utils.hpp>
+#include <roxe/chain/database_utils.hpp>
 
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
    using authorization_index_set = index_set<
       permission_index,
@@ -67,19 +67,19 @@ namespace actc { namespace chain {
 
             value.parent = 0;
             if (value.id == 0) {
-               ACTC_ASSERT(row.parent == permission_name(), snapshot_exception, "Unexpected parent name on reserved permission 0");
-               ACTC_ASSERT(row.name == permission_name(), snapshot_exception, "Unexpected permission name on reserved permission 0");
-               ACTC_ASSERT(row.owner == name(), snapshot_exception, "Unexpected owner name on reserved permission 0");
-               ACTC_ASSERT(row.auth.accounts.size() == 0,  snapshot_exception, "Unexpected auth accounts on reserved permission 0");
-               ACTC_ASSERT(row.auth.keys.size() == 0,  snapshot_exception, "Unexpected auth keys on reserved permission 0");
-               ACTC_ASSERT(row.auth.waits.size() == 0,  snapshot_exception, "Unexpected auth waits on reserved permission 0");
-               ACTC_ASSERT(row.auth.threshold == 0,  snapshot_exception, "Unexpected auth threshold on reserved permission 0");
-               ACTC_ASSERT(row.last_updated == time_point(),  snapshot_exception, "Unexpected auth last updated on reserved permission 0");
+               ROXE_ASSERT(row.parent == permission_name(), snapshot_exception, "Unexpected parent name on reserved permission 0");
+               ROXE_ASSERT(row.name == permission_name(), snapshot_exception, "Unexpected permission name on reserved permission 0");
+               ROXE_ASSERT(row.owner == name(), snapshot_exception, "Unexpected owner name on reserved permission 0");
+               ROXE_ASSERT(row.auth.accounts.size() == 0,  snapshot_exception, "Unexpected auth accounts on reserved permission 0");
+               ROXE_ASSERT(row.auth.keys.size() == 0,  snapshot_exception, "Unexpected auth keys on reserved permission 0");
+               ROXE_ASSERT(row.auth.waits.size() == 0,  snapshot_exception, "Unexpected auth waits on reserved permission 0");
+               ROXE_ASSERT(row.auth.threshold == 0,  snapshot_exception, "Unexpected auth threshold on reserved permission 0");
+               ROXE_ASSERT(row.last_updated == time_point(),  snapshot_exception, "Unexpected auth last updated on reserved permission 0");
                value.parent = 0;
             } else if ( row.parent != permission_name()){
                const auto& parent = db.get<permission_object, by_owner>(boost::make_tuple(row.owner, row.parent));
 
-               ACTC_ASSERT(parent.id != 0, snapshot_exception, "Unexpected mapping to reserved permission 0");
+               ROXE_ASSERT(parent.id != 0, snapshot_exception, "Unexpected mapping to reserved permission 0");
                value.parent = parent.id;
             }
 
@@ -197,7 +197,7 @@ namespace actc { namespace chain {
    void authorization_manager::remove_permission( const permission_object& permission ) {
       const auto& index = _db.template get_index<permission_index, by_parent>();
       auto range = index.equal_range(permission.id);
-      ACTC_ASSERT( range.first == range.second, action_validate_exception,
+      ROXE_ASSERT( range.first == range.second, action_validate_exception,
                   "Cannot remove a permission which has children. Remove the children first.");
 
       _db.get_mutable_index<permission_usage_index>().remove_object( permission.usage_id._id );
@@ -217,15 +217,15 @@ namespace actc { namespace chain {
 
    const permission_object*  authorization_manager::find_permission( const permission_level& level )const
    { try {
-      ACTC_ASSERT( !level.actor.empty() && !level.permission.empty(), invalid_permission, "Invalid permission" );
+      ROXE_ASSERT( !level.actor.empty() && !level.permission.empty(), invalid_permission, "Invalid permission" );
       return _db.find<permission_object, by_owner>( boost::make_tuple(level.actor,level.permission) );
-   } ACTC_RETHROW_EXCEPTIONS( chain::permission_query_exception, "Failed to retrieve permission: ${level}", ("level", level) ) }
+   } ROXE_RETHROW_EXCEPTIONS( chain::permission_query_exception, "Failed to retrieve permission: ${level}", ("level", level) ) }
 
    const permission_object&  authorization_manager::get_permission( const permission_level& level )const
    { try {
-      ACTC_ASSERT( !level.actor.empty() && !level.permission.empty(), invalid_permission, "Invalid permission" );
+      ROXE_ASSERT( !level.actor.empty() && !level.permission.empty(), invalid_permission, "Invalid permission" );
       return _db.get<permission_object, by_owner>( boost::make_tuple(level.actor,level.permission) );
-   } ACTC_RETHROW_EXCEPTIONS( chain::permission_query_exception, "Failed to retrieve permission: ${level}", ("level", level) ) }
+   } ROXE_RETHROW_EXCEPTIONS( chain::permission_query_exception, "Failed to retrieve permission: ${level}", ("level", level) ) }
 
    optional<permission_name> authorization_manager::lookup_linked_permission( account_name authorizer_account,
                                                                               account_name scope,
@@ -259,7 +259,7 @@ namespace actc { namespace chain {
    {
       // Special case native actions cannot be linked to a minimum permission, so there is no need to check.
       if( scope == config::system_account_name ) {
-          ACTC_ASSERT( act_name != updateauth::get_name() &&
+          ROXE_ASSERT( act_name != updateauth::get_name() &&
                      act_name != deleteauth::get_name() &&
                      act_name != linkauth::get_name() &&
                      act_name != unlinkauth::get_name() &&
@@ -273,7 +273,7 @@ namespace actc { namespace chain {
          if( !linked_permission )
             return config::active_name;
 
-         if( *linked_permission == config::actc_any_name )
+         if( *linked_permission == config::roxe_any_name )
             return optional<permission_name>();
 
          return linked_permission;
@@ -284,10 +284,10 @@ namespace actc { namespace chain {
                                                                const vector<permission_level>& auths
                                                              )const
    {
-      ACTC_ASSERT( auths.size() == 1, irrelevant_auth_exception,
+      ROXE_ASSERT( auths.size() == 1, irrelevant_auth_exception,
                   "updateauth action should only have one declared authorization" );
       const auto& auth = auths[0];
-      ACTC_ASSERT( auth.actor == update.account, irrelevant_auth_exception,
+      ROXE_ASSERT( auth.actor == update.account, irrelevant_auth_exception,
                   "the owner of the affected permission needs to be the actor of the declared authorization" );
 
       const auto* min_permission = find_permission({update.account, update.permission});
@@ -295,7 +295,7 @@ namespace actc { namespace chain {
          min_permission = &get_permission({update.account, update.parent});
       }
 
-      ACTC_ASSERT( get_permission(auth).satisfies( *min_permission,
+      ROXE_ASSERT( get_permission(auth).satisfies( *min_permission,
                                                   _db.get_index<permission_index>().indices() ),
                   irrelevant_auth_exception,
                   "updateauth action declares irrelevant authority '${auth}'; minimum authority is ${min}",
@@ -306,15 +306,15 @@ namespace actc { namespace chain {
                                                                const vector<permission_level>& auths
                                                              )const
    {
-      ACTC_ASSERT( auths.size() == 1, irrelevant_auth_exception,
+      ROXE_ASSERT( auths.size() == 1, irrelevant_auth_exception,
                   "deleteauth action should only have one declared authorization" );
       const auto& auth = auths[0];
-      ACTC_ASSERT( auth.actor == del.account, irrelevant_auth_exception,
+      ROXE_ASSERT( auth.actor == del.account, irrelevant_auth_exception,
                   "the owner of the permission to delete needs to be the actor of the declared authorization" );
 
       const auto& min_permission = get_permission({del.account, del.permission});
 
-      ACTC_ASSERT( get_permission(auth).satisfies( min_permission,
+      ROXE_ASSERT( get_permission(auth).satisfies( min_permission,
                                                   _db.get_index<permission_index>().indices() ),
                   irrelevant_auth_exception,
                   "updateauth action declares irrelevant authority '${auth}'; minimum authority is ${min}",
@@ -325,33 +325,33 @@ namespace actc { namespace chain {
                                                              const vector<permission_level>& auths
                                                            )const
    {
-      ACTC_ASSERT( auths.size() == 1, irrelevant_auth_exception,
+      ROXE_ASSERT( auths.size() == 1, irrelevant_auth_exception,
                   "link action should only have one declared authorization" );
       const auto& auth = auths[0];
-      ACTC_ASSERT( auth.actor == link.account, irrelevant_auth_exception,
+      ROXE_ASSERT( auth.actor == link.account, irrelevant_auth_exception,
                   "the owner of the linked permission needs to be the actor of the declared authorization" );
 
       if( link.code == config::system_account_name
             || !_control.is_builtin_activated( builtin_protocol_feature_t::fix_linkauth_restriction ) ) 
       {
-         ACTC_ASSERT( link.type != updateauth::get_name(),  action_validate_exception,
-                     "Cannot link actc::updateauth to a minimum permission" );
-         ACTC_ASSERT( link.type != deleteauth::get_name(),  action_validate_exception,
-                     "Cannot link actc::deleteauth to a minimum permission" );
-         ACTC_ASSERT( link.type != linkauth::get_name(),    action_validate_exception,
-                     "Cannot link actc::linkauth to a minimum permission" );
-         ACTC_ASSERT( link.type != unlinkauth::get_name(),  action_validate_exception,
-                     "Cannot link actc::unlinkauth to a minimum permission" );
-         ACTC_ASSERT( link.type != canceldelay::get_name(), action_validate_exception,
-                     "Cannot link actc::canceldelay to a minimum permission" );
+         ROXE_ASSERT( link.type != updateauth::get_name(),  action_validate_exception,
+                     "Cannot link roxe::updateauth to a minimum permission" );
+         ROXE_ASSERT( link.type != deleteauth::get_name(),  action_validate_exception,
+                     "Cannot link roxe::deleteauth to a minimum permission" );
+         ROXE_ASSERT( link.type != linkauth::get_name(),    action_validate_exception,
+                     "Cannot link roxe::linkauth to a minimum permission" );
+         ROXE_ASSERT( link.type != unlinkauth::get_name(),  action_validate_exception,
+                     "Cannot link roxe::unlinkauth to a minimum permission" );
+         ROXE_ASSERT( link.type != canceldelay::get_name(), action_validate_exception,
+                     "Cannot link roxe::canceldelay to a minimum permission" );
       }
 
       const auto linked_permission_name = lookup_minimum_permission(link.account, link.code, link.type);
 
-      if( !linked_permission_name ) // if action is linked to actc.any permission
+      if( !linked_permission_name ) // if action is linked to roxe.any permission
          return;
 
-      ACTC_ASSERT( get_permission(auth).satisfies( get_permission({link.account, *linked_permission_name}),
+      ROXE_ASSERT( get_permission(auth).satisfies( get_permission({link.account, *linked_permission_name}),
                                                   _db.get_index<permission_index>().indices()              ),
                   irrelevant_auth_exception,
                   "link action declares irrelevant authority '${auth}'; minimum authority is ${min}",
@@ -362,21 +362,21 @@ namespace actc { namespace chain {
                                                                const vector<permission_level>& auths
                                                              )const
    {
-      ACTC_ASSERT( auths.size() == 1, irrelevant_auth_exception,
+      ROXE_ASSERT( auths.size() == 1, irrelevant_auth_exception,
                   "unlink action should only have one declared authorization" );
       const auto& auth = auths[0];
-      ACTC_ASSERT( auth.actor == unlink.account, irrelevant_auth_exception,
+      ROXE_ASSERT( auth.actor == unlink.account, irrelevant_auth_exception,
                   "the owner of the linked permission needs to be the actor of the declared authorization" );
 
       const auto unlinked_permission_name = lookup_linked_permission(unlink.account, unlink.code, unlink.type);
-      ACTC_ASSERT( unlinked_permission_name.valid(), transaction_exception,
+      ROXE_ASSERT( unlinked_permission_name.valid(), transaction_exception,
                   "cannot unlink non-existent permission link of account '${account}' for actions matching '${code}::${action}'",
                   ("account", unlink.account)("code", unlink.code)("action", unlink.type) );
 
-      if( *unlinked_permission_name == config::actc_any_name )
+      if( *unlinked_permission_name == config::roxe_any_name )
          return;
 
-      ACTC_ASSERT( get_permission(auth).satisfies( get_permission({unlink.account, *unlinked_permission_name}),
+      ROXE_ASSERT( get_permission(auth).satisfies( get_permission({unlink.account, *unlinked_permission_name}),
                                                   _db.get_index<permission_index>().indices()                  ),
                   irrelevant_auth_exception,
                   "unlink action declares irrelevant authority '${auth}'; minimum authority is ${min}",
@@ -387,11 +387,11 @@ namespace actc { namespace chain {
                                                                             const vector<permission_level>& auths
                                                                           )const
    {
-      ACTC_ASSERT( auths.size() == 1, irrelevant_auth_exception,
+      ROXE_ASSERT( auths.size() == 1, irrelevant_auth_exception,
                   "canceldelay action should only have one declared authorization" );
       const auto& auth = auths[0];
 
-      ACTC_ASSERT( get_permission(auth).satisfies( get_permission(cancel.canceling_auth),
+      ROXE_ASSERT( get_permission(auth).satisfies( get_permission(cancel.canceling_auth),
                                                   _db.get_index<permission_index>().indices() ),
                   irrelevant_auth_exception,
                   "canceldelay action declares irrelevant authority '${auth}'; specified authority to satisfy is ${min}",
@@ -402,7 +402,7 @@ namespace actc { namespace chain {
       const auto& generated_transaction_idx = _control.db().get_index<generated_transaction_multi_index>();
       const auto& generated_index = generated_transaction_idx.indices().get<by_trx_id>();
       const auto& itr = generated_index.lower_bound(trx_id);
-      ACTC_ASSERT( itr != generated_index.end() && itr->sender == account_name() && itr->trx_id == trx_id,
+      ROXE_ASSERT( itr != generated_index.end() && itr->sender == account_name() && itr->trx_id == trx_id,
                   tx_not_found,
                  "cannot cancel trx_id=${tid}, there is no deferred transaction with that transaction id",
                  ("tid", trx_id) );
@@ -419,7 +419,7 @@ namespace actc { namespace chain {
          if( found ) break;
       }
 
-      ACTC_ASSERT( found, action_validate_exception,
+      ROXE_ASSERT( found, action_validate_exception,
                   "canceling_auth in canceldelay action was not found as authorization in the original delayed transaction" );
 
       return (itr->delay_until - itr->published);
@@ -483,9 +483,9 @@ namespace actc { namespace chain {
 
             if( !special_case ) {
                auto min_permission_name = lookup_minimum_permission(declared_auth.actor, act.account, act.name);
-               if( min_permission_name ) { // since special cases were already handled, it should only be false if the permission is actc.any
+               if( min_permission_name ) { // since special cases were already handled, it should only be false if the permission is roxe.any
                   const auto& min_permission = get_permission({declared_auth.actor, *min_permission_name});
-                  ACTC_ASSERT( get_permission(declared_auth).satisfies( min_permission,
+                  ROXE_ASSERT( get_permission(declared_auth).satisfies( min_permission,
                                                                        _db.get_index<permission_index>().indices() ),
                               irrelevant_auth_exception,
                               "action declares irrelevant authority '${auth}'; minimum authority is ${min}",
@@ -511,7 +511,7 @@ namespace actc { namespace chain {
       // ascending order of the actor name with ties broken by ascending order of the permission name.
       for( const auto& p : permissions_to_satisfy ) {
          checktime(); // TODO: this should eventually move into authority_checker instead
-         ACTC_ASSERT( checker.satisfied( p.first, p.second ), unsatisfied_authorization,
+         ROXE_ASSERT( checker.satisfied( p.first, p.second ), unsatisfied_authorization,
                      "transaction declares authority '${auth}', "
                      "but does not have signatures for it under a provided delay of ${provided_delay} ms, "
                      "provided permissions ${provided_permissions}, provided keys ${provided_keys}, "
@@ -526,7 +526,7 @@ namespace actc { namespace chain {
       }
 
       if( !allow_unused_keys ) {
-         ACTC_ASSERT( checker.all_keys_used(), tx_irrelevant_sig,
+         ROXE_ASSERT( checker.all_keys_used(), tx_irrelevant_sig,
                      "transaction bears irrelevant signatures from these keys: ${keys}",
                      ("keys", checker.unused_keys()) );
       }
@@ -554,7 +554,7 @@ namespace actc { namespace chain {
                                         checktime
                                       );
 
-      ACTC_ASSERT( checker.satisfied({account, permission}), unsatisfied_authorization,
+      ROXE_ASSERT( checker.satisfied({account, permission}), unsatisfied_authorization,
                   "permission '${auth}' was not satisfied under a provided delay of ${provided_delay} ms, "
                   "provided permissions ${provided_permissions}, provided keys ${provided_keys}, "
                   "and a delay max limit of ${delay_max_limit_ms} ms",
@@ -566,7 +566,7 @@ namespace actc { namespace chain {
                 );
 
       if( !allow_unused_keys ) {
-         ACTC_ASSERT( checker.all_keys_used(), tx_irrelevant_sig,
+         ROXE_ASSERT( checker.all_keys_used(), tx_irrelevant_sig,
                      "irrelevant keys provided: ${keys}",
                      ("keys", checker.unused_keys()) );
       }
@@ -587,7 +587,7 @@ namespace actc { namespace chain {
 
       for (const auto& act : trx.actions ) {
          for (const auto& declared_auth : act.authorization) {
-            ACTC_ASSERT( checker.satisfied(declared_auth), unsatisfied_authorization,
+            ROXE_ASSERT( checker.satisfied(declared_auth), unsatisfied_authorization,
                         "transaction declares authority '${auth}', but does not have signatures for it.",
                         ("auth", declared_auth) );
          }
@@ -596,4 +596,4 @@ namespace actc { namespace chain {
       return checker.used_keys();
    }
 
-} } /// namespace actc::chain
+} } /// namespace roxe::chain

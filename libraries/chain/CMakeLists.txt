@@ -1,12 +1,12 @@
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/actc/chain/core_symbol.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/actc/chain/core_symbol.hpp)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/include/roxe/chain/core_symbol.hpp.in ${CMAKE_CURRENT_BINARY_DIR}/include/roxe/chain/core_symbol.hpp)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/genesis_state_root_key.cpp.in ${CMAKE_CURRENT_BINARY_DIR}/genesis_state_root_key.cpp)
 
-file(GLOB HEADERS "include/actc/chain/*.hpp"
-                  "include/actc/chain/webassembly/*.hpp"
-                  "${CMAKE_CURRENT_BINARY_DIR}/include/actc/chain/core_symbol.hpp" )
+file(GLOB HEADERS "include/roxe/chain/*.hpp"
+                  "include/roxe/chain/webassembly/*.hpp"
+                  "${CMAKE_CURRENT_BINARY_DIR}/include/roxe/chain/core_symbol.hpp" )
 
 ## SORT .cpp by most likely to change / break compile
-add_library( actc_chain
+add_library( roxe_chain
              merkle.cpp
              name.cpp
              transaction.cpp
@@ -19,8 +19,8 @@ add_library( actc_chain
              resource_limits.cpp
              block_log.cpp
              transaction_context.cpp
-             actc_contract.cpp
-             actc_contract_abi.cpp
+             roxe_contract.cpp
+             roxe_contract_abi.cpp
              chain_config.cpp
              chain_id_type.cpp
              genesis_state.cpp
@@ -30,8 +30,8 @@ add_library( actc_chain
 #             block_trace.cpp
               wast_to_wasm.cpp
               wasm_interface.cpp
-              wasm_actc_validation.cpp
-              wasm_actc_injection.cpp
+              wasm_roxe_validation.cpp
+              wasm_roxe_injection.cpp
               apply_context.cpp
               abi_serializer.cpp
               asset.cpp
@@ -55,26 +55,26 @@ add_library( actc_chain
              ${HEADERS}
              )
 
-target_link_libraries( actc_chain fc chainbase Logging IR WAST WASM Runtime
+target_link_libraries( roxe_chain fc chainbase Logging IR WAST WASM Runtime
                        softfloat builtins wabt
                      )
-target_include_directories( actc_chain
+target_include_directories( roxe_chain
                             PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include" "${CMAKE_CURRENT_BINARY_DIR}/include"
                                    "${CMAKE_CURRENT_SOURCE_DIR}/../wasm-jit/Include"
                                    "${CMAKE_SOURCE_DIR}/libraries/wabt"
                                    "${CMAKE_BINARY_DIR}/libraries/wabt"
                             )
 
-install( TARGETS actc_chain
+install( TARGETS roxe_chain
    RUNTIME DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}
    LIBRARY DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
    ARCHIVE DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}
 )
-install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/actc/chain/
-      DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/actc/chain
+install( DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/roxe/chain/
+      DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/roxe/chain
       FILES_MATCHING PATTERN "*.hpp" PATTERN "*.h" PATTERN "webassembly" EXCLUDE
 )
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/actc/chain/core_symbol.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/actc/chain)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/include/roxe/chain/core_symbol.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR}/roxe/chain)
 #if(MSVC)
 #  set_source_files_properties( db_init.cpp db_block.cpp database.cpp block_log.cpp PROPERTIES COMPILE_FLAGS "/bigobj" )
 #endif(MSVC)

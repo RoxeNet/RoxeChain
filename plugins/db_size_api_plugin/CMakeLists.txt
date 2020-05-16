@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/actc/db_size_api_plugin/*.hpp")
+file(GLOB HEADERS "include/roxe/db_size_api_plugin/*.hpp")
 add_library( db_size_api_plugin
              db_size_api_plugin.cpp
              ${HEADERS} )

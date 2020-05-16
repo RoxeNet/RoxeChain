@@ -1,31 +1,27 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE
  */
 #include <algorithm>
-#include <vector>
 #include <iterator>
-#include <boost/test/unit_test.hpp>
+#include <vector>
 
-#include <actc/chain/controller.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/permission_object.hpp>
-#include <actc/chain/global_property_object.hpp>
-
-#include <actc/testing/tester.hpp>
-
-#include <actc/utilities/tempdir.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/permission_object.hpp>
+#include <roxe/chain/global_property_object.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <fc/crypto/digest.hpp>
 
-#include <boost/test/unit_test.hpp>
 #include <boost/range/algorithm/find.hpp>
 #include <boost/range/algorithm/find_if.hpp>
 #include <boost/range/algorithm/permutation.hpp>
+#include <boost/test/unit_test.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace chain;
-using tester = actc::testing::tester;
+using tester = roxe::testing::tester;
 
 BOOST_AUTO_TEST_SUITE(special_account_tests)
 
@@ -40,14 +36,14 @@ BOOST_FIXTURE_TEST_CASE(accounts_exists, tester)
       auto nobody = chain1_db.find<account_object, by_name>(config::null_account_name);
       BOOST_CHECK(nobody != nullptr);
       const auto& nobody_active_authority = chain1_db.get<permission_object, by_owner>(boost::make_tuple(config::null_account_name, config::active_name));
-      BOOST_CHECK_EQUAL(nobody_active_authority.auth.threshold, 1);
-      BOOST_CHECK_EQUAL(nobody_active_authority.auth.accounts.size(), 0);
-      BOOST_CHECK_EQUAL(nobody_active_authority.auth.keys.size(), 0);
+      BOOST_CHECK_EQUAL(nobody_active_authority.auth.threshold, 1u);
+      BOOST_CHECK_EQUAL(nobody_active_authority.auth.accounts.size(), 0u);
+      BOOST_CHECK_EQUAL(nobody_active_authority.auth.keys.size(), 0u);
 
       const auto& nobody_owner_authority = chain1_db.get<permission_object, by_owner>(boost::make_tuple(config::null_account_name, config::owner_name));
-      BOOST_CHECK_EQUAL(nobody_owner_authority.auth.threshold, 1);
-      BOOST_CHECK_EQUAL(nobody_owner_authority.auth.accounts.size(), 0);
-      BOOST_CHECK_EQUAL(nobody_owner_authority.auth.keys.size(), 0);
+      BOOST_CHECK_EQUAL(nobody_owner_authority.auth.threshold, 1u);
+      BOOST_CHECK_EQUAL(nobody_owner_authority.auth.accounts.size(), 0u);
+      BOOST_CHECK_EQUAL(nobody_owner_authority.auth.keys.size(), 0u);
 
       auto producers = chain1_db.find<account_object, by_name>(config::producers_account_name);
       BOOST_CHECK(producers != nullptr);
@@ -58,7 +54,7 @@ BOOST_FIXTURE_TEST_CASE(accounts_exists, tester)
       auto expected_threshold = (active_producers.producers.size() * 2)/3 + 1;
       BOOST_CHECK_EQUAL(producers_active_authority.auth.threshold, expected_threshold);
       BOOST_CHECK_EQUAL(producers_active_authority.auth.accounts.size(), active_producers.producers.size());
-      BOOST_CHECK_EQUAL(producers_active_authority.auth.keys.size(), 0);
+      BOOST_CHECK_EQUAL(producers_active_authority.auth.keys.size(), 0u);
 
       std::vector<account_name> active_auth;
       for(auto& apw : producers_active_authority.auth.accounts) {
@@ -66,7 +62,7 @@ BOOST_FIXTURE_TEST_CASE(accounts_exists, tester)
       }
 
       std::vector<account_name> diff;
-      for (int i = 0; i < std::max(active_auth.size(), active_producers.producers.size()); ++i) {
+      for (size_t i = 0; i < std::max(active_auth.size(), active_producers.producers.size()); ++i) {
          account_name n1 = i < active_auth.size() ? active_auth[i] : (account_name)0;
          account_name n2 = i < active_producers.producers.size() ? active_producers.producers[i].producer_name : (account_name)0;
          if (n1 != n2) diff.push_back((uint64_t)n2 - (uint64_t)n1);

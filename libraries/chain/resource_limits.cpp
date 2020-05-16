@@ -1,13 +1,13 @@
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/resource_limits_private.hpp>
-#include <actc/chain/transaction_metadata.hpp>
-#include <actc/chain/transaction.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/resource_limits_private.hpp>
+#include <roxe/chain/transaction_metadata.hpp>
+#include <roxe/chain/transaction.hpp>
 #include <boost/tuple/tuple_io.hpp>
-#include <actc/chain/database_utils.hpp>
+#include <roxe/chain/database_utils.hpp>
 #include <algorithm>
 
-namespace actc { namespace chain { namespace resource_limits {
+namespace roxe { namespace chain { namespace resource_limits {
 
 using resource_index_set = index_set<
    resource_limits_index,
@@ -31,9 +31,9 @@ static uint64_t update_elastic_limit(uint64_t current_limit, uint64_t average_us
 void elastic_limit_parameters::validate()const {
    // At the very least ensure parameters are not set to values that will cause divide by zero errors later on.
    // Stricter checks for sensible values can be added later.
-   ACTC_ASSERT( periods > 0, resource_limit_exception, "elastic limit parameter 'periods' cannot be zero" );
-   ACTC_ASSERT( contract_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'contract_rate' is not a well-defined ratio" );
-   ACTC_ASSERT( expand_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'expand_rate' is not a well-defined ratio" );
+   ROXE_ASSERT( periods > 0, resource_limit_exception, "elastic limit parameter 'periods' cannot be zero" );
+   ROXE_ASSERT( contract_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'contract_rate' is not a well-defined ratio" );
+   ROXE_ASSERT( expand_rate.denominator > 0, resource_limit_exception, "elastic limit parameter 'expand_rate' is not a well-defined ratio" );
 }
 
 
@@ -148,7 +148,7 @@ void resource_limits_manager::add_transaction_usage(const flat_set<account_name>
 
          auto max_user_use_in_window = (virtual_network_capacity_in_window * user_weight) / all_user_weight;
 
-         ACTC_ASSERT( cpu_used_in_window <= max_user_use_in_window,
+         ROXE_ASSERT( cpu_used_in_window <= max_user_use_in_window,
                      tx_cpu_usage_exceeded,
                      "authorizing account '${n}' has insufficient cpu resources for this transaction",
                      ("n", name(a))
@@ -167,7 +167,7 @@ void resource_limits_manager::add_transaction_usage(const flat_set<account_name>
 
          auto max_user_use_in_window = (virtual_network_capacity_in_window * user_weight) / all_user_weight;
 
-         ACTC_ASSERT( net_used_in_window <= max_user_use_in_window,
+         ROXE_ASSERT( net_used_in_window <= max_user_use_in_window,
                      tx_net_usage_exceeded,
                      "authorizing account '${n}' has insufficient net resources for this transaction",
                      ("n", name(a))
@@ -183,8 +183,8 @@ void resource_limits_manager::add_transaction_usage(const flat_set<account_name>
       rls.pending_net_usage += net_usage;
    });
 
-   ACTC_ASSERT( state.pending_cpu_usage <= config.cpu_limit_parameters.max, block_resource_exhausted, "Block has insufficient cpu resources" );
-   ACTC_ASSERT( state.pending_net_usage <= config.net_limit_parameters.max, block_resource_exhausted, "Block has insufficient net resources" );
+   ROXE_ASSERT( state.pending_cpu_usage <= config.cpu_limit_parameters.max, block_resource_exhausted, "Block has insufficient cpu resources" );
+   ROXE_ASSERT( state.pending_net_usage <= config.net_limit_parameters.max, block_resource_exhausted, "Block has insufficient net resources" );
 }
 
 void resource_limits_manager::add_pending_ram_usage( const account_name account, int64_t ram_delta ) {
@@ -194,9 +194,9 @@ void resource_limits_manager::add_pending_ram_usage( const account_name account,
 
    const auto& usage  = _db.get<resource_usage_object,by_owner>( account );
 
-   ACTC_ASSERT( ram_delta <= 0 || UINT64_MAX - usage.ram_usage >= (uint64_t)ram_delta, transaction_exception,
+   ROXE_ASSERT( ram_delta <= 0 || UINT64_MAX - usage.ram_usage >= (uint64_t)ram_delta, transaction_exception,
               "Ram usage delta would overflow UINT64_MAX");
-   ACTC_ASSERT(ram_delta >= 0 || usage.ram_usage >= (uint64_t)(-ram_delta), transaction_exception,
+   ROXE_ASSERT(ram_delta >= 0 || usage.ram_usage >= (uint64_t)(-ram_delta), transaction_exception,
               "Ram usage delta would underflow UINT64_MAX");
 
    _db.modify( usage, [&]( auto& u ) {
@@ -210,7 +210,7 @@ void resource_limits_manager::verify_account_ram_usage( const account_name accou
    const auto& usage  = _db.get<resource_usage_object,by_owner>( account );
 
    if( ram_bytes >= 0 ) {
-      ACTC_ASSERT( usage.ram_usage <= static_cast<uint64_t>(ram_bytes), ram_usage_exceeded,
+      ROXE_ASSERT( usage.ram_usage <= static_cast<uint64_t>(ram_bytes), ram_usage_exceeded,
                   "account ${account} has insufficient ram; needs ${needs} bytes has ${available} bytes",
                   ("account", account)("needs",usage.ram_usage)("available",ram_bytes)              );
    }
@@ -255,9 +255,9 @@ bool resource_limits_manager::set_account_limits( const account_name& account, i
 
       /*
       if( limits.ram_bytes < 0 ) {
-         ACTC_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "converting unlimited account would result in overcommitment [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
+         ROXE_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "converting unlimited account would result in overcommitment [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
       } else {
-         ACTC_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "attempting to release committed ram resources [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
+         ROXE_ASSERT(ram_bytes >= usage.ram_usage, wasm_execution_error, "attempting to release committed ram resources [commit=${c}, desired limit=${l}]", ("c", usage.ram_usage)("l", ram_bytes));
       }
       */
    }
@@ -293,12 +293,12 @@ void resource_limits_manager::process_account_limit_updates() {
    // convenience local lambda to reduce clutter
    auto update_state_and_value = [](uint64_t &total, int64_t &value, int64_t pending_value, const char* debug_which) -> void {
       if (value > 0) {
-         ACTC_ASSERT(total >= static_cast<uint64_t>(value), rate_limiting_state_inconsistent, "underflow when reverting old value to ${which}", ("which", debug_which));
+         ROXE_ASSERT(total >= static_cast<uint64_t>(value), rate_limiting_state_inconsistent, "underflow when reverting old value to ${which}", ("which", debug_which));
          total -= value;
       }
 
       if (pending_value > 0) {
-         ACTC_ASSERT(UINT64_MAX - total >= static_cast<uint64_t>(pending_value), rate_limiting_state_inconsistent, "overflow when applying new value to ${which}", ("which", debug_which));
+         ROXE_ASSERT(UINT64_MAX - total >= static_cast<uint64_t>(pending_value), rate_limiting_state_inconsistent, "overflow when applying new value to ${which}", ("which", debug_which));
          total += pending_value;
       }
 
@@ -460,4 +460,4 @@ std::pair<account_resource_limit, bool> resource_limits_manager::get_account_net
    return {arl, greylisted};
 }
 
-} } } /// actc::chain::resource_limits
+} } } /// roxe::chain::resource_limits
