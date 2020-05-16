@@ -1,6 +1,6 @@
 # Bios Boot Tutorial
 
-The `bios-boot-tutorial.py` script simulates the ACTC bios boot sequence.
+The `bios-boot-tutorial.py` script simulates the ROXE bios boot sequence.
 
 ``Prerequisites``:
 
@@ -18,18 +18,18 @@ The `bios-boot-tutorial.py` script simulates the ACTC bios boot sequence.
 
 ``Steps``:
 
-1. Install actc binaries by following the steps outlined in below tutorial
-[Install actc binaries](https://github.com/ACTC/actc#mac-os-x-brew-install)
+1. Install roxe binaries by following the steps outlined in below tutorial
+[Install roxe binaries](https://github.com/ROXE/roxe#mac-os-x-brew-install)
 
-2. Install actc.cdt binaries by following the steps outlined in below tutorial
-[Install actc.cdt binaries](https://github.com/ACTC/actc.cdt#binary-releases)
+2. Install roxe.cdt binaries by following the steps outlined in below tutorial
+[Install roxe.cdt binaries](https://github.com/ROXE/roxe.cdt#binary-releases)
 
-3. Compile actc.contracts
+3. Compile roxe.contracts
 
 ```bash
 $ cd ~
-$ git clone https://github.com/ACTC/actc.contracts.git
-$ cd ./actc.contracts/
+$ git clone https://github.com/ROXE/roxe.contracts.git
+$ cd ./roxe.contracts/
 $ ./build.sh
 $ cd ./build/contracts/
 $ pwd
@@ -37,16 +37,16 @@ $ pwd
 ```
 
 4. Make note of the directory where the contracts were compiled
-The last command in the previous step printed on the bash console the contracts' directory, make note of it, we'll reference it from now on as `ACTC_CONTRACTS_DIRECTORY`
+The last command in the previous step printed on the bash console the contracts' directory, make note of it, we'll reference it from now on as `ROXE_CONTRACTS_DIRECTORY`
 
 5. Launch the `bios-boot-tutorial.py` script
-Minimal command line to launch the script below, make sure you replace `ACTC_CONTRACTS_DIRECTORY` with actual directory
+Minimal command line to launch the script below, make sure you replace `ROXE_CONTRACTS_DIRECTORY` with actual directory
 
 ```bash
 $ cd ~
-$ git clone https://github.com/ACTC/actc.git
-$ cd ./actc/tutorials/bios-boot-tutorial/
-$ python3 bios-boot-tutorial.py --clactc="clactc --wallet-url http://127.0.0.1:6666 " --nodactc=nodactc --kactcd=kactcd --contracts-dir="ACTC_CONTRACTS_DIRECTORY" -w -a
+$ git clone https://github.com/ROXE/roxe.git
+$ cd ./roxe/tutorials/bios-boot-tutorial/
+$ python3 bios-boot-tutorial.py --clroxe="clroxe --wallet-url http://127.0.0.1:6666 " --nodroxe=nodroxe --kroxed=kroxed --contracts-dir="ROXE_CONTRACTS_DIRECTORY" -w -a
 ```
 
-See [ACTC Documentation Wiki: Tutorial - Bios Boot](https://github.com/ACTC/actc/wiki/Tutorial-Bios-Boot-Sequence) for additional information.
+See [ROXE Documentation Wiki: Tutorial - Bios Boot](https://github.com/ROXE/roxe/wiki/Tutorial-Bios-Boot-Sequence) for additional information.

@@ -1,14 +1,14 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/block.hpp>
-#include <actc/chain/merkle.hpp>
+#include <roxe/chain/block.hpp>
+#include <roxe/chain/merkle.hpp>
 #include <fc/io/raw.hpp>
 #include <fc/bitutil.hpp>
 #include <algorithm>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
    digest_type block_header::digest()const
    {
       return digest_type::hash(*this);
@@ -43,20 +43,20 @@ namespace actc { namespace chain {
          const auto& e = header_extensions[i];
          auto id = e.first;
 
-         ACTC_ASSERT( id >= id_type_lower_bound, invalid_block_header_extension,
+         ROXE_ASSERT( id >= id_type_lower_bound, invalid_block_header_extension,
                      "Block header extensions are not in the correct order (ascending id types required)"
          );
 
          results.emplace_back();
 
          auto match = decompose_t::extract<block_header_extensions_t>( id, e.second, results.back() );
-         ACTC_ASSERT( match, invalid_block_header_extension,
+         ROXE_ASSERT( match, invalid_block_header_extension,
                      "Block header extension with id type ${id} is not supported",
                      ("id", id)
          );
 
          if( match->enforce_unique ) {
-            ACTC_ASSERT( i == 0 || id > id_type_lower_bound, invalid_block_header_extension,
+            ROXE_ASSERT( i == 0 || id > id_type_lower_bound, invalid_block_header_extension,
                         "Block header extension with id type ${id} is not allowed to repeat",
                         ("id", id)
             );

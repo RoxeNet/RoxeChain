@@ -1,6 +1,6 @@
 /**
  *  @file api_tests.cpp
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <algorithm>
 #include <random>
@@ -18,15 +18,15 @@
 #include <boost/iostreams/stream_buffer.hpp>
 #include <boost/algorithm/string/predicate.hpp>
 
-#include <actc/testing/tester.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/account_object.hpp>
-#include <actc/chain/contract_table_objects.hpp>
-#include <actc/chain/block_summary_object.hpp>
-#include <actc/chain/global_property_object.hpp>
-#include <actc/chain/generated_transaction_object.hpp>
-#include <actc/chain/wasm_interface.hpp>
-#include <actc/chain/resource_limits.hpp>
+#include <roxe/testing/tester.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/account_object.hpp>
+#include <roxe/chain/contract_table_objects.hpp>
+#include <roxe/chain/block_summary_object.hpp>
+#include <roxe/chain/global_property_object.hpp>
+#include <roxe/chain/generated_transaction_object.hpp>
+#include <roxe/chain/wasm_interface.hpp>
+#include <roxe/chain/resource_limits.hpp>
 
 #include <fc/crypto/digest.hpp>
 #include <fc/crypto/sha256.hpp>
@@ -123,8 +123,8 @@ FC_REFLECT( invalid_access_action, (code)(val)(index)(store) )
 #define TESTER validating_tester
 #endif
 
-using namespace actc;
-using namespace actc::testing;
+using namespace roxe;
+using namespace roxe::testing;
 using namespace chain;
 using namespace fc;
 
@@ -265,7 +265,7 @@ bool is_access_violation(fc::unhandled_exception const & e) {
    try {
       std::rethrow_exception(e.get_inner_exception());
     }
-    catch (const actc::chain::wasm_execution_error& e) {
+    catch (const roxe::chain::wasm_execution_error& e) {
        return true;
     } catch (...) {
 
@@ -277,7 +277,7 @@ bool is_access_violation(const Runtime::Exception& e) { return true; }
 bool is_assert_exception(fc::assert_exception const & e) { return true; }
 bool is_page_memory_error(page_memory_error const &e) { return true; }
 bool is_unsatisfied_authorization(unsatisfied_authorization const & e) { return true;}
-bool is_wasm_execution_error(actc::chain::wasm_execution_error const& e) {return true;}
+bool is_wasm_execution_error(roxe::chain::wasm_execution_error const& e) {return true;}
 bool is_tx_net_usage_exceeded(const tx_net_usage_exceeded& e) { return true; }
 bool is_block_net_usage_exceeded(const tx_cpu_usage_exceeded& e) { return true; }
 bool is_tx_cpu_usage_exceeded(const tx_cpu_usage_exceeded& e) { return true; }
@@ -391,10 +391,10 @@ BOOST_FIXTURE_TEST_CASE(action_receipt_tests, TESTER) { try {
       BOOST_CHECK_EQUAL( m.begin()->second, base_test_auth_seq_num + 4 );
    } );
 
-   set_code( config::system_account_name, contracts::actc_bios_wasm() );
+   set_code( config::system_account_name, contracts::roxe_bios_wasm() );
 
-   set_code( N(test), contracts::actc_bios_wasm() );
-   set_abi( N(test), contracts::actc_bios_abi().data() );
+   set_code( N(test), contracts::roxe_bios_wasm() );
+   set_abi( N(test), contracts::roxe_bios_abi().data() );
 	set_code( N(test), contracts::payloadless_wasm() );
 
    call_doit_and_check( N(test), N(test), [&]( const transaction_trace_ptr& res ) {
@@ -430,7 +430,7 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
 
    //test assert_false
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "assert_false", {} ),
-                          actc_assert_message_exception, actc_assert_message_is("test_action::assert_false") );
+                          roxe_assert_message_exception, roxe_assert_message_is("test_action::assert_false") );
 
    // test read_action_normal
    dummy_action dummy13{DUMMY_ACTION_DEFAULT_A, DUMMY_ACTION_DEFAULT_B, DUMMY_ACTION_DEFAULT_C};
@@ -442,8 +442,8 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
 
    // test read_action_to_0
    raw_bytes.resize((1<<16)+1);
-   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_0", raw_bytes), actc::chain::wasm_execution_error,
-         [](const actc::chain::wasm_execution_error& e) {
+   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_0", raw_bytes), roxe::chain::wasm_execution_error,
+         [](const roxe::chain::wasm_execution_error& e) {
             return expect_assert_message(e, "access violation");
          }
       );
@@ -454,8 +454,8 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
 
    // test read_action_to_64k
    raw_bytes.resize(3);
-	BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_64k", raw_bytes ), actc::chain::wasm_execution_error,
-         [](const actc::chain::wasm_execution_error& e) {
+	BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION( *this, "test_action", "read_action_to_64k", raw_bytes ), roxe::chain::wasm_execution_error,
+         [](const roxe::chain::wasm_execution_error& e) {
             return expect_assert_message(e, "access violation");
          }
       );
@@ -539,7 +539,7 @@ BOOST_FIXTURE_TEST_CASE(action_tests, TESTER) { try {
    // test current_time
    produce_block();
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "test_current_time", fc::raw::pack(now) ),
-                          actc_assert_message_exception, actc_assert_message_is("tmp == current_time()")     );
+                          roxe_assert_message_exception, roxe_assert_message_is("tmp == current_time()")     );
 
    // test test_current_receiver
    CALL_TEST_FUNCTION( *this, "test_action", "test_current_receiver", fc::raw::pack(N(testapi)));
@@ -719,8 +719,8 @@ BOOST_FIXTURE_TEST_CASE(cf_action_tests, TESTER) { try {
       BOOST_CHECK_EQUAL(ttrace->action_traces[1].act.authorization.size(), 0);
 
       BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_transaction", "send_cf_action_fail", {} ),
-                             actc_assert_message_exception,
-                             actc_assert_message_is("context free actions cannot have authorizations") );
+                             roxe_assert_message_exception,
+                             roxe_assert_message_is("context free actions cannot have authorizations") );
 
       BOOST_REQUIRE_EQUAL( validate(), true );
 } FC_LOG_AND_RETHROW() }
@@ -1073,8 +1073,8 @@ BOOST_FIXTURE_TEST_CASE(transaction_tests, TESTER) { try {
 
    // test send_action_inline_fail
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION(*this, "test_transaction", "send_action_inline_fail", {}),
-                          actc_assert_message_exception,
-                          actc_assert_message_is("test_action::assert_false")                          );
+                          roxe_assert_message_exception,
+                          roxe_assert_message_is("test_action::assert_false")                          );
 
    //   test send_transaction
       CALL_TEST_FUNCTION(*this, "test_transaction", "send_transaction", {});
@@ -1119,8 +1119,8 @@ BOOST_FIXTURE_TEST_CASE(transaction_tests, TESTER) { try {
    CALL_TEST_FUNCTION(*this, "test_transaction", "test_tapos_block_prefix", fc::raw::pack(control->head_block_id()._hash[1]) );
 
    // test send_action_recurse
-   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION(*this, "test_transaction", "send_action_recurse", {}), actc::chain::transaction_exception,
-         [](const actc::chain::transaction_exception& e) {
+   BOOST_CHECK_EXCEPTION(CALL_TEST_FUNCTION(*this, "test_transaction", "send_action_recurse", {}), roxe::chain::transaction_exception,
+         [](const roxe::chain::transaction_exception& e) {
             return expect_assert_message(e, "max inline action depth per transaction reached");
          }
       );
@@ -1269,7 +1269,7 @@ BOOST_FIXTURE_TEST_CASE(deferred_transaction_tests, TESTER) { try {
       dtt_act2.delay_sec = 5;
 
       auto auth = authority(get_public_key("testapi", name(dtt_act2.permission_name).to_string()), 10);
-      auth.accounts.push_back( permission_level_weight{{N(testapi), config::actc_code_name}, 1} );
+      auth.accounts.push_back( permission_level_weight{{N(testapi), config::roxe_code_name}, 1} );
 
       push_action(config::system_account_name, updateauth::get_name(), "testapi", fc::mutable_variant_object()
               ("account", "testapi")
@@ -1290,7 +1290,7 @@ BOOST_FIXTURE_TEST_CASE(deferred_transaction_tests, TESTER) { try {
 
       // If the deferred tx receiver == this tx receiver, the authorization checking would originally be bypassed.
       // But not anymore. With the RESTRICT_ACTION_TO_SELF protocol feature activated, it should now objectively
-      // fail because testapi@additional permission is not unilaterally satisfied by testapi@actc.code.
+      // fail because testapi@additional permission is not unilaterally satisfied by testapi@roxe.code.
       dtt_action dtt_act3;
       dtt_act3.deferred_account = N(testapi);
       dtt_act3.permission_name = N(additional);
@@ -1396,8 +1396,8 @@ BOOST_AUTO_TEST_CASE(more_deferred_transaction_tests) { try {
    trx.sign( chain.get_private_key( test_account, "active" ), chain.control->get_chain_id() );
    BOOST_REQUIRE_EXCEPTION(
       chain.push_transaction( trx ),
-      actc_assert_message_exception,
-      actc_assert_message_is("fail")
+      roxe_assert_message_exception,
+      roxe_assert_message_is("fail")
    );
 
    BOOST_REQUIRE_EQUAL(1, index.size());
@@ -1488,8 +1488,8 @@ BOOST_AUTO_TEST_CASE(more_deferred_transaction_tests) { try {
    trx2.sign( chain.get_private_key( test_account, "active" ), chain.control->get_chain_id() );
    BOOST_REQUIRE_EXCEPTION(
       chain.push_transaction( trx2 ),
-      actc_assert_message_exception,
-      actc_assert_message_is("fail")
+      roxe_assert_message_exception,
+      roxe_assert_message_is("fail")
    );
 
    BOOST_REQUIRE_EQUAL(3, index.size());
@@ -1678,8 +1678,8 @@ BOOST_FIXTURE_TEST_CASE(multi_index_tests, TESTER) { try {
 
    auto check_failure = [this]( action_name a, const char* expected_error_msg ) {
       BOOST_CHECK_EXCEPTION(  push_action( N(testapi), a, N(testapi), {} ),
-                              actc_assert_message_exception,
-                              actc_assert_message_is( expected_error_msg )
+                              roxe_assert_message_exception,
+                              roxe_assert_message_is( expected_error_msg )
       );
    };
 
@@ -1976,7 +1976,7 @@ BOOST_FIXTURE_TEST_CASE(permission_tests, TESTER) { try {
          .account    = N(testapi),
          .permission = N(active),
          .pubkeys    = {
-            public_key_type(string("ACTC7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
+            public_key_type(string("ROXE7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
          }
       })
    );
@@ -1988,7 +1988,7 @@ BOOST_FIXTURE_TEST_CASE(permission_tests, TESTER) { try {
          .permission = N(active),
          .pubkeys    = {
             get_public_key(N(testapi), "active"),
-            public_key_type(string("ACTC7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
+            public_key_type(string("ROXE7GfRtyDWWgxV88a5TRaYY59XmHptyfjsFmHHfioGNJtPjpSmGX"))
          }
       })
    );
@@ -2131,7 +2131,7 @@ BOOST_FIXTURE_TEST_CASE(permission_usage_tests, TESTER) { try {
                                        N(testapi), config::active_name,
                                        control->head_block_time() + fc::milliseconds(config::block_interval_ms)
                                      })
-   ), actc_assert_message_exception );
+   ), roxe_assert_message_exception );
 
    produce_blocks(5);
 
@@ -2139,7 +2139,7 @@ BOOST_FIXTURE_TEST_CASE(permission_usage_tests, TESTER) { try {
 
    push_action(config::system_account_name, linkauth::get_name(), N(bob), fc::mutable_variant_object()
            ("account", "bob")
-           ("code", "actc")
+           ("code", "roxe")
            ("type", "reqauth")
            ("requirement", "perm1")
    );
@@ -2173,7 +2173,7 @@ BOOST_FIXTURE_TEST_CASE(permission_usage_tests, TESTER) { try {
                                                             N(bob), N(perm1),
                                                             permission_creation_time
                                           })
-   ), actc_assert_message_exception );
+   ), roxe_assert_message_exception );
 
    CALL_TEST_FUNCTION( *this, "test_permission", "test_permission_last_used",
                        fc::raw::pack(test_permission_last_used_action{
@@ -2215,9 +2215,9 @@ BOOST_FIXTURE_TEST_CASE(account_creation_time_tests, TESTER) { try {
 } FC_LOG_AND_RETHROW() }
 
 /*************************************************************************************
- * actc_assert_code_tests test cases
+ * roxe_assert_code_tests test cases
  *************************************************************************************/
-BOOST_FIXTURE_TEST_CASE(actc_assert_code_tests, TESTER) { try {
+BOOST_FIXTURE_TEST_CASE(roxe_assert_code_tests, TESTER) { try {
    produce_block();
    create_account( N(testapi) );
    produce_block();
@@ -2225,7 +2225,7 @@ BOOST_FIXTURE_TEST_CASE(actc_assert_code_tests, TESTER) { try {
 
    const char* abi_string = R"=====(
 {
-   "version": "actc::abi/1.0",
+   "version": "roxe::abi/1.0",
    "types": [],
    "structs": [],
    "actions": [],
@@ -2247,7 +2247,7 @@ BOOST_FIXTURE_TEST_CASE(actc_assert_code_tests, TESTER) { try {
    produce_blocks(10);
 
    BOOST_CHECK_EXCEPTION( CALL_TEST_FUNCTION( *this, "test_action", "test_assert_code", fc::raw::pack((uint64_t)42) ),
-                          actc_assert_code_exception, actc_assert_code_is(42)                                        );
+                          roxe_assert_code_exception, roxe_assert_code_is(42)                                        );
 
 
    auto trace = CALL_TEST_FUNCTION_NO_THROW( *this, "test_action", "test_assert_code", fc::raw::pack((uint64_t)42) );

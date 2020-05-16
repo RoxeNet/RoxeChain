@@ -1,17 +1,17 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/test_control_api_plugin/test_control_api_plugin.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/test_control_api_plugin/test_control_api_plugin.hpp>
+#include <roxe/chain/exceptions.hpp>
 
 #include <fc/io/json.hpp>
 
-namespace actc {
+namespace roxe {
 
 static appbase::abstract_plugin& _test_control_api_plugin = app().register_plugin<test_control_api_plugin>();
 
-using namespace actc;
+using namespace roxe;
 
 class test_control_api_plugin_impl {
 public:

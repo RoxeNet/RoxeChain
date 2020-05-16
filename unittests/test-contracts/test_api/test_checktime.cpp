@@ -1,12 +1,12 @@
 /**
  * @file
- * @copyright defined in actc/LICENSE
+ * @copyright defined in roxe/LICENSE
  */
 #include <vector>
 
-#include <actclib/crypto.h>
-#include <actclib/actc.hpp>
-#include <actclib/print.h>
+#include <roxelib/crypto.h>
+#include <roxelib/roxe.hpp>
+#include <roxelib/print.h>
 
 #include "test_api.hpp"
 
@@ -15,7 +15,7 @@ void test_checktime::checktime_pass() {
    for ( int i = 0; i < 10000; i++ )
       p += i;
 
-   actc::print(p);
+   roxe::print(p);
 }
 
 
@@ -28,7 +28,7 @@ void test_checktime::checktime_failure() {
       for ( unsigned long long j = 0; j < bound; j++ )
          p += i+j+bound;
 
-   actc::print(p);
+   roxe::print(p);
 }
 
 constexpr size_t size = 20000000;

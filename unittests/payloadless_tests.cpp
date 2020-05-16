@@ -1,14 +1,14 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-compare"
 #include <boost/test/unit_test.hpp>
 #pragma GCC diagnostic pop
 
-#include <actc/testing/tester.hpp>
-#include <actc/chain/abi_serializer.hpp>
+#include <roxe/testing/tester.hpp>
+#include <roxe/chain/abi_serializer.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -25,9 +25,9 @@
 #define TESTER validating_tester
 #endif
 
-using namespace actc;
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe;
+using namespace roxe::chain;
+using namespace roxe::testing;
 using namespace fc;
 
 class payloadless_tester : public TESTER {
@@ -47,7 +47,7 @@ BOOST_FIXTURE_TEST_CASE( test_doit, payloadless_tester ) {
    BOOST_CHECK_EQUAL(msg == "Im a payloadless action", true);
 }
 
-// test GH#3916 - contract api action with no parameters fails when called from clactc
+// test GH#3916 - contract api action with no parameters fails when called from clroxe
 // abi_serializer was failing when action data was empty.
 BOOST_FIXTURE_TEST_CASE( test_abi_serializer, payloadless_tester ) {
 

@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <appbase/application.hpp>
 
-#include <actc/wallet_plugin/yubihsm_wallet.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/wallet_plugin/yubihsm_wallet.hpp>
+#include <roxe/chain/exceptions.hpp>
 #include <yubihsm.h>
 
 #include <fc/crypto/openssl.hpp>
@@ -17,7 +17,7 @@
 
 #include <dlfcn.h>
 
-namespace actc { namespace wallet {
+namespace roxe { namespace wallet {
 
 using namespace fc::crypto::r1;
 
@@ -188,7 +188,7 @@ struct yubihsm_wallet_impl {
          FC_THROW_EXCEPTION(chain::wallet_exception, "Cannot create caps mask");
 
       try {
-         if((rc = yh_util_generate_ec_key(session, &new_key_id, "kactcd created key", authkey_domains, &creation_caps, YH_ALGO_EC_P256)))
+         if((rc = yh_util_generate_ec_key(session, &new_key_id, "kroxed created key", authkey_domains, &creation_caps, YH_ALGO_EC_P256)))
             FC_THROW_EXCEPTION(chain::wallet_exception, "yh_util_generate_ec_key failed: ${m}", ("m", yh_strerror(rc)));
          return populate_key_map_with_keyid(new_key_id)->first;
       }

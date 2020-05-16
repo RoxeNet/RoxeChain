@@ -1,32 +1,32 @@
 /**
  * @file action_test.cpp
- * @copyright defined in actc/LICENSE
+ * @copyright defined in roxe/LICENSE
  */
 #include <limits>
 
-#include <actclib/action.hpp>
-#include <actclib/db.h>
-#include <actclib/actc.hpp>
-#include <actclib/permission.h>
-#include <actclib/print.hpp>
-#include <actclib/serialize.hpp>
+#include <roxelib/action.hpp>
+#include <roxelib/db.h>
+#include <roxelib/roxe.hpp>
+#include <roxelib/permission.h>
+#include <roxelib/print.hpp>
+#include <roxelib/serialize.hpp>
 
 #include "test_api.hpp"
 
 
 
 struct check_auth_msg {
-   actc::name                    account;
-   actc::name                    permission;
-   std::vector<actc::public_key> pubkeys;
+   roxe::name                    account;
+   roxe::name                    permission;
+   std::vector<roxe::public_key> pubkeys;
 
-   ACTCLIB_SERIALIZE( check_auth_msg, (account)(permission)(pubkeys)  )
+   ROXELIB_SERIALIZE( check_auth_msg, (account)(permission)(pubkeys)  )
 };
 
 void test_permission::check_authorization( uint64_t receiver, uint64_t code, uint64_t action ) {
    (void)code;
    (void)action;
-   using namespace actc;
+   using namespace roxe;
 
    auto self = receiver;
    auto params = unpack_action_data<check_auth_msg>();
@@ -47,29 +47,29 @@ void test_permission::check_authorization( uint64_t receiver, uint64_t code, uin
 }
 
 struct test_permission_last_used_msg {
-   actc::name account;
-   actc::name permission;
+   roxe::name account;
+   roxe::name permission;
    int64_t     last_used_time;
 
-   ACTCLIB_SERIALIZE( test_permission_last_used_msg, (account)(permission)(last_used_time) )
+   ROXELIB_SERIALIZE( test_permission_last_used_msg, (account)(permission)(last_used_time) )
 };
 
 void test_permission::test_permission_last_used( uint64_t /* receiver */, uint64_t code, uint64_t action ) {
    (void)code;
    (void)action;
-   using namespace actc;
+   using namespace roxe;
 
    auto params = unpack_action_data<test_permission_last_used_msg>();
 
-   actc_assert( get_permission_last_used(params.account.value, params.permission.value) == params.last_used_time, "unexpected last used permission time" );
+   roxe_assert( get_permission_last_used(params.account.value, params.permission.value) == params.last_used_time, "unexpected last used permission time" );
 }
 
 void test_permission::test_account_creation_time( uint64_t /* receiver */, uint64_t code, uint64_t action ) {
    (void)code;
    (void)action;
-   using namespace actc;
+   using namespace roxe;
 
    auto params = unpack_action_data<test_permission_last_used_msg>();
 
-   actc_assert( get_account_creation_time(params.account.value) == params.last_used_time, "unexpected account creation time" );
+   roxe_assert( get_account_creation_time(params.account.value) == params.last_used_time, "unexpected account creation time" );
 }

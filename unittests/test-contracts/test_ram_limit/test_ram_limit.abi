@@ -1,6 +1,6 @@
 {
-    "____comment": "This file was generated with actc-abigen. DO NOT EDIT Fri Dec  7 11:56:43 2018",
-    "version": "actc::abi/1.1",
+    "____comment": "This file was generated with roxe-abigen. DO NOT EDIT Fri Dec  7 11:56:43 2018",
+    "version": "roxe::abi/1.1",
     "structs": [
         {
             "name": "printentry",

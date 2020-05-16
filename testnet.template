@@ -14,10 +14,10 @@ fi
 
 bioscontractpath=$BIOS_CONTRACT_PATH
 if [ -z "$bioscontractpath" ]; then
-    bioscontractpath="unittests/contracts/actc.bios"
+    bioscontractpath="unittests/contracts/roxe.bios"
 fi
 
-wddir=actc-ignition-wd
+wddir=roxe-ignition-wd
 wdaddr=localhost:8899
 wdurl=http://$wdaddr
 # Manual deployers, add a line below this block that looks like:
@@ -26,7 +26,7 @@ wdurl=http://$wdaddr
 #    cnt_dir=$CONTRACT_DIR
 #    sys=$SYS_CONTRACT
 # where $BIOS_HOSTNAME is replaced by the hostname portion of the http-server-address configured
-# for the nodactc instance running to bios producer
+# for the nodroxe instance running to bios producer
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT envars
 
@@ -44,16 +44,16 @@ echo "FEATURE_DIGESTS: $FEATURE_DIGESTS" >> $logfile
 
 echo "http-server-address = $wdaddr" > $wddir/config.ini
 
-programs/kactcd/kactcd --config-dir $wddir --data-dir $wddir 2> $wddir/wdlog.txt &
+programs/kroxed/kroxed --config-dir $wddir --data-dir $wddir 2> $wddir/wdlog.txt &
 echo $$ > ignition_wallet.pid
-echo kactcd log in $wddir/wdlog.txt >> $logfile
+echo kroxed log in $wddir/wdlog.txt >> $logfile
 sleep 1
 
 ecmd () {
     echo ===== Start: $step ============ >> $logfile
-    echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport $* | tee -a $logfile
+    echo executing: clroxe --wallet-url $wdurl --url http://$bioshost:$biosport $* | tee -a $logfile
     echo ----------------------- >> $logfile
-    programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport $* >> $logfile 2>&1
+    programs/clroxe/clroxe  --wallet-url $wdurl --url http://$bioshost:$biosport $* >> $logfile 2>&1
     echo ==== End: $step ============== >> $logfile
     step=$(($step + 1))
 }
@@ -63,9 +63,9 @@ wcmd () {
 }
 
 cacmd () {
-    programs/clactc/clactc  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 ACI" --stake-cpu "10000000.0000 ACI"  --buy-ram "10000000.0000 ACI" actc $* >> $logfile 2>&1
+    programs/clroxe/clroxe  --wallet-url $wdurl --url http://$bioshost:$biosport system newaccount --transfer --stake-net "10000000.0000 ROC" --stake-cpu "10000000.0000 ROC"  --buy-ram "10000000.0000 ROC" roxe $* >> $logfile 2>&1
     ecmd system regproducer $1 $2
-    ecmd system voteproducer prods $1 $1
+#    ecmd system voteproducer prods $1 $1
 }
 
 sleep 2
@@ -82,46 +82,46 @@ wcmd create --to-console -n ignition
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT prodkeys
 
-ecmd set contract actc $bioscontractpath actc.bios.wasm actc.bios.abi
+ecmd set contract roxe $bioscontractpath roxe.bios.wasm roxe.bios.abi
 
 # Preactivate all digests
 for digest in $FEATURE_DIGESTS;
 do
-ecmd push action actc activate "{\"feature_digest\":\"$digest\"}" -p actc
+ecmd push action roxe activate "{\"feature_digest\":\"$digest\"}" -p roxe
 done
 
 # Create required system accounts
 ecmd create key --to-console
 pubsyskey=`grep "^Public key:" $logfile | tail -1 | sed "s/^Public key://"`
 prisyskey=`grep "^Private key:" $logfile | tail -1 | sed "s/^Private key://"`
-echo actc.* keys: $prisyskey $pubsyskey >> $logfile
+echo roxe.* keys: $prisyskey $pubsyskey >> $logfile
 wcmd import -n ignition --private-key $prisyskey
-ecmd create account actc actc.bpay $pubsyskey $pubsyskey
-ecmd create account actc actc.msig $pubsyskey $pubsyskey
-ecmd create account actc actc.names $pubsyskey $pubsyskey
-ecmd create account actc actc.ram $pubsyskey $pubsyskey
-ecmd create account actc actc.ramfee $pubsyskey $pubsyskey
-ecmd create account actc actc.saving $pubsyskey $pubsyskey
-ecmd create account actc actc.stake $pubsyskey $pubsyskey
-ecmd create account actc actc.token $pubsyskey $pubsyskey
-ecmd create account actc actc.vpay $pubsyskey $pubsyskey
-ecmd create account actc actc.wrap $pubsyskey $pubsyskey
+ecmd create account roxe roxe.bpay $pubsyskey $pubsyskey
+ecmd create account roxe roxe.msig $pubsyskey $pubsyskey
+ecmd create account roxe roxe.names $pubsyskey $pubsyskey
+ecmd create account roxe roxe.ram $pubsyskey $pubsyskey
+ecmd create account roxe roxe.ramfee $pubsyskey $pubsyskey
+ecmd create account roxe roxe.saving $pubsyskey $pubsyskey
+ecmd create account roxe roxe.stake $pubsyskey $pubsyskey
+ecmd create account roxe roxe.token $pubsyskey $pubsyskey
+ecmd create account roxe roxe.vpay $pubsyskey $pubsyskey
+ecmd create account roxe roxe.wrap $pubsyskey $pubsyskey
 
-ecmd set contract actc.token unittests/contracts/actc.token actc.token.wasm actc.token.abi
-ecmd set contract actc.msig unittests/contracts/actc.msig actc.msig.wasm actc.msig.abi
-ecmd set contract actc.wrap unittests/contracts/actc.wrap actc.wrap.wasm actc.wrap.abi
+ecmd set contract roxe.token unittests/contracts/roxe.token roxe.token.wasm roxe.token.abi
+ecmd set contract roxe.msig unittests/contracts/roxe.msig roxe.msig.wasm roxe.msig.abi
+ecmd set contract roxe.wrap unittests/contracts/roxe.wrap roxe.wrap.wasm roxe.wrap.abi
 
 echo ===== Start: $step ============ >> $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 ACI" ]' -p actc.token | tee -a $logfile
-echo executing: clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc | tee -a $logfile
+echo executing: clroxe --wallet-url $wdurl --url http://$bioshost:$biosport push action roxe.token create '[ "roxe", "10000000000.0000 ROC" ]' -p roxe.token | tee -a $logfile
+echo executing: clroxe --wallet-url $wdurl --url http://$bioshost:$biosport push action roxe.token issue '[ "roxe", "1000000000.0000 ROC", "memo" ]' -p roxe | tee -a $logfile
 echo ----------------------- >> $logfile
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token create '[ "actc", "10000000000.0000 ACI" ]' -p actc.token >> $logfile 2>&1
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc.token issue '[ "actc", "1000000000.0000 ACI", "memo" ]' -p actc >> $logfile 2>&1
+programs/clroxe/clroxe --wallet-url $wdurl --url http://$bioshost:$biosport push action roxe.token create '[ "roxe", "10000000000.0000 ROC" ]' -p roxe.token >> $logfile 2>&1
+programs/clroxe/clroxe --wallet-url $wdurl --url http://$bioshost:$biosport push action roxe.token issue '[ "roxe", "1000000000.0000 ROC", "memo" ]' -p roxe >> $logfile 2>&1
 echo ==== End: $step ============== >> $logfile
 step=$(($step + 1))
 
-ecmd set contract actc unittests/contracts/actc.system actc.system.wasm actc.system.abi
-programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push action actc init '[0, "4,ACI"]' -p actc >> $logfile 2>&1
+ecmd set contract roxe unittests/contracts/roxe.system roxe.system.wasm roxe.system.abi
+programs/clroxe/clroxe --wallet-url $wdurl --url http://$bioshost:$biosport push action roxe init '[0, "4,ROC"]' -p roxe >> $logfile 2>&1
 
 # Manual deployers, add a series of lines below this block that looks like:
 #    cacmd $PRODNAME[0] $OWNERKEY[0] $ACTIVEKEY[0]
@@ -133,4 +133,4 @@ programs/clactc/clactc --wallet-url $wdurl --url http://$bioshost:$biosport push
 # ------ DO NOT ALTER THE NEXT LINE -------
 ###INSERT cacmd
 
-pkill -15 kactcd
+pkill -15 kroxed

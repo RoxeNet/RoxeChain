@@ -1,54 +1,54 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
-#include <actc/singleton.hpp>
-#include <actc/asset.hpp>
+#include <roxe/roxe.hpp>
+#include <roxe/singleton.hpp>
+#include <roxe/asset.hpp>
 
-// Extacted from actc.token contract:
-namespace actc {
-   class [[actc::contract("actc.token")]] token : public actc::contract {
+// Extacted from roxe.token contract:
+namespace roxe {
+   class [[roxe::contract("roxe.token")]] token : public roxe::contract {
    public:
-      using actc::contract::contract;
+      using roxe::contract::contract;
 
-      [[actc::action]]
-      void transfer( actc::name        from,
-                     actc::name        to,
-                     actc::asset       quantity,
+      [[roxe::action]]
+      void transfer( roxe::name        from,
+                     roxe::name        to,
+                     roxe::asset       quantity,
                      const std::string& memo );
-      using transfer_action = actc::action_wrapper<"transfer"_n, &token::transfer>;
+      using transfer_action = roxe::action_wrapper<"transfer"_n, &token::transfer>;
    };
 }
 
 // This contract:
-class [[actc::contract]] proxy : public actc::contract {
+class [[roxe::contract]] proxy : public roxe::contract {
 public:
-   proxy( actc::name self, actc::name first_receiver, actc::datastream<const char*> ds );
+   proxy( roxe::name self, roxe::name first_receiver, roxe::datastream<const char*> ds );
 
-   [[actc::action]]
-   void setowner( actc::name owner, uint32_t delay );
+   [[roxe::action]]
+   void setowner( roxe::name owner, uint32_t delay );
 
-   [[actc::on_notify("actc.token::transfer")]]
-   void on_transfer( actc::name        from,
-                     actc::name        to,
-                     actc::asset       quantity,
+   [[roxe::on_notify("roxe.token::transfer")]]
+   void on_transfer( roxe::name        from,
+                     roxe::name        to,
+                     roxe::asset       quantity,
                      const std::string& memo );
 
-   [[actc::on_notify("actc::onerror")]]
-   void on_error( uint128_t sender_id, actc::ignore<std::vector<char>> sent_trx );
+   [[roxe::on_notify("roxe::onerror")]]
+   void on_error( uint128_t sender_id, roxe::ignore<std::vector<char>> sent_trx );
 
-   struct [[actc::table]] config {
-      actc::name owner;
+   struct [[roxe::table]] config {
+      roxe::name owner;
       uint32_t    delay   = 0;
       uint32_t    next_id = 0;
 
-      ACTCLIB_SERIALIZE( config, (owner)(delay)(next_id) )
+      ROXELIB_SERIALIZE( config, (owner)(delay)(next_id) )
    };
 
-   using config_singleton = actc::singleton< "config"_n,  config >;
+   using config_singleton = roxe::singleton< "config"_n,  config >;
 
 protected:
    config_singleton _config;

@@ -1,27 +1,27 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 
-class [[actc::contract]] integration_test : public actc::contract {
+class [[roxe::contract]] integration_test : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
-   void store( actc::name from, actc::name to, uint64_t num );
+   [[roxe::action]]
+   void store( roxe::name from, roxe::name to, uint64_t num );
 
-   struct [[actc::table("payloads")]] payload {
+   struct [[roxe::table("payloads")]] payload {
       uint64_t              key;
       std::vector<uint64_t> data;
 
       uint64_t primary_key()const { return key; }
 
-      ACTCLIB_SERIALIZE( payload, (key)(data) )
+      ROXELIB_SERIALIZE( payload, (key)(data) )
    };
 
-   using payloads_table = actc::multi_index< "payloads"_n,  payload >;
+   using payloads_table = roxe::multi_index< "payloads"_n,  payload >;
 
 };

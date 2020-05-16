@@ -1,7 +1,7 @@
-#include <actc/chain/block_state.hpp>
-#include <actc/chain/exceptions.hpp>
+#include <roxe/chain/block_state.hpp>
+#include <roxe/chain/exceptions.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
    block_state::block_state( const block_header_state& prev,
                              signed_block_ptr b,
@@ -41,4 +41,4 @@ namespace actc { namespace chain {
    ,trxs( std::move(trx_metas) )
    {}
 
-} } /// actc::chain
+} } /// roxe::chain

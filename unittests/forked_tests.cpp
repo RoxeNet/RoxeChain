@@ -1,12 +1,12 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/testing/tester.hpp>
 
-#include <actc/chain/fork_database.hpp>
+#include <roxe/chain/fork_database.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -18,8 +18,8 @@
 
 #include "fork_test_utilities.hpp"
 
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe::chain;
+using namespace roxe::testing;
 
 BOOST_AUTO_TEST_SUITE(forked_tests)
 
@@ -150,26 +150,26 @@ BOOST_AUTO_TEST_CASE( forking ) try {
    wlog("set producer schedule to [dan,sam,pam]");
    c.produce_blocks(30);
 
-   auto r2 = c.create_accounts( {N(actc.token)} );
+   auto r2 = c.create_accounts( {N(roxe.token)} );
    wdump((fc::json::to_pretty_string(r2)));
-   c.set_code( N(actc.token), contracts::actc_token_wasm() );
-   c.set_abi( N(actc.token), contracts::actc_token_abi().data() );
+   c.set_code( N(roxe.token), contracts::roxe_token_wasm() );
+   c.set_abi( N(roxe.token), contracts::roxe_token_abi().data() );
    c.produce_blocks(10);
 
 
-   auto cr = c.push_action( N(actc.token), N(create), N(actc.token), mutable_variant_object()
-              ("issuer",       "actc" )
+   auto cr = c.push_action( N(roxe.token), N(create), N(roxe.token), mutable_variant_object()
+              ("issuer",       "roxe" )
               ("maximum_supply", core_from_string("10000000.0000"))
       );
 
-   cr = c.push_action( N(actc.token), N(issue), config::system_account_name, mutable_variant_object()
-              ("to",       "actc" )
+   cr = c.push_action( N(roxe.token), N(issue), config::system_account_name, mutable_variant_object()
+              ("to",       "roxe" )
               ("quantity", core_from_string("100.0000"))
               ("memo", "")
       );
 
-   cr = c.push_action( N(actc.token), N(transfer), config::system_account_name, mutable_variant_object()
-              ("from",     "actc")
+   cr = c.push_action( N(roxe.token), N(transfer), config::system_account_name, mutable_variant_object()
+              ("from",     "roxe")
               ("to",       "dan" )
               ("quantity", core_from_string("100.0000"))
               ("memo", "")

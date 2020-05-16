@@ -1,9 +1,9 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
-#include <actc/chain/global_property_object.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/global_property_object.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <boost/test/unit_test.hpp>
 
@@ -15,8 +15,8 @@
 #define TESTER validating_tester
 #endif
 
-using namespace actc::testing;
-using namespace actc::chain;
+using namespace roxe::testing;
+using namespace roxe::chain;
 using mvo = fc::mutable_variant_object;
 
 BOOST_AUTO_TEST_SUITE(producer_schedule_tests)

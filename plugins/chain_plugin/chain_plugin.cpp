@@ -1,22 +1,22 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain_plugin/chain_plugin.hpp>
-#include <actc/chain/fork_database.hpp>
-#include <actc/chain/block_log.hpp>
-#include <actc/chain/exceptions.hpp>
-#include <actc/chain/authorization_manager.hpp>
-#include <actc/chain/code_object.hpp>
-#include <actc/chain/config.hpp>
-#include <actc/chain/wasm_interface.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/reversible_block_object.hpp>
-#include <actc/chain/controller.hpp>
-#include <actc/chain/generated_transaction_object.hpp>
-#include <actc/chain/snapshot.hpp>
+#include <roxe/chain_plugin/chain_plugin.hpp>
+#include <roxe/chain/fork_database.hpp>
+#include <roxe/chain/block_log.hpp>
+#include <roxe/chain/exceptions.hpp>
+#include <roxe/chain/authorization_manager.hpp>
+#include <roxe/chain/code_object.hpp>
+#include <roxe/chain/config.hpp>
+#include <roxe/chain/wasm_interface.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/reversible_block_object.hpp>
+#include <roxe/chain/controller.hpp>
+#include <roxe/chain/generated_transaction_object.hpp>
+#include <roxe/chain/snapshot.hpp>
 
-#include <actc/chain/actc_contract.hpp>
+#include <roxe/chain/roxe_contract.hpp>
 
 #include <boost/signals2/connection.hpp>
 #include <boost/algorithm/string.hpp>
@@ -27,19 +27,19 @@
 #include <signal.h>
 #include <cstdlib>
 
-namespace actc {
+namespace roxe {
 
 //declare operator<< and validate funciton for read_mode in the same namespace as read_mode itself
 namespace chain {
 
-std::ostream& operator<<(std::ostream& osm, actc::chain::db_read_mode m) {
-   if ( m == actc::chain::db_read_mode::SPECULATIVE ) {
+std::ostream& operator<<(std::ostream& osm, roxe::chain::db_read_mode m) {
+   if ( m == roxe::chain::db_read_mode::SPECULATIVE ) {
       osm << "speculative";
-   } else if ( m == actc::chain::db_read_mode::HEAD ) {
+   } else if ( m == roxe::chain::db_read_mode::HEAD ) {
       osm << "head";
-   } else if ( m == actc::chain::db_read_mode::READ_ONLY ) {
+   } else if ( m == roxe::chain::db_read_mode::READ_ONLY ) {
       osm << "read-only";
-   } else if ( m == actc::chain::db_read_mode::IRREVERSIBLE ) {
+   } else if ( m == roxe::chain::db_read_mode::IRREVERSIBLE ) {
       osm << "irreversible";
    }
 
@@ -48,7 +48,7 @@ std::ostream& operator<<(std::ostream& osm, actc::chain::db_read_mode m) {
 
 void validate(boost::any& v,
               const std::vector<std::string>& values,
-              actc::chain::db_read_mode* /* target_type */,
+              roxe::chain::db_read_mode* /* target_type */,
               int)
 {
   using namespace boost::program_options;
@@ -61,22 +61,22 @@ void validate(boost::any& v,
   std::string const& s = validators::get_single_string(values);
 
   if ( s == "speculative" ) {
-     v = boost::any(actc::chain::db_read_mode::SPECULATIVE);
+     v = boost::any(roxe::chain::db_read_mode::SPECULATIVE);
   } else if ( s == "head" ) {
-     v = boost::any(actc::chain::db_read_mode::HEAD);
+     v = boost::any(roxe::chain::db_read_mode::HEAD);
   } else if ( s == "read-only" ) {
-     v = boost::any(actc::chain::db_read_mode::READ_ONLY);
+     v = boost::any(roxe::chain::db_read_mode::READ_ONLY);
   } else if ( s == "irreversible" ) {
-     v = boost::any(actc::chain::db_read_mode::IRREVERSIBLE);
+     v = boost::any(roxe::chain::db_read_mode::IRREVERSIBLE);
   } else {
      throw validation_error(validation_error::invalid_option_value);
   }
 }
 
-std::ostream& operator<<(std::ostream& osm, actc::chain::validation_mode m) {
-   if ( m == actc::chain::validation_mode::FULL ) {
+std::ostream& operator<<(std::ostream& osm, roxe::chain::validation_mode m) {
+   if ( m == roxe::chain::validation_mode::FULL ) {
       osm << "full";
-   } else if ( m == actc::chain::validation_mode::LIGHT ) {
+   } else if ( m == roxe::chain::validation_mode::LIGHT ) {
       osm << "light";
    }
 
@@ -85,7 +85,7 @@ std::ostream& operator<<(std::ostream& osm, actc::chain::validation_mode m) {
 
 void validate(boost::any& v,
               const std::vector<std::string>& values,
-              actc::chain::validation_mode* /* target_type */,
+              roxe::chain::validation_mode* /* target_type */,
               int)
 {
   using namespace boost::program_options;
@@ -98,9 +98,9 @@ void validate(boost::any& v,
   std::string const& s = validators::get_single_string(values);
 
   if ( s == "full" ) {
-     v = boost::any(actc::chain::validation_mode::FULL);
+     v = boost::any(roxe::chain::validation_mode::FULL);
   } else if ( s == "light" ) {
-     v = boost::any(actc::chain::validation_mode::LIGHT);
+     v = boost::any(roxe::chain::validation_mode::LIGHT);
   } else {
      throw validation_error(validation_error::invalid_option_value);
   }
@@ -108,10 +108,10 @@ void validate(boost::any& v,
 
 }
 
-using namespace actc;
-using namespace actc::chain;
-using namespace actc::chain::config;
-using namespace actc::chain::plugin_interface;
+using namespace roxe;
+using namespace roxe::chain;
+using namespace roxe::chain::config;
+using namespace roxe::chain::plugin_interface;
 using vm_type = wasm_interface::vm_type;
 using fc::flat_map;
 
@@ -197,8 +197,8 @@ public:
 
 chain_plugin::chain_plugin()
 :my(new chain_plugin_impl()) {
-   app().register_config_type<actc::chain::db_read_mode>();
-   app().register_config_type<actc::chain::validation_mode>();
+   app().register_config_type<roxe::chain::db_read_mode>();
+   app().register_config_type<roxe::chain::validation_mode>();
    app().register_config_type<chainbase::pinnable_mapped_file::map_mode>();
 }
 
@@ -212,7 +212,7 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
          ("protocol-features-dir", bpo::value<bfs::path>()->default_value("protocol_features"),
           "the location of the protocol_features directory (absolute path or relative to application config dir)")
          ("checkpoint", bpo::value<vector<string>>()->composing(), "Pairs of [BLOCK_NUM,BLOCK_ID] that should be enforced as checkpoints.")
-         ("wasm-runtime", bpo::value<actc::chain::wasm_interface::vm_type>()->value_name("wavm/wabt"), "Override default WASM runtime")
+         ("wasm-runtime", bpo::value<roxe::chain::wasm_interface::vm_type>()->value_name("wavm/wabt"), "Override default WASM runtime")
          ("abi-serializer-max-time-ms", bpo::value<uint32_t>()->default_value(config::default_abi_serializer_max_time_ms),
           "Override default maximum ABI serialization time allowed in ms")
          ("chain-state-db-size-mb", bpo::value<uint64_t>()->default_value(config::default_state_size / (1024  * 1024)), "Maximum size (in MiB) of the chain state database")
@@ -239,14 +239,14 @@ void chain_plugin::set_program_options(options_description& cli, options_descrip
           "Public key added to blacklist of keys that should not be included in authorities (may specify multiple times)")
          ("sender-bypass-whiteblacklist", boost::program_options::value<vector<string>>()->composing()->multitoken(),
           "Deferred transactions sent by accounts in this list do not have any of the subjective whitelist/blacklist checks applied to them (may specify multiple times)")
-         ("read-mode", boost::program_options::value<actc::chain::db_read_mode>()->default_value(actc::chain::db_read_mode::SPECULATIVE),
+         ("read-mode", boost::program_options::value<roxe::chain::db_read_mode>()->default_value(roxe::chain::db_read_mode::SPECULATIVE),
           "Database read mode (\"speculative\", \"head\", \"read-only\", \"irreversible\").\n"
           "In \"speculative\" mode database contains changes done up to the head block plus changes made by transactions not yet included to the blockchain.\n"
           "In \"head\" mode database contains changes done up to the current head block.\n"
           "In \"read-only\" mode database contains changes done up to the current head block and transactions cannot be pushed to the chain API.\n"
           "In \"irreversible\" mode database contains changes done up to the last irreversible block and transactions cannot be pushed to the chain API.\n"
           )
-         ("validation-mode", boost::program_options::value<actc::chain::validation_mode>()->default_value(actc::chain::validation_mode::FULL),
+         ("validation-mode", boost::program_options::value<roxe::chain::validation_mode>()->default_value(roxe::chain::validation_mode::FULL),
           "Chain validation mode (\"full\" or \"light\").\n"
           "In \"full\" mode all incoming blocks will be fully validated.\n"
           "In \"light\" mode all incoming blocks headers will be fully validated; transactions in those validated blocks will be trusted \n")
@@ -374,7 +374,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
    bool directory_exists = true;
 
    if( fc::exists( p ) ) {
-      ACTC_ASSERT( fc::is_directory( p ), plugin_exception,
+      ROXE_ASSERT( fc::is_directory( p ), plugin_exception,
                   "Path to protocol-features is not a directory: ${path}",
                   ("path", p.generic_string())
       );
@@ -440,7 +440,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
 
          auto res = found_builtin_protocol_features.emplace( f->get_codename(), file_path );
 
-         ACTC_ASSERT( res.second, plugin_exception,
+         ROXE_ASSERT( res.second, plugin_exception,
                      "Builtin protocol feature '${codename}' was already included from a previous_file",
                      ("codename", builtin_protocol_feature_codename(f->get_codename()))
                      ("current_file", file_path.generic_string())
@@ -491,7 +491,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
 
       auto file_path = p / filename;
 
-      ACTC_ASSERT( !fc::exists( file_path ), plugin_exception,
+      ROXE_ASSERT( !fc::exists( file_path ), plugin_exception,
                   "Could not save builtin protocol feature with codename '${codename}' because a file at the following path already exists: ${path}",
                   ("codename", builtin_protocol_feature_codename( f.get_codename() ))
                   ("path", file_path.generic_string())
@@ -517,7 +517,7 @@ protocol_feature_set initialize_protocol_features( const fc::path& p, bool popul
    ( builtin_protocol_feature_t codename ) -> digest_type {
       auto res = visited_builtins.emplace( codename, optional<digest_type>() );
       if( !res.second ) {
-         ACTC_ASSERT( res.first->second, protocol_feature_exception,
+         ROXE_ASSERT( res.first->second, protocol_feature_exception,
                      "invariant failure: cycle found in builtin protocol feature dependencies"
          );
          return *res.first->second;
@@ -557,10 +557,10 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
    try {
       try {
-         genesis_state gs; // Check if ACTC_ROOT_KEY is bad
+         genesis_state gs; // Check if ROXE_ROOT_KEY is bad
       } catch ( const fc::exception& ) {
-         elog( "ACTC_ROOT_KEY ('${root_key}') is invalid. Recompile with a valid public key.",
-               ("root_key", genesis_state::actc_root_key));
+         elog( "ROXE_ROOT_KEY ('${root_key}') is invalid. Recompile with a valid public key.",
+               ("root_key", genesis_state::roxe_root_key));
          throw;
       }
 
@@ -579,7 +579,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          auto& list = my->chain_config->action_blacklist;
          for( const auto& a : acts ) {
             auto pos = a.find( "::" );
-            ACTC_ASSERT( pos != std::string::npos, plugin_config_exception, "Invalid entry in action-blacklist: '${a}'", ("a", a));
+            ROXE_ASSERT( pos != std::string::npos, plugin_config_exception, "Invalid entry in action-blacklist: '${a}'", ("a", a));
             account_name code( a.substr( 0, pos ));
             action_name act( a.substr( pos + 2 ));
             list.emplace( code.value, act.value );
@@ -621,7 +621,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             auto item = fc::json::from_string(cp).as<std::pair<uint32_t,block_id_type>>();
             auto itr = my->loaded_checkpoints.find(item.first);
             if( itr != my->loaded_checkpoints.end() ) {
-               ACTC_ASSERT( itr->second == item.second,
+               ROXE_ASSERT( itr->second == item.second,
                            plugin_config_exception,
                           "redefining existing checkpoint at block number ${num}: original: ${orig} new: ${new}",
                           ("num", item.first)("orig", itr->second)("new", item.second)
@@ -657,12 +657,12 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       if( options.count( "chain-threads" )) {
          my->chain_config->thread_pool_size = options.at( "chain-threads" ).as<uint16_t>();
-         ACTC_ASSERT( my->chain_config->thread_pool_size > 0, plugin_config_exception,
+         ROXE_ASSERT( my->chain_config->thread_pool_size > 0, plugin_config_exception,
                      "chain-threads ${num} must be greater than 0", ("num", my->chain_config->thread_pool_size) );
       }
 
       my->chain_config->sig_cpu_bill_pct = options.at("signature-cpu-billable-pct").as<uint32_t>();
-      ACTC_ASSERT( my->chain_config->sig_cpu_bill_pct >= 0 && my->chain_config->sig_cpu_bill_pct <= 100, plugin_config_exception,
+      ROXE_ASSERT( my->chain_config->sig_cpu_bill_pct >= 0 && my->chain_config->sig_cpu_bill_pct <= 100, plugin_config_exception,
                   "signature-cpu-billable-pct must be 0 - 100, ${pct}", ("pct", my->chain_config->sig_cpu_bill_pct) );
       my->chain_config->sig_cpu_bill_pct *= config::percent_1;
 
@@ -695,7 +695,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                p = bfs::current_path() / p;
             }
 
-            ACTC_ASSERT( fc::json::save_to_file( gs, p, true ),
+            ROXE_ASSERT( fc::json::save_to_file( gs, p, true ),
                         misc_exception,
                         "Error occurred while writing genesis JSON to '${path}'",
                         ("path", p.generic_string())
@@ -704,7 +704,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             ilog( "Saved genesis JSON to '${path}'", ("path", p.generic_string()) );
          }
 
-         ACTC_THROW( extract_genesis_state_exception, "extracted genesis state from blocks.log" );
+         ROXE_THROW( extract_genesis_state_exception, "extracted genesis state from blocks.log" );
       }
 
       if( options.count("export-reversible-blocks") ) {
@@ -719,7 +719,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          else
             ilog( "Saved recovered blocks from reversible block database into '${path}'", ("path", p.generic_string()) );
 
-         ACTC_THROW( node_management_success, "exported reversible blocks" );
+         ROXE_THROW( node_management_success, "exported reversible blocks" );
       }
 
       if( options.at( "delete-all-blocks" ).as<bool>()) {
@@ -766,7 +766,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          } else {
             ilog( "Exiting after fixing reversible blocks database..." );
          }
-         ACTC_THROW( fixed_reversible_db_exception, "fixed corrupted reversible blocks database" );
+         ROXE_THROW( fixed_reversible_db_exception, "fixed corrupted reversible blocks database" );
       } else if( options.at( "truncate-at-block" ).as<uint32_t>() > 0 ) {
          wlog( "The --truncate-at-block option can only be used with --fix-reversible-blocks without a replay or with --hard-replay-blockchain." );
       } else if( options.count("import-reversible-blocks") ) {
@@ -777,7 +777,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          import_reversible_blocks( my->chain_config->blocks_dir/config::reversible_blocks_dir_name,
                                    my->chain_config->reversible_cache_size, reversible_blocks_file );
 
-         ACTC_THROW( node_management_success, "imported reversible blocks" );
+         ROXE_THROW( node_management_success, "imported reversible blocks" );
       }
 
       if( options.count("import-reversible-blocks") ) {
@@ -786,7 +786,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
 
       if (options.count( "snapshot" )) {
          my->snapshot_path = options.at( "snapshot" ).as<bfs::path>();
-         ACTC_ASSERT( fc::exists(*my->snapshot_path), plugin_config_exception,
+         ROXE_ASSERT( fc::exists(*my->snapshot_path), plugin_config_exception,
                      "Cannot load snapshot, ${name} does not exist", ("name", my->snapshot_path->generic_string()) );
 
          // recover genesis information from the snapshot
@@ -798,7 +798,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          });
          infile.close();
 
-         ACTC_ASSERT( options.count( "genesis-timestamp" ) == 0,
+         ROXE_ASSERT( options.count( "genesis-timestamp" ) == 0,
                  plugin_config_exception,
                  "--snapshot is incompatible with --genesis-timestamp as the snapshot contains genesis information");
 
@@ -807,24 +807,24 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
             if( genesis_path.is_relative() ) {
                genesis_path = bfs::current_path() / genesis_path;
             }
-            ACTC_ASSERT( fc::is_regular_file( genesis_path ),
+            ROXE_ASSERT( fc::is_regular_file( genesis_path ),
                         plugin_config_exception,
                         "Specified genesis file '${genesis}' does not exist.",
                         ("genesis", genesis_path.generic_string()));
             auto genesis_file = fc::json::from_file( genesis_path ).as<genesis_state>();
-            ACTC_ASSERT( my->chain_config->genesis == genesis_file, plugin_config_exception,
+            ROXE_ASSERT( my->chain_config->genesis == genesis_file, plugin_config_exception,
                         "Genesis state provided via command line arguments does not match the existing genesis state in the snapshot. "
                         "It is not necessary to provide a genesis state argument when loading a snapshot."
                       );
          }
          auto shared_mem_path = my->chain_config->state_dir / "shared_memory.bin";
-         ACTC_ASSERT( !fc::exists(shared_mem_path),
+         ROXE_ASSERT( !fc::exists(shared_mem_path),
                  plugin_config_exception,
                  "Snapshot can only be used to initialize an empty database." );
 
          if( fc::is_regular_file( my->blocks_dir / "blocks.log" )) {
             auto log_genesis = block_log::extract_genesis_state(my->blocks_dir);
-            ACTC_ASSERT( log_genesis.compute_chain_id() == my->chain_config->genesis.compute_chain_id(),
+            ROXE_ASSERT( log_genesis.compute_chain_id() == my->chain_config->genesis.compute_chain_id(),
                     plugin_config_exception,
                     "Genesis information in blocks.log does not match genesis information in the snapshot");
          }
@@ -845,7 +845,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                genesis_file = bfs::current_path() / genesis_file;
             }
 
-            ACTC_ASSERT( fc::is_regular_file( genesis_file ),
+            ROXE_ASSERT( fc::is_regular_file( genesis_file ),
                         plugin_config_exception,
                        "Specified genesis file '${genesis}' does not exist.",
                        ("genesis", genesis_file.generic_string()));
@@ -873,7 +873,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
                wlog( "Starting up fresh blockchain with default genesis state." );
             }
          } else {
-            ACTC_ASSERT( my->chain_config->genesis == *existing_genesis, plugin_config_exception,
+            ROXE_ASSERT( my->chain_config->genesis == *existing_genesis, plugin_config_exception,
                         "Genesis state provided via command line arguments does not match the existing genesis state in blocks.log. "
                         "It is not necessary to provide genesis state arguments when a blocks.log file already exists."
                       );
@@ -922,7 +922,7 @@ void chain_plugin::plugin_initialize(const variables_map& options) {
          auto itr = my->loaded_checkpoints.find( blk->block_num() );
          if( itr != my->loaded_checkpoints.end() ) {
             auto id = blk->id();
-            ACTC_ASSERT( itr->second == id, checkpoint_exception,
+            ROXE_ASSERT( itr->second == id, checkpoint_exception,
                         "Checkpoint does not match for block number ${num}: expected: ${expected} actual: ${actual}",
                         ("num", blk->block_num())("expected", itr->second)("actual", id)
             );
@@ -1007,7 +1007,7 @@ chain_apis::read_write::read_write(controller& db, const fc::microseconds& abi_s
 }
 
 void chain_apis::read_write::validate() const {
-   ACTC_ASSERT( db.get_read_mode() != chain::db_read_mode::READ_ONLY, missing_chain_api_plugin_exception, "Not allowed, node in read-only mode" );
+   ROXE_ASSERT( db.get_read_mode() != chain::db_read_mode::READ_ONLY, missing_chain_api_plugin_exception, "Not allowed, node in read-only mode" );
 }
 
 void chain_plugin::accept_block(const signed_block_ptr& block ) {
@@ -1061,10 +1061,10 @@ bool chain_plugin::recover_reversible_blocks( const fc::path& db_dir, uint32_t c
       reversible_dir = *new_db_dir;
    } else {
       auto reversible_dir_name = reversible_dir.filename().generic_string();
-      ACTC_ASSERT( reversible_dir_name != ".", invalid_reversible_blocks_dir, "Invalid path to reversible directory" );
+      ROXE_ASSERT( reversible_dir_name != ".", invalid_reversible_blocks_dir, "Invalid path to reversible directory" );
       backup_dir = reversible_dir.parent_path() / reversible_dir_name.append("-").append( now );
 
-      ACTC_ASSERT( !fc::exists(backup_dir),
+      ROXE_ASSERT( !fc::exists(backup_dir),
                   reversible_blocks_backup_dir_exist,
                  "Cannot move existing reversible directory to already existing directory '${backup_dir}'",
                  ("backup_dir", backup_dir) );
@@ -1100,7 +1100,7 @@ bool chain_plugin::recover_reversible_blocks( const fc::path& db_dir, uint32_t c
    }
    try {
       for( ; itr != ubi.end(); ++itr ) {
-         ACTC_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
+         ROXE_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
                      "gap in reversible block database between ${end} and ${blocknum}",
                      ("end", end)("blocknum", itr->blocknum)
                    );
@@ -1156,7 +1156,7 @@ bool chain_plugin::import_reversible_blocks( const fc::path& reversible_dir,
          if( start == 0 ) {
             start = num;
          } else {
-            ACTC_ASSERT( num == end + 1, gap_in_reversible_blocks_db,
+            ROXE_ASSERT( num == end + 1, gap_in_reversible_blocks_db,
                         "gap in reversible block database between ${end} and ${num}",
                         ("end", end)("num", num)
                       );
@@ -1199,7 +1199,7 @@ bool chain_plugin::export_reversible_blocks( const fc::path& reversible_dir,
    }
    try {
       for( ; itr != ubi.end(); ++itr ) {
-         ACTC_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
+         ROXE_ASSERT( itr->blocknum == end + 1, gap_in_reversible_blocks_db,
                      "gap in reversible block database between ${end} and ${blocknum}",
                      ("end", end)("blocknum", itr->blocknum)
                    );
@@ -1231,7 +1231,7 @@ controller& chain_plugin::chain() { return *my->chain; }
 const controller& chain_plugin::chain() const { return *my->chain; }
 
 chain::chain_id_type chain_plugin::get_chain_id()const {
-   ACTC_ASSERT( my->chain_id.valid(), chain_id_type_exception, "chain ID has not been initialized yet" );
+   ROXE_ASSERT( my->chain_id.valid(), chain_id_type_exception, "chain ID has not been initialized yet" );
    return *my->chain_id;
 }
 
@@ -1260,13 +1260,13 @@ void chain_plugin::handle_guard_exception(const chain::guard_exception& e) {
 
 void chain_plugin::handle_db_exhaustion() {
    elog("database memory exhausted: increase chain-state-db-size-mb and/or reversible-blocks-db-size-mb");
-   //return 1 -- it's what programs/nodactc/main.cpp considers "BAD_ALLOC"
+   //return 1 -- it's what programs/nodroxe/main.cpp considers "BAD_ALLOC"
    std::_Exit(1);
 }
 
 void chain_plugin::handle_bad_alloc() {
    elog("std::bad_alloc - memory exhausted");
-   //return -2 -- it's what programs/nodactc/main.cpp reports for std::exception
+   //return -2 -- it's what programs/nodroxe/main.cpp reports for std::exception
    std::_Exit(-2);
 }
 
@@ -1379,7 +1379,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
    // see multi_index packing of index name
    const uint64_t table = p.table;
    uint64_t index = table & 0xFFFFFFFFFFFFFFF0ULL;
-   ACTC_ASSERT( index == table, chain::contract_table_query_exception, "Unsupported table name: ${n}", ("n", p.table) );
+   ROXE_ASSERT( index == table, chain::contract_table_query_exception, "Unsupported table name: ${n}", ("n", p.table) );
 
    primary = false;
    uint64_t pos = 0;
@@ -1406,7 +1406,7 @@ uint64_t read_only::get_table_index_name(const read_only::get_table_rows_params&
       try {
          pos = fc::to_uint64( p.index_position );
       } catch(...) {
-         ACTC_ASSERT( false, chain::contract_table_query_exception, "Invalid index_position: ${p}", ("p", p.index_position));
+         ROXE_ASSERT( false, chain::contract_table_query_exception, "Invalid index_position: ${p}", ("p", p.index_position));
       }
       if (pos < 2) {
          primary = true;
@@ -1433,17 +1433,17 @@ uint64_t convert_to_type(const string& str, const string& desc) {
       return s.value;
    } catch( ... ) { }
 
-   if (str.find(',') != string::npos) { // fix #6274 only match formats like 4,ACTC
+   if (str.find(',') != string::npos) { // fix #6274 only match formats like 4,ROXE
       try {
-         auto symb = actc::chain::symbol::from_string(str);
+         auto symb = roxe::chain::symbol::from_string(str);
          return symb.value();
       } catch( ... ) { }
    }
 
    try {
-      return ( actc::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
+      return ( roxe::chain::string_to_symbol( 0, str.c_str() ) >> 8 );
    } catch( ... ) {
-      ACTC_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
+      ROXE_ASSERT( false, chain_type_exception, "Could not convert ${desc} string '${str}' to any of the following: "
                         "uint64_t, valid name, or valid symbol (with or without the precision)",
                   ("desc", desc)("str", str));
    }
@@ -1456,7 +1456,7 @@ double convert_to_type(const string& str, const string& desc) {
       val = fc::variant(str).as<double>();
    } FC_RETHROW_EXCEPTIONS(warn, "Could not convert ${desc} string '${str}' to key type.", ("desc", desc)("str",str) )
 
-   ACTC_ASSERT( !std::isnan(val), chain::contract_table_query_exception,
+   ROXE_ASSERT( !std::isnan(val), chain::contract_table_query_exception,
                "Converted ${desc} string '${str}' to NaN which is not a permitted value for the key type", ("desc", desc)("str",str) );
 
    return val;
@@ -1465,7 +1465,7 @@ double convert_to_type(const string& str, const string& desc) {
 abi_def get_abi( const controller& db, const name& account ) {
    const auto &d = db.db();
    const account_object *code_accnt = d.find<account_object, by_name>(account);
-   ACTC_ASSERT(code_accnt != nullptr, chain::account_query_exception, "Fail to retrieve account for ${account}", ("account", account) );
+   ROXE_ASSERT(code_accnt != nullptr, chain::account_query_exception, "Fail to retrieve account for ${account}", ("account", account) );
    abi_def abi;
    abi_serializer::to_abi(code_accnt->abi, abi);
    return abi;
@@ -1477,24 +1477,24 @@ string get_table_type( const abi_def& abi, const name& table_name ) {
          return t.index_type;
       }
    }
-   ACTC_ASSERT( false, chain::contract_table_query_exception, "Table ${table} is not specified in the ABI", ("table",table_name) );
+   ROXE_ASSERT( false, chain::contract_table_query_exception, "Table ${table} is not specified in the ABI", ("table",table_name) );
 }
 
 read_only::get_table_rows_result read_only::get_table_rows( const read_only::get_table_rows_params& p )const {
-   const abi_def abi = actc::chain_apis::get_abi( db, p.code );
+   const abi_def abi = roxe::chain_apis::get_abi( db, p.code );
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstrict-aliasing"
    bool primary = false;
    auto table_with_index = get_table_index_name( p, primary );
    if( primary ) {
-      ACTC_ASSERT( p.table == table_with_index, chain::contract_table_query_exception, "Invalid table name ${t}", ( "t", p.table ));
+      ROXE_ASSERT( p.table == table_with_index, chain::contract_table_query_exception, "Invalid table name ${t}", ( "t", p.table ));
       auto table_type = get_table_type( abi, p.table );
       if( table_type == KEYi64 || p.key_type == "i64" || p.key_type == "name" ) {
          return get_table_rows_ex<key_value_index>(p,abi);
       }
-      ACTC_ASSERT( false, chain::contract_table_query_exception,  "Invalid table type ${type}", ("type",table_type)("abi",abi));
+      ROXE_ASSERT( false, chain::contract_table_query_exception,  "Invalid table type ${type}", ("type",table_type)("abi",abi));
    } else {
-      ACTC_ASSERT( !p.key_type.empty(), chain::contract_table_query_exception, "key type required for non-primary index" );
+      ROXE_ASSERT( !p.key_type.empty(), chain::contract_table_query_exception, "key type required for non-primary index" );
 
       if (p.key_type == chain_apis::i64 || p.key_type == "name") {
          return get_table_rows_by_seckey<index64_index, uint64_t>(p, abi, [](uint64_t v)->uint64_t {
@@ -1536,7 +1536,7 @@ read_only::get_table_rows_result read_only::get_table_rows( const read_only::get
          using  conv = keytype_converter<chain_apis::ripemd160,chain_apis::hex>;
          return get_table_rows_by_seckey<conv::index_type, conv::input_type>(p, abi, conv::function());
       }
-      ACTC_ASSERT(false, chain::contract_table_query_exception,  "Unsupported secondary index type: ${t}", ("t", p.key_type));
+      ROXE_ASSERT(false, chain::contract_table_query_exception,  "Unsupported secondary index type: ${t}", ("t", p.key_type));
    }
 #pragma GCC diagnostic pop
 }
@@ -1591,18 +1591,18 @@ read_only::get_table_by_scope_result read_only::get_table_by_scope( const read_o
 
 vector<asset> read_only::get_currency_balance( const read_only::get_currency_balance_params& p )const {
 
-   const abi_def abi = actc::chain_apis::get_abi( db, p.code );
+   const abi_def abi = roxe::chain_apis::get_abi( db, p.code );
    (void)get_table_type( abi, "accounts" );
 
    vector<asset> results;
    walk_key_value_table(p.code, p.account, N(accounts), [&](const key_value_object& obj){
-      ACTC_ASSERT( obj.value.size() >= sizeof(asset), chain::asset_type_exception, "Invalid data on table");
+      ROXE_ASSERT( obj.value.size() >= sizeof(asset), chain::asset_type_exception, "Invalid data on table");
 
       asset cursor;
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       fc::raw::unpack(ds, cursor);
 
-      ACTC_ASSERT( cursor.get_symbol().valid(), chain::asset_type_exception, "Invalid asset");
+      ROXE_ASSERT( cursor.get_symbol().valid(), chain::asset_type_exception, "Invalid asset");
 
       if( !p.symbol || boost::iequals(cursor.symbol_name(), *p.symbol) ) {
         results.emplace_back(cursor);
@@ -1618,13 +1618,13 @@ vector<asset> read_only::get_currency_balance( const read_only::get_currency_bal
 fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_params& p )const {
    fc::mutable_variant_object results;
 
-   const abi_def abi = actc::chain_apis::get_abi( db, p.code );
+   const abi_def abi = roxe::chain_apis::get_abi( db, p.code );
    (void)get_table_type( abi, "stat" );
 
-   uint64_t scope = ( actc::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
+   uint64_t scope = ( roxe::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
 
    walk_key_value_table(p.code, scope, N(stat), [&](const key_value_object& obj){
-      ACTC_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
+      ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
 
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       read_only::get_currency_stats_result result;
@@ -1642,14 +1642,14 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
 
 fc::variant get_global_row( const database& db, const abi_def& abi, const abi_serializer& abis, const fc::microseconds& abi_serializer_max_time_ms, bool shorten_abi_errors ) {
    const auto table_type = get_table_type(abi, N(global));
-   ACTC_ASSERT(table_type == read_only::KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table global", ("type",table_type));
+   ROXE_ASSERT(table_type == read_only::KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table global", ("type",table_type));
 
    const auto* const table_id = db.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple(config::system_account_name, config::system_account_name, N(global)));
-   ACTC_ASSERT(table_id, chain::contract_table_query_exception, "Missing table global");
+   ROXE_ASSERT(table_id, chain::contract_table_query_exception, "Missing table global");
 
    const auto& kv_index = db.get_index<key_value_index, by_scope_primary>();
    const auto it = kv_index.find(boost::make_tuple(table_id->id, N(global)));
-   ACTC_ASSERT(it != kv_index.end(), chain::contract_table_query_exception, "Missing row in table global");
+   ROXE_ASSERT(it != kv_index.end(), chain::contract_table_query_exception, "Missing row in table global");
 
    vector<char> data;
    read_only::copy_inline_row(*it, data);
@@ -1657,10 +1657,10 @@ fc::variant get_global_row( const database& db, const abi_def& abi, const abi_se
 }
 
 read_only::get_producers_result read_only::get_producers( const read_only::get_producers_params& p ) const try {
-   const abi_def abi = actc::chain_apis::get_abi(db, config::system_account_name);
+   const abi_def abi = roxe::chain_apis::get_abi(db, config::system_account_name);
    const auto table_type = get_table_type(abi, N(producers));
    const abi_serializer abis{ abi, abi_serializer_max_time };
-   ACTC_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
+   ROXE_ASSERT(table_type == KEYi64, chain::contract_table_query_exception, "Invalid table type ${type} for table producers", ("type",table_type));
 
    const auto& d = db.db();
    const auto lower = name{p.lower_bound};
@@ -1670,7 +1670,7 @@ read_only::get_producers_result read_only::get_producers( const read_only::get_p
            boost::make_tuple(config::system_account_name, config::system_account_name, N(producers)));
    const auto* const secondary_table_id = d.find<chain::table_id_object, chain::by_code_scope_table>(
            boost::make_tuple(config::system_account_name, config::system_account_name, N(producers) | secondary_index_num));
-   ACTC_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing producers table");
+   ROXE_ASSERT(table_id && secondary_table_id, chain::contract_table_query_exception, "Missing producers table");
 
    const auto& kv_index = d.get_index<key_value_index, by_scope_primary>();
    const auto& secondary_index = d.get_index<index_double_index>().indices();
@@ -1771,7 +1771,7 @@ read_only::get_scheduled_transactions( const read_only::get_scheduled_transactio
                const auto& by_txid = d.get_index<generated_transaction_multi_index,by_trx_id>();
                auto itr = by_txid.find( txid );
                if (itr == by_txid.end()) {
-                  ACTC_THROW(transaction_exception, "Unknown Transaction ID: ${txid}", ("txid", txid));
+                  ROXE_THROW(transaction_exception, "Unknown Transaction ID: ${txid}", ("txid", txid));
                }
 
                return d.get_index<generated_transaction_multi_index>().indices().project<by_delay>(itr);
@@ -1832,7 +1832,7 @@ fc::variant read_only::get_block(const read_only::get_block_params& params) cons
    signed_block_ptr block;
    optional<uint64_t> block_num;
 
-   ACTC_ASSERT( !params.block_num_or_id.empty() && params.block_num_or_id.size() <= 64,
+   ROXE_ASSERT( !params.block_num_or_id.empty() && params.block_num_or_id.size() <= 64,
                chain::block_id_type_exception,
                "Invalid Block number or ID, must be greater than 0 and less than 64 characters"
    );
@@ -1846,10 +1846,10 @@ fc::variant read_only::get_block(const read_only::get_block_params& params) cons
    } else {
       try {
          block = db.fetch_block_by_id( fc::variant(params.block_num_or_id).as<block_id_type>() );
-      } ACTC_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+      } ROXE_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
    }
 
-   ACTC_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num_or_id));
+   ROXE_ASSERT( block, unknown_block_exception, "Could not find block: ${block}", ("block", params.block_num_or_id));
 
    fc::variant pretty_output;
    abi_serializer::to_variant(*block, pretty_output, make_resolver(this, abi_serializer_max_time), abi_serializer_max_time);
@@ -1875,10 +1875,10 @@ fc::variant read_only::get_block_header_state(const get_block_header_state_param
    } else {
       try {
          b = db.fetch_block_state_by_id(fc::variant(params.block_num_or_id).as<block_id_type>());
-      } ACTC_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
+      } ROXE_RETHROW_EXCEPTIONS(chain::block_id_type_exception, "Invalid block ID: ${block_num_or_id}", ("block_num_or_id", params.block_num_or_id))
    }
 
-   ACTC_ASSERT( b, unknown_block_exception, "Could not find reversible block: ${block}", ("block", params.block_num_or_id));
+   ROXE_ASSERT( b, unknown_block_exception, "Could not find reversible block: ${block}", ("block", params.block_num_or_id));
 
    fc::variant vo;
    fc::to_variant( static_cast<const block_header_state&>(*b), vo );
@@ -1904,7 +1904,7 @@ void read_write::push_transaction(const read_write::push_transaction_params& par
       try {
          abi_serializer::from_variant(params, *pretty_input, resolver, abi_serializer_max_time);
          ptrx = std::make_shared<transaction_metadata>( pretty_input );
-      } ACTC_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
+      } ROXE_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
 
       app().get_method<incoming::methods::transaction_async>()(ptrx, true, [this, next](const fc::static_variant<fc::exception_ptr, transaction_trace_ptr>& result) -> void{
          if (result.contains<fc::exception_ptr>()) {
@@ -2002,7 +2002,7 @@ static void push_recurse(read_write* rw, int index, const std::shared_ptr<read_w
 
 void read_write::push_transactions(const read_write::push_transactions_params& params, next_function<read_write::push_transactions_results> next) {
    try {
-      ACTC_ASSERT( params.size() <= 1000, too_many_tx_at_once, "Attempt to push too many transactions at once" );
+      ROXE_ASSERT( params.size() <= 1000, too_many_tx_at_once, "Attempt to push too many transactions at once" );
       auto params_copy = std::make_shared<read_write::push_transactions_params>(params.begin(), params.end());
       auto result = std::make_shared<read_write::push_transactions_results>();
       result->reserve(params.size());
@@ -2024,7 +2024,7 @@ void read_write::send_transaction(const read_write::send_transaction_params& par
       try {
          abi_serializer::from_variant(params, *pretty_input, resolver, abi_serializer_max_time);
          ptrx = std::make_shared<transaction_metadata>( pretty_input );
-      } ACTC_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
+      } ROXE_RETHROW_EXCEPTIONS(chain::packed_transaction_type_exception, "Invalid packed transaction")
 
       app().get_method<incoming::methods::transaction_async>()(ptrx, true, [this, next](const fc::static_variant<fc::exception_ptr, transaction_trace_ptr>& result) -> void{
          if (result.contains<fc::exception_ptr>()) {
@@ -2073,7 +2073,7 @@ read_only::get_code_results read_only::get_code( const get_code_params& params )
    const auto& accnt_obj          = d.get<account_object,by_name>( params.account_name );
    const auto& accnt_metadata_obj = d.get<account_metadata_object,by_name>( params.account_name );
 
-   ACTC_ASSERT( params.code_as_wasm, unsupported_feature, "Returning WAST from get_code is no longer supported" );
+   ROXE_ASSERT( params.code_as_wasm, unsupported_feature, "Returning WAST from get_code is no longer supported" );
 
    if( accnt_metadata_obj.code_hash != digest_type() ) {
       const auto& code_obj = d.get<code_object, by_code_hash>(accnt_metadata_obj.code_hash);
@@ -2167,7 +2167,7 @@ read_only::get_account_results read_only::get_account( const get_account_params&
       if( perm->parent._id ) {
          const auto* p = d.find<permission_object,by_id>( perm->parent );
          if( p ) {
-            ACTC_ASSERT(perm->owner == p->owner, invalid_parent_permission, "Invalid parent permission");
+            ROXE_ASSERT(perm->owner == p->owner, invalid_parent_permission, "Invalid parent permission");
             parent = p->name;
          }
       }
@@ -2182,7 +2182,7 @@ read_only::get_account_results read_only::get_account( const get_account_params&
    if( abi_serializer::to_abi(code_account.abi, abi) ) {
       abi_serializer abis( abi, abi_serializer_max_time );
 
-      const auto token_code = N(actc.token);
+      const auto token_code = N(roxe.token);
 
       auto core_symbol = extract_core_symbol();
 
@@ -2262,20 +2262,20 @@ static variant action_abi_to_variant( const abi_def& abi, type_name action_type 
 read_only::abi_json_to_bin_result read_only::abi_json_to_bin( const read_only::abi_json_to_bin_params& params )const try {
    abi_json_to_bin_result result;
    const auto code_account = db.db().find<account_object,by_name>( params.code );
-   ACTC_ASSERT(code_account != nullptr, contract_query_exception, "Contract can't be found ${contract}", ("contract", params.code));
+   ROXE_ASSERT(code_account != nullptr, contract_query_exception, "Contract can't be found ${contract}", ("contract", params.code));
 
    abi_def abi;
    if( abi_serializer::to_abi(code_account->abi, abi) ) {
       abi_serializer abis( abi, abi_serializer_max_time );
       auto action_type = abis.get_action_type(params.action);
-      ACTC_ASSERT(!action_type.empty(), action_validate_exception, "Unknown action ${action} in contract ${contract}", ("action", params.action)("contract", params.code));
+      ROXE_ASSERT(!action_type.empty(), action_validate_exception, "Unknown action ${action} in contract ${contract}", ("action", params.action)("contract", params.code));
       try {
          result.binargs = abis.variant_to_binary( action_type, params.args, abi_serializer_max_time, shorten_abi_errors );
-      } ACTC_RETHROW_EXCEPTIONS(chain::invalid_action_args_exception,
+      } ROXE_RETHROW_EXCEPTIONS(chain::invalid_action_args_exception,
                                 "'${args}' is invalid args for action '${action}' code '${code}'. expected '${proto}'",
                                 ("args", params.args)("action", params.action)("code", params.code)("proto", action_abi_to_variant(abi, action_type)))
    } else {
-      ACTC_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
+      ROXE_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
    }
    return result;
 } FC_RETHROW_EXCEPTIONS( warn, "code: ${code}, action: ${action}, args: ${args}",
@@ -2289,7 +2289,7 @@ read_only::abi_bin_to_json_result read_only::abi_bin_to_json( const read_only::a
       abi_serializer abis( abi, abi_serializer_max_time );
       result.args = abis.binary_to_variant( abis.get_action_type( params.action ), params.binargs, abi_serializer_max_time, shorten_abi_errors );
    } else {
-      ACTC_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
+      ROXE_ASSERT(false, abi_not_found_exception, "No ABI found for ${contract}", ("contract", params.code));
    }
    return result;
 }
@@ -2299,7 +2299,7 @@ read_only::get_required_keys_result read_only::get_required_keys( const get_requ
    auto resolver = make_resolver(this, abi_serializer_max_time);
    try {
       abi_serializer::from_variant(params.transaction, pretty_input, resolver, abi_serializer_max_time);
-   } ACTC_RETHROW_EXCEPTIONS(chain::transaction_type_exception, "Invalid transaction")
+   } ROXE_RETHROW_EXCEPTIONS(chain::transaction_type_exception, "Invalid transaction")
 
    auto required_keys_set = db.get_authorization_manager().get_required_keys( pretty_input, params.available_keys, fc::seconds( pretty_input.delay_sec ));
    get_required_keys_result result;
@@ -2324,12 +2324,12 @@ namespace detail {
 chain::symbol read_only::extract_core_symbol()const {
    symbol core_symbol(0);
 
-   // The following code makes assumptions about the contract deployed on actc account (i.e. the system contract) and how it stores its data.
+   // The following code makes assumptions about the contract deployed on roxe account (i.e. the system contract) and how it stores its data.
    const auto& d = db.db();
-   const auto* t_id = d.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple( N(actc), N(actc), N(rammarket) ));
+   const auto* t_id = d.find<chain::table_id_object, chain::by_code_scope_table>(boost::make_tuple( N(roxe), N(roxe), N(rammarket) ));
    if( t_id != nullptr ) {
       const auto &idx = d.get_index<key_value_index, by_scope_primary>();
-      auto it = idx.find(boost::make_tuple( t_id->id, actc::chain::string_to_symbol_c(4,"RAMCORE") ));
+      auto it = idx.find(boost::make_tuple( t_id->id, roxe::chain::string_to_symbol_c(4,"RAMCORE") ));
       if( it != idx.end() ) {
          detail::ram_market_exchange_state_t ram_market_exchange_state;
 
@@ -2351,6 +2351,6 @@ chain::symbol read_only::extract_core_symbol()const {
 }
 
 } // namespace chain_apis
-} // namespace actc
+} // namespace roxe
 
-FC_REFLECT( actc::chain_apis::detail::ram_market_exchange_state_t, (ignore1)(ignore2)(ignore3)(core_symbol)(ignore4) )
+FC_REFLECT( roxe::chain_apis::detail::ram_market_exchange_state_t, (ignore1)(ignore2)(ignore3)(core_symbol)(ignore4) )

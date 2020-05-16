@@ -14,19 +14,19 @@ args = None
 logFile = None
 
 unlockTimeout = 999999999
-fastUnstakeSystem = './fast.refund/actc.system/actc.system.wasm'
+fastUnstakeSystem = './fast.refund/roxe.system/roxe.system.wasm'
 
 systemAccounts = [
-    'actc.bpay',
-    'actc.msig',
-    'actc.names',
-    'actc.ram',
-    'actc.ramfee',
-    'actc.saving',
-    'actc.stake',
-    'actc.token',
-    'actc.vpay',
-    'actc.rex',
+    'roxe.bpay',
+    'roxe.msig',
+    'roxe.names',
+    'roxe.ram',
+    'roxe.ramfee',
+    'roxe.saving',
+    'roxe.stake',
+    'roxe.token',
+    'roxe.vpay',
+    'roxe.rex',
 ]
 
 def jsonArg(a):
@@ -70,12 +70,12 @@ def sleep(t):
 def startWallet():
     run('rm -rf ' + os.path.abspath(args.wallet_dir))
     run('mkdir -p ' + os.path.abspath(args.wallet_dir))
-    background(args.kactcd + ' --unlock-timeout %d --http-server-address 127.0.0.1:6666 --wallet-dir %s' % (unlockTimeout, os.path.abspath(args.wallet_dir)))
+    background(args.kroxed + ' --unlock-timeout %d --http-server-address 127.0.0.1:6666 --wallet-dir %s' % (unlockTimeout, os.path.abspath(args.wallet_dir)))
     sleep(.4)
-    run(args.clactc + 'wallet create --to-console')
+    run(args.clroxe + 'wallet create --to-console')
 
 def importKeys():
-    run(args.clactc + 'wallet import --private-key ' + args.private_key)
+    run(args.clroxe + 'wallet import --private-key ' + args.private_key)
     keys = {}
     for a in accounts:
         key = a['pvt']
@@ -83,13 +83,13 @@ def importKeys():
             if len(keys) >= args.max_user_keys:
                 break
             keys[key] = True
-            run(args.clactc + 'wallet import --private-key ' + key)
+            run(args.clroxe + 'wallet import --private-key ' + key)
     for i in range(firstProducer, firstProducer + numProducers):
         a = accounts[i]
         key = a['pvt']
         if not key in keys:
             keys[key] = True
-            run(args.clactc + 'wallet import --private-key ' + key)
+            run(args.clroxe + 'wallet import --private-key ' + key)
 
 def startNode(nodeIndex, account):
     dir = args.nodes_dir + ('%02d-' % nodeIndex) + account['name'] + '/'
@@ -97,11 +97,11 @@ def startNode(nodeIndex, account):
     run('mkdir -p ' + dir)
     otherOpts = ''.join(list(map(lambda i: '    --p2p-peer-address localhost:' + str(9000 + i), range(nodeIndex))))
     if not nodeIndex: otherOpts += (
-        '    --plugin actc::history_plugin'
-        '    --plugin actc::history_api_plugin'
+        '    --plugin roxe::history_plugin'
+        '    --plugin roxe::history_api_plugin'
     )
     cmd = (
-        args.nodactc +
+        args.nodroxe +
         '    --max-irreversible-block-age -1'
         '    --max-transaction-time=1000'
         '    --contracts-console'
@@ -117,11 +117,11 @@ def startNode(nodeIndex, account):
         '    --enable-stale-production'
         '    --producer-name ' + account['name'] +
         '    --private-key \'["' + account['pub'] + '","' + account['pvt'] + '"]\''
-        '    --plugin actc::http_plugin'
-        '    --plugin actc::chain_api_plugin'
-        '    --plugin actc::chain_plugin'
-        '    --plugin actc::producer_api_plugin'
-        '    --plugin actc::producer_plugin' +
+        '    --plugin roxe::http_plugin'
+        '    --plugin roxe::chain_api_plugin'
+        '    --plugin roxe::chain_plugin'
+        '    --plugin roxe::producer_api_plugin'
+        '    --plugin roxe::producer_plugin' +
         otherOpts)
     with open(dir + 'stderr', mode='w') as f:
         f.write(cmd + '\n\n')
@@ -133,7 +133,7 @@ def startProducers(b, e):
 
 def createSystemAccounts():
     for a in systemAccounts:
-        run(args.clactc + 'create account actc ' + a + ' ' + args.public_key)
+        run(args.clroxe + 'create account roxe ' + a + ' ' + args.public_key)
 
 def intToCurrency(i):
     return '%d.%04d %s' % (i // 10000, i % 10000, args.symbol)
@@ -172,48 +172,48 @@ def createStakedAccounts(b, e):
         stakeCpu = stake - stakeNet
         print('%s: total funds=%s, ram=%s, net=%s, cpu=%s, unstaked=%s' % (a['name'], intToCurrency(a['funds']), intToCurrency(ramFunds), intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(unstaked)))
         assert(funds == ramFunds + stakeNet + stakeCpu + unstaked)
-        retry(args.clactc + 'system newaccount --transfer actc %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' %
+        retry(args.clroxe + 'system newaccount --transfer roxe %s %s --stake-net "%s" --stake-cpu "%s" --buy-ram "%s"   ' %
             (a['name'], a['pub'], intToCurrency(stakeNet), intToCurrency(stakeCpu), intToCurrency(ramFunds)))
         if unstaked:
-            retry(args.clactc + 'transfer actc %s "%s"' % (a['name'], intToCurrency(unstaked)))
+            retry(args.clroxe + 'transfer roxe %s "%s"' % (a['name'], intToCurrency(unstaked)))
 
 def regProducers(b, e):
     for i in range(b, e):
         a = accounts[i]
-        retry(args.clactc + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
+        retry(args.clroxe + 'system regproducer ' + a['name'] + ' ' + a['pub'] + ' https://' + a['name'] + '.com' + '/' + a['pub'])
 
 def listProducers():
-    run(args.clactc + 'system listproducers')
+    run(args.clroxe + 'system listproducers')
 
-def vote(b, e):
-    for i in range(b, e):
-        voter = accounts[i]['name']
-        k = args.num_producers_vote
-        if k > numProducers:
-            k = numProducers - 1
-        prods = random.sample(range(firstProducer, firstProducer + numProducers), k)
-        prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
-        retry(args.clactc + 'system voteproducer prods ' + voter + ' ' + prods)
+# def vote(b, e):
+#     for i in range(b, e):
+#         voter = accounts[i]['name']
+#         k = args.num_producers_vote
+#         if k > numProducers:
+#             k = numProducers - 1
+#         prods = random.sample(range(firstProducer, firstProducer + numProducers), k)
+#         prods = ' '.join(map(lambda x: accounts[x]['name'], prods))
+#         retry(args.clroxe + 'system voteproducer prods ' + voter + ' ' + prods)
 
 def claimRewards():
-    table = getJsonOutput(args.clactc + 'get table actc actc producers -l 100')
+    table = getJsonOutput(args.clroxe + 'get table roxe roxe producers -l 100')
     times = []
     for row in table['rows']:
         if row['unpaid_blocks'] and not row['last_claim_time']:
-            times.append(getJsonOutput(args.clactc + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
+            times.append(getJsonOutput(args.clroxe + 'system claimrewards -j ' + row['owner'])['processed']['elapsed'])
     print('Elapsed time for claimrewards:', times)
 
 def proxyVotes(b, e):
-    vote(firstProducer, firstProducer + 1)
+    # vote(firstProducer, firstProducer + 1)
     proxy = accounts[firstProducer]['name']
-    retry(args.clactc + 'system regproxy ' + proxy)
+    retry(args.clroxe + 'system regproxy ' + proxy)
     sleep(1.0)
     for i in range(b, e):
         voter = accounts[i]['name']
-        retry(args.clactc + 'system voteproducer proxy ' + voter + ' ' + proxy)
+        retry(args.clroxe + 'system voteproducer proxy ' + voter + ' ' + proxy)
 
 def updateAuth(account, permission, parent, controller):
-    run(args.clactc + 'push action actc updateauth' + jsonArg({
+    run(args.clroxe + 'push action roxe updateauth' + jsonArg({
         'account': account,
         'permission': permission,
         'parent': parent,
@@ -230,7 +230,7 @@ def resign(account, controller):
     updateAuth(account, 'owner', '', controller)
     updateAuth(account, 'active', 'owner', controller)
     sleep(1)
-    run(args.clactc + 'get account ' + account)
+    run(args.clroxe + 'get account ' + account)
 
 def randomTransfer(b, e):
     for j in range(20):
@@ -238,29 +238,29 @@ def randomTransfer(b, e):
         dest = src
         while dest == src:
             dest = accounts[random.randint(b, e - 1)]['name']
-        run(args.clactc + 'transfer -f ' + src + ' ' + dest + ' "0.0001 ' + args.symbol + '"' + ' || true')
+        run(args.clroxe + 'transfer -f ' + src + ' ' + dest + ' "0.0001 ' + args.symbol + '"' + ' || true')
 
 def msigProposeReplaceSystem(proposer, proposalName):
     requestedPermissions = []
     for i in range(firstProducer, firstProducer + numProducers):
         requestedPermissions.append({'actor': accounts[i]['name'], 'permission': 'active'})
-    trxPermissions = [{'actor': 'actc', 'permission': 'active'}]
+    trxPermissions = [{'actor': 'roxe', 'permission': 'active'}]
     with open(fastUnstakeSystem, mode='rb') as f:
-        setcode = {'account': 'actc', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
-    run(args.clactc + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) +
-        jsonArg(trxPermissions) + 'actc setcode' + jsonArg(setcode) + ' -p ' + proposer)
+        setcode = {'account': 'roxe', 'vmtype': 0, 'vmversion': 0, 'code': f.read().hex()}
+    run(args.clroxe + 'multisig propose ' + proposalName + jsonArg(requestedPermissions) +
+        jsonArg(trxPermissions) + 'roxe setcode' + jsonArg(setcode) + ' -p ' + proposer)
 
 def msigApproveReplaceSystem(proposer, proposalName):
     for i in range(firstProducer, firstProducer + numProducers):
-        run(args.clactc + 'multisig approve ' + proposer + ' ' + proposalName +
+        run(args.clroxe + 'multisig approve ' + proposer + ' ' + proposalName +
             jsonArg({'actor': accounts[i]['name'], 'permission': 'active'}) +
             '-p ' + accounts[i]['name'])
 
 def msigExecReplaceSystem(proposer, proposalName):
-    retry(args.clactc + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
+    retry(args.clroxe + 'multisig exec ' + proposer + ' ' + proposalName + ' -p ' + proposer)
 
 def msigReplaceSystem():
-    run(args.clactc + 'push action actc buyrambytes' + jsonArg(['actc', accounts[0]['name'], 200000]) + '-p actc')
+    run(args.clroxe + 'push action roxe buyrambytes' + jsonArg(['roxe', accounts[0]['name'], 200000]) + '-p roxe')
     sleep(1)
     msigProposeReplaceSystem(accounts[0]['name'], 'fast.unstake')
     sleep(1)
@@ -270,7 +270,7 @@ def msigReplaceSystem():
 def produceNewAccounts():
     with open('newusers', 'w') as f:
         for i in range(120_000, 200_000):
-            x = getOutput(args.clactc + 'create key --to-console')
+            x = getOutput(args.clroxe + 'create key --to-console')
             r = re.match('Private key: *([^ \n]*)\nPublic key: *([^ \n]*)', x, re.DOTALL | re.MULTILINE)
             name = 'user'
             for j in range(7, -1, -1):
@@ -279,62 +279,62 @@ def produceNewAccounts():
             f.write('        {"name":"%s", "pvt":"%s", "pub":"%s"},\n' % (name, r[1], r[2]))
 
 def stepKillAll():
-    run('killall kactcd nodactc || true')
+    run('killall kroxed nodroxe || true')
     sleep(1.5)
 def stepStartWallet():
     startWallet()
     importKeys()
 def stepStartBoot():
-    startNode(0, {'name': 'actc', 'pvt': args.private_key, 'pub': args.public_key})
+    startNode(0, {'name': 'roxe', 'pvt': args.private_key, 'pub': args.public_key})
     sleep(1.5)
 def stepInstallSystemContracts():
-    run(args.clactc + 'set contract actc.token ' + args.contracts_dir + '/actc.token/')
-    run(args.clactc + 'set contract actc.msig ' + args.contracts_dir + '/actc.msig/')
+    run(args.clroxe + 'set contract roxe.token ' + args.contracts_dir + '/roxe.token/')
+    run(args.clroxe + 'set contract roxe.msig ' + args.contracts_dir + '/roxe.msig/')
 def stepCreateTokens():
-    run(args.clactc + 'push action actc.token create \'["actc", "10000000000.0000 %s"]\' -p actc.token' % (args.symbol))
+    run(args.clroxe + 'push action roxe.token create \'["roxe", "10000000000.0000 %s"]\' -p roxe.token' % (args.symbol))
     totalAllocation = allocateFunds(0, len(accounts))
-    run(args.clactc + 'push action actc.token issue \'["actc", "%s", "memo"]\' -p actc' % intToCurrency(totalAllocation))
+    run(args.clroxe + 'push action roxe.token issue \'["roxe", "%s", "memo"]\' -p roxe' % intToCurrency(totalAllocation))
     sleep(1)
 def stepSetSystemContract():
     # All of the protocol upgrade features introduced in v1.8 first require a special protocol 
     # feature (codename PREACTIVATE_FEATURE) to be activated and for an updated version of the system 
     # contract that makes use of the functionality introduced by that feature to be deployed. 
 
-    # activate PREACTIVATE_FEATURE before installing actc.system
+    # activate PREACTIVATE_FEATURE before installing roxe.system
     retry('curl -X POST http://127.0.0.1:%d' % args.http_port + 
         '/v1/producer/schedule_protocol_feature_activations ' +
         '-d \'{"protocol_features_to_activate": ["0ec7e080177b2c02b278d5088611686b49d739925a92d9bfcacd7fc6b74053bd"]}\'')
     sleep(5)
 
-    # install actc.system
-    retry(args.clactc + 'set contract actc ' + args.contracts_dir + '/actc.system/')
+    # install roxe.system
+    retry(args.clroxe + 'set contract roxe ' + args.contracts_dir + '/roxe.system/')
     sleep(1)
 
     # activate remaining features
     # GET_SENDER
-    retry(args.clactc + 'push action actc activate \'["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["f0af56d2c5a48d60a4a5b5c903edfb7db3a736a94ed589d0b797df33ff9d3e1d"]\' -p roxe')
     # FORWARD_SETCODE
-    retry(args.clactc + 'push action actc activate \'["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["2652f5f96006294109b3dd0bbde63693f55324af452b799ee137a81a905eed25"]\' -p roxe')
     # ONLY_BILL_FIRST_AUTHORIZER
-    retry(args.clactc + 'push action actc activate \'["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["8ba52fe7a3956c5cd3a656a3174b931d3bb2abb45578befc59f283ecd816a405"]\' -p roxe')
     # RESTRICT_ACTION_TO_SELF
-    retry(args.clactc + 'push action actc activate \'["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["ad9e3d8f650687709fd68f4b90b41f7d825a365b02c23a636cef88ac2ac00c43"]\' -p roxe')
     # DISALLOW_EMPTY_PRODUCER_SCHEDULE
-    retry(args.clactc + 'push action actc activate \'["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["68dcaa34c0517d19666e6b33add67351d8c5f69e999ca1e37931bc410a297428"]\' -p roxe')
      # FIX_LINKAUTH_RESTRICTION
-    retry(args.clactc + 'push action actc activate \'["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["e0fb64b1085cc5538970158d05a009c24e276fb94e1a0bf6a528b48fbc4ff526"]\' -p roxe')
      # REPLACE_DEFERRED
-    retry(args.clactc + 'push action actc activate \'["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["ef43112c6543b88db2283a2e077278c315ae2c84719a8b25f25cc88565fbea99"]\' -p roxe')
     # NO_DUPLICATE_DEFERRED_ID
-    retry(args.clactc + 'push action actc activate \'["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["4a90c00d55454dc5b059055ca213579c6ea856967712a56017487886a4d4cc0f"]\' -p roxe')
     # ONLY_LINK_TO_EXISTING_PERMISSION
-    retry(args.clactc + 'push action actc activate \'["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]\' -p actc')
+    retry(args.clroxe + 'push action roxe activate \'["1a99a59d87e06e09ec5b028a9cbb7749b4a5ad8819004365d02dc4379a8b7241"]\' -p roxe')
     # RAM_RESTRICTIONS
-    retry(args.clactc + 'push action actc activate \'["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]\' -p actc')
-    run(args.clactc + 'push action actc setpriv' + jsonArg(['actc.msig', 1]) + '-p actc@active')
+    retry(args.clroxe + 'push action roxe activate \'["4e7bf348da00a945489b2a681749eb56f5de00b900014e137ddae39f48f69d67"]\' -p roxe')
+    run(args.clroxe + 'push action roxe setpriv' + jsonArg(['roxe.msig', 1]) + '-p roxe@active')
 
 def stepInitSystemContract():
-    run(args.clactc + 'push action actc init' + jsonArg(['0', '4,' + args.symbol]) + '-p actc@active')
+    run(args.clroxe + 'push action roxe init' + jsonArg(['0', '4,' + args.symbol]) + '-p roxe@active')
     sleep(1)
 def stepCreateStakedAccounts():
     createStakedAccounts(0, len(accounts))
@@ -345,32 +345,32 @@ def stepRegProducers():
 def stepStartProducers():
     startProducers(firstProducer, firstProducer + numProducers)
     sleep(args.producer_sync_delay)
-def stepVote():
-    vote(0, 0 + args.num_voters)
-    sleep(1)
-    listProducers()
-    sleep(5)
+# def stepVote():
+#     vote(0, 0 + args.num_voters)
+#     sleep(1)
+#     listProducers()
+#     sleep(5)
 def stepProxyVotes():
     proxyVotes(0, 0 + args.num_voters)
 def stepResign():
-    resign('actc', 'actc.prods')
+    resign('roxe', 'roxe.prods')
     for a in systemAccounts:
-        resign(a, 'actc')
+        resign(a, 'roxe')
 def stepTransfer():
     while True:
         randomTransfer(0, args.num_senders)
 def stepLog():
-    run('tail -n 60 ' + args.nodes_dir + '00-actc/stderr')
+    run('tail -n 60 ' + args.nodes_dir + '00-roxe/stderr')
 
 # Command Line Arguments
 
 parser = argparse.ArgumentParser()
 
 commands = [
-    ('k', 'kill',               stepKillAll,                True,    "Kill all nodactc and kactcd processes"),
-    ('w', 'wallet',             stepStartWallet,            True,    "Start kactcd, create wallet, fill with keys"),
+    ('k', 'kill',               stepKillAll,                True,    "Kill all nodroxe and kroxed processes"),
+    ('w', 'wallet',             stepStartWallet,            True,    "Start kroxed, create wallet, fill with keys"),
     ('b', 'boot',               stepStartBoot,              True,    "Start boot node"),
-    ('s', 'sys',                createSystemAccounts,       True,    "Create system accounts (actc.*)"),
+    ('s', 'sys',                createSystemAccounts,       True,    "Create system accounts (roxe.*)"),
     ('c', 'contracts',          stepInstallSystemContracts, True,    "Install system contracts (token, msig)"),
     ('t', 'tokens',             stepCreateTokens,           True,    "Create tokens"),
     ('S', 'sys-contract',       stepSetSystemContract,      True,    "Set system contract"),
@@ -378,26 +378,26 @@ commands = [
     ('T', 'stake',              stepCreateStakedAccounts,   True,    "Create staked accounts"),
     ('p', 'reg-prod',           stepRegProducers,           True,    "Register producers"),
     ('P', 'start-prod',         stepStartProducers,         True,    "Start producers"),
-    ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
+    # ('v', 'vote',               stepVote,                   True,    "Vote for producers"),
     ('R', 'claim',              claimRewards,               True,    "Claim rewards"),
     ('x', 'proxy',              stepProxyVotes,             True,    "Proxy votes"),
-    ('q', 'resign',             stepResign,                 True,    "Resign actc"),
+    ('q', 'resign',             stepResign,                 True,    "Resign roxe"),
     ('m', 'msg-replace',        msigReplaceSystem,          False,   "Replace system contract using msig"),
     ('X', 'xfer',               stepTransfer,               False,   "Random transfer tokens (infinite loop)"),
     ('l', 'log',                stepLog,                    True,    "Show tail of node's log"),
 ]
 
-parser.add_argument('--public-key', metavar='', help="ACTC Public Key", default='ACTC8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
-parser.add_argument('--private-Key', metavar='', help="ACTC Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
-parser.add_argument('--clactc', metavar='', help="Clactc command", default='../../build/programs/clactc/clactc --wallet-url http://127.0.0.1:6666 ')
-parser.add_argument('--nodactc', metavar='', help="Path to nodactc binary", default='../../build/programs/nodactc/nodactc')
-parser.add_argument('--kactcd', metavar='', help="Path to kactcd binary", default='../../build/programs/kactcd/kactcd')
+parser.add_argument('--public-key', metavar='', help="ROXE Public Key", default='ROXE8Znrtgwt8TfpmbVpTKvA2oB8Nqey625CLN8bCN3TEbgx86Dsvr', dest="public_key")
+parser.add_argument('--private-Key', metavar='', help="ROXE Private Key", default='5K463ynhZoCDDa4RDcr63cUwWLTnKqmdcoTKTHBjqoKfv4u5V7p', dest="private_key")
+parser.add_argument('--clroxe', metavar='', help="Clroxe command", default='../../build/programs/clroxe/clroxe --wallet-url http://127.0.0.1:6666 ')
+parser.add_argument('--nodroxe', metavar='', help="Path to nodroxe binary", default='../../build/programs/nodroxe/nodroxe')
+parser.add_argument('--kroxed', metavar='', help="Path to kroxed binary", default='../../build/programs/kroxed/kroxed')
 parser.add_argument('--contracts-dir', metavar='', help="Path to contracts directory", default='../../build/contracts/')
 parser.add_argument('--nodes-dir', metavar='', help="Path to nodes directory", default='./nodes/')
 parser.add_argument('--genesis', metavar='', help="Path to genesis.json", default="./genesis.json")
 parser.add_argument('--wallet-dir', metavar='', help="Path to wallet directory", default='./wallet/')
 parser.add_argument('--log-path', metavar='', help="Path to log file", default='./output.log')
-parser.add_argument('--symbol', metavar='', help="The actc.system symbol", default='ACI')
+parser.add_argument('--symbol', metavar='', help="The roxe.system symbol", default='ACI')
 parser.add_argument('--user-limit', metavar='', help="Max number of users. (0 = no limit)", type=int, default=3000)
 parser.add_argument('--max-user-keys', metavar='', help="Maximum user keys to import into wallet", type=int, default=10)
 parser.add_argument('--ram-funds', metavar='', help="How much funds for each user to spend on ram", type=float, default=0.1)
@@ -410,7 +410,7 @@ parser.add_argument('--num-voters', metavar='', help="Number of voters", type=in
 parser.add_argument('--num-senders', metavar='', help="Number of users to transfer funds randomly", type=int, default=10)
 parser.add_argument('--producer-sync-delay', metavar='', help="Time (s) to sleep to allow producers to sync", type=int, default=80)
 parser.add_argument('-a', '--all', action='store_true', help="Do everything marked with (*)")
-parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for clactc')
+parser.add_argument('-H', '--http-port', type=int, default=8000, metavar='', help='HTTP port for clroxe')
 
 for (flag, command, function, inAll, help) in commands:
     prefix = ''
@@ -423,7 +423,7 @@ for (flag, command, function, inAll, help) in commands:
         
 args = parser.parse_args()
 
-args.clactc += '--url http://127.0.0.1:%d ' % args.http_port
+args.clroxe += '--url http://127.0.0.1:%d ' % args.http_port
 
 logFile = open(args.log_path, 'a')
 

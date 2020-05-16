@@ -1,13 +1,13 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "proxy.hpp"
-#include <actc/transaction.hpp>
+#include <roxe/transaction.hpp>
 
-using namespace actc;
+using namespace roxe;
 
-proxy::proxy( actc::name self, actc::name first_receiver, actc::datastream<const char*> ds )
+proxy::proxy( roxe::name self, roxe::name first_receiver, roxe::datastream<const char*> ds )
 :contract( self, first_receiver, ds )
 ,_config( get_self(), get_self().value )
 {}
@@ -36,14 +36,14 @@ void proxy::on_transfer( name from, name to, asset quantity, const std::string& 
       _config.set( cfg, self );
 
       transaction out;
-      actc::token::transfer_action a( "actc.token"_n, {self, "active"_n} );
+      roxe::token::transfer_action a( "roxe.token"_n, {self, "active"_n} );
       out.actions.emplace_back( a.to_action( self, cfg.owner, quantity, memo ) );
       out.delay_sec = cfg.delay;
       out.send( id, self );
    }
 }
 
-void proxy::on_error( uint128_t sender_id, actc::ignore<std::vector<char>> ) {
+void proxy::on_error( uint128_t sender_id, roxe::ignore<std::vector<char>> ) {
    print( "on_error called on ", get_self(), " contract with sender_id = ", sender_id, "\n" );
    check( _config.exists(), "Attempting use of unconfigured proxy" );
 

@@ -1,33 +1,33 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #pragma once
 
-#include <actc/actc.hpp>
+#include <roxe/roxe.hpp>
 #include <vector>
 
-class [[actc::contract]] deferred_test : public actc::contract {
+class [[roxe::contract]] deferred_test : public roxe::contract {
 public:
-   using actc::contract::contract;
+   using roxe::contract::contract;
 
-   [[actc::action]]
-   void defercall( actc::name payer, uint64_t sender_id, actc::name contract, uint64_t payload );
+   [[roxe::action]]
+   void defercall( roxe::name payer, uint64_t sender_id, roxe::name contract, uint64_t payload );
 
-   [[actc::action]]
-   void delayedcall( actc::name payer, uint64_t sender_id, actc::name contract,
+   [[roxe::action]]
+   void delayedcall( roxe::name payer, uint64_t sender_id, roxe::name contract,
                      uint64_t payload, uint32_t delay_sec, bool replace_existing );
 
-   [[actc::action]]
+   [[roxe::action]]
    void deferfunc( uint64_t payload );
-   using deferfunc_action = actc::action_wrapper<"deferfunc"_n, &deferred_test::deferfunc>;
+   using deferfunc_action = roxe::action_wrapper<"deferfunc"_n, &deferred_test::deferfunc>;
 
-   [[actc::action]]
-   void inlinecall( actc::name contract, actc::name authorizer, uint64_t payload );
+   [[roxe::action]]
+   void inlinecall( roxe::name contract, roxe::name authorizer, uint64_t payload );
 
-   [[actc::action]]
+   [[roxe::action]]
    void fail();
 
-   [[actc::on_notify("actc::onerror")]]
-   void on_error( uint128_t sender_id, actc::ignore<std::vector<char>> sent_trx );
+   [[roxe::on_notify("roxe::onerror")]]
+   void on_error( uint128_t sender_id, roxe::ignore<std::vector<char>> sent_trx );
 };

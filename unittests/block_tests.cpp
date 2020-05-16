@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <boost/test/unit_test.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/testing/tester.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace testing;
 using namespace chain;
 

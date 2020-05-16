@@ -26,7 +26,7 @@ killAll=args.clean_run
 
 Utils.Debug=debug
 
-killActcInstances=not dontKill
+killRoxeInstances=not dontKill
 topo="mesh"
 delay=1
 prodCount=1 # producers per producer node
@@ -59,7 +59,7 @@ try:
            (pnodes, total_nodes-pnodes, topo, delay))
     Print("Stand up cluster")
     if cluster.launch(pnodes=pnodes, totalNodes=total_nodes, prodCount=prodCount, topo=topo, delay=delay) is False:
-        errorExit("Failed to stand up actc cluster.")
+        errorExit("Failed to stand up roxe cluster.")
 
     Print ("Wait for Cluster stabilization")
     # wait for cluster to start producing blocks
@@ -86,6 +86,6 @@ try:
     Print("\nEND")
 finally:
     os.remove(nodesFile)
-    TestHelper.shutdown(cluster, None, testSuccessful, killActcInstances, False, False, killAll, dumpErrorDetails)
+    TestHelper.shutdown(cluster, None, testSuccessful, killRoxeInstances, False, False, killAll, dumpErrorDetails)
 
 exit(0)

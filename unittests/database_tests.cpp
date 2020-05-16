@@ -1,9 +1,9 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/global_property_object.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/global_property_object.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <fc/crypto/digest.hpp>
 
@@ -15,8 +15,8 @@
 #define TESTER validating_tester
 #endif
 
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe::chain;
+using namespace roxe::testing;
 namespace bfs = boost::filesystem;
 
 BOOST_AUTO_TEST_SUITE(database_tests)
@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE(database_tests)
          TESTER test;
 
          // Bypass read-only restriction on state DB access for this unit test which really needs to mutate the DB to properly conduct its test.
-         actc::chain::database& db = const_cast<actc::chain::database&>( test.control->db() );
+         roxe::chain::database& db = const_cast<roxe::chain::database&>( test.control->db() );
 
          auto ses = db.start_undo_session(true);
 

@@ -1,7 +1,7 @@
-#include <actc/chain/merkle.hpp>
+#include <roxe/chain/merkle.hpp>
 #include <fc/io/raw.hpp>
 
-namespace actc { namespace chain {
+namespace roxe { namespace chain {
 
 /**
  * in order to keep proofs concise, before hashing we set the first bit
@@ -49,4 +49,4 @@ digest_type merkle(vector<digest_type> ids) {
    return ids.front();
 }
 
-} } // actc::chain
+} } // roxe::chain

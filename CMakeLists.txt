@@ -1,6 +1,6 @@
 cmake_minimum_required( VERSION 3.8 )
 
-project( ACTC )
+project( ROXE )
 include(CTest) # suppresses DartConfiguration.tcl error
 enable_testing()
 
@@ -21,7 +21,7 @@ include( SetupTargetMacros )
 include( InstallDirectoryPermissions )
 include( MASSigning )
 
-set( BLOCKCHAIN_NAME "ACTC" )
+set( BLOCKCHAIN_NAME "ROXE" )
 set( CMAKE_CXX_STANDARD 17 )
 set( CMAKE_CXX_EXTENSIONS ON )
 set( CXX_STANDARD_REQUIRED ON)
@@ -37,10 +37,10 @@ else()
     set(VERSION_FULL "${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_PATCH}")
 endif()
 
-set( CLI_CLIENT_EXECUTABLE_NAME clactc )
-set( NODE_EXECUTABLE_NAME nodactc )
-set( KEY_STORE_EXECUTABLE_NAME kactcd )
-set( GUI_CLIENT_EXECUTABLE_NAME actc )
+set( CLI_CLIENT_EXECUTABLE_NAME clroxe )
+set( NODE_EXECUTABLE_NAME nodroxe )
+set( KEY_STORE_EXECUTABLE_NAME kroxed )
+set( GUI_CLIENT_EXECUTABLE_NAME roxe )
 set( CUSTOM_URL_SCHEME "gcs" )
 set( INSTALLER_APP_ID "68ad7005-8eee-49c9-95ce-9eed97e5b347" )
 
@@ -120,7 +120,7 @@ link_libraries(Threads::Threads)
 
 if( WIN32 )
 
-    message( STATUS "Configuring ACTC on WIN32")
+    message( STATUS "Configuring ROXE on WIN32")
     set( DB_VERSION 60 )
     set( BDB_STATIC_LIBS 1 )
 
@@ -155,11 +155,11 @@ else( WIN32 ) # Apple AND Linux
 
     if( APPLE )
         # Apple Specific Options Here
-        message( STATUS "Configuring ACTC on OS X" )
+        message( STATUS "Configuring ROXE on OS X" )
         set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-declarations" )
     else( APPLE )
         # Linux Specific Options Here
-        message( STATUS "Configuring ACTC on Linux" )
+        message( STATUS "Configuring ROXE on Linux" )
         set( CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} ${CMAKE_CXX_FLAGS} -Wall" )
         if ( FULL_STATIC_BUILD )
             set( CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
@@ -184,7 +184,7 @@ else( WIN32 ) # Apple AND Linux
 
 endif( WIN32 )
 
-set(ENABLE_COVERAGE_TESTING FALSE CACHE BOOL "Build ACTC for code coverage analysis")
+set(ENABLE_COVERAGE_TESTING FALSE CACHE BOOL "Build ROXE for code coverage analysis")
 
 if(ENABLE_COVERAGE_TESTING)
     SET(CMAKE_CXX_FLAGS "--coverage ${CMAKE_CXX_FLAGS}")
@@ -196,7 +196,7 @@ endif()
 include(utils)
 
 if ("${CORE_SYMBOL_NAME}" STREQUAL "")
-    set( CORE_SYMBOL_NAME "ACI" )
+    set( CORE_SYMBOL_NAME "ROC" )
 endif()
 string(TOUPPER ${CORE_SYMBOL_NAME} CORE_SYMBOL_NAME)
 
@@ -207,11 +207,11 @@ endif()
 
 message( STATUS "Using '${CORE_SYMBOL_NAME}' as CORE symbol name" )
 
-if ("${ACTC_ROOT_KEY}" STREQUAL "")
-    set(ACTC_ROOT_KEY "ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt")
+if ("${ROXE_ROOT_KEY}" STREQUAL "")
+    set(ROXE_ROOT_KEY "ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt")
 endif()
 
-message( STATUS "Using '${ACTC_ROOT_KEY}' as public key for 'actc' account" )
+message( STATUS "Using '${ROXE_ROOT_KEY}' as public key for 'roxe' account" )
 
 add_subdirectory( libraries )
 add_subdirectory( plugins )
@@ -222,48 +222,48 @@ add_subdirectory( tests )
 add_subdirectory( tools )
 add_subdirectory( debian )
 
-install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc)
+install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/roxe)
 
-install(FILES testnet.template DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc/launcher)
-install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc)
-install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/actc/launcher)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testnet.template ${CMAKE_CURRENT_BINARY_DIR}/etc/actc/launcher/testnet.template COPYONLY)
+install(FILES testnet.template DESTINATION ${CMAKE_INSTALL_FULL_SYSCONFDIR}/roxe/launcher)
+install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/roxe)
+install_directory_permissions(DIRECTORY ${CMAKE_INSTALL_FULL_SYSCONFDIR}/roxe/launcher)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/testnet.template ${CMAKE_CURRENT_BINARY_DIR}/etc/roxe/launcher/testnet.template COPYONLY)
 
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/actc.version.in ${CMAKE_CURRENT_BINARY_DIR}/actc.version.hpp)
-install(FILES ${CMAKE_CURRENT_BINARY_DIR}/actc.version.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/roxe.version.in ${CMAKE_CURRENT_BINARY_DIR}/roxe.version.hpp)
+install(FILES ${CMAKE_CURRENT_BINARY_DIR}/roxe.version.hpp DESTINATION ${CMAKE_INSTALL_FULL_INCLUDEDIR})
 
-set(ACTC_ROOT_DIR ${CMAKE_BINARY_DIR})
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/actc-config.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc/actc-config.cmake @ONLY)
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/ActcTesterBuild.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/actc/ActcTester.cmake @ONLY)
+set(ROXE_ROOT_DIR ${CMAKE_BINARY_DIR})
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/roxe-config.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/roxe/roxe-config.cmake @ONLY)
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/RoxeTesterBuild.cmake.in ${CMAKE_BINARY_DIR}/lib/cmake/roxe/RoxeTester.cmake @ONLY)
 
-set(ACTC_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/actc-config.cmake.in ${CMAKE_BINARY_DIR}/modules/actc-config.cmake @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/modules/actc-config.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/actc)
-configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/ActcTester.cmake.in ${CMAKE_BINARY_DIR}/modules/ActcTester.cmake @ONLY)
-install(FILES ${CMAKE_BINARY_DIR}/modules/ActcTester.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/actc)
+set(ROXE_ROOT_DIR ${CMAKE_INSTALL_PREFIX})
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/roxe-config.cmake.in ${CMAKE_BINARY_DIR}/modules/roxe-config.cmake @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/modules/roxe-config.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/roxe)
+configure_file(${CMAKE_SOURCE_DIR}/CMakeModules/RoxeTester.cmake.in ${CMAKE_BINARY_DIR}/modules/RoxeTester.cmake @ONLY)
+install(FILES ${CMAKE_BINARY_DIR}/modules/RoxeTester.cmake DESTINATION ${CMAKE_INSTALL_FULL_LIBDIR}/cmake/roxe)
 
 configure_file(${CMAKE_SOURCE_DIR}/LICENSE
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/wabt/LICENSE
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.wabt COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE.wabt COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/softfloat/COPYING.txt
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.softfloat COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE.softfloat COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/wasm-jit/LICENSE
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.wavm COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE.wavm COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/fc/secp256k1/upstream/COPYING
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.secp256k1 COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE.secp256k1 COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/fc/src/network/LICENSE.go
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.go COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE.go COPYONLY)
 configure_file(${CMAKE_SOURCE_DIR}/libraries/yubihsm/LICENSE
-        ${CMAKE_BINARY_DIR}/licenses/actc/LICENSE.yubihsm COPYONLY)
+        ${CMAKE_BINARY_DIR}/licenses/roxe/LICENSE.yubihsm COPYONLY)
 
-install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ COMPONENT base)
-install(FILES libraries/wabt/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.wabt COMPONENT base)
-install(FILES libraries/softfloat/COPYING.txt DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.softfloat COMPONENT base)
-install(FILES libraries/wasm-jit/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.wavm COMPONENT base)
-install(FILES libraries/fc/secp256k1/upstream/COPYING DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.secp256k1 COMPONENT base)
-install(FILES libraries/fc/src/network/LICENSE.go DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ COMPONENT base)
-install(FILES libraries/yubihsm/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/actc/ RENAME LICENSE.yubihsm COMPONENT base)
+install(FILES LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ COMPONENT base)
+install(FILES libraries/wabt/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ RENAME LICENSE.wabt COMPONENT base)
+install(FILES libraries/softfloat/COPYING.txt DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ RENAME LICENSE.softfloat COMPONENT base)
+install(FILES libraries/wasm-jit/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ RENAME LICENSE.wavm COMPONENT base)
+install(FILES libraries/fc/secp256k1/upstream/COPYING DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ RENAME LICENSE.secp256k1 COMPONENT base)
+install(FILES libraries/fc/src/network/LICENSE.go DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ COMPONENT base)
+install(FILES libraries/yubihsm/LICENSE DESTINATION ${CMAKE_INSTALL_FULL_DATAROOTDIR}/licenses/roxe/ RENAME LICENSE.yubihsm COMPONENT base)
 
 add_custom_target(base-install
         COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}"

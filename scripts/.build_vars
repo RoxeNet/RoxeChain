@@ -1,11 +1,11 @@
-# See install-directory-prompt for logic that sets ACTC_INSTALL_DIR
-export SRC_DIR=${ACTC_INSTALL_DIR}/src
-export OPT_DIR=${ACTC_INSTALL_DIR}/opt
-export VAR_DIR=${ACTC_INSTALL_DIR}/var
-export ETC_DIR=${ACTC_INSTALL_DIR}/etc
-export BIN_DIR=${ACTC_INSTALL_DIR}/bin
-export LIB_DIR=${ACTC_INSTALL_DIR}/lib
-export DATA_DIR=${ACTC_INSTALL_DIR}/data
+# See install-directory-prompt for logic that sets ROXE_INSTALL_DIR
+export SRC_DIR=${ROXE_INSTALL_DIR}/src
+export OPT_DIR=${ROXE_INSTALL_DIR}/opt
+export VAR_DIR=${ROXE_INSTALL_DIR}/var
+export ETC_DIR=${ROXE_INSTALL_DIR}/etc
+export BIN_DIR=${ROXE_INSTALL_DIR}/bin
+export LIB_DIR=${ROXE_INSTALL_DIR}/lib
+export DATA_DIR=${ROXE_INSTALL_DIR}/data
 
 # CMAKE
 export CMAKE_VERSION_MAJOR=3
@@ -62,7 +62,7 @@ export NO_CPP17=${NO_CPP17:-false}
 export PIN_COMPILER=${PIN_COMPILER:-false}
 export BUILD_CLANG=${BUILD_CLANG:-false}
 
-export CORE_SYMBOL_NAME=${CORE_SYMBOL_NAME:-ACI}
+export CORE_SYMBOL_NAME=${CORE_SYMBOL_NAME:-ROC}
 
 export CPU_CORES=$(grep -c ^processor /proc/cpuinfo 2>/dev/null || sysctl -n hw.ncpu)
 export CMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE:-Release}

@@ -1,15 +1,15 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
-#include <actc/chain/block_timestamp.hpp>
+#include <roxe/chain/block_timestamp.hpp>
 
 #include <boost/test/unit_test.hpp>
 
 #include <fc/time.hpp>
 #include <fc/exception/exception.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace chain;
 
 BOOST_AUTO_TEST_SUITE(block_timestamp_tests)

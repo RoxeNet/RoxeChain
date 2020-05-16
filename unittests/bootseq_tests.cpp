@@ -1,9 +1,9 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -20,9 +20,9 @@
 #endif
 
 
-using namespace actc;
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe;
+using namespace roxe::chain;
+using namespace roxe::testing;
 using namespace fc;
 
 using mvo = fc::mutable_variant_object;
@@ -70,8 +70,8 @@ std::vector<genesis_account> test_genesis( {
 class bootseq_tester : public TESTER {
 public:
    void deploy_contract( bool call_init = true ) {
-      set_code( config::system_account_name, contracts::actc_system_wasm() );
-      set_abi( config::system_account_name, contracts::actc_system_abi().data() );
+      set_code( config::system_account_name, contracts::roxe_system_wasm() );
+      set_abi( config::system_account_name, contracts::roxe_system_abi().data() );
       if( call_init ) {
          base_tester::push_action(config::system_account_name, N(init),
                                   config::system_account_name,  mutable_variant_object()
@@ -88,7 +88,7 @@ public:
    fc::variant get_global_state() {
       vector<char> data = get_row_by_account( config::system_account_name, config::system_account_name, N(global), N(global) );
       if (data.empty()) std::cout << "\nData is empty\n" << std::endl;
-      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "actc_global_state", data, abi_serializer_max_time );
+      return data.empty() ? fc::variant() : abi_ser.binary_to_variant( "roxe_global_state", data, abi_serializer_max_time );
    }
 
     auto buyram( name payer, name receiver, asset ram ) {
@@ -167,7 +167,7 @@ public:
     }
 
     asset get_balance( const account_name& act ) {
-         return get_currency_balance(N(actc.token), symbol(CORE_SYMBOL), act);
+         return get_currency_balance(N(roxe.token), symbol(CORE_SYMBOL), act);
     }
 
     void set_code_abi(const account_name& account, const vector<uint8_t>& wasm, const char* abi, const private_key_type* signer = nullptr) {
@@ -192,39 +192,39 @@ BOOST_AUTO_TEST_SUITE(bootseq_tests)
 BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
     try {
 
-        // Create actc.msig and actc.token
-        create_accounts({N(actc.msig), N(actc.token), N(actc.ram), N(actc.ramfee), N(actc.stake), N(actc.vpay), N(actc.bpay), N(actc.saving) });
+        // Create roxe.msig and roxe.token
+        create_accounts({N(roxe.msig), N(roxe.token), N(roxe.ram), N(roxe.ramfee), N(roxe.stake), N(roxe.vpay), N(roxe.bpay), N(roxe.saving) });
         // Set code for the following accounts:
-        //  - actc (code: actc.bios) (already set by tester constructor)
-        //  - actc.msig (code: actc.msig)
-        //  - actc.token (code: actc.token)
-        // set_code_abi(N(actc.msig), contracts::actc_msig_wasm(), contracts::actc_msig_abi().data());//, &actc_active_pk);
-        // set_code_abi(N(actc.token), contracts::actc_token_wasm(), contracts::actc_token_abi().data()); //, &actc_active_pk);
+        //  - roxe (code: roxe.bios) (already set by tester constructor)
+        //  - roxe.msig (code: roxe.msig)
+        //  - roxe.token (code: roxe.token)
+        // set_code_abi(N(roxe.msig), contracts::roxe_msig_wasm(), contracts::roxe_msig_abi().data());//, &roxe_active_pk);
+        // set_code_abi(N(roxe.token), contracts::roxe_token_wasm(), contracts::roxe_token_abi().data()); //, &roxe_active_pk);
 
-        set_code_abi(N(actc.msig),
-                     contracts::actc_msig_wasm(),
-                     contracts::actc_msig_abi().data());//, &actc_active_pk);
-        set_code_abi(N(actc.token),
-                     contracts::actc_token_wasm(),
-                     contracts::actc_token_abi().data()); //, &actc_active_pk);
+        set_code_abi(N(roxe.msig),
+                     contracts::roxe_msig_wasm(),
+                     contracts::roxe_msig_abi().data());//, &roxe_active_pk);
+        set_code_abi(N(roxe.token),
+                     contracts::roxe_token_wasm(),
+                     contracts::roxe_token_abi().data()); //, &roxe_active_pk);
 
-        // Set privileged for actc.msig and actc.token
-        set_privileged(N(actc.msig));
-        set_privileged(N(actc.token));
+        // Set privileged for roxe.msig and roxe.token
+        set_privileged(N(roxe.msig));
+        set_privileged(N(roxe.token));
 
-        // Verify actc.msig and actc.token is privileged
-        const auto& actc_msig_acc = get<account_metadata_object, by_name>(N(actc.msig));
-        BOOST_TEST(actc_msig_acc.is_privileged() == true);
-        const auto& actc_token_acc = get<account_metadata_object, by_name>(N(actc.token));
-        BOOST_TEST(actc_token_acc.is_privileged() == true);
+        // Verify roxe.msig and roxe.token is privileged
+        const auto& roxe_msig_acc = get<account_metadata_object, by_name>(N(roxe.msig));
+        BOOST_TEST(roxe_msig_acc.is_privileged() == true);
+        const auto& roxe_token_acc = get<account_metadata_object, by_name>(N(roxe.token));
+        BOOST_TEST(roxe_token_acc.is_privileged() == true);
 
 
-        // Create ACI tokens in actc.token, set its manager as actc
+        // Create ROC tokens in roxe.token, set its manager as roxe
         auto max_supply = core_from_string("10000000000.0000"); /// 1x larger than 1B initial tokens
         auto initial_supply = core_from_string("1000000000.0000"); /// 1x larger than 1B initial tokens
-        create_currency(N(actc.token), config::system_account_name, max_supply);
-        // Issue the genesis supply of 1 billion ACI tokens to actc.system
-        issue(N(actc.token), config::system_account_name, config::system_account_name, initial_supply);
+        create_currency(N(roxe.token), config::system_account_name, max_supply);
+        // Issue the genesis supply of 1 billion ROC tokens to roxe.system
+        issue(N(roxe.token), config::system_account_name, config::system_account_name, initial_supply);
 
         auto actual = get_balance(config::system_account_name);
         BOOST_REQUIRE_EQUAL(initial_supply, actual);
@@ -246,7 +246,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
            auto r = buyram(config::system_account_name, a.aname, asset(ram));
            BOOST_REQUIRE( !r->except_ptr );
 
-           r = delegate_bandwidth(N(actc.stake), a.aname, asset(net), asset(cpu));
+           r = delegate_bandwidth(N(roxe.stake), a.aname, asset(net), asset(cpu));
            BOOST_REQUIRE( !r->except_ptr );
         }
 
@@ -286,12 +286,12 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         produce_blocks_for_n_rounds(2); // 2 rounds since new producer schedule is set when the first block of next round is irreversible
         auto active_schedule = control->head_block_state()->active_schedule;
         BOOST_TEST(active_schedule.producers.size() == 1u);
-        BOOST_TEST(active_schedule.producers.front().producer_name == "actc");
+        BOOST_TEST(active_schedule.producers.front().producer_name == "roxe");
 
         // Spend some time so the producer pay pool is filled by the inflation rate
         produce_min_num_of_blocks_to_spend_time_wo_inactive_prod(fc::seconds(30 * 24 * 3600)); // 30 days
         // Since the total activated stake is less than 150,000,000, it shouldn't be possible to claim rewards
-        BOOST_REQUIRE_THROW(claim_rewards(N(runnerup1)), actc_assert_message_exception);
+        BOOST_REQUIRE_THROW(claim_rewards(N(runnerup1)), roxe_assert_message_exception);
 
         // This will increase the total vote stake by (40,000,000 - 1,000)
         votepro( N(whale4), {N(prodq), N(prodr), N(prods), N(prodt), N(produ)} );
@@ -336,7 +336,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
 
         // This should thrown an error, since block one can only unstake all his stake after 10 years
 
-        BOOST_REQUIRE_THROW(undelegate_bandwidth(N(b1), N(b1), core_from_string("49999500.0000"), core_from_string("49999500.0000")), actc_assert_message_exception);
+        BOOST_REQUIRE_THROW(undelegate_bandwidth(N(b1), N(b1), core_from_string("49999500.0000"), core_from_string("49999500.0000")), roxe_assert_message_exception);
 
         // Skip 10 years
         produce_block(first_june_2028 - control->head_block_time().time_since_epoch());

@@ -1,10 +1,10 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include "asserter.hpp"
 
-using namespace actc;
+using namespace roxe;
 
 static int global_variable = 45;
 

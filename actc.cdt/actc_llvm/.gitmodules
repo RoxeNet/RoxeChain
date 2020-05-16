@@ -1,6 +1,0 @@
-[submodule "tools/clang"]
-	path = tools/clang
-	url = https://github.com/actc/clang.git
-[submodule "tools/lld"]
-	path = tools/lld
-	url = https://github.com/actc/lld.git

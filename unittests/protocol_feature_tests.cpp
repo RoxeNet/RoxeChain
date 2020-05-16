@@ -1,11 +1,11 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE.txt
+ *  @copyright defined in roxe/LICENSE.txt
  */
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/chain/resource_limits.hpp>
-#include <actc/chain/generated_transaction_object.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/chain/resource_limits.hpp>
+#include <roxe/chain/generated_transaction_object.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <Runtime/Runtime.h>
 
@@ -17,8 +17,8 @@
 
 #include "fork_test_utilities.hpp"
 
-using namespace actc::chain;
-using namespace actc::testing;
+using namespace roxe::chain;
+using namespace roxe::testing;
 
 BOOST_AUTO_TEST_SUITE(protocol_feature_tests)
 
@@ -29,13 +29,13 @@ BOOST_AUTO_TEST_CASE( activate_preactivate_feature ) try {
    c.produce_block();
 
    // Cannot set latest bios contract since it requires intrinsics that have not yet been whitelisted.
-   BOOST_CHECK_EXCEPTION( c.set_code( config::system_account_name, contracts::actc_bios_wasm() ),
+   BOOST_CHECK_EXCEPTION( c.set_code( config::system_account_name, contracts::roxe_bios_wasm() ),
                           wasm_exception, fc_exception_message_is("env.is_feature_activated unresolveable")
    );
 
    // But the old bios contract can still be set.
-   c.set_code( config::system_account_name, contracts::before_preactivate_actc_bios_wasm() );
-   c.set_abi( config::system_account_name, contracts::before_preactivate_actc_bios_abi().data() );
+   c.set_code( config::system_account_name, contracts::before_preactivate_roxe_bios_wasm() );
+   c.set_abi( config::system_account_name, contracts::before_preactivate_roxe_bios_abi().data() );
 
    auto t = c.control->pending_block_time();
    c.control->abort_block();
@@ -52,15 +52,15 @@ BOOST_AUTO_TEST_CASE( activate_preactivate_feature ) try {
    c.produce_block();
 
    // Now the latest bios contract can be set.
-   c.set_code( config::system_account_name, contracts::actc_bios_wasm() );
-   c.set_abi( config::system_account_name, contracts::actc_bios_abi().data() );
+   c.set_code( config::system_account_name, contracts::roxe_bios_wasm() );
+   c.set_abi( config::system_account_name, contracts::roxe_bios_abi().data() );
 
    c.produce_block();
 
    BOOST_CHECK_EXCEPTION( c.push_action( config::system_account_name, N(reqactivated), config::system_account_name,
                                           mutable_variant_object()("feature_digest",  digest_type()) ),
-                           actc_assert_message_exception,
-                           actc_assert_message_is( "protocol feature is not activated" )
+                           roxe_assert_message_exception,
+                           roxe_assert_message_is( "protocol feature is not activated" )
    );
 
    c.push_action( config::system_account_name, N(reqactivated), config::system_account_name, mutable_variant_object()
@@ -602,7 +602,7 @@ BOOST_AUTO_TEST_CASE( no_duplicate_deferred_id_test ) try {
 
    trace1 = nullptr;
 
-   // Retire the delayed actc::reqauth transaction.
+   // Retire the delayed roxe::reqauth transaction.
    c.produce_blocks(5);
    BOOST_REQUIRE( trace1 );
    BOOST_REQUIRE_EQUAL(0, index.size());
@@ -710,15 +710,15 @@ BOOST_AUTO_TEST_CASE( fix_linkauth_restriction ) { try {
                ("type", type)
                ("requirement", "first")),
          action_validate_exception,
-         fc_exception_message_is(std::string("Cannot link actc::") + std::string(type) + std::string(" to a minimum permission"))
+         fc_exception_message_is(std::string("Cannot link roxe::") + std::string(type) + std::string(" to a minimum permission"))
       );
    };
 
-   validate_disallow("actc", "linkauth");
-   validate_disallow("actc", "unlinkauth");
-   validate_disallow("actc", "deleteauth");
-   validate_disallow("actc", "updateauth");
-   validate_disallow("actc", "canceldelay");
+   validate_disallow("roxe", "linkauth");
+   validate_disallow("roxe", "unlinkauth");
+   validate_disallow("roxe", "deleteauth");
+   validate_disallow("roxe", "updateauth");
+   validate_disallow("roxe", "canceldelay");
 
    validate_disallow("currency", "linkauth");
    validate_disallow("currency", "unlinkauth");
@@ -741,11 +741,11 @@ BOOST_AUTO_TEST_CASE( fix_linkauth_restriction ) { try {
             ("requirement", "first"));
    };
 
-   validate_disallow("actc", "linkauth");
-   validate_disallow("actc", "unlinkauth");
-   validate_disallow("actc", "deleteauth");
-   validate_disallow("actc", "updateauth");
-   validate_disallow("actc", "canceldelay");
+   validate_disallow("roxe", "linkauth");
+   validate_disallow("roxe", "unlinkauth");
+   validate_disallow("roxe", "deleteauth");
+   validate_disallow("roxe", "updateauth");
+   validate_disallow("roxe", "canceldelay");
 
    validate_allowed("currency", "linkauth");
    validate_allowed("currency", "unlinkauth");
@@ -957,15 +957,15 @@ BOOST_AUTO_TEST_CASE( forward_setcode_test ) { try {
    c.create_accounts( {tester1_account, tester2_account} );
 
    // Deploy contract that rejects all actions dispatched to it with the following exceptions:
-   //   * actc::setcode to set code on the actc is allowed (unless the rejectall account exists)
-   //   * actc::newaccount is allowed only if it creates the rejectall account.
+   //   * roxe::setcode to set code on the roxe is allowed (unless the rejectall account exists)
+   //   * roxe::newaccount is allowed only if it creates the rejectall account.
    c.set_code( config::system_account_name, contracts::reject_all_wasm() );
    c.produce_block();
 
-   // Before activation, deploying a contract should work since setcode won't be forwarded to the WASM on actc.
+   // Before activation, deploying a contract should work since setcode won't be forwarded to the WASM on roxe.
    c.set_code( tester1_account, contracts::noop_wasm() );
 
-   // Activate FORWARD_SETCODE protocol feature and then return contract on actc back to what it was.
+   // Activate FORWARD_SETCODE protocol feature and then return contract on roxe back to what it was.
    const auto& pfm = c.control->get_protocol_feature_manager();
    const auto& d = pfm.get_builtin_digest( builtin_protocol_feature_t::forward_setcode );
    BOOST_REQUIRE( d );
@@ -975,11 +975,11 @@ BOOST_AUTO_TEST_CASE( forward_setcode_test ) { try {
    c.set_code( config::system_account_name, contracts::reject_all_wasm() );
    c.produce_block();
 
-   // After activation, deploying a contract causes setcode to be dispatched to the WASM on actc,
+   // After activation, deploying a contract causes setcode to be dispatched to the WASM on roxe,
    // and in this case the contract is configured to reject the setcode action.
    BOOST_REQUIRE_EXCEPTION( c.set_code( tester2_account, contracts::noop_wasm() ),
-                            actc_assert_message_exception,
-                            actc_assert_message_is( "rejecting all actions" ) );
+                            roxe_assert_message_exception,
+                            roxe_assert_message_is( "rejecting all actions" ) );
 
 
    tester c2(setup_policy::none);
@@ -990,20 +990,20 @@ BOOST_AUTO_TEST_CASE( forward_setcode_test ) { try {
    c.produce_block();
    // The existence of the rejectall account will make the reject_all contract reject all actions with no exception.
 
-   // It will now not be possible to deploy the reject_all contract to the actc account,
+   // It will now not be possible to deploy the reject_all contract to the roxe account,
    // because after it is set by the native function, it is called immediately after which will reject the transaction.
    BOOST_REQUIRE_EXCEPTION( c.set_code( config::system_account_name, contracts::reject_all_wasm() ),
-                            actc_assert_message_exception,
-                            actc_assert_message_is( "rejecting all actions" ) );
+                            roxe_assert_message_exception,
+                            roxe_assert_message_is( "rejecting all actions" ) );
 
 
    // Going back to the backup chain, we can create the rejectall account while the reject_all contract is
-   // already deployed on actc.
+   // already deployed on roxe.
    c2.create_account( N(rejectall) );
    c2.produce_block();
-   // Now all actions dispatched to the actc account should be rejected.
+   // Now all actions dispatched to the roxe account should be rejected.
 
-   // However, it should still be possible to set the bios contract because the WASM on actc is called after the
+   // However, it should still be possible to set the bios contract because the WASM on roxe is called after the
    // native setcode function completes.
    c2.set_bios_contract();
    c2.produce_block();
@@ -1037,8 +1037,8 @@ BOOST_AUTO_TEST_CASE( get_sender_test ) { try {
    BOOST_CHECK_EXCEPTION(  c.push_action( tester1_account, N(sendinline), tester1_account, mutable_variant_object()
                                              ("to", tester2_account.to_string())
                                              ("expected_sender", account_name{}) ),
-                           actc_assert_message_exception,
-                           actc_assert_message_is( "sender did not match" ) );
+                           roxe_assert_message_exception,
+                           roxe_assert_message_is( "sender did not match" ) );
 
    c.push_action( tester1_account, N(sendinline), tester1_account, mutable_variant_object()
       ("to", tester2_account.to_string())

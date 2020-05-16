@@ -28,44 +28,44 @@ while getopts ":lv" opt; do
    esac
 done
 
-ACTC_STUFF_DIR=$(mktemp -d)
-trap "rm -rf $ACTC_STUFF_DIR" EXIT
-NODACTC_LAUNCH_PARAMS="./programs/nodactc/nodactc -d $ACTC_STUFF_DIR --config-dir $ACTC_STUFF_DIR \
+ROXE_STUFF_DIR=$(mktemp -d)
+trap "rm -rf $ROXE_STUFF_DIR" EXIT
+NODROXE_LAUNCH_PARAMS="./programs/nodroxe/nodroxe -d $ROXE_STUFF_DIR --config-dir $ROXE_STUFF_DIR \
 --chain-state-db-size-mb 8 --chain-state-db-guard-size-mb 0 --reversible-blocks-db-size-mb 1 \
---reversible-blocks-db-guard-size-mb 0 -e -pactc"
+--reversible-blocks-db-guard-size-mb 0 -e -proxe"
 
-run_nodactc() {
+run_nodroxe() {
    if (( $VERBOSE == 0 )); then
-      $NODACTC_LAUNCH_PARAMS --http-server-address '' --p2p-listen-endpoint '' "$@" 2>/dev/null &
+      $NODROXE_LAUNCH_PARAMS --http-server-address '' --p2p-listen-endpoint '' "$@" 2>/dev/null &
    else
-      $NODACTC_LAUNCH_PARAMS --http-server-address '' --p2p-listen-endpoint '' "$@" &
+      $NODROXE_LAUNCH_PARAMS --http-server-address '' --p2p-listen-endpoint '' "$@" &
    fi
 }
 
 run_expect_success() {
-   run_nodactc "$@"
-   local NODACTC_PID=$!
+   run_nodroxe "$@"
+   local NODROXE_PID=$!
    sleep 10
-   kill $NODACTC_PID
-   wait $NODACTC_PID
+   kill $NODROXE_PID
+   wait $NODROXE_PID
 }
 
 run_and_kill() {
-   run_nodactc "$@"
-   local NODACTC_PID=$!
+   run_nodroxe "$@"
+   local NODROXE_PID=$!
    sleep 10
-   kill -KILL $NODACTC_PID
-   ! wait $NODACTC_PID
+   kill -KILL $NODROXE_PID
+   ! wait $NODROXE_PID
 }
 
 run_expect_failure() {
-   run_nodactc "$@"
-   local NODACTC_PID=$!
+   run_nodroxe "$@"
+   local NODROXE_PID=$!
    MYPID=$$
    (sleep 20; kill -ALRM $MYPID) & local TIMER_PID=$!
-   trap "kill $NODACTC_PID; wait $NODACTC_PID; exit 1" ALRM
+   trap "kill $NODROXE_PID; wait $NODROXE_PID; exit 1" ALRM
    sleep 10
-   if wait $NODACTC_PID; then exit 1; fi
+   if wait $NODROXE_PID; then exit 1; fi
    kill $TIMER_PID
    trap ALRM
 }

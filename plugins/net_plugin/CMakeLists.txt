@@ -1,4 +1,4 @@
-file(GLOB HEADERS "include/actc/net_plugin/*.hpp" )
+file(GLOB HEADERS "include/roxe/net_plugin/*.hpp" )
 add_library( net_plugin
              net_plugin.cpp
              ${HEADERS} )

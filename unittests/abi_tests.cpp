@@ -1,6 +1,6 @@
 /**
  *  @file
- *  @copyright defined in actc/LICENSE
+ *  @copyright defined in roxe/LICENSE
  */
 #include <algorithm>
 #include <vector>
@@ -15,17 +15,17 @@
 #include <fc/log/logger.hpp>
 #include <fc/scoped_exit.hpp>
 
-#include <actc/chain/contract_types.hpp>
-#include <actc/chain/abi_serializer.hpp>
-#include <actc/chain/actc_contract.hpp>
-#include <actc/testing/tester.hpp>
+#include <roxe/chain/contract_types.hpp>
+#include <roxe/chain/abi_serializer.hpp>
+#include <roxe/chain/roxe_contract.hpp>
+#include <roxe/testing/tester.hpp>
 
 #include <boost/test/framework.hpp>
 
 #include <deep_nested.abi.hpp>
 #include <large_nested.abi.hpp>
 
-using namespace actc;
+using namespace roxe;
 using namespace chain;
 
 BOOST_AUTO_TEST_SUITE(abi_tests)
@@ -67,7 +67,7 @@ void verify_round_trip_conversion( const abi_serializer& abis, const type_name& 
 auto get_resolver(const abi_def& abi = abi_def())
 {
    return [&abi](const account_name &name) -> optional<abi_serializer> {
-      return abi_serializer(actc_contract_abi(abi), max_serialization_time);
+      return abi_serializer(roxe_contract_abi(abi), max_serialization_time);
    };
 }
 
@@ -97,7 +97,7 @@ fc::variant verify_type_round_trip_conversion( const abi_serializer& abis, const
 
     const char* my_abi = R"=====(
 {
-   "version": "actc::abi/1.0",
+   "version": "roxe::abi/1.0",
    "types": [{
       "new_type_name": "type_name",
       "type": "string"
@@ -492,7 +492,7 @@ BOOST_AUTO_TEST_CASE(uint_types)
 
    const char* currency_abi = R"=====(
    {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [],
        "structs": [{
            "name": "transfer",
@@ -519,7 +519,7 @@ BOOST_AUTO_TEST_CASE(uint_types)
 
    auto abi = fc::json::from_string(currency_abi).as<abi_def>();
 
-   abi_serializer abis(actc_contract_abi(abi), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi), max_serialization_time);
 
    const char* test_data = R"=====(
    {
@@ -540,16 +540,16 @@ BOOST_AUTO_TEST_CASE(uint_types)
 BOOST_AUTO_TEST_CASE(general)
 { try {
 
-   auto abi = actc_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(my_abi).as<abi_def>());
 
    abi_serializer abis(abi, max_serialization_time);
 
    const char *my_other = R"=====(
     {
-      "publickey"     :  "ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt",
-      "publickey_arr" :  ["ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt"],
-      "asset"         : "100.0000 ACI",
-      "asset_arr"     : ["100.0000 ACI","100.0000 ACI"],
+      "publickey"     :  "ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt",
+      "publickey_arr" :  ["ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt","ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt"],
+      "asset"         : "100.0000 ROC",
+      "asset_arr"     : ["100.0000 ROC","100.0000 ROC"],
 
       "string"            : "ola ke ase",
       "string_arr"        : ["ola ke ase","ola ke desi"],
@@ -683,22 +683,22 @@ BOOST_AUTO_TEST_CASE(general)
         "delay_sec":0,
         "transaction_extensions": []
       }],
-      "keyweight": {"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},
-      "keyweight_arr": [{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
+      "keyweight": {"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},
+      "keyweight_arr": [{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
       "authority": {
          "threshold":"10",
-         "keys":[{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":100},{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":200}],
+         "keys":[{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":100},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":200}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        },
       "authority_arr": [{
          "threshold":"10",
-         "keys":[{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
+         "keys":[{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        },{
          "threshold":"10",
-         "keys":[{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ACTC7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
+         "keys":[{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"100"},{"key":"ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt", "weight":"200"}],
          "accounts":[{"permission":{"actor":"acc1","permission":"permname1"},"weight":"1"},{"permission":{"actor":"acc2","permission":"permname2"},"weight":"2"}],
          "waits":[]
        }],
@@ -712,7 +712,7 @@ BOOST_AUTO_TEST_CASE(general)
          {"name":"table2","index_type":"indextype2","key_names":["keyname2"],"key_types":["typename2"],"type":"type2"}
       ],
       "abidef":{
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types" : [{"new_type_name":"new", "type":"old"}],
         "structs" : [{"name":"struct1", "base":"base1", "fields": [{"name":"name1", "type": "type1"}, {"name":"name2", "type": "type2"}] }],
         "actions" : [{"name":"action1","type":"type1", "ricardian_contract":""}],
@@ -721,7 +721,7 @@ BOOST_AUTO_TEST_CASE(general)
         "abi_extensions": []
       },
       "abidef_arr": [{
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types" : [{"new_type_name":"new", "type":"old"}],
         "structs" : [{"name":"struct1", "base":"base1", "fields": [{"name":"name1", "type": "type1"}, {"name":"name2", "type": "type2"}] }],
         "actions" : [{"name":"action1","type":"type1", "ricardian_contract":""}],
@@ -729,7 +729,7 @@ BOOST_AUTO_TEST_CASE(general)
         "ricardian_clauses": [],
         "abi_extensions": []
       },{
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types" : [{"new_type_name":"new", "type":"old"}],
         "structs" : [{"name":"struct1", "base":"base1", "fields": [{"name":"name1", "type": "type1"}, {"name":"name2", "type": "type2"}] }],
         "actions" : [{"name":"action1","type":"type1", "ricardian_contract": ""}],
@@ -766,7 +766,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
 
    const char* struct_cycle_abi = R"=====(
    {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [],
        "structs": [{
          "name": "A",
@@ -787,7 +787,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(typedef_cycle_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(typedef_cycle_abi).as<abi_def>());
 
    auto is_assert_exception = [](const auto& e) -> bool {
       wlog(e.to_string()); return true;
@@ -803,7 +803,7 @@ BOOST_AUTO_TEST_CASE(abi_cycle)
 BOOST_AUTO_TEST_CASE(linkauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -837,7 +837,7 @@ BOOST_AUTO_TEST_CASE(linkauth_test)
 BOOST_AUTO_TEST_CASE(unlinkauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -868,7 +868,7 @@ BOOST_AUTO_TEST_CASE(unlinkauth_test)
 BOOST_AUTO_TEST_CASE(updateauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -878,8 +878,8 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
      "parent" : "updauth.prnt",
      "auth" : {
         "threshold" : "2147483145",
-        "keys" : [ {"key" : "ACTC65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "ACTC5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 } ],
         "waits" : []
@@ -896,9 +896,9 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
    BOOST_TEST(2147483145u == updauth.auth.threshold);
 
    BOOST_TEST_REQUIRE(2u == updauth.auth.keys.size());
-   BOOST_TEST("ACTC65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)updauth.auth.keys[0].key);
+   BOOST_TEST("ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)updauth.auth.keys[0].key);
    BOOST_TEST(57005u == updauth.auth.keys[0].weight);
-   BOOST_TEST("ACTC5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)updauth.auth.keys[1].key);
+   BOOST_TEST("ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)updauth.auth.keys[1].key);
    BOOST_TEST(57605u == updauth.auth.keys[1].weight);
 
    BOOST_TEST_REQUIRE(2u == updauth.auth.accounts.size());
@@ -938,7 +938,7 @@ BOOST_AUTO_TEST_CASE(updateauth_test)
 BOOST_AUTO_TEST_CASE(deleteauth_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -966,7 +966,7 @@ BOOST_AUTO_TEST_CASE(deleteauth_test)
 BOOST_AUTO_TEST_CASE(newaccount_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    BOOST_CHECK(true);
    const char* test_data = R"=====(
@@ -975,16 +975,16 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
      "name" : "newacct.name",
      "owner" : {
         "threshold" : 2147483145,
-        "keys" : [ {"key" : "ACTC65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "ACTC5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 }],
         "waits" : []
      },
      "active" : {
         "threshold" : 2146483145,
-        "keys" : [ {"key" : "ACTC65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
-                   {"key" : "ACTC5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
+        "keys" : [ {"key" : "ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im", "weight" : 57005},
+                   {"key" : "ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf", "weight" : 57605} ],
         "accounts" : [ {"permission" : {"actor" : "prm.acct1", "permission" : "prm.prm1"}, "weight" : 53005 },
                        {"permission" : {"actor" : "prm.acct2", "permission" : "prm.prm2"}, "weight" : 53405 }],
         "waits" : []
@@ -1000,9 +1000,9 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
    BOOST_TEST(2147483145u == newacct.owner.threshold);
 
    BOOST_TEST_REQUIRE(2u == newacct.owner.keys.size());
-   BOOST_TEST("ACTC65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.owner.keys[0].key);
+   BOOST_TEST("ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.owner.keys[0].key);
    BOOST_TEST(57005u == newacct.owner.keys[0].weight);
-   BOOST_TEST("ACTC5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.owner.keys[1].key);
+   BOOST_TEST("ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.owner.keys[1].key);
    BOOST_TEST(57605u == newacct.owner.keys[1].weight);
 
    BOOST_TEST_REQUIRE(2u == newacct.owner.accounts.size());
@@ -1016,9 +1016,9 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
    BOOST_TEST(2146483145u == newacct.active.threshold);
 
    BOOST_TEST_REQUIRE(2u == newacct.active.keys.size());
-   BOOST_TEST("ACTC65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.active.keys[0].key);
+   BOOST_TEST("ROXE65rXebLhtk2aTTzP4e9x1AQZs7c5NNXJp89W8R3HyaA6Zyd4im" == (std::string)newacct.active.keys[0].key);
    BOOST_TEST(57005u == newacct.active.keys[0].weight);
-   BOOST_TEST("ACTC5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.active.keys[1].key);
+   BOOST_TEST("ROXE5eVr9TVnqwnUBNwf9kwMTbrHvX5aPyyEG97dz2b2TNeqWRzbJf" == (std::string)newacct.active.keys[1].key);
    BOOST_TEST(57605u == newacct.active.keys[1].weight);
 
    BOOST_TEST_REQUIRE(2u == newacct.active.accounts.size());
@@ -1076,7 +1076,7 @@ BOOST_AUTO_TEST_CASE(newaccount_test)
 BOOST_AUTO_TEST_CASE(setcode_test)
 { try {
 
-   abi_serializer abis(actc_contract_abi(abi_def()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(abi_def()), max_serialization_time);
 
    const char* test_data = R"=====(
    {
@@ -1111,7 +1111,7 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    const char* abi_def_abi = R"=====(
       {
-         "version": "actc::abi/1.0",
+         "version": "roxe::abi/1.0",
          "types": [{
             "new_type_name": "type_name",
             "type": "string"
@@ -1239,11 +1239,11 @@ BOOST_AUTO_TEST_CASE(setabi_test)
 
    auto v = fc::json::from_string(abi_def_abi);
 
-   abi_serializer abis(actc_contract_abi(v.as<abi_def>()), max_serialization_time);
+   abi_serializer abis(roxe_contract_abi(v.as<abi_def>()), max_serialization_time);
 
    const char* abi_string = R"=====(
       {
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types": [{
             "new_type_name": "account_name",
             "type": "name"
@@ -1503,7 +1503,7 @@ BOOST_AUTO_TEST_CASE(packed_transaction)
 
    const char* packed_transaction_abi = R"=====(
    {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [{
           "new_type_name": "compression_type",
           "type": "int64"
@@ -1586,7 +1586,7 @@ BOOST_AUTO_TEST_CASE(abi_type_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -1637,7 +1637,7 @@ BOOST_AUTO_TEST_CASE(abi_type_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    auto is_table_exception = [](fc::exception const & e) -> bool { return e.to_detail_string().find("type already exists") != std::string::npos; };
    BOOST_CHECK_EXCEPTION( abi_serializer abis(abi, max_serialization_time), duplicate_abi_type_def_exception, is_table_exception );
 } FC_LOG_AND_RETHROW() }
@@ -1647,7 +1647,7 @@ BOOST_AUTO_TEST_CASE(abi_struct_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -1695,7 +1695,7 @@ BOOST_AUTO_TEST_CASE(abi_struct_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, max_serialization_time), duplicate_abi_struct_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -1704,7 +1704,7 @@ BOOST_AUTO_TEST_CASE(abi_action_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -1755,7 +1755,7 @@ BOOST_AUTO_TEST_CASE(abi_action_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, max_serialization_time), duplicate_abi_action_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -1764,7 +1764,7 @@ BOOST_AUTO_TEST_CASE(abi_table_repeat)
 
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "actor_name",
          "type": "name"
@@ -1818,7 +1818,7 @@ BOOST_AUTO_TEST_CASE(abi_table_repeat)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    BOOST_CHECK_THROW( abi_serializer abis(abi, max_serialization_time), duplicate_abi_table_def_exception );
 } FC_LOG_AND_RETHROW() }
 
@@ -1827,7 +1827,7 @@ BOOST_AUTO_TEST_CASE(abi_type_def)
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "name"
@@ -1880,7 +1880,7 @@ BOOST_AUTO_TEST_CASE(abi_type_loop)
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "name"
@@ -1924,7 +1924,7 @@ BOOST_AUTO_TEST_CASE(abi_type_redefine)
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "account_name"
@@ -1965,7 +1965,7 @@ BOOST_AUTO_TEST_CASE(abi_type_redefine_to_name)
       // inifinite loop in types
       const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "name",
          "type": "name"
@@ -1987,7 +1987,7 @@ BOOST_AUTO_TEST_CASE(abi_type_nested_in_vector)
       // inifinite loop in types
       const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [],
      "structs": [{
          "name": "store_t",
@@ -2008,12 +2008,12 @@ BOOST_AUTO_TEST_CASE(abi_type_nested_in_vector)
 
 } FC_LOG_AND_RETHROW() }
 
-BOOST_AUTO_TEST_CASE(abi_account_name_in_actc_abi)
+BOOST_AUTO_TEST_CASE(abi_account_name_in_roxe_abi)
 { try {
    // inifinite loop in types
    const char* repeat_abi = R"=====(
    {
-     "version": "actc::abi/1.0",
+     "version": "roxe::abi/1.0",
      "types": [{
          "new_type_name": "account_name",
          "type": "name"
@@ -2044,7 +2044,7 @@ BOOST_AUTO_TEST_CASE(abi_account_name_in_actc_abi)
    }
    )=====";
 
-   auto abi = actc_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
+   auto abi = roxe_contract_abi(fc::json::from_string(repeat_abi).as<abi_def>());
    auto is_type_exception = [](fc::assert_exception const & e) -> bool { return e.to_detail_string().find("abi.types.size") != std::string::npos; };
 
 } FC_LOG_AND_RETHROW() }
@@ -2056,7 +2056,7 @@ BOOST_AUTO_TEST_CASE(abi_large_array)
    try {
       const char* abi_str = R"=====(
       {
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types": [],
         "structs": [{
            "name": "hi",
@@ -2077,7 +2077,7 @@ BOOST_AUTO_TEST_CASE(abi_large_array)
 
       abi_serializer abis( fc::json::from_string( abi_str ).as<abi_def>(), max_serialization_time );
       // indicate a very large array, but don't actually provide a large array
-      // curl http://127.0.0.1:8888/v1/chain/abi_bin_to_json -X POST -d '{"code":"actc", "action":"hi", "binargs":"ffffffff08"}'
+      // curl http://127.0.0.1:8888/v1/chain/abi_bin_to_json -X POST -d '{"code":"roxe", "action":"hi", "binargs":"ffffffff08"}'
       bytes bin = {static_cast<char>(0xff),
                    static_cast<char>(0xff),
                    static_cast<char>(0xff),
@@ -2094,7 +2094,7 @@ BOOST_AUTO_TEST_CASE(abi_is_type_recursion)
    try {
       const char* abi_str = R"=====(
       {
-       "version": "actc::abi/1.0",
+       "version": "roxe::abi/1.0",
        "types": [
         {
             "new_type_name": "a[]",
@@ -2138,7 +2138,7 @@ BOOST_AUTO_TEST_CASE(abi_recursive_structs)
    try {
       const char* abi_str = R"=====(
       {
-        "version": "actc::abi/1.0",
+        "version": "roxe::abi/1.0",
         "types": [],
         "structs": [
           {
@@ -2195,7 +2195,7 @@ BOOST_AUTO_TEST_CASE(abi_recursive_structs)
       )=====";
 
       abi_serializer abis(fc::json::from_string(abi_str).as<abi_def>(), max_serialization_time);
-      string hi_data = "{\"user\":\"actc\"}";
+      string hi_data = "{\"user\":\"roxe\"}";
       auto bin = abis.variant_to_binary("hi2", fc::json::from_string(hi_data), max_serialization_time);
       BOOST_CHECK_THROW( abis.binary_to_variant("hi", bin, max_serialization_time);, fc::exception );
 
@@ -2233,10 +2233,10 @@ BOOST_AUTO_TEST_CASE(abi_deep_structs_validate)
 
 BOOST_AUTO_TEST_CASE(variants)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto duplicate_variant_abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "variants": [
          {"name": "v1", "types": ["int8", "string", "bool"]},
          {"name": "v1", "types": ["int8", "string", "bool"]},
@@ -2244,14 +2244,14 @@ BOOST_AUTO_TEST_CASE(variants)
    })";
 
    auto variant_abi_invalid_type = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "variants": [
          {"name": "v1", "types": ["int91", "string", "bool"]},
       ],
    })";
 
    auto variant_abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "foo", "type": "s"},
          {"new_type_name": "bar", "type": "s"},
@@ -2306,10 +2306,10 @@ BOOST_AUTO_TEST_CASE(variants)
 
 BOOST_AUTO_TEST_CASE(extend)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "structs": [
          {"name": "s", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -2363,18 +2363,18 @@ BOOST_AUTO_TEST_CASE(version)
    try {
       BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
       BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({"version": ""})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
-      BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({"version": "actc::abi/9.0"})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
-      abi_serializer(fc::json::from_string(R"({"version": "actc::abi/1.0"})").as<abi_def>(), max_serialization_time);
-      abi_serializer(fc::json::from_string(R"({"version": "actc::abi/1.1"})").as<abi_def>(), max_serialization_time);
+      BOOST_CHECK_THROW( abi_serializer(fc::json::from_string(R"({"version": "roxe::abi/9.0"})").as<abi_def>(), max_serialization_time), unsupported_abi_version_exception );
+      abi_serializer(fc::json::from_string(R"({"version": "roxe::abi/1.0"})").as<abi_def>(), max_serialization_time);
+      abi_serializer(fc::json::from_string(R"({"version": "roxe::abi/1.1"})").as<abi_def>(), max_serialization_time);
    } FC_LOG_AND_RETHROW()
 }
 
 BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_array)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -2400,10 +2400,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_array)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_object)
 {
-   using actc::testing::fc_exception_message_starts_with;
+   using roxe::testing::fc_exception_message_starts_with;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s1", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -2432,10 +2432,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_incomplete_json_object)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_json_mismatching_type)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s1", "base": "", "fields": [
             {"name": "i0", "type": "int8"},
@@ -2461,10 +2461,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_json_mismatching_type)
 // it is a bit odd to have an empty name for a field, but json seems to allow it
 BOOST_AUTO_TEST_CASE(abi_serialize_json_empty_name)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.0",
+      "version": "roxe::abi/1.0",
       "structs": [
          {"name": "s1", "base": "", "fields": [
             {"name": "", "type": "int8"},
@@ -2484,10 +2484,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_json_empty_name)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "foo", "type": "s2"},
          {"new_type_name": "bar", "type": "foo"},
@@ -2561,10 +2561,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_detailed_error_messages)
 
 BOOST_AUTO_TEST_CASE(abi_serialize_short_error_messages)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "foo", "type": "s2"},
          {"new_type_name": "bar", "type": "foo"},
@@ -2641,10 +2641,10 @@ BOOST_AUTO_TEST_CASE(abi_serialize_short_error_messages)
 
 BOOST_AUTO_TEST_CASE(abi_deserialize_detailed_error_messages)
 {
-   using actc::testing::fc_exception_message_is;
+   using roxe::testing::fc_exception_message_is;
 
    auto abi = R"({
-      "version": "actc::abi/1.1",
+      "version": "roxe::abi/1.1",
       "types": [
          {"new_type_name": "oint", "type": "int8?"},
          {"new_type_name": "os1", "type": "s1?"}
