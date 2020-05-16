@@ -11,6 +11,11 @@ $ wget https://github.com/RoxeTech/RoxeChain/releases/download/v1.0.0/RoxeChain-
 $ sudo apt install ./RoxeChain-1.0.0.ubuntu-18.04-x86_64.deb
 ```
 
+#### Debian Package Uninstall
+
+```sh
+$ sudo apt remove RoxeChain
+```
 
 #### RPM Package Install
 

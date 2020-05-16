@@ -103,18 +103,10 @@ fi
    install_symlinks   
    create_cmake_symlink "roxe-config.cmake"
 
-   printf "\n\n${bldred}\t _______  _______  _______ _________ _______\n"
-   printf '\t(  ____ \(  ___  )(  ____ \\\\__   __/(  ___  )\n'
-   printf "\t| (    \/| (   ) || (    \/   ) (   | (   ) |\n"
-   printf "\t| (__    | |   | || (_____    | |   | |   | |\n"
-   printf "\t|  __)   | |   | |(_____  )   | |   | |   | |\n"
-   printf "\t| (      | |   | |      ) |   | |   | |   | |\n"
-   printf "\t| (____/\| (___) |/\____) |___) (___| (___) |\n"
-   printf "\t(_______/(_______)\_______)\_______/(_______)\n${txtrst}"
+   printf "\n\n${bldred}\n"
+   printf "\n${txtrst}"
 
    printf "\\tFor more information:\\n"
-   printf "\\troxe website: https://roxe.io\\n"
-   printf "\\troxe Telegram channel @ https://t.me/roxeProject\\n"
-   printf "\\troxe resources: https://roxe.io/resources/\\n"
-   printf "\\troxe Stack Exchange: https://roxe.stackexchange.com\\n"
-   printf "\\troxe wiki: https://github.com/roxe/roxe/wiki\\n\\n\\n"
+   printf "\\troxe website: https://roxe.tech\\n"
+   printf "\\troxe resources: https://github.com/RoxeTech/RoxeChain\\n"
+   printf "\\troxe wiki: https://github.com/RoxeTech/RoxeChain/wiki\\n\\n\\n"
