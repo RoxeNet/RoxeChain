@@ -103,7 +103,7 @@ executed transaction: 60d334850151cb95c35fe31ce2e8b536b51441c5fd4c3f2fea98edcc6d
 #           bob <= roxe.token::transfer        {"from":"roxe","to":"bob","quantity":"25.0000 ROC","memo":"m"}
 warning: transaction executed locally, but may not be confirmed by the network yet         ]
 ```
-Now check if "bob" got the tokens using [clroxe get currency balance](https://developers.roxe.io/roxe-clroxe/reference#currency-balance)
+Now check if "bob" got the tokens using [clroxe get currency balance](https://developers.roxe.tech/)
 
 ```shell
 clroxe get currency balance roxe.token bob ROC
