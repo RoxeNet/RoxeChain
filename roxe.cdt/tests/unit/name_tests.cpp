@@ -115,21 +115,12 @@ ROXE_TEST_BEGIN(name_type_test)
    // ----------------------------
    // constexpr name suffix()const
    CHECK_EQUAL( name{".roxeaccounj"}.suffix(), name{"roxeaccounj"} )
-   CHECK_EQUAL( name{"e.osioaccounj"}.suffix(), name{"osioaccounj"} )
-   CHECK_EQUAL( name{"eo.sioaccounj"}.suffix(), name{"sioaccounj"} )
-   CHECK_EQUAL( name{"roxe.ioaccounj"}.suffix(), name{"ioaccounj"} )
-   CHECK_EQUAL( name{"roxei.oaccounj"}.suffix(), name{"oaccounj"} )
+   CHECK_EQUAL( name{"r.oxeaccounj"}.suffix(), name{"oxeaccounj"} )
+   CHECK_EQUAL( name{"ro.xeaccounj"}.suffix(), name{"xeaccounj"} )
    CHECK_EQUAL( name{"roxe.accounj"}.suffix(), name{"accounj"} )
-   CHECK_EQUAL( name{"act"
-                     "ca.ccounj"}.suffix(), name{"ccounj"} )
-   CHECK_EQUAL( name{"roxeac.counj"}.suffix(), name{"counj"} )
-   CHECK_EQUAL( name{"roxeacc.ounj"}.suffix(), name{"ounj"} )
-   CHECK_EQUAL( name{"roxeacco.unj"}.suffix(), name{"unj"} )
-   CHECK_EQUAL( name{"roxeaccou.nj"}.suffix(), name{"nj"} )
-   CHECK_EQUAL( name{"roxeaccoun.j"}.suffix(), name{"j"} )
 
-   CHECK_EQUAL( name{"e.o.s.i.o.a.c"}.suffix(), name{"c"} )
-   CHECK_EQUAL( name{"roxe.ioa.cco"}.suffix(), name{"cco"} )
+   CHECK_EQUAL( name{"r.o.x.e"}.suffix(), name{"e"} )
+   CHECK_EQUAL( name{"roxe.tech.cco"}.suffix(), name{"cco"} )
 
    // -----------------------------
    // constexpr operator raw()const
