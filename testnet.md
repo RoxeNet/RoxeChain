@@ -1,16 +1,16 @@
-# GLS Testnet
-To date, all work done to experiment with the GLS blockchain has been performed using a single instance of GLS hosting all 21 block producers. While this is a perfectly valid solution for validating features of the blockchain, developing new contracts, or whatever, it does not scale. Nor does it expose the sort of issues raised when contract and block data must be shared across multiple instances. Providing the ability to scale involves deploying multiple GLS nodes across many hosts and lining then into a peer-to-peer (p2p) network. Composing this network involves tailoring and distributing configuration files, coordinating starts and stops and other tasks.
+# Roxe Chain Testnet
+To date, all work done to experiment with the Roxe Chain has been performed using a single instance of Roxe Chain hosting all 21 block producers. While this is a perfectly valid solution for validating features of the blockchain, developing new contracts, or whatever, it does not scale. Nor does it expose the sort of issues raised when contract and block data must be shared across multiple instances. Providing the ability to scale involves deploying multiple Roxe Chain nodes across many hosts and lining then into a peer-to-peer (p2p) network. Composing this network involves tailoring and distributing configuration files, coordinating starts and stops and other tasks.
 
 Doing this manually is a tedious task and easily error prone. Fortunately a solution is provided, in the form of the Launcher application, described below.
 
 ## Testnet nodes, networks, and topology
-Before getting into the details of the GLS testnet, lets clarify some terms. In this document I use the terms "host" and "machine" fairly interchangeably. A host generally boils down to a single IP address, although in practice it could have more.
+Before getting into the details of the Roxe Chain testnet, lets clarify some terms. In this document I use the terms "host" and "machine" fairly interchangeably. A host generally boils down to a single IP address, although in practice it could have more.
 
-The next term is "node." A node is an instance of the GLS executable configured to serve as 0 or more producers. There is not a one-to-one mapping between nodes and hosts, a host may serve more than one node, but one node cannot span more than one host.
+The next term is "node." A node is an instance of the Roxe Chain executable configured to serve as 0 or more producers. There is not a one-to-one mapping between nodes and hosts, a host may serve more than one node, but one node cannot span more than one host.
 
 I use "local network" to refer to any group of nodes, whether on a single host or several, are all close in that access does not have to leave a secure network environment. 
 
-Finally there is the idea of distributed networks that involve remote hosts. These may be hosts on which you may not have direct access for starting and stopping GLS instances, but with whom you may wish to collaborate for setting up a decentralized testnet.
+Finally there is the idea of distributed networks that involve remote hosts. These may be hosts on which you may not have direct access for starting and stopping Roxe Chain instances, but with whom you may wish to collaborate for setting up a decentralized testnet.
 
 ### Localhost networks
 Running a testnet on a single machine is the quickest way to get started. As you will see below, this is the default mode for the Launcher application. You can set up a localhost network immediately by simply telling the launcher how many producing or non-producing nodes to activate, and perhaps what type of network topology to use.
@@ -18,13 +18,13 @@ Running a testnet on a single machine is the quickest way to get started. As you
 The downside is that you need a lot of hardware when running many nodes on a single host. Also the multiple nodes will contend with each other in terms of CPU cycles, limiting true concurrency, and also localhost network performance is much different from inter-host performance, even with very high speed lans.
 
 ### Distributed networks
-The most representative model of the live net is to spread the GLS nodes across many hosts. The Launcher app is able to start distributed nodes by the use of bash scripts pushed through ssh. In this case additional configuration is required to replace configured references to "localhost" or "127.0.0.1" with the actual host name or ip addresses of the various peer machines.
+The most representative model of the live net is to spread the Roxe Chain nodes across many hosts. The Launcher app is able to start distributed nodes by the use of bash scripts pushed through ssh. In this case additional configuration is required to replace configured references to "localhost" or "127.0.0.1" with the actual host name or ip addresses of the various peer machines.
 
 Launching a distributed testnet requires the operator to have ssh access to all the remote machines configured to authenticate without the need for a user entered password. This configuration is described in detail below. 
 
 In cases where a testnet spans multiple remote networks, a common launcher defined configuration file may be shared externally between distributed operators, each being responsible for launching his or her own local network.
 
-Note that the Launcher will not push instances of GLS to the remote hosts, you must prepare the various test network hosts separately.
+Note that the Launcher will not push instances of Roxe Chain to the remote hosts, you must prepare the various test network hosts separately.
 
 ### Network Topology
 Network topology or "shape" describes how the nodes are connected in order to share transaction and block data, and requests for the same. The idea for varying network topology is that there is a trade off between the number of times a node must send a message reporting a new transaction or block, vs the number of times that message must be repeated to ensure all nodes know of it.
@@ -32,11 +32,11 @@ Network topology or "shape" describes how the nodes are connected in order to sh
 The Launcher has definitions of two basic different network "shapes" based on inter-nodal connections, which can be selected by a command line option. If you wish to create your own custom network topology, you can do so by supplying a json formatted file. This file is typically the edited version of the template created by the launcher in "output" mode.
 
 #### Star network
-![](https://github.com/glsio/gls/raw/master/star.png)
+![](https://github.com/RoxeTech/RoxeChain/raw/master/star.png)
 A "star" is intended to support a larger number of nodes in the testnet. In this case the number of peers connected to a node and the distribution of those nodes varies based on the number of nodes in the network.
 
 #### Mesh network
-![](https://github.com/glsio/gls/raw/master/mesh.png)
+![](https://github.com/RoxeTech/RoxeChain/raw/master/mesh.png)
 In a "mesh" network, each node is connected to as many peer nodes as possible.
 
 #### Custom network shape
@@ -44,15 +44,15 @@ In a "mesh" network, each node is connected to as many peer nodes as possible.
 This is an example of a custom deployment where clusters of nodes are isolated except through a single crosslink.
 
 # The Launcher Application
-To address the complexity implied by distributing multiple GLS nodes across a LAN or a wider network, the launcher application was created.
+To address the complexity implied by distributing multiple Roxe Chain nodes across a LAN or a wider network, the launcher application was created.
 
-Based on a handful of command line arguments the Launcher is able to compose per-node configuration files, distribute these files securely amongst the peer hosts, then start up the multiple instances of GLS.
+Based on a handful of command line arguments the Launcher is able to compose per-node configuration files, distribute these files securely amongst the peer hosts, then start up the multiple instances of Roxe Chain.
 
 actcd instances started this way have their output logged in individual text files. Finally the launcher application is also able to shut down some or all of the test network.
 
 ## Running the Launcher application
 
-The launcher program is used to configure and deploy producing and non-producing GLS nodes that talk to each other using configured routes. The configuration for each node is stored in separate directories, permitting multiple nodes to be active on the same host, assuming the machine has sufficient memory and disk space for multiple GLS instances. The launcher makes use of multiple configuration sources in order to deploy a testnet. A handful of command line arguments can be used to set up simple local networks.
+The launcher program is used to configure and deploy producing and non-producing Roxe Chain nodes that talk to each other using configured routes. The configuration for each node is stored in separate directories, permitting multiple nodes to be active on the same host, assuming the machine has sufficient memory and disk space for multiple Roxe Chain instances. The launcher makes use of multiple configuration sources in order to deploy a testnet. A handful of command line arguments can be used to set up simple local networks.
 
 To support deploying distributed networks, the launcher will read more detailed configuration from a JSON file. You can use the launcher to create a default JSON file based on the command line options you supply. Edit that file to substitute actual hostnames and other details 
 as needed, then rerun the launcher supplying this file.
@@ -67,14 +67,14 @@ launcher command line arguments:
   -n [ --nodes ] arg (=1)               total number of nodes to configure and 
                                         launch
   -p [ --pnodes ] arg (=1)              number of nodes that are producers
-  -d [ --delay ] arg (=0)               number of seconds to wait before starting the next node. Used to simulate a person keying in a series of individual GLS startup command lines.
+  -d [ --delay ] arg (=0)               number of seconds to wait before starting the next node. Used to simulate a person keying in a series of individual Roxe Chain startup command lines.
   -s [ --shape ] arg (=star)            network topology, use "star" 
                                         "mesh" or give a filename for custom
   -g [ --genesis ] arg (="./genesis.json")
                                         set the path to genesis.json
   -o [ --output ] arg                   save a copy of the generated topology 
                                         in this file
-  --skip-signature                      GLS does not require transaction
+  --skip-signature                      Roxe Chain does not require transaction
                                         signatures.
   -i [ --timestamp ] arg                set the timestamp for the first block. 
                                         Use "now" to indicate the current time
@@ -94,7 +94,7 @@ This is the file generated by running the following command:
 
  `launcher --output <filename> [other options]`
 
-In this mode, the launcher does not activate any GLS instances, it produces a file of the given filename. This file is a JSON formatted template that provides an easy means of
+In this mode, the launcher does not activate any Roxe Chain instances, it produces a file of the given filename. This file is a JSON formatted template that provides an easy means of
 
 The object described in this file is composed of a helper for using ssl, and a collection of testnet node descriptors. The node descriptors are listed as name, value pairs. Note that the names serve a dual purpose acting as both the key in a map of node descriptors and as an alias for the node in the peer lists. For example:
 
@@ -116,7 +116,7 @@ The ssh helper fields are paths to ssh and scp, an identity if necessary, and an
         "remote": true,
         "ssh_identity": "",
         "ssh_args": "",
-        "gls_root_dir": "/home/phil/blockchain/gls",
+        "roxe_root_dir": "/home/phil/blockchain/roxe",
         "data_dir": "tn_data_0",
         "hostname": "remoteserv",
         "public_name": "remoteserv",
@@ -124,7 +124,7 @@ The ssh helper fields are paths to ssh and scp, an identity if necessary, and an
         "http_port": 8888,
         "filesize": 8192,
         "keys": [{
-            "public_key": "gls6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
+            "public_key": "roxe6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV",
             "wif_private_key": "5KQwrPbwdL6PhXujxW37FSSQZ1JiwsST4cqQzDeyXtP79zkvFD3"
           }
         ],
@@ -155,7 +155,7 @@ This table describes all of the key/value pairs used in the testnet.json file.
 |Value          | Description
 | :------------ | :-----------
 | ssh_helper    | a set of values used to facilitate the use of SSH and SCP
-| nodes         | a collection of descriptors defining the GLS instances used to assemble this testnet. The names used as keys in this collection are also aliases used within as placeholders for peer nodes.
+| nodes         | a collection of descriptors defining the Roxe Chain instances used to assemble this testnet. The names used as keys in this collection are also aliases used within as placeholders for peer nodes.
 
 |ssh_helper elements | Description
 | :----------        | :------------
@@ -170,7 +170,7 @@ This table describes all of the key/value pairs used in the testnet.json file.
 | remote             | specifies whether this node is in the local network or not. This flag ties in with the launch mode command line option (-l) to determine if the local launcher instance will attempt to start this node.
 | ssh_identity       | a per-node override of the general ssh_identity defined above.
 | ssh_args           | a per-node override of the general ssh_args
-| actc_root_dir       | specifies the directory into which all GLS artifacts are based. This is required for any hosts that are not the local host.
+| actc_root_dir       | specifies the directory into which all Roxe Chain artifacts are based. This is required for any hosts that are not the local host.
 | data_dir           | the root for the remaining node-specific settings below.
 | hostname           | the domain name for the server, or its IP address.
 | public_name        | possibly different from the hostname, this name will get substituted for the aliases when creating the per-node config.ini file's peer list.
@@ -184,18 +184,18 @@ This table describes all of the key/value pairs used in the testnet.json file.
 ### Provisioning Distributed Servers
 The ssh_helper section of the testnet.json file contains the ssh elements necessary to connect and issue commands to other servers. In addition to the ssh_helper section which provides access to global configuration settings, the per-node configuration may provide overriding identity and connection arguments.
 
-It is also necessary to provision the server by at least copying the GLS executable, and the genesis.json files to their appropriate locations relative to some named GLS root directory. For example, I defined the GLS root to be `/home/phil/blockchain/gls`. When run, the launcher will run through a variety of shell commands using ssh and finally using scp to copy a config.ini file to the appropriate data directory on the remote.
+It is also necessary to provision the server by at least copying the Roxe Chain executable, and the genesis.json files to their appropriate locations relative to some named Roxe Chain root directory. For example, I defined the Roxe Chain root to be `/home/phil/blockchain/roxe`. When run, the launcher will run through a variety of shell commands using ssh and finally using scp to copy a config.ini file to the appropriate data directory on the remote.
 
 ## Runtime Artifacts
 The launcher app creates a separate date and configuration directory for each node instance. This directory is named `tn_data_<n>` with n ranging from 0 to the number of nodes being launched. 
 
 | Per-Node File | Description
 | :------------ | :----------
-| config.ini    | The GLS configuration file.
-| actcd.pid      | The process ID of the running GLS instance.
+| config.ini    | The Roxe Chain configuration file.
+| actcd.pid      | The process ID of the running Roxe Chain instance.
 | blockchain/*  | The blockchain backing store
 | blocks/*      | The blockchain log store
-| stderr.txt    | The cerr output from GLS.
-| stdout.txt    | The cout output from GLS.
+| stderr.txt    | The cerr output from Roxe Chain.
+| stdout.txt    | The cout output from Roxe Chain.
 
 A file called "last_run.json" contains hints for a later instance of the launcher to be able to kill local and remote nodes when run with -k 15.

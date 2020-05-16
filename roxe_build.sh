@@ -291,8 +291,6 @@
    print_instructions
 
    printf "\\tFor more information:\\n"
-   printf "\\troxe website: https://roxe.io\\n"
-   printf "\\troxe Telegram channel @ https://t.me/roxeProject\\n"
-   printf "\\troxe resources: https://roxe.io/resources/\\n"
-   printf "\\troxe Stack Exchange: https://roxe.stackexchange.com\\n"
-   printf "\\troxe wiki: https://github.com/roxe/roxe/wiki\\n\\n\\n"
+   printf "\\troxe website: https://roxe.tech\\n"
+   printf "\\troxe resources: https://github.com/RoxeTech/RoxeChain\\n"
+   printf "\\troxe wiki: https://github.com/RoxeTech/RoxeChain/wiki\\n\\n\\n"
