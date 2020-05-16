@@ -43,7 +43,7 @@
 	
 	YUM=$( command -v yum 2>/dev/null )
 	if [ -z "${YUM}" ]; then
-		printf "\\n\\tYum must be installed to compile ROXE.IO.\\n"
+		printf "\\n\\tYum must be installed to compile ROXE.\\n"
 		printf "\\n\\tExiting now.\\n"
 		exit 1;
 	fi

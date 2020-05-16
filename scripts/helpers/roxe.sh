@@ -119,10 +119,8 @@ function previous-install-prompt() {
 }
 
 function resources() {
-    echo "${COLOR_CYAN}ROXE website:${COLOR_NC} https://roxe.io"
-    echo "${COLOR_CYAN}ROXE Telegram channel:${COLOR_NC} https://t.me/ROXEProject"
-    echo "${COLOR_CYAN}ROXE resources:${COLOR_NC} https://roxe.io/resources/"
-    echo "${COLOR_CYAN}ROXE Stack Exchange:${COLOR_NC} https://roxe.stackexchange.com"
+    echo "${COLOR_CYAN}ROXE website:${COLOR_NC} https://roxe.tech"
+    echo "${COLOR_CYAN}ROXE resources:${COLOR_NC} https://roxe.tech/resources/"
 }
 
 function print_supported_linux_distros_and_exit() {
