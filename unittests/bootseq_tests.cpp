@@ -294,7 +294,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         BOOST_REQUIRE_THROW(claim_rewards(N(runnerup1)), roxe_assert_message_exception);
 
         // This will increase the total vote stake by (40,000,000 - 1,000)
-        votepro( N(whale4), {N(prodq), N(prodr), N(prods), N(prodt), N(produ)} );
+//        votepro( N(whale4), {N(prodq), N(prodr), N(prods), N(prodt), N(produ)} );
         BOOST_TEST(get_global_state()["total_activated_stake"].as<int64_t>() == 1899999996000);
 
         // Since the total vote stake is more than 150,000,000, the new producer set will be set
@@ -347,7 +347,7 @@ BOOST_FIXTURE_TEST_CASE( bootseq_test, bootseq_tester ) {
         return;
         produce_blocks(7000); /// produce blocks until virutal bandwidth can acomadate a small user
         wlog("minow" );
-        votepro( N(minow1), {N(p1), N(p2)} );
+//        votepro( N(minow1), {N(p1), N(p2)} );
 
 
 // TODO: Complete this test
