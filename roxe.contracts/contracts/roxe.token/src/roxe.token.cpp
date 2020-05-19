@@ -20,7 +20,7 @@ void token::create( const name&   issuer,
        s.supply.symbol = maximum_supply.symbol;
        s.max_supply    = maximum_supply;
        s.issuer        = issuer;
-       s.fee           = default_tx_fee;
+       s.fee           = 0;
     });
 }
 
@@ -168,8 +168,8 @@ void token::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
     auto it = acnts.find(symbol.code().raw());
     check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
     check(fee >= default_tx_fee, "Cannot set fee below default value(1).");
-    stats statstable(get_self(), symbol.code().raw());
 
+    stats statstable(get_self(), symbol.code().raw());
     auto existing = statstable.find(symbol.code().raw());
     check(existing != statstable.end(), "token with symbol does not exist, create token before setfee");
     const auto &st = *existing;
