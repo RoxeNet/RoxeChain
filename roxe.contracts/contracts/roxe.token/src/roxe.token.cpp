@@ -20,7 +20,7 @@ void token::create( const name&   issuer,
        s.supply.symbol = maximum_supply.symbol;
        s.max_supply    = maximum_supply;
        s.issuer        = issuer;
-       s.fee           = 0;
+       s.fee           =  0;
     });
 }
 
