@@ -154,7 +154,7 @@ namespace roxe {
          /**
           * default transaction fee
           */
-          static constexpr int64_t default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
+          static constexpr int64_t default_tx_fee = 0;    // actural fee = tx_fee / precision =1/10000 (0.0001)
 
    };
 
