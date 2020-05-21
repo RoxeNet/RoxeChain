@@ -15,7 +15,7 @@ extern "C" {
  * @brief Defines API for querying action and sending action
  *
  *
- * A ROXE.IO action has the following abstract structure:
+ * A ROXE action has the following abstract structure:
  *
  * ```
  *   struct action {
