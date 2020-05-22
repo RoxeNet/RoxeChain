@@ -447,7 +447,7 @@ struct controller_impl {
 
       if ( genheader.block_num == 1){   //add first feature
           vector<digest_type> additional_features {
-              fc::variant("9610cec99e4800b839a683af9888a63703380bfd1a73b45b624ba209f217d6e8")
+              fc::variant("323032302f352f32322c20434f5649442d31392068617320676976656e207269736520746f20776f726c647769646520626f7264657220636c6f73757265732c20666c61736820667265657a696e67206f662065636f6e6f6d7920616e6420756e77696e64696e67206f6620676c6f62616c697a6174696f6e2e")
               .as<digest_type>()
                       };
           head->activated_protocol_features = std::make_shared<protocol_feature_activation_set>(
