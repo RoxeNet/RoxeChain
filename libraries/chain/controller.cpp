@@ -445,16 +445,16 @@ struct controller_impl {
       static_cast<block_header_state&>(*head) = genheader;
       head->activated_protocol_features = std::make_shared<protocol_feature_activation_set>();
 
-//      if ( genheader.block_num == 1){   //add first feature
-//          vector<digest_type> additional_features {
-//              fc::variant("2020/5/22, COVID-19 has given rise to worldwide border closures, flash freezing of economy and unwinding of globalization.")
-//              .as<digest_type>()
-//                      };
-//          head->activated_protocol_features = std::make_shared<protocol_feature_activation_set>(
-//                  *(head->activated_protocol_features),
-//                  additional_features
-//          );
-//      }
+      if ( genheader.block_num == 1){   //add first feature
+          vector<digest_type> additional_features {
+              fc::variant("9610cec99e4800b839a683af9888a63703380bfd1a73b45b624ba209f217d6e8")
+              .as<digest_type>()
+                      };
+          head->activated_protocol_features = std::make_shared<protocol_feature_activation_set>(
+                  *(head->activated_protocol_features),
+                  additional_features
+          );
+      }
 
       head->block = std::make_shared<signed_block>(genheader.header);
       db.set_revision( head->block_num );
