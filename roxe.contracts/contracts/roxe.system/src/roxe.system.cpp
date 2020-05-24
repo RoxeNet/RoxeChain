@@ -385,7 +385,7 @@ namespace roxesystem {
 
       check( system_token_supply.amount > 0, "system token supply must be greater than 0" );
       _rammarket.emplace( get_self(), [&]( auto& m ) {
-         m.supply.amount = 100000000000000ll;
+         m.supply.amount = 1000000000000000ll;
          m.supply.symbol = ramcore_symbol;
          m.base.balance.amount = int64_t(_gstate.free_ram());
          m.base.balance.symbol = ram_symbol;
