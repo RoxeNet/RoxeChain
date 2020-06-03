@@ -377,7 +377,7 @@ namespace roxesystem {
       require_auth( get_self() );
       check( version.value == 0, "unsupported version for init action" );
 
-      auto itr = _rammarket.find(ramcore_sramcore_symbolymbol.raw());
+      auto itr = _rammarket.find(ramcore_symbol.raw());
       check( itr == _rammarket.end(), "system contract has already been initialized" );
 
       auto system_token_supply   = roxe::token::get_supply(token_account, core.code() );
