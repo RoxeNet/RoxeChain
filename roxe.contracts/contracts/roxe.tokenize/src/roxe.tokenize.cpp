@@ -1,8 +1,8 @@
-#include <roxe.token/roxe.token.hpp>
+#include <roxe.tokenize/roxe.tokenize.hpp>
 
 namespace roxe {
 
-void token::create( const name&   issuer,
+void tokenize::create( const name&   issuer,
                     const asset&  maximum_supply )
 {
     require_auth( get_self() );
@@ -21,21 +21,30 @@ void token::create( const name&   issuer,
        s.max_supply    = maximum_supply;
        s.issuer        = issuer;
        s.fee           = default_tx_fee;
+       s.fixed         = true;
+
+       s.percent       = 0;
+       s.maxfee        = 0;
+       s.minfee        = 0;
+
+       s.useroc        = true;
     });
 }
 
 
-void token::issue( const name& to, const asset& quantity, const string& memo )
+void tokenize::issue(const name& to, const asset& quantity, const string& memo )
 {
     auto sym = quantity.symbol;
     check( sym.is_valid(), "invalid symbol name" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
+    check( is_account( to ), "to account does not exist");
 
     stats statstable( get_self(), sym.code().raw() );
     auto existing = statstable.find( sym.code().raw() );
     check( existing != statstable.end(), "token with symbol does not exist, create token before issue" );
     const auto& st = *existing;
-    check( to == st.issuer, "tokens can only be issued to issuer account" );
+
+    require_recipient( to );
 
     require_auth( st.issuer );
     check( quantity.is_valid(), "invalid quantity" );
@@ -48,10 +57,10 @@ void token::issue( const name& to, const asset& quantity, const string& memo )
        s.supply += quantity;
     });
 
-    add_balance( st.issuer, quantity, st.issuer );
+    add_balance( st.issuer, quantity, to );
 }
 
-void token::retire( const asset& quantity, const string& memo )
+void tokenize::retire(const name& from,  const asset& quantity, const string& memo )
 {
     auto sym = quantity.symbol;
     check( sym.is_valid(), "invalid symbol name" );
@@ -62,7 +71,9 @@ void token::retire( const asset& quantity, const string& memo )
     check( existing != statstable.end(), "token with symbol does not exist" );
     const auto& st = *existing;
 
+    require_recipient( from );
     require_auth( st.issuer );
+
     check( quantity.is_valid(), "invalid quantity" );
     check( quantity.amount > 0, "must retire positive quantity" );
 
@@ -72,10 +83,10 @@ void token::retire( const asset& quantity, const string& memo )
        s.supply -= quantity;
     });
 
-    sub_balance( st.issuer, quantity );
+    sub_balance( from, quantity );
 }
 
-void token::transfer( const name&    from,
+void tokenize::transfer( const name&    from,
                       const name&    to,
                       const asset&   quantity,
                       const string&  memo )
@@ -95,18 +106,28 @@ void token::transfer( const name&    from,
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
 
-    asset fee = asset(st.fee, st.supply.symbol);
+    symbol fee_sym = st.useroc ? roxe::system_contract::get_core_symbol() : st.supply.symbol;
+    int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
+    if( fee_amount < st.minfee)
+        fee_amount = st.minfee;
+    if( fee_amount > st.maxfee)
+        fee_amount = st.maxfee;
+
+    asset fee = asset(fee_amount, fee_sym);
 
     auto payer = has_auth(to) ? to : from;
 
     sub_balance(from, quantity);
-    sub_balance(from, fee);
     add_balance(to, quantity, payer);
-    roxe::name saving_account{"roxe.saving"_n};
-    add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+
+    if( st.issuer != to  && to != roxe::system_contract::saving_account) {
+        sub_balance(from, fee);
+        add_balance(roxe::system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_savings
+    }
+
 }
 
-void token::sub_balance( const name& owner, const asset& value ) {
+void tokenize::sub_balance( const name& owner, const asset& value ) {
    accounts from_acnts( get_self(), owner.value );
 
    const auto& from = from_acnts.get( value.symbol.code().raw(), "no balance object found" );
@@ -117,7 +138,7 @@ void token::sub_balance( const name& owner, const asset& value ) {
       });
 }
 
-void token::add_balance( const name& owner, const asset& value, const name& ram_payer )
+void tokenize::add_balance( const name& owner, const asset& value, const name& ram_payer )
 {
    accounts to_acnts( get_self(), owner.value );
    auto to = to_acnts.find( value.symbol.code().raw() );
@@ -132,7 +153,7 @@ void token::add_balance( const name& owner, const asset& value, const name& ram_
    }
 }
 
-void token::open( const name& owner, const symbol& symbol, const name& ram_payer )
+void tokenize::open( const name& owner, const symbol& symbol, const name& ram_payer )
 {
    require_auth( ram_payer );
 
@@ -152,7 +173,7 @@ void token::open( const name& owner, const symbol& symbol, const name& ram_payer
    }
 }
 
-void token::close( const name& owner, const symbol& symbol )
+void tokenize::close( const name& owner, const symbol& symbol )
 {
    require_auth( owner );
    accounts acnts( get_self(), owner.value );
@@ -162,12 +183,12 @@ void token::close( const name& owner, const symbol& symbol )
    acnts.erase( it );
 }
 
-void token::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
+void tokenize::setfee(const name& owner, const symbol &symbol, const int64_t fee) {
     require_auth(owner);
     accounts acnts(get_self(), owner.value);
     auto it = acnts.find(symbol.code().raw());
     check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
-    check(fee >= default_tx_fee, "Cannot set fee below default value(1).");
+    check(fee >= default_tx_fee, "Cannot set fee below default value(0).");
 
     stats statstable(get_self(), symbol.code().raw());
     auto existing = statstable.find(symbol.code().raw());
@@ -177,4 +198,5 @@ void token::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
         s.fee = fee;
     });
 }
+
 } /// namespace roxe

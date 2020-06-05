@@ -38,13 +38,12 @@ namespace roxe {
          /**
           *  This action issues to `to` account a `quantity` of tokens.
           *
-          * @param issuer - the account to issue tokens from, it must be the same as the issuer,
           * @param to - the account to issue tokens to,
           * @param quntity - the amount of tokens to be issued,
           * @memo - the memo string that accompanies the token issue transaction.
           */
          [[roxe::action]]
-         void issue( const name& issuer, const name& to, const asset& quantity, const string& memo );
+         void issue( const name& to, const asset& quantity, const string& memo );
 
          /**
           * The opposite for create action, if all validations succeed,
@@ -109,6 +108,8 @@ namespace roxe {
          [[roxe::action]]   ///FIXME add transaction fee
          void setfee( const name& owner, const symbol& symbol, const int64_t fee );
 
+
+
          static asset get_supply( const name& token_contract_account, const symbol_code& sym_code )
          {
             stats statstable( token_contract_account, sym_code.raw() );
@@ -142,7 +143,13 @@ namespace roxe {
             asset    max_supply;
             name     issuer;
             int64_t  fee;
+            bool     fixed;
 
+            int64_t  percent;
+            int64_t  maxfee;
+            int64_t  minfee;
+
+            bool     useroc;
             uint64_t primary_key()const { return supply.symbol.code().raw(); }
          };
 
