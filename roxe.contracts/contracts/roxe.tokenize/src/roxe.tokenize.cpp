@@ -57,7 +57,7 @@ void tokenize::issue(const name& to, const asset& quantity, const string& memo )
        s.supply += quantity;
     });
 
-    add_balance( st.issuer, quantity, to );
+    add_balance( to, quantity, st.issuer );
 }
 
 void tokenize::retire(const name& from,  const asset& quantity, const string& memo )
@@ -71,8 +71,9 @@ void tokenize::retire(const name& from,  const asset& quantity, const string& me
     check( existing != statstable.end(), "token with symbol does not exist" );
     const auto& st = *existing;
 
+    require_auth( from );
     require_recipient( from );
-    require_auth( st.issuer );
+//    require_auth( st.issuer );
 
     check( quantity.is_valid(), "invalid quantity" );
     check( quantity.amount > 0, "must retire positive quantity" );
