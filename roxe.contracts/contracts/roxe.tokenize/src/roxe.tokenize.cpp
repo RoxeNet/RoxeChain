@@ -106,7 +106,7 @@ void tokenize::transfer( const name&    from,
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
 
-    symbol fee_sym = st.useroc ? roxesystem::system_contract::get_core_symbol() : st.supply.symbol;
+    symbol fee_sym = st.useroc ? symbol.string_to_symbol(4,"ROC") : st.supply.symbol;
     int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
     if( fee_amount < st.minfee)
         fee_amount = st.minfee;
@@ -119,10 +119,10 @@ void tokenize::transfer( const name&    from,
 
     sub_balance(from, quantity);
     add_balance(to, quantity, payer);
-
-    if( st.issuer != to  && to != roxesystem::system_contract::saving_account) {
+    roxe::name saving_account{"roxe.saving"_n};
+    if( st.issuer != to  && to != saving_account) {
         sub_balance(from, fee);
-        add_balance(roxesystem::system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_savings
+        add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
     }
 
 }
