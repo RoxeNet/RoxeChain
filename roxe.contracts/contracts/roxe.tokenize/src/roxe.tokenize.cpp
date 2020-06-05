@@ -1,5 +1,5 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
-#include <roxe/chain/symbol.hpp>
+#include <roxelib/symbol.hpp>
 namespace roxe {
 
 void tokenize::create( const name&   issuer,
