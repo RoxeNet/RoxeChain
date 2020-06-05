@@ -4,14 +4,15 @@
 #include <roxe/roxe.hpp>
 
 #include <string>
-
-namespace roxesystem {
-   class system_contract;
-}
+#include <roxe.system/roxe.system.hpp>
+//namespace roxesystem {
+//   class system_contract;
+//}
 
 namespace roxe {
 
    using std::string;
+   using roxesystem::system_contract;
 
    /**
     * roxe.tokenize contract defines the structures and actions that allow users to create, issue, and manage
