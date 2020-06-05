@@ -65,11 +65,11 @@ If {{owner}} does not have a balance for {{symbol_to_symbol_code symbol}}, {{ram
 ---
 spec_version: "0.2.0"
 title: Remove Tokens from Circulation
-summary: 'Remove {{nowrap quantity}} from circulation'
+summary: 'Remove {{nowrap quantity}} from {{nowrap from}} circulation'
 icon: @ICON_BASE_URL@/@TOKEN_ICON_URI@
 ---
 
-The token manager agrees to remove {{quantity}} from circulation, taken from their own account.
+The token manager agrees to remove {{quantity}} from {{from}} circulation, taken from their own account.
 
 {{#if memo}} There is a memo attached to the action stating:
 {{memo}}
