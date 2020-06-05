@@ -106,7 +106,7 @@ void tokenize::transfer( const name&    from,
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
 
-    symbol fee_sym = st.useroc ? symbol.from_string("4,ROC") : st.supply.symbol;
+    symbol fee_sym = st.useroc ? symbol( symbol_code("ROC") , 4 ) : st.supply.symbol;
     int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
     if( fee_amount < st.minfee)
         fee_amount = st.minfee;
