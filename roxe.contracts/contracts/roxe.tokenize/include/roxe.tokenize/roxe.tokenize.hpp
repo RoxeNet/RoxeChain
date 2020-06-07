@@ -5,6 +5,7 @@
 
 #include <string>
 #include <algorithm>
+#include <vector>
 
 namespace roxesystem {
    class system_contract;
