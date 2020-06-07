@@ -13,6 +13,7 @@ namespace roxe {
 
    using std::string;
    using std::vector;
+   using std::find;
 
    /**
     * roxe.tokenize contract defines the structures and actions that allow users to create, issue, and manage
