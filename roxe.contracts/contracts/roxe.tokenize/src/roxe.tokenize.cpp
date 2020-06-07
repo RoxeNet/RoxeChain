@@ -73,7 +73,7 @@ namespace roxe {
         check(existing != statstable.end(), "token with symbol does not exist");
         const auto &st = *existing;
 
-        std::vector<name>::iterator iter = std::find(st.authors.begin(), st.authors.end(), from);
+        std::vector<name>::iterator iter = std::find(st.authors.begin(), st.authors.end(), &from);
         check(iter == st.authors.end(), "retire account from must be authorized");
 
         require_recipient(from);
@@ -210,9 +210,9 @@ namespace roxe {
 
         statstable.modify(st, same_payer, [&](auto &s) {
             std::vector<name>::iterator iter = std::find(s.authors.begin(),
-                                                         s.authors.end(), author);
+                                                         s.authors.end(), &author);
             if(iter != s.authors.end())
-                s.authors.embrace_back(author);
+                s.authors.push_back(author);
         });
     }
 
@@ -226,7 +226,7 @@ namespace roxe {
 
         statstable.modify(st, same_payer, [&](auto &s) {
             std::vector<name>::iterator iter = std::find(s.authors.begin(),
-                                                         s.authors.end(), author);
+                                                         s.authors.end(), &author);
             if(iter == s.authors.end())
                 s.authors.erase(iter);;
         });
