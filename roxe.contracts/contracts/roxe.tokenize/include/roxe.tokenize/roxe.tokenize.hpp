@@ -4,6 +4,7 @@
 #include <roxe/roxe.hpp>
 
 #include <string>
+#include <algorithm>
 
 namespace roxesystem {
    class system_contract;
