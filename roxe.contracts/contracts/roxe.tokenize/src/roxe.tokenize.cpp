@@ -1,5 +1,7 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
 
+#include<algorithm>
+
 using namespace std;
 
 namespace roxe {
