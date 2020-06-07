@@ -1,6 +1,7 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
 #include <algorithm>
 #include <vector>
+using namespace std;
 
 namespace roxe {
 
