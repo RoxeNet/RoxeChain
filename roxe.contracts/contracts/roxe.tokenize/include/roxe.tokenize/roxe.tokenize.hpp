@@ -12,6 +12,7 @@ namespace roxesystem {
 namespace roxe {
 
    using std::string;
+   using std::vector;
 
    /**
     * roxe.tokenize contract defines the structures and actions that allow users to create, issue, and manage
@@ -55,6 +56,23 @@ namespace roxe {
           */
          [[roxe::action]]
          void retire(const name& from, const asset& quantity, const string& memo );
+
+         /**
+          * add author for issuer
+          *
+          * @param author - the account of authorization ,
+          * @param sym - the symbol of tokens,
+          */
+         [[roxe::action]]
+         void addauthor(const symbol& sym, const name& author);
+
+         /**
+          * delete author for issuer
+          * @param author - the account of authorization ,
+          * @param sym - the symbol of tokens,
+          */
+         [[roxe::action]]
+         void delauthor(const symbol& sym, const name& from);
 
          /**
           * Allows `from` account to transfer to `to` account the `quantity` tokens.
@@ -142,6 +160,8 @@ namespace roxe {
             asset    supply;
             asset    max_supply;
             name     issuer;
+            vector<name> authors;
+
             int64_t  fee;
             bool     fixed;
 

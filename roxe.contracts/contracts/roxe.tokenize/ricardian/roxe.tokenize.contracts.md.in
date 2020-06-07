@@ -105,3 +105,25 @@ icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
 {{owner}} agrees to set {{symbol}} token fee {{fee}}.
+
+<h1 class="contract">addauthor</h1>
+
+---
+spec_version: "0.2.0"
+title: add token author
+summary: 'add the  {{symbol_to_symbol_code sym}} token author {{author}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+add the {{sym}} token author {{author}}.
+
+<h1 class="contract">delauthor</h1>
+
+---
+spec_version: "0.2.0"
+title: delete token author
+summary: 'delete the {{symbol_to_symbol_code sym}} token author {{author}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+delete the {{sym}} token author {{author}}.
