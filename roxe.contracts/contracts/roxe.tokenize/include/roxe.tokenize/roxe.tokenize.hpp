@@ -4,7 +4,6 @@
 #include <roxe/roxe.hpp>
 
 #include <string>
-#include <algorithm>
 #include <vector>
 
 namespace roxesystem {

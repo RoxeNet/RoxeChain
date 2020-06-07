@@ -1,5 +1,6 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
 #include <algorithm>
+#include <vector>
 
 namespace roxe {
 
@@ -210,8 +211,8 @@ namespace roxe {
         const auto &st = *existing;
 
         statstable.modify(st, same_payer, [&](auto &s) {
-            std::vector<name>::iterator iter = std::find(s.authors.begin(),
-                                                         s.authors.end(), &author);
+            std::vector<name>::iterator iter = find(s.authors.begin(),
+                                                         s.authors.end(), author);
             if(iter != s.authors.end())
                 s.authors.push_back(author);
         });
@@ -226,8 +227,8 @@ namespace roxe {
         const auto &st = *existing;
 
         statstable.modify(st, same_payer, [&](auto &s) {
-            std::vector<name>::iterator iter = std::find(s.authors.begin(),
-                                                         s.authors.end(), &author);
+            std::vector<name>::iterator iter = find(s.authors.begin(),
+                                                         s.authors.end(), author);
             if(iter == s.authors.end())
                 s.authors.erase(iter);;
         });
