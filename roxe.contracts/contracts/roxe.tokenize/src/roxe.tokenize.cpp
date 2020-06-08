@@ -20,8 +20,7 @@ namespace roxe {
         auto existing = statstable.find(sym.code().raw());
         check(existing == statstable.end(), "token with symbol already exists");
 
-        std:
-        vector <name> authors{issuer};
+        vector<name> authors{ issuer };
         statstable.emplace(get_self(), [&](auto &s) {
             s.supply.symbol = maximum_supply.symbol;
             s.max_supply = maximum_supply;
