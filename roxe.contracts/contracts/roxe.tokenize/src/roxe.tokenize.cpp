@@ -38,10 +38,11 @@ namespace roxe {
     }
 
 
-    void tokenize::issue(const name& to, const asset& quantity, const string& memo) {
+    void tokenize::issue(const name& from, const name& to, const asset& quantity, const string& memo) {
         auto sym = quantity.symbol;
         check(sym.is_valid(), "invalid symbol name");
         check(memo.size() <= 256, "memo has more than 256 bytes");
+        check(is_account(from), "issuer account does not exist");
         check(is_account(to), "to account does not exist");
 
         stats statstable(get_self(), sym.code().raw());
@@ -49,9 +50,12 @@ namespace roxe {
         check(existing != statstable.end(), "token with symbol does not exist, create token before issue");
         const auto &st = *existing;
 
-        require_recipient(to);
+        require_auth(from);
+        vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
+        check(iter == st.authors.end(), "retire account from must be authorized");
 
-        require_auth(st.issuer);
+        require_recipient(to);
+//        require_auth(st.issuer);
         check(quantity.is_valid(), "invalid quantity");
         check(quantity.amount > 0, "must issue positive quantity");
 
@@ -207,6 +211,8 @@ namespace roxe {
 
     void tokenize::addauthor(const symbol& sym, const name& author) {
         require_auth(get_self());
+        check(sym.is_valid(), "invalid symbol name");
+        check(is_account(author), "to account does not exist");
 
         stats statstable(get_self(), sym.code().raw());
         auto existing = statstable.find(sym.code().raw());
@@ -223,11 +229,14 @@ namespace roxe {
 
     void tokenize::delauthor(const symbol& sym, const name& author) {
         require_auth(get_self());
+        check(sym.is_valid(), "invalid symbol name");
+        check(is_account(author), "to account does not exist");
 
         stats statstable(get_self(), sym.code().raw());
         auto existing = statstable.find(sym.code().raw());
         check(existing != statstable.end(), "token with symbol does not exist");
         const auto &st = *existing;
+        check(st.issuer != author, "can not delete issuer");
 
         statstable.modify(st, same_payer, [&](auto &s) {
             vector<name>::iterator iter = find(s.authors.begin(),
