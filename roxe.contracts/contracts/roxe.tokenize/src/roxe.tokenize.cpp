@@ -52,7 +52,7 @@ namespace roxe {
 
         require_auth(from);
         vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
-        check(iter == st.authors.end(), "retire account from must be authorized");
+        check(iter != st.authors.end(), "retire account from must be authorized");
 
         require_recipient(to);
 //        require_auth(st.issuer);
@@ -83,7 +83,7 @@ namespace roxe {
 
 
         vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
-        check(iter == st.authors.end(), "retire account from must be authorized");
+        check(iter != st.authors.end(), "retire account from must be authorized");
 
         require_recipient(from);
 //    require_auth( st.issuer );
