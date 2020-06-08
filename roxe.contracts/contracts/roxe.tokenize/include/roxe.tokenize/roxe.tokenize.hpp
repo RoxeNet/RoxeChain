@@ -41,12 +41,13 @@ namespace roxe {
          /**
           *  This action issues to `to` account a `quantity` of tokens.
           *
+          * @param from - the account to be authorized to issue tokens,
           * @param to - the account to issue tokens to,
           * @param quntity - the amount of tokens to be issued,
           * @memo - the memo string that accompanies the token issue transaction.
           */
          [[roxe::action]]
-         void issue( const name& to, const asset& quantity, const string& memo );
+         void issue( const name& from, const name& to, const asset& quantity, const string& memo );
 
          /**
           * The opposite for create action, if all validations succeed,
