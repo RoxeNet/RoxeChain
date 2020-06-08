@@ -77,7 +77,9 @@ namespace roxe {
         check(existing != statstable.end(), "token with symbol does not exist");
         const auto &st = *existing;
 
-        vector<name>::iterator iter = find(st.authors.begin(), st.authors.end(), from.value);
+
+        name from1 = from;
+        vector<name>::iterator iter = find(st.authors.begin(), st.authors.end(), from1);
         check(iter == st.authors.end(), "retire account from must be authorized");
 
         require_recipient(from);
