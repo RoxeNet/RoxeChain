@@ -222,7 +222,7 @@ namespace roxe {
         statstable.modify(st, same_payer, [&](auto &s) {
             vector<name>::iterator iter = find(s.authors.begin(),
                                                          s.authors.end(), author);
-            if(iter != s.authors.end())
+            if(iter == s.authors.end())
                 s.authors.push_back(author);
         });
     }
@@ -241,8 +241,8 @@ namespace roxe {
         statstable.modify(st, same_payer, [&](auto &s) {
             vector<name>::iterator iter = find(s.authors.begin(),
                                                          s.authors.end(), author);
-            if(iter == s.authors.end())
-                s.authors.erase(iter);;
+            if(iter != s.authors.end())
+                s.authors.erase(iter);
         });
     }
 
