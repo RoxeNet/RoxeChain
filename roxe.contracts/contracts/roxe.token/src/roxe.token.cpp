@@ -95,15 +95,17 @@ void token::transfer( const name&    from,
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
 
-    asset fee = asset(st.fee, st.supply.symbol);
-
     auto payer = has_auth(to) ? to : from;
-
     sub_balance(from, quantity);
-    sub_balance(from, fee);
     add_balance(to, quantity, payer);
-    roxe::name saving_account{"roxe.saving"_n};
-    add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+
+    if(st.fee > 0) {
+        asset fee = asset(st.fee, st.supply.symbol);
+        sub_balance(from, fee);
+        roxe::name saving_account{"roxe.saving"_n};
+        add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+    }
+
 }
 
 void token::sub_balance( const name& owner, const asset& value ) {
@@ -162,7 +164,7 @@ void token::close( const name& owner, const symbol& symbol )
    acnts.erase( it );
 }
 
-void token::setfee(const name& owner, const symbol &symbol, const int64_t fee) {
+void token::setfee(const name& owner, const symbol& symbol, const int64_t fee) {
     require_auth(owner);
     accounts acnts(get_self(), owner.value);
     auto it = acnts.find(symbol.code().raw());

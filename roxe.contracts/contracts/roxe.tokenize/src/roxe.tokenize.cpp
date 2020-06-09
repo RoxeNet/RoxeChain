@@ -37,7 +37,6 @@ namespace roxe {
         });
     }
 
-
     void tokenize::issue(const name& from, const name& to, const asset& quantity, const string& memo) {
         auto sym = quantity.symbol;
         check(sym.is_valid(), "invalid symbol name");
