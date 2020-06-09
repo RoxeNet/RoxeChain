@@ -132,7 +132,7 @@ namespace roxe {
         sub_balance(from, quantity);
         add_balance(to, quantity, payer);
         roxe::name saving_account{"roxe.saving"_n};
-        if (st.issuer != to && to != saving_account) {
+        if (st.issuer != to && to != saving_account && fee_amount > 0) {
             sub_balance(from, fee);
             add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
         }
