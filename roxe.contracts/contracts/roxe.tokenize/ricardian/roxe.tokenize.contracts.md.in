@@ -127,3 +127,47 @@ icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
 delete the {{sym}} token author {{author}}.
+
+<h1 class="contract">setfeeper</h1>
+---
+spec_version: "0.2.0"
+title: Set Token Fee Percent
+summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token fee percent {{percent}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+{{owner}} agrees to set {{symbol}} token fee percent {{percent}}.
+
+<h1 class="contract">setmaxfee</h1>
+
+---
+spec_version: "0.2.0"
+title: Set Token Max Fee
+summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token max fee {{maxfee}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+{{owner}} agrees to set {{symbol}} token max fee {{maxfee}}.
+
+<h1 class="contract">setminfee</h1>
+
+---
+spec_version: "0.2.0"
+title: Set Token Min Fee
+summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token min fee {{minfee}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+{{owner}} agrees to set {{symbol}} token min fee {{minfee}}.
+
+
+<h1 class="contract">useroc</h1>
+
+---
+spec_version: "0.2.0"
+title: Set Token Type Roc
+summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} fee token type {{roc}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+{{owner}} agrees to set {{symbol}} token type fee {{roc}}.

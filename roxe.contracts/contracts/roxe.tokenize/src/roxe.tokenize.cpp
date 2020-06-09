@@ -1,4 +1,5 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
+#include <roxe.token/roxe.token.hpp>
 
 #include<vector>
 #include<algorithm>
@@ -7,8 +8,8 @@ using namespace std;
 
 namespace roxe {
 
-    void tokenize::create(const name& issuer,
-                          const asset& maximum_supply) {
+    void tokenize::create(const name &issuer,
+                          const asset &maximum_supply) {
         require_auth(get_self());
 
         auto sym = maximum_supply.symbol;
@@ -20,7 +21,7 @@ namespace roxe {
         auto existing = statstable.find(sym.code().raw());
         check(existing == statstable.end(), "token with symbol already exists");
 
-        vector<name> authors{ issuer };
+        vector <name> authors{issuer};
         statstable.emplace(get_self(), [&](auto &s) {
             s.supply.symbol = maximum_supply.symbol;
             s.max_supply = maximum_supply;
@@ -37,7 +38,7 @@ namespace roxe {
         });
     }
 
-    void tokenize::issue(const name& from, const name& to, const asset& quantity, const string& memo) {
+    void tokenize::issue(const name &from, const name &to, const asset &quantity, const string &memo) {
         auto sym = quantity.symbol;
         check(sym.is_valid(), "invalid symbol name");
         check(memo.size() <= 256, "memo has more than 256 bytes");
@@ -68,7 +69,7 @@ namespace roxe {
         add_balance(to, quantity, st.issuer);
     }
 
-    void tokenize::retire(const name& from, const asset &quantity, const string &memo) {
+    void tokenize::retire(const name &from, const asset &quantity, const string &memo) {
         require_auth(from);
 
         auto sym = quantity.symbol;
@@ -131,10 +132,16 @@ namespace roxe {
 
         sub_balance(from, quantity);
         add_balance(to, quantity, payer);
-        roxe::name saving_account{"roxe.saving"_n};
         if (st.issuer != to && to != saving_account && fee_amount > 0) {
-            sub_balance(from, fee);
-            add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+            if (st.useroc) {
+                roxe::name token_account{"roxe.token"_n};
+                token::transfer_action transfer_act{token_account, {{get_self(), active_permission}}};
+                transfer_act.send(from, to, quantity, memo)
+            } else {
+                sub_balance(from, fee);
+                roxe::name saving_account{"roxe.saving"_n};
+                add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+            }
         }
 
     }
@@ -208,7 +215,7 @@ namespace roxe {
         });
     }
 
-    void tokenize::addauthor(const symbol& sym, const name& author) {
+    void tokenize::addauthor(const symbol &sym, const name &author) {
         require_auth(get_self());
         check(sym.is_valid(), "invalid symbol name");
         check(is_account(author), "to account does not exist");
@@ -220,13 +227,13 @@ namespace roxe {
 
         statstable.modify(st, same_payer, [&](auto &s) {
             vector<name>::iterator iter = find(s.authors.begin(),
-                                                         s.authors.end(), author);
-            if(iter == s.authors.end())
+                                               s.authors.end(), author);
+            if (iter == s.authors.end())
                 s.authors.push_back(author);
         });
     }
 
-    void tokenize::delauthor(const symbol& sym, const name& author) {
+    void tokenize::delauthor(const symbol &sym, const name &author) {
         require_auth(get_self());
         check(sym.is_valid(), "invalid symbol name");
         check(is_account(author), "to account does not exist");
@@ -239,9 +246,74 @@ namespace roxe {
 
         statstable.modify(st, same_payer, [&](auto &s) {
             vector<name>::iterator iter = find(s.authors.begin(),
-                                                         s.authors.end(), author);
-            if(iter != s.authors.end())
+                                               s.authors.end(), author);
+            if (iter != s.authors.end())
                 s.authors.erase(iter);
+        });
+    }
+
+    void tokenize::setfeeper(const name &owner, const symbol &symbol, const int64_t percent) {
+        require_auth(owner);
+        accounts acnts(get_self(), owner.value);
+        auto it = acnts.find(symbol.code().raw());
+        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+        check(percent >= 0, "Cannot set  percent below default value(0).");
+
+        stats statstable(get_self(), symbol.code().raw());
+        auto existing = statstable.find(symbol.code().raw());
+        check(existing != statstable.end(), "token with symbol does not exist, create token before setfeeper");
+        const auto &st = *existing;
+        statstable.modify(st, same_payer, [&](auto &s) {
+            s.percent = percent;
+        });
+    }
+
+    void tokenize::setmaxfee(const name &owner, const symbol &symbol, const int64_t maxfee) {
+        require_auth(owner);
+        accounts acnts(get_self(), owner.value);
+        auto it = acnts.find(symbol.code().raw());
+        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+
+        stats statstable(get_self(), symbol.code().raw());
+        auto existing = statstable.find(symbol.code().raw());
+        check(existing != statstable.end(), "token with symbol does not exist, create token before setmaxfee");
+        const auto &st = *existing;
+
+        check(maxfee >= st.minfee, "Cannot set maxfee below minfee.");
+
+        statstable.modify(st, same_payer, [&](auto &s) {
+            s.maxfee = maxfee;
+        });
+    }
+
+    void tokenize::setminfee(const name &owner, const symbol &symbol, const int64_t minfee) {
+        require_auth(owner);
+        accounts acnts(get_self(), owner.value);
+        auto it = acnts.find(symbol.code().raw());
+        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+        stats statstable(get_self(), symbol.code().raw());
+        auto existing = statstable.find(symbol.code().raw());
+        check(existing != statstable.end(), "token with symbol does not exist, create token before setminfee");
+        const auto &st = *existing;
+        check(minfee <= st.maxfee, "Cannot set minfee upper maxfee.");
+
+        statstable.modify(st, same_payer, [&](auto &s) {
+            s.minfee = minfee;
+        });
+    }
+
+    void tokenize::useroc(const name &owner, const symbol &symbol, const bool roc) {
+        require_auth(owner);
+        accounts acnts(get_self(), owner.value);
+        auto it = acnts.find(symbol.code().raw());
+        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+        stats statstable(get_self(), symbol.code().raw());
+        auto existing = statstable.find(symbol.code().raw());
+        check(existing != statstable.end(), "token with symbol does not exist, create token before useroc");
+        const auto &st = *existing;
+
+        statstable.modify(st, same_payer, [&](auto &s) {
+            s.useroc = roc;
         });
     }
 
