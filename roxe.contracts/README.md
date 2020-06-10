@@ -13,6 +13,7 @@ This repository contains examples of these privileged contracts that are useful 
 
 The following unprivileged contract(s) are also part of the system.
    * [roxe.token](./contracts/roxe.token)
+   * [roxe.tokenize](./contracts/roxe.tokenize)
 
 Dependencies:
 * [roxe.cdt v1.6.x](https://github.com/ROXE/roxe.cdt/releases/tag/v1.6.3)

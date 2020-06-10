@@ -1,11 +1,14 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
 
+#include <roxe.token/roxe.token.hpp>
 #include<vector>
 #include<algorithm>
 
 using namespace std;
 
 namespace roxe {
+
+    using roxe::token;
 
     void tokenize::create(const name &issuer,
                           const asset &maximum_supply) {

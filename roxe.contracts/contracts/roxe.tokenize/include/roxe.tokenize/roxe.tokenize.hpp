@@ -6,7 +6,6 @@
 #include <string>
 #include <vector>
 
-#include <roxe.token/roxe.token.hpp>
 
 namespace roxesystem {
     class system_contract;
