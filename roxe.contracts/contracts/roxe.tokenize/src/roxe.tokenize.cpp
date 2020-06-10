@@ -133,17 +133,16 @@ namespace roxe {
         auto payer = has_auth(to) ? to : from;
 
         sub_balance(from, quantity);
-        add_balance(to, quantity, payer);
-        if (st.issuer != to && to != system_contract::saving_account && fee_amount > 0) {
+        if (st.issuer != to && from != system_contract::saving_account && to != system_contract::saving_account && fee_amount > 0) {
             if (st.useroc) {
-                token::transfer_action transfer_act{system_contract::token_account, {{get_self(), system_contract::active_permission}}};
+                token::transfer_action transfer_act{system_contract::token_account, {{system_contract::get_self(), system_contract::active_permission}}};
                 transfer_act.send(payer, system_contract::saving_account, fee, "send fee to saving");
             } else {
-                sub_balance(from, fee);
+                sub_balance(payer, fee);
                 add_balance(system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_savings
             }
         }
-
+        add_balance(to, quantity, payer);
     }
 
     void tokenize::sub_balance(const name &owner, const asset &value) {
