@@ -2,7 +2,9 @@ add_contract(roxe.tokenize roxe.tokenize ${CMAKE_CURRENT_SOURCE_DIR}/src/roxe.to
 
 target_include_directories(roxe.tokenize
    PUBLIC
-   ${CMAKE_CURRENT_SOURCE_DIR}/include)
+   ${CMAKE_CURRENT_SOURCE_DIR}/include
+   ${CMAKE_CURRENT_SOURCE_DIR}/../roxe.token/include
+   ${CMAKE_CURRENT_SOURCE_DIR}/../roxe.system/include)
 
 set_target_properties(roxe.tokenize
    PROPERTIES

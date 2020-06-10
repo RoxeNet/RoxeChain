@@ -1,5 +1,5 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
-
+#include <roxe.system/roxe.system.hpp>
 #include <roxe.token/roxe.token.hpp>
 #include<vector>
 #include<algorithm>
@@ -8,6 +8,7 @@ using namespace std;
 
 namespace roxe {
     using roxe::token;
+    using roxesystem::system_contract;
 
     void tokenize::create(const name &issuer,
                           const asset &maximum_supply) {
@@ -135,13 +136,11 @@ namespace roxe {
         add_balance(to, quantity, payer);
         if (st.issuer != to && to != saving_account && fee_amount > 0) {
             if (st.useroc) {
-                roxe::name token_account{"roxe.token"_n};
-                token::transfer_action transfer_act{token_account, {{get_self(), active_permission}}};
+                token::transfer_action transfer_act{system_contract::token_account, {{get_self(), active_permission}}};
                 transfer_act.send(from, to, quantity, memo)
             } else {
                 sub_balance(from, fee);
-                roxe::name saving_account{"roxe.saving"_n};
-                add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+                add_balance(system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_savings
             }
         }
 
