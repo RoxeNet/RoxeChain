@@ -137,7 +137,7 @@ namespace roxe {
         if (st.issuer != to && to != system_contract::saving_account && fee_amount > 0) {
             if (st.useroc) {
                 token::transfer_action transfer_act{system_contract::token_account, {{get_self(), system_contract::active_permission}}};
-                transfer_act.send(from, system_contract::saving_account, fee, "send fee to saving");
+                transfer_act.send(payer, system_contract::saving_account, fee, "send fee to saving");
             } else {
                 sub_balance(from, fee);
                 add_balance(system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_savings
