@@ -7,7 +7,6 @@
 using namespace std;
 
 namespace roxe {
-
     using roxe::token;
 
     void tokenize::create(const name &issuer,
