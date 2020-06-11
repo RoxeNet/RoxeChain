@@ -198,11 +198,8 @@ namespace roxe {
         acnts.erase(it);
     }
 
-    void tokenize::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
-        require_auth(owner);
-        accounts acnts(get_self(), owner.value);
-        auto it = acnts.find(symbol.code().raw());
-        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+    void tokenize::setfee(const symbol &symbol, const int64_t fee) {
+        require_auth(get_self());
         check(fee >= default_tx_fee, "Cannot set fee below default value(0).");
 
         stats statstable(get_self(), symbol.code().raw());
@@ -251,11 +248,8 @@ namespace roxe {
         });
     }
 
-    void tokenize::setfeeper(const name &owner, const symbol &symbol, const int64_t percent) {
-        require_auth(owner);
-        accounts acnts(get_self(), owner.value);
-        auto it = acnts.find(symbol.code().raw());
-        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+    void tokenize::setfeeper(const symbol &symbol, const int64_t percent) {
+        require_auth(get_self());
         check(percent >= 0, "Cannot set  percent below default value(0).");
 
         stats statstable(get_self(), symbol.code().raw());
@@ -267,12 +261,8 @@ namespace roxe {
         });
     }
 
-    void tokenize::setmaxfee(const name &owner, const symbol &symbol, const int64_t maxfee) {
-        require_auth(owner);
-        accounts acnts(get_self(), owner.value);
-        auto it = acnts.find(symbol.code().raw());
-        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
-
+    void tokenize::setmaxfee(const symbol &symbol, const int64_t maxfee) {
+        require_auth(get_self());
         stats statstable(get_self(), symbol.code().raw());
         auto existing = statstable.find(symbol.code().raw());
         check(existing != statstable.end(), "token with symbol does not exist, create token before setmaxfee");
@@ -285,11 +275,9 @@ namespace roxe {
         });
     }
 
-    void tokenize::setminfee(const name &owner, const symbol &symbol, const int64_t minfee) {
-        require_auth(owner);
-        accounts acnts(get_self(), owner.value);
-        auto it = acnts.find(symbol.code().raw());
-        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+    void tokenize::setminfee(const symbol &symbol, const int64_t minfee) {
+        require_auth(get_self());
+
         stats statstable(get_self(), symbol.code().raw());
         auto existing = statstable.find(symbol.code().raw());
         check(existing != statstable.end(), "token with symbol does not exist, create token before setminfee");
@@ -301,11 +289,8 @@ namespace roxe {
         });
     }
 
-    void tokenize::useroc(const name &owner, const symbol &symbol, const bool roc) {
-        require_auth(owner);
-        accounts acnts(get_self(), owner.value);
-        auto it = acnts.find(symbol.code().raw());
-        check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
+    void tokenize::useroc(const symbol &symbol, const bool roc) {
+        require_auth(get_self());
         stats statstable(get_self(), symbol.code().raw());
         auto existing = statstable.find(symbol.code().raw());
         check(existing != statstable.end(), "token with symbol does not exist, create token before useroc");

@@ -100,11 +100,11 @@ If {{to}} does not have a balance for {{asset_to_symbol_code quantity}}, {{from}
 ---
 spec_version: "0.2.0"
 title: Set Token Fee
-summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token fee {{fee}}'
+summary: 'set the {{symbol_to_symbol_code symbol}} token fee {{fee}}'
 icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
-{{owner}} agrees to set {{symbol}} token fee {{fee}}.
+set {{symbol}} token fee {{fee}}.
 
 <h1 class="contract">addauthor</h1>
 
@@ -132,33 +132,33 @@ delete the {{sym}} token author {{author}}.
 ---
 spec_version: "0.2.0"
 title: Set Token Fee Percent
-summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token fee percent {{percent}}'
+summary: 'set the {{symbol_to_symbol_code symbol}} token fee percent {{percent}}'
 icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
-{{owner}} agrees to set {{symbol}} token fee percent {{percent}}.
+set {{symbol}} token fee percent {{percent}}.
 
 <h1 class="contract">setmaxfee</h1>
 
 ---
 spec_version: "0.2.0"
 title: Set Token Max Fee
-summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token max fee {{maxfee}}'
+summary: 'set the {{symbol_to_symbol_code symbol}} token max fee {{maxfee}}'
 icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
-{{owner}} agrees to set {{symbol}} token max fee {{maxfee}}.
+set {{symbol}} token max fee {{maxfee}}.
 
 <h1 class="contract">setminfee</h1>
 
 ---
 spec_version: "0.2.0"
 title: Set Token Min Fee
-summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token min fee {{minfee}}'
+summary: 'set the {{symbol_to_symbol_code symbol}} token min fee {{minfee}}'
 icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
-{{owner}} agrees to set {{symbol}} token min fee {{minfee}}.
+set {{symbol}} token min fee {{minfee}}.
 
 
 <h1 class="contract">useroc</h1>
@@ -166,8 +166,8 @@ icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 spec_version: "0.2.0"
 title: Set Token Type Roc
-summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} fee token type {{roc}}'
+summary: 'set the {{symbol_to_symbol_code symbol}} fee token type {{roc}}'
 icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
-{{owner}} agrees to set {{symbol}} token type fee {{roc}}.
+set {{symbol}} token type fee {{roc}}.

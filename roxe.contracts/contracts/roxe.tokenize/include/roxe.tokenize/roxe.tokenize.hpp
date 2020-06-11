@@ -122,21 +122,19 @@ namespace roxe {
         void close(const name &owner, const symbol &symbol);
 
         /**
-         * Set transaction fee `fee` for token `symbol` only by owner account `owner`.
+         * Set transaction fee `fee` for token `symbol`.
          *
-         * @param owner - the account to be authorization,
          * @param symbol - the token to be payed,
          * @param fee - the number that supports the cost of each transaction.
          *
          */
         [[roxe::action]]   ///FIXME add transaction fee
-        void setfee(const name &owner, const symbol &symbol, const int64_t fee);
+        void setfee(const symbol &symbol, const int64_t fee);
 
 
         /**
-         * Set transaction fee percent `percent` for token `symbol` only by owner account `owner`.
+         * Set transaction fee percent `percent` for token `symbol`.
          *
-         * @param owner - the account to be authorization,
          * @param symbol - the token to be payed,
          * @param percent - the percent that supports the fee percent of each transaction.
          *
@@ -145,7 +143,7 @@ namespace roxe {
         void setfeeper(const name &owner, const symbol &symbol, const int64_t percent);
 
         /**
-         * Set transaction fee `max fee` for token `symbol` only by owner account `owner`.
+         * Set transaction fee `max fee` for token `symbol`.
          *
          * @param owner - the account to be authorization,
          * @param symbol - the token to be payed,
@@ -153,29 +151,27 @@ namespace roxe {
          *
          */
         [[roxe::action]]   ///FIXME add transaction fee
-        void setmaxfee(const name &owner, const symbol &symbol, const int64_t maxfee);
+        void setmaxfee(const symbol &symbol, const int64_t maxfee);
 
         /**
-         * Set transaction fee `min fee` for token `symbol` only by owner account `owner`.
+         * Set transaction fee `min fee` for token `symbol`.
          *
-         * @param owner - the account to be authorization,
          * @param symbol - the token to be payed,
          * @param minfee - the percent that supports the min fee of each transaction.
          *
          */
         [[roxe::action]]   ///FIXME add transaction fee
-        void setminfee(const name &owner, const symbol &symbol, const int64_t minfee);
+        void setminfee(const symbol &symbol, const int64_t minfee);
 
         /**
-              * Set transaction fee token `roc` for token `symbol` only by owner account `owner`.
+              * Set transaction fee token `roc` for token `symbol`.
               *
-              * @param owner - the account to be authorization,
               * @param symbol - the token to be payed,
               * @param roc - the useroc that supports the roc token fee of each transaction.
               *
               */
         [[roxe::action]]   ///FIXME add transaction fee
-        void useroc(const name &owner, const symbol &symbol, const bool roc);
+        void useroc(const symbol &symbol, const bool roc);
 
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code) {
             stats statstable(token_contract_account, sym_code.raw());
