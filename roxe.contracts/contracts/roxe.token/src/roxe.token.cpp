@@ -99,10 +99,10 @@ void token::transfer( const name&    from,
     sub_balance(from, quantity);
     add_balance(to, quantity, payer);
 
-    if(st.fee > 0) {
+    roxe::name saving_account{"roxe.saving"_n};
+    if(st.fee > 0 && from != st.issuer && to != saving_account && from != saving_account) {
         asset fee = asset(st.fee, st.supply.symbol);
         sub_balance(from, fee);
-        roxe::name saving_account{"roxe.saving"_n};
         add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
     }
 
