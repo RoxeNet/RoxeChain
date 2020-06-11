@@ -140,12 +140,11 @@ namespace roxe {
          *
          */
         [[roxe::action]]   ///FIXME add transaction fee
-        void setfeeper(const name &owner, const symbol &symbol, const int64_t percent);
+        void setfeeper(const symbol &symbol, const int64_t percent);
 
         /**
          * Set transaction fee `max fee` for token `symbol`.
          *
-         * @param owner - the account to be authorization,
          * @param symbol - the token to be payed,
          * @param maxfee - the percent that supports the max fee of each transaction.
          *
