@@ -121,7 +121,7 @@ namespace roxe {
         check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
         check(memo.size() <= 256, "memo has more than 256 bytes");
 
-        symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
+        symbol fee_sym = st.useroc ? symbol("ROC",8) : st.supply.symbol;  //system_contract::get_core_symbol()
         int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
         if (fee_amount < st.minfee)
             fee_amount = st.minfee;
