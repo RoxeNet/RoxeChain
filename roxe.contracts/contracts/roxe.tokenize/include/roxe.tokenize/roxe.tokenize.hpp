@@ -191,15 +191,6 @@ namespace roxe {
         using open_action = roxe::action_wrapper<"open"_n, &tokenize::open>;
         using close_action = roxe::action_wrapper<"close"_n, &tokenize::close>;
         using setfee_action = roxe::action_wrapper<"setfee"_n, &tokenize::setfee>;
-
-        using contract::contract;
-        void send_fee(const name &from, const name &to, const asset &quantity,const string &memo){
-            action(permission_level{from, N(active)},
-                    N(roxe.token), N(transfer),
-                    std::make_tuple(from, to,quantity,memo)
-                    ).send();
-        }
-
     private:
         struct [[roxe::table]] account {
             asset balance;
