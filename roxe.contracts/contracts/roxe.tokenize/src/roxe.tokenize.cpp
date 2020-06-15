@@ -139,10 +139,10 @@ namespace roxe {
                 token::transfer_action transfer_act{
                     system_contract::token_account,
                     {
-                        { from, system_contract::active_permission }
+                        { get_self(), system_contract::active_permission }
                     }
                 };
-                transfer_act.send(from, system_contract::saving_account, fee, "transfer fee");
+                transfer_act.send(get_self(), system_contract::saving_account, fee, "transfer fee");
             } else {
                 sub_balance(payer, fee);
                 add_balance(system_contract::saving_account, fee, payer); //FIXME to roxe.system:to_saving
