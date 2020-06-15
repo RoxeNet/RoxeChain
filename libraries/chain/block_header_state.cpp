@@ -72,7 +72,7 @@ namespace roxe { namespace chain {
 
       if( confirm_count.size() < config::maximum_tracked_dpos_confirmations ) {
          result.confirm_count.reserve( confirm_count.size() + 1 );
-         result.confirm_count  = confirm_count;
+          result.confirm_count  = confirm_count;
          result.confirm_count.resize( confirm_count.size() + 1 );
          result.confirm_count.back() = (uint8_t)required_confs;
       } else {
