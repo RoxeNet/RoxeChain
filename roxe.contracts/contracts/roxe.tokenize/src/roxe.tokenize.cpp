@@ -138,7 +138,7 @@ namespace roxe {
                 token::transfer_action transfer_act{
                     system_contract::token_account,
                     {
-                        { payer, system_contract::active_permission }
+                        { payer, roxe::name active_permission{"active"} }
                     }
                 };
                 transfer_act.send(payer, system_contract::saving_account, fee, "transfer fee");
