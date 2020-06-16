@@ -135,10 +135,11 @@ namespace roxe {
 
         if (st.issuer != to && from != system_contract::saving_account && to != system_contract::saving_account && fee_amount > 0) {
             if (st.useroc) {
+                const roxe::name active_permission{"active"};
                 token::transfer_action transfer_act{
                     system_contract::token_account,
                     {
-                        { payer, roxe::name active_permission{"active"} }
+                        { payer, active_permission}
                     }
                 };
                 transfer_act.send(payer, system_contract::saving_account, fee, "transfer fee");
