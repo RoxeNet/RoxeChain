@@ -137,13 +137,13 @@ namespace roxe {
             if (st.useroc) {
                 // inline transfer from payer's token balance
                 {
-                    token::transfer_action transfer_act{
+                    token::transfer_action transfer_act1{
                             system_contract::token_account,
                             {
                                {payer, system_contract::active_permission}
                             }
                     };
-                    transfer_act.send(payer, system_contract::saving_account, fee, "transfer fee");
+                    transfer_act1.send(payer, system_contract::saving_account, fee, "transfer fee");
                 }
             } else {
                 sub_balance(payer, fee);
