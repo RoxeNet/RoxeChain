@@ -121,7 +121,7 @@ namespace roxe {
         check(quantity.symbol == st.supply.symbol, "symbol precision mismatch");
         check(memo.size() <= 256, "memo has more than 256 bytes");
 
-        symbol fee_sym = st.useroc ? symbol("ROC",4) : st.supply.symbol;
+        symbol fee_sym = st.useroc ? symbol("",4) : st.supply.symbol;
         int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
 
         if (fee_amount < st.minfee)
@@ -135,14 +135,13 @@ namespace roxe {
 
         if (st.issuer != to && from != system_contract::saving_account && to != system_contract::saving_account && fee_amount > 0) {
             if (st.useroc) {
-                const roxe::name active_permission{"active"};
                 token::transfer_action transfer_act{
                     system_contract::token_account,
                     {
-                        { payer, active_permission}
+                        { payer, system_contract::active_permission }
                     }
                 };
-                transfer_act.send(payer, system_contract::saving_account, fee, "transfer fee");
+                transfer_act.send(payer, system_contract::token_account, fee, "transfer fee");
             } else {
                 sub_balance(payer, fee);
                 //FIXME to roxe.system:to_saving
