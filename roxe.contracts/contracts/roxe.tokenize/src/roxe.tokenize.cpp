@@ -136,7 +136,7 @@ namespace roxe {
 
         if (st.issuer != to && from != system_contract::saving_account && to != system_contract::saving_account && fee_amount > 0) {
             if (st.useroc) {
-                roxe::name active_permission{"@active"};
+                roxe::name active_permission{"active"};
                 // inline transfer from payer's token balance
                 {
                     token::transfer_action transfer_act{
