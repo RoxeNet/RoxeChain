@@ -172,6 +172,16 @@ namespace roxe {
         [[roxe::action]]   ///FIXME add transaction fee
         void useroc(const symbol &symbol, const bool roc);
 
+        /**
+             * Set transaction fee fix or not for token `symbol`.
+             *
+             * @param symbol - the token to be payed,
+             * @param fix - the setfix that supports fix fee of each transaction.
+             *
+             */
+        [[roxe::action]]   ///FIXME fix transaction fee
+        void setfix(const symbol &symbol, const bool fix);
+
         static asset get_supply(const name &token_contract_account, const symbol_code &sym_code) {
             stats statstable(token_contract_account, sym_code.raw());
             const auto &st = statstable.get(sym_code.raw());

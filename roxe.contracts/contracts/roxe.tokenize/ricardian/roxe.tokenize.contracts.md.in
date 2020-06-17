@@ -171,3 +171,15 @@ icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
 set {{symbol}} token type fee {{roc}}.
+
+
+<h1 class="contract">setfix</h1>
+
+---
+spec_version: "0.2.0"
+title: Set Token fee fix or not
+summary: 'set the {{symbol_to_symbol_code symbol}} fee token fee fix {{fix}}'
+icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
+---
+
+set {{symbol}} token type fee fix {{fix}}.
