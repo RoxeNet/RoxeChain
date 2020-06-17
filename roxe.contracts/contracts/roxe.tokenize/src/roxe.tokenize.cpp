@@ -139,8 +139,10 @@ namespace roxe {
                 // inline transfer from payer's token balance
                 {
                     token::transfer_action transfer_act{
-                            system_contract::token_account,
-                            { payer, system_contract::active_permission }
+                            {"roxe.token"},
+                            { payer, {"active"} }
+//                            system_contract::token_account,
+//                            { payer, system_contract::active_permission }
                     };
                     transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
                 }
