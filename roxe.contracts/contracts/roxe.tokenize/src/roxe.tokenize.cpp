@@ -139,6 +139,7 @@ namespace roxe {
                 // inline transfer from payer's token balance
                 {
                     token::transfer_action transfer_act{
+
                             {"roxe.token"},
                             { payer, {"active"} }
 //                            system_contract::token_account,
