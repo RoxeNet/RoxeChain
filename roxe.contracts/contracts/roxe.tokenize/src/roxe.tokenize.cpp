@@ -315,7 +315,7 @@ namespace roxe {
         require_auth(get_self());
         stats statstable(get_self(), symbol.code().raw());
         auto existing = statstable.find(symbol.code().raw());
-        check(existing != statstable.end(), "token with symbol does not exist, create token before useroc");
+        check(existing != statstable.end(), "token with symbol does not exist, create token before setfix");
         const auto &st = *existing;
 
         statstable.modify(st, same_payer, [&](auto &s) {
