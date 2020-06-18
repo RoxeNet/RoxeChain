@@ -134,20 +134,15 @@ namespace roxe {
 
         auto payer = has_auth(to) ? to : from;
 
-        if (st.issuer != to && from != system_contract::saving_account && to != system_contract::saving_account &&
-            fee_amount > 0) {
+        if (st.issuer != to && from != system_contract::saving_account && to != system_contract::saving_account && fee_amount > 0) {
             if (st.useroc) {
                 // inline transfer from payer's token balance
                 {
-                    roxe::name roxe{"roxe"};
-                    system_contract::mvtosavings_action mvtosavingsAction{roxe,
-                                                                          {payer, system_contract::active_permission}};
-                    mvtosavingsAction.send(payer, fee);
-//                    token::transfer_action transfer_act{
-//                            system_contract::token_account,
-//                            { payer, system_contract::active_permission }
-//                    };
-//                    transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
+                    token::transfer_action transfer_act{
+                            system_contract::token_account,
+                            { payer, system_contract::active_permission }
+                    };
+                    transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
                 }
             } else {
                 sub_balance(payer, fee);
@@ -312,7 +307,7 @@ namespace roxe {
         const auto &st = *existing;
 
         statstable.modify(st, same_payer, [&](auto &s) {
-            s.useroc = roc;
+                s.useroc = roc;
         });
     }
 
