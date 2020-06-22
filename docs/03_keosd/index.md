@@ -1,18 +1,18 @@
 ---
-content_title: Keosd
+content_title: Kroxed
 ---
 
 ## Introduction
 
-`keosd` is a key manager service daemon for storing private keys and signing digital messages. It provides a secure key storage medium for keys to be encrypted at rest in the associated wallet file. `keosd` also defines a secure enclave for signing transaction created by `cleos` or a third part library.
+`kroxed` is a key manager service daemon for storing private keys and signing digital messages. It provides a secure key storage medium for keys to be encrypted at rest in the associated wallet file. `kroxed` also defines a secure enclave for signing transaction created by `clroxe` or a third part library.
 
 ## Installation
 
-`keosd` is distributed as part of the [EOSIO software suite](https://github.com/EOSIO/eos/blob/master/README.md). To install `keosd` just visit the [EOSIO Software Installation](../00_install/index.md) section.
+`kroxed` is distributed as part of the [ROXE software suite](https://github.com/Roxe/roxe/blob/master/README.md). To install `kroxed` just visit the [Roxe Software Installation](../00_install/index.md) section.
 
 ## Operation
 
-When a wallet is unlocked with the corresponding password, `cleos` can request `keosd` to sign a transaction with the appropriate private keys. Also, `keosd` provides support for hardware-based wallets such as Secure Encalve and YubiHSM.
+When a wallet is unlocked with the corresponding password, `clroxe` can request `kroxed` to sign a transaction with the appropriate private keys. Also, `kroxed` provides support for hardware-based wallets such as Secure Encalve and YubiHSM.
 
 [[info | Audience]]
-| `keosd` is intended to be used by EOSIO developers only.
+| `kroxed` is intended to be used by ROXE developers only.
