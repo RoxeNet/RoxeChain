@@ -1,31 +1,48 @@
-/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/local/Cellar/cmake/3.15.5/bin/cmake -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -G "CodeBlocks - Unix Makefiles" /Users/shadow/git/roxeio/actc
--- The C compiler identification is unknown
--- The CXX compiler identification is GNU 9.2.0
--- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9
--- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -- broken
-CMake Error at /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.16/Modules/CMakeTestCCompiler.cmake:60 (message):
-  The C compiler
+/Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /Users/ashmore/git/roxeio/actc
+-- The C compiler identification is AppleClang 11.0.3.11030032
+-- The CXX compiler identification is AppleClang 11.0.3.11030032
+-- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc
+-- Check for working C compiler: /Library/Developer/CommandLineTools/usr/bin/cc -- works
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++
+-- Check for working CXX compiler: /Library/Developer/CommandLineTools/usr/bin/c++ -- works
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+CMake Warning at CMakeLists.txt:8 (message):
+  CMAKE_INSTALL_PREFIX is set to /usr/local.  This is not recommended.
 
-    "/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9"
 
-  is not able to compile a simple test program.
+-- Using custom FindBoost.cmake
+CMake Error at libraries/fc/CMakeModules/FindBoost.cmake:1129 (message):
+  Unable to find the requested Boost libraries.
 
-  It fails with the following output:
-
-    Change Dir: /Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeTmp
-    
-    Run Build Command(s):/usr/local/Cellar/cmake/3.15.5/bin/cmake cmTC_a4f15/fast && CMake Error: The source directory "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeTmp/cmTC_a4f15/fast" does not exist.
-    Specify --help for usage, or press the help button on the CMake GUI.
-    
-    
-
-  
-
-  CMake will not be able to correctly generate this project.
+  Unable to find the Boost header files.  Please set BOOST_ROOT to the root
+  directory containing Boost or BOOST_INCLUDEDIR to the directory containing
+  Boost's headers.
 Call Stack (most recent call first):
-  CMakeLists.txt:3 (project)
+  CMakeLists.txt:105 (find_package)
+
+
+-- Looking for pthread.h
+-- Looking for pthread.h - found
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Configuring ROXE on OS X
+-- Using 'ROC' as CORE symbol name
+-- Using 'ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt' as public key for 'roxe' account
+CMake Error at /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake:146 (message):
+  Could NOT find GMP (missing: GMP_LIBRARIES GMP_INCLUDE_DIR)
+Call Stack (most recent call first):
+  /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.16/Modules/FindPackageHandleStandardArgs.cmake:393 (_FPHSA_FAILURE_MESSAGE)
+  libraries/fc/CMakeModules/FindGMP.cmake:56 (find_package_handle_standard_args)
+  libraries/fc/secp256k1/CMakeLists.txt:4 (find_package)
 
 
 -- Configuring incomplete, errors occurred!
-See also "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeOutput.log".
-See also "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeError.log".
+See also "/Users/ashmore/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeOutput.log".
