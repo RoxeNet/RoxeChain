@@ -4,7 +4,7 @@ content_title: Install ROXE Binaries
 
 ## Roxe install script
 
-For ease of contract development, content can be installed at the `/usr/local` folder using the `eosio_install.sh` script within the `eos/scripts` folder. Adequate permission is required to install on system folders:
+For ease of contract development, content can be installed at the `/usr/local` folder using the `roxe_install.sh` script within the `roxe/scripts` folder. Adequate permission is required to install on system folders:
 
 ```sh
 cd ~/roxe/RoxeChain
