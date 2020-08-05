@@ -73,7 +73,7 @@ You can also use `kroxed` instead of hard-defining keys.
 signature-provider = KROXED:<data>   
 
 //Example
-//ROXE6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KROXED:https://127.0.0.1:88888
+//ROXE6MRyAjQq8ud7hVNYcfnVPJqcVpscN5So8BhtHuGYqET5GDW5CV=KROXED:https://127.0.0.1:18878
 ```
 
 ### 4. Define a peers list

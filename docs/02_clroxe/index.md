@@ -28,7 +28,7 @@ Usage: clroxe [OPTIONS] SUBCOMMAND
 
 Options:
   -h,--help                   Print this help message and exit
-  -u,--url TEXT=http://127.0.0.1:8888/
+  -u,--url TEXT=http://127.0.0.1:18878/
                               the http/https URL where nodroxe is running
   --wallet-url TEXT=unix:///Users/username/roxe-wallet/kroxed.sock
                               the http/https URL where kroxed is running

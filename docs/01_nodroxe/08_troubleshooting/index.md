@@ -35,13 +35,13 @@ Start `nodroxe` with `--shared-memory-size-mb 1024`. A 1 GB shared memory file a
 If defaults can be used, then `clroxe get info` will output a block that contains a field called `server_version`.  If your `nodroxe` is not using the defaults, then you need to know the URL of the `nodroxe`. In that case, use the following with your `nodroxe` URL:
 
 ```sh
-clroxe --url http://localhost:8888 get info
+clroxe --url http://localhost:18878 get info
 ```
 
 To focus only on the version line within the block:
 
 ```sh
-clroxe --url http://localhost:8888 get info | grep server_version
+clroxe --url http://localhost:18878 get info | grep server_version
 ```
 
 ### Error 3070000: WASM Exception Error

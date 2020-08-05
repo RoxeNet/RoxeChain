@@ -11,7 +11,7 @@ If your `nodroxe` instance is running locally, the below command will request `n
 
 ```sh
 curl --request POST \
-  --url http://127.0.0.1:8888/v1/producer/create_snapshot \
+  --url http://127.0.0.1:18878/v1/producer/create_snapshot \
   --header 'content-type: application/x-www-form-urlencoded; charset=UTF-8'
 ```
 

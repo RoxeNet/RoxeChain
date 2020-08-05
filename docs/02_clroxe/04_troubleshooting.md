@@ -7,7 +7,7 @@ content_title: Clroxe Troubleshooting
 Check if your local `nodroxe` is running by visiting the following URL in your browser:
 
 ```sh
-curl http://localhost:8888/v1/chain/get_info
+curl http://localhost:18878/v1/chain/get_info
 ```
 
 If you are trying to connect a remote `nodroxe` API endpoint, try to visit the API endpoint with the following suffix:

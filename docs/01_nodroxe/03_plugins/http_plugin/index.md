@@ -25,7 +25,7 @@ Config Options for roxe::http_plugin:
   --unix-socket-path arg                The filename (relative to data-dir) to 
                                         create a unix socket for HTTP RPC; set 
                                         blank to disable (=kroxed.sock for kroxed)
-  --http-server-address arg (=127.0.0.1:8888 for nodroxe)
+  --http-server-address arg (=127.0.0.1:18878 for nodroxe)
                                         The local IP and port to listen for 
                                         incoming http connections; set blank to
                                         disable.
