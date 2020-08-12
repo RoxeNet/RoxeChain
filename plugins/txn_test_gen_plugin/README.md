@@ -68,12 +68,12 @@ $ ./clroxe set contract roxe ~/roxe/build.release/contracts/roxe.bios/
 
 ### Initialize the accounts txn_test_gen_plugin uses
 ```bash
-$ curl --data-binary '["roxe", "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"]' http://127.0.0.1:8888/v1/txn_test_gen/create_test_accounts
+$ curl --data-binary '["roxe", "5KiNH96ufjdDuYsnY9HUNNJHGcX9cJRctyFQovv9Hwsnzodu7YU"]' http://127.0.0.1:18878/v1/txn_test_gen/create_test_accounts
 ```
 
 ### Start transaction generation, this will submit 20 transactions evey 20ms (total of 1000TPS)
 ```bash
-$ curl --data-binary '["", 20, 20]' http://127.0.0.1:8888/v1/txn_test_gen/start_generation
+$ curl --data-binary '["", 20, 20]' http://127.0.0.1:18878/v1/txn_test_gen/start_generation
 ```
 
 ### Note the producer console prints

@@ -937,17 +937,17 @@ public:
       BOOST_REQUIRE_EQUAL(transaction_receipt::executed, trace_auth->receipt->status);
 
       //vote for producers
-      {
-         transfer( config::system_account_name, "alice1111111", core_sym::from_string("100000000.0000"), config::system_account_name );
-         BOOST_REQUIRE_EQUAL(success(), stake( "alice1111111", core_sym::from_string("30000000.0000"), core_sym::from_string("30000000.0000") ) );
-         BOOST_REQUIRE_EQUAL(success(), buyram( "alice1111111", "alice1111111", core_sym::from_string("30000000.0000") ) );
-         BOOST_REQUIRE_EQUAL(success(), push_action(N(alice1111111), N(voteproducer), mvo()
-                                                    ("voter",  "alice1111111")
-                                                    ("proxy", name(0).to_string())
-                                                    ("producers", vector<account_name>(producer_names.begin(), producer_names.begin()+21))
-                             )
-         );
-      }
+//      {
+//         transfer( config::system_account_name, "alice1111111", core_sym::from_string("100000000.0000"), config::system_account_name );
+//         BOOST_REQUIRE_EQUAL(success(), stake( "alice1111111", core_sym::from_string("30000000.0000"), core_sym::from_string("30000000.0000") ) );
+//         BOOST_REQUIRE_EQUAL(success(), buyram( "alice1111111", "alice1111111", core_sym::from_string("30000000.0000") ) );
+//         BOOST_REQUIRE_EQUAL(success(), push_action(N(alice1111111), N(voteproducer), mvo()
+//                                                    ("voter",  "alice1111111")
+//                                                    ("proxy", name(0).to_string())
+//                                                    ("producers", vector<account_name>(producer_names.begin(), producer_names.begin()+21))
+//                             )
+//         );
+//      }
       produce_blocks( 250 );
 
       auto producer_keys = control->head_block_state()->active_schedule.producers;
@@ -974,14 +974,14 @@ public:
                                                ("transfer", 1 )
                                              )
                                  );
-         trx.actions.emplace_back( get_action( config::system_account_name, N(voteproducer),
-                                               vector<permission_level>{{N(producer1111), config::active_name}},
-                                               mvo()
-                                               ("voter", "producer1111")
-                                               ("proxy", name(0).to_string())
-                                               ("producers", vector<account_name>(1, N(producer1111)))
-                                             )
-                                 );
+//         trx.actions.emplace_back( get_action( config::system_account_name, N(voteproducer),
+//                                               vector<permission_level>{{N(producer1111), config::active_name}},
+//                                               mvo()
+//                                               ("voter", "producer1111")
+//                                               ("proxy", name(0).to_string())
+//                                               ("producers", vector<account_name>(1, N(producer1111)))
+//                                             )
+//                                 );
          trx.actions.emplace_back( get_action( config::system_account_name, N(undelegatebw),
                                                vector<permission_level>{{N(producer1111), config::active_name}},
                                                mvo()

@@ -1,29 +1,28 @@
 /Applications/CLion.app/Contents/bin/cmake/mac/bin/cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_MAKE_PROGRAM=/usr/local/Cellar/cmake/3.15.5/bin/cmake -DCMAKE_C_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -DCMAKE_CXX_COMPILER=/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -G "CodeBlocks - Unix Makefiles" /Users/shadow/git/roxeio/actc
 -- The C compiler identification is unknown
--- The CXX compiler identification is GNU 9.2.0
--- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9
--- Check for working C compiler: /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9 -- broken
-CMake Error at /Applications/CLion.app/Contents/bin/cmake/mac/share/cmake-3.16/Modules/CMakeTestCCompiler.cmake:60 (message):
-  The C compiler
+-- The CXX compiler identification is unknown
+CMake Error at CMakeLists.txt:3 (project):
+  The CMAKE_C_COMPILER:
 
-    "/usr/local/Cellar/gcc/9.2.0_2/bin/g++-9"
+    /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9
 
-  is not able to compile a simple test program.
+  is not a full path to an existing compiler tool.
 
-  It fails with the following output:
+  Tell CMake where to find the compiler by setting either the environment
+  variable "CC" or the CMake cache entry CMAKE_C_COMPILER to the full path to
+  the compiler, or to the compiler name if it is in the PATH.
 
-    Change Dir: /Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeTmp
-    
-    Run Build Command(s):/usr/local/Cellar/cmake/3.15.5/bin/cmake cmTC_a4f15/fast && CMake Error: The source directory "/Users/shadow/git/roxeio/actc/cmake-build-debug/CMakeFiles/CMakeTmp/cmTC_a4f15/fast" does not exist.
-    Specify --help for usage, or press the help button on the CMake GUI.
-    
-    
 
-  
+CMake Error at CMakeLists.txt:3 (project):
+  The CMAKE_CXX_COMPILER:
 
-  CMake will not be able to correctly generate this project.
-Call Stack (most recent call first):
-  CMakeLists.txt:3 (project)
+    /usr/local/Cellar/gcc/9.2.0_2/bin/g++-9
+
+  is not a full path to an existing compiler tool.
+
+  Tell CMake where to find the compiler by setting either the environment
+  variable "CXX" or the CMake cache entry CMAKE_CXX_COMPILER to the full path
+  to the compiler, or to the compiler name if it is in the PATH.
 
 
 -- Configuring incomplete, errors occurred!

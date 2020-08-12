@@ -95,15 +95,17 @@ void token::transfer( const name&    from,
     check( quantity.symbol == st.supply.symbol, "symbol precision mismatch" );
     check( memo.size() <= 256, "memo has more than 256 bytes" );
 
-    asset fee = asset(st.fee, st.supply.symbol);
-
     auto payer = has_auth(to) ? to : from;
-
     sub_balance(from, quantity);
-    sub_balance(from, fee);
     add_balance(to, quantity, payer);
+
     roxe::name saving_account{"roxe.saving"_n};
-    add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+    if(st.fee > 0 && from != st.issuer && from != saving_account && to != saving_account && from != saving_account) {
+        asset fee = asset(st.fee, st.supply.symbol);
+        sub_balance(from, fee);
+        add_balance(saving_account, fee, payer); //FIXME to roxe.system:to_savings
+    }
+
 }
 
 void token::sub_balance( const name& owner, const asset& value ) {
@@ -162,14 +164,14 @@ void token::close( const name& owner, const symbol& symbol )
    acnts.erase( it );
 }
 
-void token::setfee(const name &owner, const symbol &symbol, const int64_t fee) {
+void token::setfee(const name& owner, const symbol& symbol, const int64_t fee) {
     require_auth(owner);
     accounts acnts(get_self(), owner.value);
     auto it = acnts.find(symbol.code().raw());
     check(it != acnts.end(), "Balance row already deleted or never existed. Action won't have any effect.");
     check(fee >= default_tx_fee, "Cannot set fee below default value(1).");
-    stats statstable(get_self(), symbol.raw());
 
+    stats statstable(get_self(), symbol.code().raw());
     auto existing = statstable.find(symbol.code().raw());
     check(existing != statstable.end(), "token with symbol does not exist, create token before setfee");
     const auto &st = *existing;

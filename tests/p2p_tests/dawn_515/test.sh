@@ -45,7 +45,7 @@ plugin = roxe::producer_plugin
 plugin = roxe::chain_api_plugin
 plugin = roxe::net_plugin
 plugin = roxe::history_api_plugin
-http-server-address = 127.0.0.1:8888
+http-server-address = 127.0.0.1:18878
 blocks-dir = blocks
 p2p-listen-endpoint = 0.0.0.0:9876
 allowed-connection = any
@@ -61,7 +61,7 @@ read -d '' config00 << EOF
 blocks-dir = blocks
 readonly = 0
 send-whole-blocks = true
-http-server-address = 127.0.0.1:8889
+http-server-address = 127.0.0.1:18879
 p2p-listen-endpoint = 0.0.0.0:9877
 p2p-server-address = localhost:9877
 allowed-connection = any
@@ -280,8 +280,8 @@ if [ $res -ne 0 ]; then
     ret=1
 fi
 
-b5idbios=`./programs/clroxe/clroxe -u http://localhost:8888 get block 5 | grep "^ *\"id\""`
-b5id00=`./programs/clroxe/clroxe -u http://localhost:8889 get block 5 | grep "^ *\"id\""`
+b5idbios=`./programs/clroxe/clroxe -u http://localhost:18878 get block 5 | grep "^ *\"id\""`
+b5id00=`./programs/clroxe/clroxe -u http://localhost:18879 get block 5 | grep "^ *\"id\""`
 b5id01=`./programs/clroxe/clroxe -u http://localhost:8890 get block 5 | grep "^ *\"id\""`
 
 if [ "$b5idbios" != "$b5id00" ]; then

@@ -323,14 +323,6 @@
         {"name":"isproxy",   "type":"bool"}
       ]
     },{
-      "name": "voteproducer",
-      "base": "",
-      "fields": [
-        {"name":"voter",     "type":"account_name"},
-        {"name":"proxy",     "type":"account_name"},
-        {"name":"producers", "type":"account_name[]"}
-      ]
-    },{
       "name": "voter_info",
       "base": "",
       "fields": [
@@ -521,10 +513,6 @@
    },{
       "name": "regproxy",
       "type": "regproxy",
-      "ricardian_contract": ""
-   },{
-      "name": "voteproducer",
-      "type": "voteproducer",
       "ricardian_contract": ""
    },{
       "name": "claimrewards",

@@ -395,6 +395,7 @@ namespace roxesystem {
 
       token::open_action open_act{ token_account, { {get_self(), active_permission} } };
       open_act.send( rex_account, core, get_self() );
+
    }
 
 } /// roxe.system
