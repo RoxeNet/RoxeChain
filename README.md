@@ -5,15 +5,15 @@
 
 
 ```sh
-$ wget https://github.com/dwjpeng/RoxeChain/tree/roxe/releases/download/v1.0.0/RoxeChain-1.0.0.ubuntu-18.04-x86_64.zip
+$ wget https://github.com/dwjpeng/RoxeChain/tree/roxe/releases/download/v1.0.0/RoxeChain-1.0.0.ubuntu-18.04-x86_64.tar
 
-file md5sum:3a2aab4569c913eba3800c35d994ddc4
+file md5sum:f9ffe351fded97ebb9d7d2017a874c9e
 ```
 
 #### Centos7 Package 
 
 ```sh
-$ wget https://github.com/dwjpeng/RoxeChain/tree/roxe/releases/download/v1.0.0/RoxeChain-1.0.0.x86_64-0.x86_64.zip
+$ wget https://github.com/dwjpeng/RoxeChain/tree/roxe/releases/download/v1.0.0/RoxeChain-1.0.0.x86_64-0.x86_64.tar
 
 ```
 
