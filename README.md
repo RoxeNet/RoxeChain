@@ -3,32 +3,22 @@
 
 **If you have previously installed Roxechain, please run the `Roxe_uninstall` script (it is in the directory where you cloned Roxe Chain) before downloading and using the binary releases.**
 
-#### Ubuntu 18.04 Debian Package Install
+#### Ubuntu 18.04  Package 
 
 
 ```sh
 $ wget https://github.com/RoxeTech/RoxeChain/releases/download/v1.0.0/RoxeChain-1.0.0.ubuntu-18.04-x86_64.zip
 
+file md5sum:94e72b3ee7d428d0f32415080928d080
 ```
 
-#### Debian Package Uninstall
-
-```sh
-$ sudo apt remove RoxeChain
-```
-
-#### RPM Package Install
+#### Centos7 Package 
 
 ```sh
 $ wget https://github.com/RoxeTech/RoxeChain/releases/download/v1.0.0/RoxeChain-1.0.0.x86_64-0.x86_64.zip
 
 ```
 
-#### RPM Package Uninstall
-
-```sh
-$ sudo yum remove Roxe.cdt
-```
 
 ## Supported Operating Systems
 
