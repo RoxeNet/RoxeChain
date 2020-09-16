@@ -13,7 +13,7 @@ file md5sum:3a2aab4569c913eba3800c35d994ddc4
 #### Centos7 Package 
 
 ```sh
-$ wget https://github.com/dwjpeng/RoxeChain/releases/download/v1.0.0/RoxeChain-1.0.0.x86_64-0.x86_64.zip
+$ wget https://github.com/dwjpeng/RoxeChain/tree/roxe/releases/download/v1.0.0/RoxeChain-1.0.0.x86_64-0.x86_64.zip
 
 ```
 
