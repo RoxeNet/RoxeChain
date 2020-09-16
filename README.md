@@ -1,8 +1,6 @@
 # Roxe Chain
 
 
-**If you have previously installed Roxechain, please run the `Roxe_uninstall` script (it is in the directory where you cloned Roxe Chain) before downloading and using the binary releases.**
-
 #### Ubuntu 18.04  Package 
 
 
