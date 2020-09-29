@@ -111,6 +111,8 @@ if [ $# -ne 0 ]; then
    done
 fi
 
+#CMAKE_BUILD_TYPE=Debug
+
 export CURRENT_WORKING_DIR=$(pwd) # relative path support
 
 # Ensure we're in the repo root and not inside of scripts
