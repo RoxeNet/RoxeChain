@@ -212,16 +212,13 @@ namespace roxe {
             asset supply;
             asset max_supply;
             name issuer;
-            vector <name> authors;
-
             int64_t fee;
             bool fixed;
-
             int64_t percent;
             int64_t maxfee;
             int64_t minfee;
-
             bool useroc;
+            vector <name> authors;
 
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
         };
