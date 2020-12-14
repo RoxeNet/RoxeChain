@@ -165,9 +165,9 @@ bfs::path determine_home_directory()
     return home;
 }
 
-string url = "http://127.0.0.1:18878/";
+string url = "http://127.0.0.1:18888";
 string default_wallet_url = "unix://" + (determine_home_directory() / "roxe-wallet" / (string(key_store_executable_name) + ".sock")).string();
-string wallet_url; //to be set to default_wallet_url in main
+string wallet_url = "http://127.0.0.1:18889";   //to be set to default_wallet_url in main
 bool no_verify = false;
 vector<string> headers;
 
