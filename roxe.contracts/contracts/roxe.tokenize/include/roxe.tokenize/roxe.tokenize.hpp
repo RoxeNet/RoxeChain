@@ -267,7 +267,7 @@ namespace roxe {
             bool useroc;
 
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
-            ACTCLIB_SERIALIZE(currency_stats,(supply)(max_supply)(issuer)(authors)(fee)(fixed)(percent)(maxfee)(minfee)(useroc))
+            //ACTCLIB_SERIALIZE(currency_stats,(supply)(max_supply)(issuer)(authors)(fee)(fixed)(percent)(maxfee)(minfee)(useroc))
         };
 
         typedef roxe::multi_index<"accounts"_n, account> accounts;
