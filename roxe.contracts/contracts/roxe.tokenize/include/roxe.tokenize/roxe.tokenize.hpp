@@ -6,16 +6,19 @@
 #include <string>
 #include <vector>
 
+#include <roxe.system/roxe.system.hpp>
 
-namespace roxesystem {
-    class system_contract;
-}
+//namespace roxesystem {
+//    class system_contract;
+//}
 
 namespace roxe {
 
     using std::string;
     using std::vector;
     using std::find;
+
+    using roxesystem::system_contract;
 
     /**
      * roxe.tokenize contract defines the structures and actions that allow users to create, issue, and manage
@@ -194,6 +197,48 @@ namespace roxe {
             return ac.balance;
         }
 
+        static asset estimate_fee_given_in(const asset &amount_in) {
+            auto sym = amount_in.symbol;
+            check(sym.is_valid(), "invalid symbol name");
+            check(amount_in.is_valid(), "invalid supply");
+            check(amount_in.amount > 0, "amount_in must be positive");
+
+            stats statstable(get_self(), sym.code().raw());
+            auto existing = statstable.find(sym.code().raw());
+            check(existing != statstable.end(), "token with symbol not exists");
+            const auto &st = statstable.get(sym.raw());
+            symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
+            int64_t fee_amount = st.fixed ? st.fee : amount_in.amount * st.percent / (st.percent + percent_decimal);
+
+            if (fee_amount < st.minfee)
+                fee_amount = st.minfee;
+            if (fee_amount > st.maxfee)
+                fee_amount = st.maxfee;
+
+            return asset(fee_amount, fee_sym);
+        }
+
+        static asset estimate_fee_given_out(const asset &amount_out) {
+            auto sym = amount_out.symbol;
+            check(sym.is_valid(), "invalid symbol name");
+            check(amount_out.is_valid(), "invalid supply");
+            check(amount_out.amount > 0, "amount_out must be positive");
+
+            stats statstable(get_self(), sym.code().raw());
+            auto existing = statstable.find(sym.code().raw());
+            check(existing != statstable.end(), "token with symbol not exists");
+            const auto &st = statstable.get(sym.raw());
+            symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
+            int64_t fee_amount = st.fixed ? st.fee : amount_out.amount * st.percent / percent_decimal;
+
+            if (fee_amount < st.minfee)
+                fee_amount = st.minfee;
+            if (fee_amount > st.maxfee)
+                fee_amount = st.maxfee;
+
+            return asset(fee_amount, fee_sym);
+        }
+
         using create_action = roxe::action_wrapper<"create"_n, &tokenize::create>;
         using issue_action = roxe::action_wrapper<"issue"_n, &tokenize::issue>;
         using retire_action = roxe::action_wrapper<"retire"_n, &tokenize::retire>;
@@ -213,6 +258,7 @@ namespace roxe {
             asset max_supply;
             name issuer;
             vector <name> authors;
+
             int64_t fee;
             bool fixed;
             int64_t percent;
@@ -235,7 +281,7 @@ namespace roxe {
          * default transaction fee
          */
         static constexpr int64_t default_tx_fee = 0;    // actural fee = tx_fee / precision =1/10000 (0.0001)
-
+        static constexpr int64_t percent_decimal = 1000000;
     };
 
 }

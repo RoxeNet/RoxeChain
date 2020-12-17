@@ -1,5 +1,4 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
-#include <roxe.system/roxe.system.hpp>
 #include <roxe.token/roxe.token.hpp>
 #include <vector>
 #include <algorithm>
@@ -9,7 +8,6 @@ using namespace std;
 namespace roxe {
 
     using roxe::token;
-    using roxesystem::system_contract;
 
     void tokenize::create(const name &issuer,
                           const asset &maximum_supply) {
@@ -123,7 +121,7 @@ namespace roxe {
         check(memo.size() <= 256, "memo has more than 256 bytes");
 
         symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
-        int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
+        int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / percent_decimal;
 
         if (fee_amount < st.minfee)
             fee_amount = st.minfee;
