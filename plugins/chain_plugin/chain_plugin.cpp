@@ -1628,10 +1628,11 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
 
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       read_only::get_currency_stats_result result;
-
+      std::vector <name> authors;
       fc::raw::unpack(ds, result.supply);
       fc::raw::unpack(ds, result.max_supply);
       fc::raw::unpack(ds, result.issuer);
+      fc::raw::unpack(ds, authors);
       fc::raw::unpack(ds, result.fee);
 
       results[result.supply.symbol_name()] = result;
