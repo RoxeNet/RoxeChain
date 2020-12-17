@@ -1622,7 +1622,7 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
    (void)get_table_type( abi, "stat" );
 
    uint64_t scope = ( roxe::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
-   static Name _roxe_token("roxe.token");
+   static roxe::name _roxe_token("roxe.token");
    walk_key_value_table(p.code, scope, N(stat), [&](const key_value_object& obj){
       ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
 
