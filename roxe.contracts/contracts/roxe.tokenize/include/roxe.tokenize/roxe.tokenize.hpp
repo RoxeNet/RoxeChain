@@ -197,13 +197,13 @@ namespace roxe {
             return ac.balance;
         }
 
-        static asset estimate_fee_given_in(const asset &amount_in) {
+        static asset estimate_fee_given_in(const name &token_contract_account, const asset &amount_in) {
             auto sym = amount_in.symbol;
             check(sym.is_valid(), "invalid symbol name");
             check(amount_in.is_valid(), "invalid supply");
             check(amount_in.amount > 0, "amount_in must be positive");
 
-            stats statstable(get_self(), sym.code().raw());
+            stats statstable(token_contract_account, sym.code().raw());
             auto existing = statstable.find(sym.code().raw());
             check(existing != statstable.end(), "token with symbol not exists");
             const auto &st = statstable.get(sym.raw());
@@ -218,13 +218,13 @@ namespace roxe {
             return asset(fee_amount, fee_sym);
         }
 
-        static asset estimate_fee_given_out(const asset &amount_out) {
+        static asset estimate_fee_given_out(const name &token_contract_account, const asset &amount_out) {
             auto sym = amount_out.symbol;
             check(sym.is_valid(), "invalid symbol name");
             check(amount_out.is_valid(), "invalid supply");
             check(amount_out.amount > 0, "amount_out must be positive");
 
-            stats statstable(get_self(), sym.code().raw());
+            stats statstable(token_contract_account, sym.code().raw());
             auto existing = statstable.find(sym.code().raw());
             check(existing != statstable.end(), "token with symbol not exists");
             const auto &st = statstable.get(sym.raw());
