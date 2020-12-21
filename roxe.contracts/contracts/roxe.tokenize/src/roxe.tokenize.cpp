@@ -83,8 +83,8 @@ namespace roxe {
         const auto &st = *existing;
 
 
-//        vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
-//        check(iter != st.authors.end(), "retire account from must be authorized");
+        vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
+        check(iter != st.authors.end(), "retire account from must be authorized");
 
         require_recipient(from);
 //    require_auth( st.issuer );
