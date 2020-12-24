@@ -145,7 +145,7 @@ namespace roxe {
                 }
             } else {
                 transfer_action transfer_act{
-                        system_contract::token_account,
+                        get_self(),
                         { payer, system_contract::active_permission }
                 };
                 transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
