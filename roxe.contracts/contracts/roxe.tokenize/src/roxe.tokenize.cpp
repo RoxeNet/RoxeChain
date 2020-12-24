@@ -144,9 +144,15 @@ namespace roxe {
                     transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
                 }
             } else {
-                sub_balance(payer, fee);
-                //FIXME to roxe.system:to_saving
-                add_balance(system_contract::saving_account, fee, payer);
+                transfer_action transfer_act{
+                        system_contract::token_account,
+                        { payer, system_contract::active_permission }
+                };
+                transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
+//
+//                sub_balance(payer, fee);
+//                //FIXME to roxe.system:to_saving
+//                add_balance(system_contract::saving_account, fee, payer);
             }
         }
 
