@@ -206,7 +206,7 @@ namespace roxe {
             stats statstable(token_contract_account, sym.code().raw());
             auto existing = statstable.find(sym.code().raw());
             check(existing != statstable.end(), "token with symbol not exists");
-            const auto &st = statstable.get(sym.raw());
+            const auto &st = statstable.get(sym.code().raw());
             symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
             int64_t fee_amount = (st.fee * percent_decimal + amount_in.amount * st.percent) / (st.percent + percent_decimal);
 
@@ -227,7 +227,7 @@ namespace roxe {
             stats statstable(token_contract_account, sym.code().raw());
             auto existing = statstable.find(sym.code().raw());
             check(existing != statstable.end(), "token with symbol not exists");
-            const auto &st = statstable.get(sym.raw());
+            const auto &st = statstable.get(sym.code().raw());
             symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
             int64_t fee_amount = st.fee + amount_out.amount * st.percent / percent_decimal;
 
