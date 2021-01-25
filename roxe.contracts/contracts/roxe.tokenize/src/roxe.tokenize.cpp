@@ -1,5 +1,4 @@
 #include <roxe.tokenize/roxe.tokenize.hpp>
-#include <roxe.system/roxe.system.hpp>
 #include <roxe.token/roxe.token.hpp>
 #include <vector>
 #include <algorithm>
@@ -9,7 +8,6 @@ using namespace std;
 namespace roxe {
 
     using roxe::token;
-    using roxesystem::system_contract;
 
     void tokenize::create(const name &issuer,
                           const asset &maximum_supply) {
@@ -85,8 +83,8 @@ namespace roxe {
         const auto &st = *existing;
 
 
-//        vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
-//        check(iter != st.authors.end(), "retire account from must be authorized");
+        vector<const name>::iterator iter = find(st.authors.begin(), st.authors.end(), from);
+        check(iter != st.authors.end(), "retire account from must be authorized");
 
         require_recipient(from);
 //    require_auth( st.issuer );
@@ -123,7 +121,8 @@ namespace roxe {
         check(memo.size() <= 256, "memo has more than 256 bytes");
 
         symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
-        int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / 100;
+//        int64_t fee_amount = st.fixed ? st.fee : quantity.amount * st.percent / percent_decimal;
+        int64_t fee_amount = st.fee + quantity.amount * st.percent / percent_decimal;
 
         if (fee_amount < st.minfee)
             fee_amount = st.minfee;
@@ -145,9 +144,15 @@ namespace roxe {
                     transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
                 }
             } else {
-                sub_balance(payer, fee);
-                //FIXME to roxe.system:to_saving
-                add_balance(system_contract::saving_account, fee, payer);
+                transfer_action transfer_act{
+                        get_self(),
+                        { payer, system_contract::active_permission }
+                };
+                transfer_act.send( payer, system_contract::saving_account, fee, "transfer fee");
+//
+//                sub_balance(payer, fee);
+//                //FIXME to roxe.system:to_saving
+//                add_balance(system_contract::saving_account, fee, payer);
             }
         }
 
