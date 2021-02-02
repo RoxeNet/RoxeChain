@@ -99,8 +99,8 @@ namespace roxesystem {
             {
                auto new_token_assets = asset(new_tokens, core_symbol());
                if(token_supply.amount + new_tokens > token_max_supply.amount){
-                   token::incr_max_supply_action incr_act{ token_account, { {get_self(), active_permission} } };
-                   incr_act.send(new_token_assets, "inflate tokens for producer pay and savings");
+                   token::inc_max_supply_action inc_act{ token_account, { {get_self(), active_permission} } };
+                   inc_act.send(new_token_assets, "inflate tokens for producer pay and savings");
                }
                token::issue_action issue_act{ token_account, { {get_self(), active_permission} } };
                issue_act.send( get_self(), new_token_assets, "issue tokens for producer pay and savings" );
