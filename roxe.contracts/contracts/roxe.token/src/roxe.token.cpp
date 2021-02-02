@@ -24,7 +24,7 @@ void token::create( const name&   issuer,
     });
 }
 
-void token::incrmaxsupply(const asset& inflation, const string& memo ){
+void token::incmaxsupply(const asset& inflation, const string& memo ){
     check( memo.size() <= 256, "memo has more than 256 bytes" );
     auto sym = inflation.symbol;
     check( sym.is_valid(), "invalid symbol name" );
