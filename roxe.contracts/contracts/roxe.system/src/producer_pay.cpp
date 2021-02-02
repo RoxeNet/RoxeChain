@@ -89,8 +89,11 @@ namespace roxesystem {
          int64_t new_tokens = (additional_inflation < 0.0) ? 0 : static_cast<int64_t>(additional_inflation);
 
          /// FIXME to give all rewards to producers without to_saving acccount
-         int64_t to_producers     = new_tokens;
-//         int64_t to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
+//         int64_t to_producers     = new_tokens;
+         int64_t to_producers = 0;
+         if(_gstate4.inflation_pay_factor != 0){
+             to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
+         }
          int64_t to_savings       = new_tokens - to_producers;
          int64_t to_per_block_pay = (to_producers * uint128_t(pay_factor_precision)) / _gstate4.votepay_factor;
          int64_t to_per_vote_pay  = to_producers - to_per_block_pay;

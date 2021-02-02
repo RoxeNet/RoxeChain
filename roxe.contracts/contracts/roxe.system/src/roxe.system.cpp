@@ -298,7 +298,7 @@ namespace roxesystem {
    void system_contract::setinflation( int64_t annual_rate, int64_t inflation_pay_factor, int64_t votepay_factor ) {
       require_auth(get_self());
       check(annual_rate >= 0, "annual_rate can't be negative");
-      if ( inflation_pay_factor < pay_factor_precision ) {
+      if ( inflation_pay_factor != 0 && inflation_pay_factor < pay_factor_precision ) {
          check( false, "inflation_pay_factor must not be less than " + std::to_string(pay_factor_precision) );
       }
       if ( votepay_factor < pay_factor_precision ) {
