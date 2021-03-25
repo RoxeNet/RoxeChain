@@ -387,7 +387,7 @@ namespace roxesystem {
       //deletegatebw auto vote producer
       auto pitr = _producers.find( receiver.value );
       auto voter = _voters.find( from.value );
-      if( voter != _voters.end() && pitr != _producers.end()){
+      if( voter != _voters.end() && pitr != _producers.end() && pitr->is_active){
           std::vector<name> producers {receiver};
           voteproducer( from, name(0), producers);
       }
