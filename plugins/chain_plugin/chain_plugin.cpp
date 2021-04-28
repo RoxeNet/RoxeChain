@@ -1636,6 +1636,8 @@ fc::variant read_only::get_estimate_transfer_fee( const get_estimate_transfer_fe
             fc::raw::unpack(ds, result.fee);
             result.useroc = 1;
             result.fixed = 1;
+            result.maxfee = result.fee;
+            result.minfee = result.fee;
         }else{
             std::vector <name> authors;
             fc::raw::unpack(ds, authors);
