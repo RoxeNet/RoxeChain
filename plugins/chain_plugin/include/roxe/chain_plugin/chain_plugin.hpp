@@ -427,7 +427,12 @@ public:
                 }else if(given_in >= max_out + currencyStatsResult.maxfee){
                     fee_amount = currencyStatsResult.maxfee;
                 }else{
+                    // estimate fee increased by 1 when smaller than exact;
+                    int64_t remainer = (currencyStatsResult.fee * percent_decimal + given_in * currencyStatsResult.percent) % (currencyStatsResult.percent + percent_decimal);
                     fee_amount = (currencyStatsResult.fee * percent_decimal + given_in * currencyStatsResult.percent) / (currencyStatsResult.percent + percent_decimal);
+                    if(remainer){
+                        fee_amount = fee_amount + 1;
+                    }
                 }
             }
         }else{
