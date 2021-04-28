@@ -1634,6 +1634,8 @@ fc::variant read_only::get_estimate_transfer_fee( const get_estimate_transfer_fe
 
         if(p.code.value ==  _roxe_token.value){
             fc::raw::unpack(ds, result.fee);
+            result.useroc = 1;
+            result.fixed = 1;
         }else{
             std::vector <name> authors;
             fc::raw::unpack(ds, authors);

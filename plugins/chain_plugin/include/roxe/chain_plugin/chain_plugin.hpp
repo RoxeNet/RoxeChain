@@ -805,7 +805,10 @@ FC_REFLECT( roxe::chain_apis::read_only::get_table_by_scope_result, (rows)(more)
 
 FC_REFLECT( roxe::chain_apis::read_only::get_currency_balance_params, (code)(account)(symbol));
 FC_REFLECT( roxe::chain_apis::read_only::get_currency_stats_params, (code)(symbol));
-FC_REFLECT( roxe::chain_apis::read_only::get_currency_stats_result, (supply)(max_supply)(issuer)(fee));
+FC_REFLECT( roxe::chain_apis::read_only::get_currency_stats_result, (supply)(max_supply)(issuer)(fee)(authors)(fixed)(percent)(maxfee)(minfee)(useroc));
+
+FC_REFLECT( roxe::chain_apis::read_only::get_estimate_transfer_fee_params, (code)(symbol)(given_in)(given_out));
+FC_REFLECT( roxe::chain_apis::read_only::get_estimate_transfer_fee_result, (symbol)(fee));
 
 FC_REFLECT( roxe::chain_apis::read_only::get_producers_params, (json)(lower_bound)(limit) )
 FC_REFLECT( roxe::chain_apis::read_only::get_producers_result, (rows)(total_producer_vote_weight)(more) );
