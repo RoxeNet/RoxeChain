@@ -341,6 +341,12 @@ public:
       asset          max_supply;
       account_name   issuer;
       int64_t        fee;
+      vector<account_name> authors;
+      int64_t        fixed;
+      int64_t        percent;
+      int64_t        maxfee;
+      int64_t        minfee;
+      int64_t        useroc;
    };
 
    fc::variant get_currency_stats( const get_currency_stats_params& params )const;
@@ -383,7 +389,59 @@ public:
 
    get_scheduled_transactions_result get_scheduled_transactions( const get_scheduled_transactions_params& params ) const;
 
-   static void copy_inline_row(const chain::key_value_object& obj, vector<char>& data) {
+   /// estimate transfer fee
+   /// \param obj
+   /// \param data
+   struct get_estimate_transfer_fee_params {
+       name           code;
+       string         symbol;
+       int64_t        given_in;
+       int64_t        given_out;
+   };
+
+    struct get_estimate_transfer_fee_result {
+       string         symbol;
+       int64_t        fee;
+    };
+
+    fc::variant get_estimate_transfer_fee( const get_estimate_transfer_fee_params& params ) const;
+
+    static int64_t estimate_ro_transfer_fee(const get_currency_stats_result &currencyStatsResult, const int64_t &given_in, const int64_t &given_out) {
+        ROXE_ASSERT( given_in>0 || given_out>0, chain::estimate_fee_params_exception, "Invalid params given_in and given_out");
+        static constexpr int64_t percent_decimal = 1000000;
+        int64_t fee_amount;
+        /// cal fee when given_in amount > 0
+        if(given_in > 0){
+            if(currencyStatsResult.percent == 0){ /// FIXED FEE without Percent
+                fee_amount = currencyStatsResult.fee;
+                if (fee_amount < currencyStatsResult.minfee)
+                    fee_amount = currencyStatsResult.minfee;
+                if (fee_amount > currencyStatsResult.maxfee)
+                    fee_amount = currencyStatsResult.maxfee;
+            }else{
+                int64_t min_out,max_out;
+                min_out = (currencyStatsResult.minfee - currencyStatsResult.fee) * percent_decimal / currencyStatsResult.percent;
+                max_out = (currencyStatsResult.maxfee - currencyStatsResult.fee) * percent_decimal / currencyStatsResult.percent;
+                if(given_in <= min_out + currencyStatsResult.minfee){
+                    fee_amount = currencyStatsResult.minfee;
+                }else if(given_in >= max_out + currencyStatsResult.maxfee){
+                    fee_amount = currencyStatsResult.maxfee;
+                }else{
+                    fee_amount = (currencyStatsResult.fee * percent_decimal + given_in * currencyStatsResult.percent) / (currencyStatsResult.percent + percent_decimal);
+                }
+            }
+        }else{
+            fee_amount = currencyStatsResult.fee + given_out * currencyStatsResult.percent / percent_decimal;
+            if (fee_amount < currencyStatsResult.minfee)
+                fee_amount = currencyStatsResult.minfee;
+            if (fee_amount > currencyStatsResult.maxfee)
+                fee_amount = currencyStatsResult.maxfee;
+        }
+        return fee_amount;
+    }
+    ////
+
+    static void copy_inline_row(const chain::key_value_object& obj, vector<char>& data) {
       data.resize( obj.value.size() );
       memcpy( data.data(), obj.value.data(), obj.value.size() );
    }

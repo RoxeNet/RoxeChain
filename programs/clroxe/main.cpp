@@ -217,8 +217,8 @@ void add_standard_transaction_options(CLI::App* cmd, string default_permission =
         msg += " (defaults to '" + default_permission + "')";
     cmd->add_option("-p,--permission", tx_permission, localized(msg.c_str()));
 
-    cmd->add_option("--max-cpu-usage-ms", tx_max_cpu_usage, localized("set an upper limit on the milliseconds of cpu usage budget, for the execution of the transaction (defaults to 0 which means no limit)"));
-    cmd->add_option("--max-net-usage", tx_max_net_usage, localized("set an upper limit on the net usage budget, in bytes, for the transaction (defaults to 0 which means no limit)"));
+   cmd->add_option("--max-cpu-usage-ms", tx_max_cpu_usage, localized("set an upper limit on the milliseconds of cpu usage budget, for the execution of the transaction (defaults to 0 which means no limit)"));
+   cmd->add_option("--max-net-usage", tx_max_net_usage, localized("set an upper limit on the net usage budget, in bytes, for the transaction (defaults to 0 which means no limit)"));
 
     cmd->add_option("--delay-sec", delaysec, localized("set the delay_sec seconds, defaults to 0s"));
 }
@@ -1565,7 +1565,7 @@ struct sellram_subcommand {
         sellram->add_option("bytes", amount, localized("Number of RAM bytes to sell"))->required();
         add_standard_transaction_options(sellram, "account@active");
 
-        sellram->set_callback([this] {
+      sellram->set_callback([this] {
             fc::variant act_payload = fc::mutable_variant_object()
                     ("account", receiver_str)
                     ("bytes", amount);
@@ -2326,12 +2326,12 @@ CLI::callback_t header_opt_callback = [](CLI::results_t res) {
 };
 
 int main( int argc, char** argv ) {
-    setlocale(LC_ALL, "");
-    bindtextdomain(locale_domain, locale_path);
-    textdomain(locale_domain);
-    fc::logger::get(DEFAULT_LOGGER).set_log_level(fc::log_level::debug);
-    context = roxe::client::http::create_http_context();
-    wallet_url = default_wallet_url;
+   setlocale(LC_ALL, "");
+   bindtextdomain(locale_domain, locale_path);
+   textdomain(locale_domain);
+   fc::logger::get(DEFAULT_LOGGER).set_log_level(fc::log_level::debug);
+   context = roxe::client::http::create_http_context();
+   wallet_url = default_wallet_url;
 
     CLI::App app{"Command Line Interface to ROXE Client"};
     app.require_subcommand();
@@ -2698,6 +2698,22 @@ int main( int argc, char** argv ) {
         std::cout << fc::json::to_pretty_string(result)
                   << std::endl;
     });
+
+    // get estimate fee
+    int64_t given_in;
+    int64_t given_out;
+    auto get_estimate_fee =  get->add_subcommand( "fee", localized("Retrieve information related to given currencies and given amount"), false);
+    get_estimate_fee->add_option( "contract", code, localized("The contract that operates the currency") )->required();
+    get_estimate_fee->add_option( "symbol", symbol, localized("The symbol for the currency if the contract operates multiple currencies") )->required();
+    get_estimate_fee->add_option( "in", given_in, localized("Estimate the currency fee when given amount_in") )->required();
+    get_estimate_fee->add_option( "out", given_out, localized("Estimate the currency fee when given amount_out") )->required();
+    get_estimate_fee->set_callback([&] {
+        auto result = call(get_estimate_transfer_fee_func, fc::mutable_variant_object("json", false)
+                ("code", code)
+                ("symbol", symbol)
+                ("given_in", given_in)
+                ("given_out", given_out)
+        );
 
     // get accounts
     string public_key_str;
@@ -3263,16 +3279,16 @@ int main( int argc, char** argv ) {
         std::cout << fc::json::to_pretty_string(v) << std::endl;
     });
 
-    // list private keys
-    auto listPrivKeys = wallet->add_subcommand("private_keys", localized("List of private keys from an unlocked wallet in wif or PVT_R1 format."), false);
-    listPrivKeys->add_option("-n,--name", wallet_name, localized("The name of the wallet to list keys from"), true);
-    listPrivKeys->add_option("--password", wallet_pw, localized("The password returned by wallet create"));
-    listPrivKeys->set_callback([&wallet_name, &wallet_pw] {
-        prompt_for_wallet_password(wallet_pw, wallet_name);
-        fc::variants vs = {fc::variant(wallet_name), fc::variant(wallet_pw)};
-        const auto& v = call(wallet_url, wallet_list_keys, vs);
-        std::cout << fc::json::to_pretty_string(v) << std::endl;
-    });
+   // list private keys
+   auto listPrivKeys = wallet->add_subcommand("private_keys", localized("List of private keys from an unlocked wallet in wif or PVT_R1 format."), false);
+   listPrivKeys->add_option("-n,--name", wallet_name, localized("The name of the wallet to list keys from"), true);
+   listPrivKeys->add_option("--password", wallet_pw, localized("The password returned by wallet create"));
+   listPrivKeys->set_callback([&wallet_name, &wallet_pw] {
+      prompt_for_wallet_password(wallet_pw, wallet_name);
+      fc::variants vs = {fc::variant(wallet_name), fc::variant(wallet_pw)};
+      const auto& v = call(wallet_url, wallet_list_keys, vs);
+      std::cout << fc::json::to_pretty_string(v) << std::endl;
+   });
 
     auto stopKroxed = wallet->add_subcommand("stop", localized("Stop ${k}.", ("k", key_store_executable_name)), false);
     stopKroxed->set_callback([] {
@@ -3743,9 +3759,9 @@ int main( int argc, char** argv ) {
             args("proposal_hash", proposal_hash);
         }
 
-        auto accountPermissions = get_account_permissions(tx_permission, {proposer,config::active_name});
-        send_actions({chain::action{accountPermissions, "roxe.msig", action, variant_to_bin( N(roxe.msig), action, args ) }});
-    };
+      auto accountPermissions = get_account_permissions(tx_permission, {proposer,config::active_name});
+      send_actions({chain::action{accountPermissions, "roxe.msig", action, variant_to_bin( N(roxe.msig), action, args ) }});
+   };
 
     // multisig approve
     auto approve = msig->add_subcommand("approve", localized("Approve proposed transaction"));

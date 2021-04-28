@@ -1615,6 +1615,50 @@ vector<asset> read_only::get_currency_balance( const read_only::get_currency_bal
    return results;
 }
 
+fc::variant read_only::get_estimate_transfer_fee( const get_estimate_transfer_fee_params& p ) const{
+    fc::mutable_variant_object results;
+
+    const abi_def abi = roxe::chain_apis::get_abi( db, p.code );
+    (void)get_table_type( abi, "stat" );
+
+    uint64_t scope = ( roxe::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
+    static roxe::name _roxe_token("roxe.token");
+    walk_key_value_table(p.code, scope, N(stat), [&](const key_value_object& obj){
+        ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
+
+        fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
+        read_only::get_currency_stats_result result;
+        fc::raw::unpack(ds, result.supply);
+        fc::raw::unpack(ds, result.max_supply);
+        fc::raw::unpack(ds, result.issuer);
+
+        if(p.code.value ==  _roxe_token.value){
+            fc::raw::unpack(ds, result.fee);
+        }else{
+            std::vector <name> authors;
+            fc::raw::unpack(ds, authors);
+            fc::raw::unpack(ds, result.fee);
+            fc::raw::unpack(ds, result.fixed);
+            fc::raw::unpack(ds, result.percent);
+            fc::raw::unpack(ds, result.maxfee);
+            fc::raw::unpack(ds, result.minfee);
+            fc::raw::unpack(ds, result.useroc);
+        }
+
+        get_estimate_transfer_fee_result feeResult;
+        if(result.useroc){
+            feeResult.symbol = extract_core_symbol().name();
+        }else{
+            feeResult.symbol = result.supply.symbol_name();
+        }
+        feeResult.fee = estimate_ro_transfer_fee(result, p.given_in, p.given_out);
+        results[result.supply.symbol_name()] = feeResult;
+        return true;
+    });
+
+    return results;
+}
+
 fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_params& p )const {
    fc::mutable_variant_object results;
 
@@ -1638,6 +1682,11 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
           std::vector <name> authors;
           fc::raw::unpack(ds, authors);
           fc::raw::unpack(ds, result.fee);
+          fc::raw::unpack(ds, result.fixed);
+          fc::raw::unpack(ds, result.percent);
+          fc::raw::unpack(ds, result.maxfee);
+          fc::raw::unpack(ds, result.minfee);
+          fc::raw::unpack(ds, result.useroc);
       }
 
       results[result.supply.symbol_name()] = result;
