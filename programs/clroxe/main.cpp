@@ -2714,6 +2714,7 @@ int main( int argc, char** argv ) {
                 ("given_in", given_in)
                 ("given_out", given_out)
         );
+    });
 
     // get accounts
     string public_key_str;
