@@ -2714,6 +2714,8 @@ int main( int argc, char** argv ) {
                 ("given_in", given_in)
                 ("given_out", given_out)
         );
+        std::cout << fc::json::to_pretty_string(result)
+                  << std::endl;
     });
 
     // get accounts
@@ -3939,27 +3941,27 @@ int main( int argc, char** argv ) {
     auto closerex       = closerex_subcommand(rex);
 
 
-    try {
-        app.parse(argc, argv);
-    } catch (const CLI::ParseError &e) {
-        return app.exit(e);
-    } catch (const explained_exception& e) {
-        return 1;
-    } catch (connection_exception& e) {
-        if (verbose) {
-            elog("connect error: ${e}", ("e", e.to_detail_string()));
-        }
-        return 1;
-    } catch (const fc::exception& e) {
-        // attempt to extract the error code if one is present
-        if (!print_recognized_errors(e, verbose)) {
-            // Error is not recognized
-            if (!print_help_text(e) || verbose) {
-                elog("Failed with error: ${e}", ("e", verbose ? e.to_detail_string() : e.to_string()));
-            }
-        }
-        return 1;
-    }
+   try {
+       app.parse(argc, argv);
+   } catch (const CLI::ParseError &e) {
+       return app.exit(e);
+   } catch (const explained_exception& e) {
+      return 1;
+   } catch (connection_exception& e) {
+      if (verbose) {
+         elog("connect error: ${e}", ("e", e.to_detail_string()));
+      }
+      return 1;
+   } catch (const fc::exception& e) {
+      // attempt to extract the error code if one is present
+      if (!print_recognized_errors(e, verbose)) {
+         // Error is not recognized
+         if (!print_help_text(e) || verbose) {
+            elog("Failed with error: ${e}", ("e", verbose ? e.to_detail_string() : e.to_string()));
+         }
+      }
+      return 1;
+   }
 
-    return 0;
+   return 0;
 }
