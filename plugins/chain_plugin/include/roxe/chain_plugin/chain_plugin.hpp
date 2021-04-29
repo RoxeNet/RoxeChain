@@ -335,6 +335,12 @@ public:
       string         symbol;
    };
 
+    struct get_sys_currency_stats_result {
+        asset          supply;
+        asset          max_supply;
+        account_name   issuer;
+        int64_t        fee;
+    };
 
    struct get_currency_stats_result {
       asset          supply;

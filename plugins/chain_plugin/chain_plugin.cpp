@@ -1624,7 +1624,7 @@ fc::variant read_only::get_estimate_transfer_fee( const get_estimate_transfer_fe
     uint64_t scope = ( roxe::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
     static roxe::name _roxe_token("roxe.token");
     walk_key_value_table(p.code, scope, N(stat), [&](const key_value_object& obj){
-        ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
+        ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_sys_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
 
         fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
         read_only::get_currency_stats_result result;
@@ -1634,8 +1634,8 @@ fc::variant read_only::get_estimate_transfer_fee( const get_estimate_transfer_fe
 
         if(p.code.value ==  _roxe_token.value){
             fc::raw::unpack(ds, result.fee);
-            result.useroc = 1;
-            result.fixed = 1;
+            result.useroc = true;
+            result.fixed = true;
             result.maxfee = result.fee;
             result.minfee = result.fee;
         }else{
@@ -1672,7 +1672,7 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
    uint64_t scope = ( roxe::chain::string_to_symbol( 0, boost::algorithm::to_upper_copy(p.symbol).c_str() ) >> 8 );
    static roxe::name _roxe_token("roxe.token");
    walk_key_value_table(p.code, scope, N(stat), [&](const key_value_object& obj){
-      ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
+      ROXE_ASSERT( obj.value.size() >= sizeof(read_only::get_sys_currency_stats_result), chain::asset_type_exception, "Invalid data on table");
 
       fc::datastream<const char *> ds(obj.value.data(), obj.value.size());
       read_only::get_currency_stats_result result;
@@ -1680,10 +1680,16 @@ fc::variant read_only::get_currency_stats( const read_only::get_currency_stats_p
       fc::raw::unpack(ds, result.max_supply);
       fc::raw::unpack(ds, result.issuer);
 
+      std::vector <name> authors;
       if(p.code.value ==  _roxe_token.value){
           fc::raw::unpack(ds, result.fee);
+          result.authors = authors;
+          result.useroc = true;
+          result.fixed = true;
+          result.percent = 0;
+          result.maxfee = result.fee;
+          result.minfee = result.fee;
       }else{
-          std::vector <name> authors;
           fc::raw::unpack(ds, authors);
           fc::raw::unpack(ds, result.fee);
           fc::raw::unpack(ds, result.fixed);
