@@ -2702,11 +2702,11 @@ int main( int argc, char** argv ) {
     // get estimate fee
     int64_t given_in;
     int64_t given_out;
-    auto get_estimate_fee =  get->add_subcommand( "fee", localized("Retrieve information related to given currencies and given amount"), false);
+    auto get_estimate_fee =  get->add_subcommand( "fee", localized("Retrieve estimate fee related to given currencies and given amount"), false);
     get_estimate_fee->add_option( "contract", code, localized("The contract that operates the currency") )->required();
     get_estimate_fee->add_option( "symbol", symbol, localized("The symbol for the currency if the contract operates multiple currencies") )->required();
-    get_estimate_fee->add_option( "in", given_in, localized("Estimate the currency fee when given amount_in") )->required();
-    get_estimate_fee->add_option( "out", given_out, localized("Estimate the currency fee when given amount_out") )->required();
+    get_estimate_fee->add_option( "in", given_in, localized("The amount for estimating the currency fee when given amount_in") )->required();
+    get_estimate_fee->add_option( "out", given_out, localized("The amount for estimating the currency fee when given amount_out") )->required();
     get_estimate_fee->set_callback([&] {
         auto result = call(get_estimate_transfer_fee_func, fc::mutable_variant_object("json", false)
                 ("code", code)

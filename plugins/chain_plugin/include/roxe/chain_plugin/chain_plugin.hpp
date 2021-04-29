@@ -342,11 +342,11 @@ public:
       account_name   issuer;
       int64_t        fee;
       vector<account_name> authors;
-      int64_t        fixed;
+      bool        fixed;
       int64_t        percent;
       int64_t        maxfee;
       int64_t        minfee;
-      int64_t        useroc;
+      bool        useroc;
    };
 
    fc::variant get_currency_stats( const get_currency_stats_params& params )const;
