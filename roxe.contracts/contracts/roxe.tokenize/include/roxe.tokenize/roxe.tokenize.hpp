@@ -220,9 +220,9 @@ namespace roxe {
                 int64_t min_out,max_out;
                 min_out = (st.minfee - st.fee) * percent_decimal / st.percent;
                 max_out = (st.maxfee - st.fee) * percent_decimal / st.percent;
-                if(given_in <= min_out + st.minfee){
+                if(amount_in.amount <= min_out + st.minfee){
                     fee_amount = st.minfee;
-                }else if(given_in >= max_out + st.maxfee){
+                }else if(amount_in.amount >= max_out + st.maxfee){
                     fee_amount = st.maxfee;
                 }else{
                     // estimate fee increased by 1 when smaller than exact;
