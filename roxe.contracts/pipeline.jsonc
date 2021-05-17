@@ -4,8 +4,8 @@
         "pipeline-branch": "master",
         "dependencies": // dependencies to pull for a build of contracts, by branch, tag, or commit hash
         {
-            "roxe": "release/1.8.x",
-            "roxe.cdt": "release/1.6.x"
+            "roxe": "release/1.0.x",
+            "roxe.cdt": "release/1.0.x"
         }
     }
 }

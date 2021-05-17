@@ -20,7 +20,7 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 # Install a newer ninja release. It seems the older version in the debian repos
 # randomly crashes when compiling llvm.
-RUN wget "https://github.com/ninja-build/ninja/releases/download/v1.8.2/ninja-linux.zip" && \
+RUN wget "https://github.com/ninja-build/ninja/releases/download/v1.0.0/ninja-linux.zip" && \
     echo "d2fea9ff33b3ef353161ed906f260d565ca55b8ca0568fa07b1d2cab90a84a07 ninja-linux.zip" \
         | sha256sum -c  && \
     unzip ninja-linux.zip -d /usr/local/bin && \

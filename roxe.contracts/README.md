@@ -16,8 +16,8 @@ The following unprivileged contract(s) are also part of the system.
    * [roxe.tokenize](./contracts/roxe.tokenize)
 
 Dependencies:
-* [roxe.cdt v1.6.x](https://github.com/ROXE/roxe.cdt/releases/tag/v1.6.3)
-* [roxe v1.8.x](https://github.com/ROXE/roxe/releases/tag/v1.8.6) (optional dependency only needed to build unit tests)
+* [roxe.cdt v1.0.x](https://github.com/ROXE/roxe.cdt/releases/tag/v1.0.0)
+* [roxe v1.0.x](https://github.com/ROXE/roxe/releases/tag/v1.0.0) (optional dependency only needed to build unit tests)
 
 To build the contracts follow the instructions in [`Build and deploy` section](./docs/02_build-and-deploy.md).
 
