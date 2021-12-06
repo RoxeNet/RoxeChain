@@ -1,5 +1,7 @@
 add_contract(roxe.tokenize roxe.tokenize ${CMAKE_CURRENT_SOURCE_DIR}/src/roxe.tokenize.cpp)
 
+set(VERSION,"1.2")
+
 target_include_directories(roxe.tokenize
    PUBLIC
    ${CMAKE_CURRENT_SOURCE_DIR}/include
