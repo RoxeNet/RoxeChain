@@ -79,7 +79,7 @@ namespace roxe {
           *
           * More information can be read [here](https://github.com/ROXE/roxe.contracts/issues/62)
           * and [here](https://github.com/ROXE/roxe.contracts/issues/61).
-          */
+          */s
          [[roxe::action]]
          void open( const name& owner, const symbol& symbol, const name& ram_payer );
 
