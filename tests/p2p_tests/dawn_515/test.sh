@@ -16,8 +16,8 @@ delay=1
 
 read -d '' genesis << EOF
 {
-  "initial_timestamp": "2018-06-01T12:00:00.000",
-  "initial_key": "ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt",
+  "initial_timestamp": "2020-05-22T08:11:08.888",
+  "initial_key": "ROXE69GFtEZywjksKAv6oEJ2RfSPo5ShvJKa4v2nQZzaeDoUAr8Xn4",
   "initial_configuration": {
     "max_block_net_usage": 1048576,
     "target_block_net_usage_pct": 1000,
@@ -36,6 +36,7 @@ read -d '' genesis << EOF
     "max_inline_action_size": 4096,
     "max_inline_action_depth": 4,
     "max_authority_depth": 6
+  }
 }
 EOF
 

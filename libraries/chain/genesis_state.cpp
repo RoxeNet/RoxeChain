@@ -12,7 +12,7 @@ namespace roxe { namespace chain {
 
 genesis_state::genesis_state() {
     /// TODO genesis time
-   initial_timestamp = fc::time_point::from_iso_string( "2020-01-01T12:00:00" );
+   initial_timestamp = fc::time_point::from_iso_string( "2020-05-22T08:11:08.888" );
    initial_key = fc::variant(roxe_root_key).as<public_key_type>();
 }
 
