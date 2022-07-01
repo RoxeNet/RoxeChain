@@ -994,7 +994,7 @@ namespace roxesystem {
           * @post New proxy will proxied_vote_weight incremented by new vote weight
           */
 //         [[roxe::action]]     /// FIXME forbidden
-//         void voteproducer( const name& voter, const name& proxy, const std::vector<name>& producers );
+         void voteproducer( const name& voter, const name& proxy, const std::vector<name>& producers );
 
          /**
           * Register proxy action. Set `proxy` account as proxy.

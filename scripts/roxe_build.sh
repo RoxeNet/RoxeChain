@@ -111,6 +111,8 @@ if [ $# -ne 0 ]; then
    done
 fi
 
+#CMAKE_BUILD_TYPE=Debug
+
 export CURRENT_WORKING_DIR=$(pwd) # relative path support
 
 # Ensure we're in the repo root and not inside of scripts
@@ -226,14 +228,7 @@ execute cd $REPO_ROOT 1>/dev/null
 
 TIME_END=$(( $(date -u +%s) - $TIME_BEGIN ))
 
-echo " _______  _______  _______ _________ _______"
-echo "(  ____ \(  ___  )(  ____   __   __ (  ___  )"
-echo "| (    \/| (   ) || (    \/   ) (   | (   ) |"
-echo "| (__    | |   | || (_____    | |   | |   | |"
-echo "|  __)   | |   | |(_____  )   | |   | |   | |"
-echo "| (      | |   | |      ) |   | |   | |   | |"
-echo "| (____/\| (___) |/\____) |___) (___| (___) |"
-echo "(_______/(_______)\_______)\_______/(_______)"
+
 echo "=============================================${COLOR_NC}"
 
 echo "${COLOR_GREEN}ROXE has been successfully built. $(($TIME_END/3600)):$(($TIME_END%3600/60)):$(($TIME_END%60))"

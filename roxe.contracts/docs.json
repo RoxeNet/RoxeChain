@@ -11,6 +11,7 @@
       "name": "mdjavadoc",
       "options": {
         "source_dirs": [
+          "contracts/roxe.tokenize/include/roxe.tokenize/",
           "contracts/roxe.token/include/roxe.token/",
           "contracts/roxe.wrap/include/roxe.wrap/",
           "contracts/roxe.bios/include/roxe.bios/",

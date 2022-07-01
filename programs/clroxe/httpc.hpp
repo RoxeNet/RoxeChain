@@ -102,6 +102,7 @@ namespace roxe { namespace client { namespace http {
    const string get_producers_func = chain_func_base + "/get_producers";
    const string get_schedule_func = chain_func_base + "/get_producer_schedule";
    const string get_required_keys = chain_func_base + "/get_required_keys";
+   const string get_estimate_transfer_fee_func = chain_func_base + "/get_estimate_transfer_fee";
 
 
    const string history_func_base = "/v1/history";

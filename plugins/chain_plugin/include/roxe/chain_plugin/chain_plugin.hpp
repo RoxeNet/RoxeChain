@@ -335,11 +335,24 @@ public:
       string         symbol;
    };
 
+    struct get_sys_currency_stats_result {
+        asset          supply;
+        asset          max_supply;
+        account_name   issuer;
+        int64_t        fee;
+    };
 
    struct get_currency_stats_result {
       asset          supply;
       asset          max_supply;
       account_name   issuer;
+      int64_t        fee;
+      vector<account_name> authors;
+      bool        fixed;
+      int64_t        percent;
+      int64_t        maxfee;
+      int64_t        minfee;
+      bool        useroc;
    };
 
    fc::variant get_currency_stats( const get_currency_stats_params& params )const;
@@ -382,7 +395,64 @@ public:
 
    get_scheduled_transactions_result get_scheduled_transactions( const get_scheduled_transactions_params& params ) const;
 
-   static void copy_inline_row(const chain::key_value_object& obj, vector<char>& data) {
+   /// estimate transfer fee
+   /// \param obj
+   /// \param data
+   struct get_estimate_transfer_fee_params {
+       name           code;
+       string         symbol;
+       int64_t        given_in;
+       int64_t        given_out;
+   };
+
+    struct get_estimate_transfer_fee_result {
+       string         symbol;
+       int64_t        fee;
+    };
+
+    fc::variant get_estimate_transfer_fee( const get_estimate_transfer_fee_params& params ) const;
+
+    static int64_t estimate_ro_transfer_fee(const get_currency_stats_result &currencyStatsResult, const int64_t &given_in, const int64_t &given_out) {
+        ROXE_ASSERT( given_in>0 || given_out>0, chain::estimate_fee_params_exception, "Invalid params given_in and given_out");
+        static constexpr int64_t percent_decimal = 1000000;
+        int64_t fee_amount;
+        /// cal fee when given_in amount > 0
+        if(given_in > 0){
+            if(currencyStatsResult.percent == 0){ /// FIXED FEE without Percent
+                fee_amount = currencyStatsResult.fee;
+                if (fee_amount < currencyStatsResult.minfee)
+                    fee_amount = currencyStatsResult.minfee;
+                if (fee_amount > currencyStatsResult.maxfee)
+                    fee_amount = currencyStatsResult.maxfee;
+            }else{
+                int64_t min_out,max_out;
+                min_out = (currencyStatsResult.minfee - currencyStatsResult.fee) * percent_decimal / currencyStatsResult.percent;
+                max_out = (currencyStatsResult.maxfee - currencyStatsResult.fee) * percent_decimal / currencyStatsResult.percent;
+                if(given_in <= min_out + currencyStatsResult.minfee){
+                    fee_amount = currencyStatsResult.minfee;
+                }else if(given_in >= max_out + currencyStatsResult.maxfee){
+                    fee_amount = currencyStatsResult.maxfee;
+                }else{
+                    // estimate fee increased by 1 when smaller than exact;
+                    int64_t remainer = (currencyStatsResult.fee * percent_decimal + given_in * currencyStatsResult.percent) % (currencyStatsResult.percent + percent_decimal);
+                    fee_amount = (currencyStatsResult.fee * percent_decimal + given_in * currencyStatsResult.percent) / (currencyStatsResult.percent + percent_decimal);
+                    if(remainer){
+                        fee_amount = fee_amount + 1;
+                    }
+                }
+            }
+        }else{
+            fee_amount = currencyStatsResult.fee + given_out * currencyStatsResult.percent / percent_decimal;
+            if (fee_amount < currencyStatsResult.minfee)
+                fee_amount = currencyStatsResult.minfee;
+            if (fee_amount > currencyStatsResult.maxfee)
+                fee_amount = currencyStatsResult.maxfee;
+        }
+        return fee_amount;
+    }
+    ////
+
+    static void copy_inline_row(const chain::key_value_object& obj, vector<char>& data) {
       data.resize( obj.value.size() );
       memcpy( data.data(), obj.value.data(), obj.value.size() );
    }
@@ -746,7 +816,10 @@ FC_REFLECT( roxe::chain_apis::read_only::get_table_by_scope_result, (rows)(more)
 
 FC_REFLECT( roxe::chain_apis::read_only::get_currency_balance_params, (code)(account)(symbol));
 FC_REFLECT( roxe::chain_apis::read_only::get_currency_stats_params, (code)(symbol));
-FC_REFLECT( roxe::chain_apis::read_only::get_currency_stats_result, (supply)(max_supply)(issuer));
+FC_REFLECT( roxe::chain_apis::read_only::get_currency_stats_result, (supply)(max_supply)(issuer)(fee)(authors)(fixed)(percent)(maxfee)(minfee)(useroc));
+
+FC_REFLECT( roxe::chain_apis::read_only::get_estimate_transfer_fee_params, (code)(symbol)(given_in)(given_out));
+FC_REFLECT( roxe::chain_apis::read_only::get_estimate_transfer_fee_result, (symbol)(fee));
 
 FC_REFLECT( roxe::chain_apis::read_only::get_producers_params, (json)(lower_bound)(limit) )
 FC_REFLECT( roxe::chain_apis::read_only::get_producers_result, (rows)(total_producer_vote_weight)(more) );

@@ -98,10 +98,22 @@ If {{to}} does not have a balance for {{asset_to_symbol_code quantity}}, {{from}
 <h1 class="contract">setfee</h1>
 
 ---
-spec_ver
----
-sion: "0.2.0"
+spec_version: "0.2.0"
 title: Set Token Fee
-summary: 'Set the {{symbol_to_symbol_code symbol}} token fee {{fee}}'
+summary: '{{owner}} agrees to set the {{symbol_to_symbol_code symbol}} token fee {{fee}}'
 icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
-set {{symbol}} token fee {{fee}}.
+---
+
+{{owner}} agrees to set {{symbol}} token fee {{fee}}.
+
+
+<h1 class="contract">incmaxsupply</h1>
+
+---
+spec_version: "0.2.0"
+title: Inflate Token
+summary: 'increase the {{asset_to_symbol_code symbol}} token inflation {{inflation}}'
+icon: @ICON_BASE_URL@/@INCR_ICON_URI@
+---
+
+increase {{symbol}} token inflation {{inflation}}.

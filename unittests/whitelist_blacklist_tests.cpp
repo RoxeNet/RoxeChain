@@ -740,7 +740,7 @@ BOOST_AUTO_TEST_CASE( blacklist_sender_bypass ) { try {
 BOOST_AUTO_TEST_CASE( greylist_limit_tests ) { try {
    controller::config contrl_config;
    {
-      // Hack to get the default controller config used in tester (since v1.8.x does not have the base_tester::default_config helper function).
+      // Hack to get the default controller config used in tester (since v1.0.x does not have the base_tester::default_config helper function).
       tester temp( setup_policy::none );
       contrl_config = temp.get_config();
    }

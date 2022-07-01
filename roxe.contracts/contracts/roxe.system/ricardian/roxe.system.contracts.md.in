@@ -645,27 +645,6 @@ icon: @ICON_BASE_URL@/@ADMIN_ICON_URI@
 
 {{$action.account}} advances the system contract revision number to {{revision}}.
 
-<h1 class="contract">voteproducer</h1>
-
----
-spec_version: "0.2.0"
-title: Vote for Block Producers
-summary: '{{nowrap voter}} votes for {{#if proxy}}the proxy {{nowrap proxy}}{{else}}up to 30 block producer candidates{{/if}}'
-icon: @ICON_BASE_URL@/@VOTING_ICON_URI@
----
-
-{{#if proxy}}
-{{voter}} votes for the proxy {{proxy}}.
-At the time of voting the full weight of voter’s staked (CPU + NET) tokens will be cast towards each of the producers voted by {{proxy}}.
-{{else}}
-{{voter}} votes for the following block producer candidates:
-
-{{#each producers}}
-  + {{this}}
-{{/each}}
-
-At the time of voting the full weight of voter’s staked (CPU + NET) tokens will be cast towards each of the above producers.
-{{/if}}
 
 <h1 class="contract">withdraw</h1>
 

@@ -16,8 +16,8 @@ delay=1
 
 read -d '' genesis << EOF
 {
-  "initial_timestamp": "2018-06-01T12:00:00.000",
-  "initial_key": "ROXE7MVh6bachyhuHm1rTN5n3mwSpQh1VFELNUcGKVdG3GxXYELUDt",
+  "initial_timestamp": "2020-05-22T08:11:08.888",
+  "initial_key": "ROXE69GFtEZywjksKAv6oEJ2RfSPo5ShvJKa4v2nQZzaeDoUAr8Xn4",
   "initial_configuration": {
     "max_block_net_usage": 1048576,
     "target_block_net_usage_pct": 1000,
@@ -36,6 +36,7 @@ read -d '' genesis << EOF
     "max_inline_action_size": 4096,
     "max_inline_action_depth": 4,
     "max_authority_depth": 6
+  }
 }
 EOF
 
@@ -45,7 +46,7 @@ plugin = roxe::producer_plugin
 plugin = roxe::chain_api_plugin
 plugin = roxe::net_plugin
 plugin = roxe::history_api_plugin
-http-server-address = 127.0.0.1:8888
+http-server-address = 127.0.0.1:18878
 blocks-dir = blocks
 p2p-listen-endpoint = 0.0.0.0:9876
 allowed-connection = any
@@ -61,7 +62,7 @@ read -d '' config00 << EOF
 blocks-dir = blocks
 readonly = 0
 send-whole-blocks = true
-http-server-address = 127.0.0.1:8889
+http-server-address = 127.0.0.1:18879
 p2p-listen-endpoint = 0.0.0.0:9877
 p2p-server-address = localhost:9877
 allowed-connection = any
@@ -280,8 +281,8 @@ if [ $res -ne 0 ]; then
     ret=1
 fi
 
-b5idbios=`./programs/clroxe/clroxe -u http://localhost:8888 get block 5 | grep "^ *\"id\""`
-b5id00=`./programs/clroxe/clroxe -u http://localhost:8889 get block 5 | grep "^ *\"id\""`
+b5idbios=`./programs/clroxe/clroxe -u http://localhost:18878 get block 5 | grep "^ *\"id\""`
+b5id00=`./programs/clroxe/clroxe -u http://localhost:18879 get block 5 | grep "^ *\"id\""`
 b5id01=`./programs/clroxe/clroxe -u http://localhost:8890 get block 5 | grep "^ *\"id\""`
 
 if [ "$b5idbios" != "$b5id00" ]; then

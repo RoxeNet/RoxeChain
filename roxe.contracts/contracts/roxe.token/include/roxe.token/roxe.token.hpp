@@ -79,7 +79,7 @@ namespace roxe {
           *
           * More information can be read [here](https://github.com/ROXE/roxe.contracts/issues/62)
           * and [here](https://github.com/ROXE/roxe.contracts/issues/61).
-          */
+          */s
          [[roxe::action]]
          void open( const name& owner, const symbol& symbol, const name& ram_payer );
 
@@ -107,11 +107,27 @@ namespace roxe {
          [[roxe::action]]   ///FIXME add transaction fee
          void setfee( const name& owner, const symbol& symbol, const int64_t fee );
 
+         /**
+          * Increase `maxSupply` for token only by issuer account.
+          *
+          * @param inflation - the inflation amount to be increased,
+          * @param memo - the memo string to accompany the transaction.
+          */
+         [[roxe::action]]
+         void incmaxsupply( const asset& inflation ,const string& memo );
+
          static asset get_supply( const name& token_contract_account, const symbol_code& sym_code )
          {
             stats statstable( token_contract_account, sym_code.raw() );
             const auto& st = statstable.get( sym_code.raw() );
             return st.supply;
+         }
+
+         static asset get_max_supply( const name& token_contract_account, const symbol_code& sym_code )
+         {
+            stats statstable( token_contract_account, sym_code.raw() );
+            const auto& st = statstable.get( sym_code.raw() );
+            return st.max_supply;
          }
 
          static asset get_balance( const name& token_contract_account, const name& owner, const symbol_code& sym_code )
@@ -127,6 +143,7 @@ namespace roxe {
          using transfer_action = roxe::action_wrapper<"transfer"_n, &token::transfer>;
          using open_action = roxe::action_wrapper<"open"_n, &token::open>;
          using close_action = roxe::action_wrapper<"close"_n, &token::close>;
+         using inc_max_supply_action = roxe::action_wrapper<"incmaxsupply"_n, &token::incmaxsupply>;
 //         using setfee_action = roxe::action_wrapper<"setfee"_n, &token::setfee>;
       private:
          struct [[roxe::table]] account {
@@ -154,7 +171,7 @@ namespace roxe {
          /**
           * default transaction fee
           */
-          static constexpr int64_t default_tx_fee = 1;    // actural fee = tx_fee / precision =1/10000 (0.0001)
+          static constexpr int64_t default_tx_fee = 0;    // actural fee = tx_fee / precision =1/10000 (0.0001)
 
    };
 
