@@ -208,12 +208,31 @@ namespace roxe {
             check(existing != statstable.end(), "token with symbol not exists");
             const auto &st = statstable.get(sym.code().raw());
             symbol fee_sym = st.useroc ? system_contract::get_core_symbol() : st.supply.symbol;
-            int64_t fee_amount = (st.fee * percent_decimal + amount_in.amount * st.percent) / (st.percent + percent_decimal);
+            int64_t fee_amount;
 
-            if (fee_amount < st.minfee)
-                fee_amount = st.minfee;
-            if (fee_amount > st.maxfee)
-                fee_amount = st.maxfee;
+            if(st.percent == 0){ /// FIXED FEE without Percent
+                fee_amount = st.fee;
+                if (fee_amount < st.minfee)
+                    fee_amount = st.minfee;
+                if (fee_amount > st.maxfee)
+                    fee_amount = st.maxfee;
+            }else{
+                int64_t min_out,max_out;
+                min_out = (st.minfee - st.fee) * percent_decimal / st.percent;
+                max_out = (st.maxfee - st.fee) * percent_decimal / st.percent;
+                if(amount_in.amount <= min_out + st.minfee){
+                    fee_amount = st.minfee;
+                }else if(amount_in.amount >= max_out + st.maxfee){
+                    fee_amount = st.maxfee;
+                }else{
+                    // estimate fee increased by 1 when smaller than exact;
+                    int64_t remainer = (st.fee * percent_decimal + amount_in.amount * st.percent) % (st.percent + percent_decimal);
+                    fee_amount = (st.fee * percent_decimal + amount_in.amount * st.percent) / (st.percent + percent_decimal);
+                    if(remainer){
+                        fee_amount = fee_amount + 1;
+                    }
+                }
+            }
 
             return asset(fee_amount, fee_sym);
         }
@@ -267,7 +286,7 @@ namespace roxe {
             bool useroc;
 
             uint64_t primary_key() const { return supply.symbol.code().raw(); }
-            //ACTCLIB_SERIALIZE(currency_stats,(supply)(max_supply)(issuer)(authors)(fee)(fixed)(percent)(maxfee)(minfee)(useroc))
+            //ROXELIB_SERIALIZE(currency_stats,(supply)(max_supply)(issuer)(authors)(fee)(fixed)(percent)(maxfee)(minfee)(useroc))
         };
 
         typedef roxe::multi_index<"accounts"_n, account> accounts;

@@ -93,7 +93,7 @@ else
                [[ $ARCH == "Darwin" ]] && INSTALL_PATHS+=("${HOME}/Library/Application\ Support/roxe")
                [[ $ARCH != "Darwin" ]] && INSTALL_PATHS+=("${HOME}/.local/share/roxe")
             fi
-            # Version < 1.8.0; Before we started using ~/roxe/1.8.x
+            # Version < 1.8.0; Before we started using ~/roxe/1.0.x
             # Arrays should return with newlines (IFS=\n;helpers.sh) as Application\ Support will split into two
             for INSTALL_PATH in ${INSTALL_PATHS[@]}; do
                execute rm -rf $INSTALL_PATH

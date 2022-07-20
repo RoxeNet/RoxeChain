@@ -24,6 +24,24 @@ void token::create( const name&   issuer,
     });
 }
 
+void token::incmaxsupply(const asset& inflation, const string& memo ){
+    check( memo.size() <= 256, "memo has more than 256 bytes" );
+    auto sym = inflation.symbol;
+    check( sym.is_valid(), "invalid symbol name" );
+    check( inflation.is_valid(), "invalid supply");
+    check( inflation.amount > 0, "inflation-supply must be positive");
+
+    stats statstable( get_self(), sym.code().raw() );
+    auto existing = statstable.find( sym.code().raw() );
+    check( existing != statstable.end(), "token with symbol does not exist, create token before max-supply increment" );
+    const auto& st = *existing;
+
+    require_auth( st.issuer );
+
+    statstable.modify( st, same_payer, [&]( auto& s ) {
+        s.max_supply += inflation;
+    });
+}
 
 void token::issue( const name& to, const asset& quantity, const string& memo )
 {

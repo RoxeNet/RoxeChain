@@ -170,6 +170,8 @@ namespace roxe { namespace chain {
                                     3010013, "Invalid fixed key" )
       FC_DECLARE_DERIVED_EXCEPTION( symbol_type_exception,           chain_type_exception,
                                     3010014, "Invalid symbol" )
+      FC_DECLARE_DERIVED_EXCEPTION( estimate_fee_params_exception,          chain_type_exception,
+        3010015, "Invalid params" )
 
 
    FC_DECLARE_DERIVED_EXCEPTION( fork_database_exception, chain_exception,

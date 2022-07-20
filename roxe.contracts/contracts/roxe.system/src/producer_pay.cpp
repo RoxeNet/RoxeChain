@@ -79,6 +79,7 @@ namespace roxesystem {
       check( ct - prod.last_claim_time > microseconds(useconds_per_day), "already claimed rewards within past day" );
 
       const asset token_supply   = token::get_supply(token_account, core_symbol().code() );
+      const asset token_max_supply   = token::get_max_supply(token_account, core_symbol().code() );
       const auto usecs_since_last_fill = (ct - _gstate.last_pervote_bucket_fill).count();
 
       if( usecs_since_last_fill > 0 && _gstate.last_pervote_bucket_fill > time_point() ) {
@@ -88,16 +89,24 @@ namespace roxesystem {
          int64_t new_tokens = (additional_inflation < 0.0) ? 0 : static_cast<int64_t>(additional_inflation);
 
          /// FIXME to give all rewards to producers without to_saving acccount
-         int64_t to_producers     = new_tokens;
-//         int64_t to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
+//         int64_t to_producers     = new_tokens;
+         int64_t to_producers = 0;
+         if(_gstate4.inflation_pay_factor != 0){
+             to_producers     = (new_tokens * uint128_t(pay_factor_precision)) / _gstate4.inflation_pay_factor;
+         }
          int64_t to_savings       = new_tokens - to_producers;
          int64_t to_per_block_pay = (to_producers * uint128_t(pay_factor_precision)) / _gstate4.votepay_factor;
          int64_t to_per_vote_pay  = to_producers - to_per_block_pay;
 
          if( new_tokens > 0 ) {
             {
+               auto new_token_assets = asset(new_tokens, core_symbol());
+               if(token_supply.amount + new_tokens > token_max_supply.amount){
+                   token::inc_max_supply_action inc_act{ token_account, { {get_self(), active_permission} } };
+                   inc_act.send(new_token_assets, "inflate tokens for producer pay and savings");
+               }
                token::issue_action issue_act{ token_account, { {get_self(), active_permission} } };
-               issue_act.send( get_self(), asset(new_tokens, core_symbol()), "issue tokens for producer pay and savings" );
+               issue_act.send( get_self(), new_token_assets, "issue tokens for producer pay and savings" );
             }
             {
                token::transfer_action transfer_act{ token_account, { {get_self(), active_permission} } };

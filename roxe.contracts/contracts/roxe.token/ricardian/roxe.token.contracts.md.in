@@ -105,3 +105,15 @@ icon: @ICON_BASE_URL@/@SETFEE_ICON_URI@
 ---
 
 {{owner}} agrees to set {{symbol}} token fee {{fee}}.
+
+
+<h1 class="contract">incmaxsupply</h1>
+
+---
+spec_version: "0.2.0"
+title: Inflate Token
+summary: 'increase the {{asset_to_symbol_code symbol}} token inflation {{inflation}}'
+icon: @ICON_BASE_URL@/@INCR_ICON_URI@
+---
+
+increase {{symbol}} token inflation {{inflation}}.
