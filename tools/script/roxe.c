@@ -397,6 +397,14 @@ int WDCheckProducer(char* url, char* producer, int showcmd)
     return ret;
 }
 
+int WDStrExists(char* line, char** bufs, int* lens, int bufs_len)
+{
+    for (int i = 0; i < bufs_len; i++) {	
+        if (0 == strncmp(line, bufs[i], lens[i]))
+            return 1; 	    
+    }
+    return 0;
+}
 
 int WDCombineFile(const char* tmpfile, const char* def_conf, char* key, const char* file)
 {
@@ -427,7 +435,13 @@ int WDCombineFile(const char* tmpfile, const char* def_conf, char* key, const ch
         fclose(pFile)
 
     //----------
-
+    const int K = 100;
+    char* bufs[K];
+    int lens[K];
+    int bufs_len = 0;
+    memset(bufs, 0, sizeof(bufs));
+    
+    int i = 0;
     int len;    
     char line[1024];
     while (NULL != fgets(line, sizeof(line), pDefconf)) {
@@ -461,26 +475,47 @@ int WDCombineFile(const char* tmpfile, const char* def_conf, char* key, const ch
 
 	len = strlen(line);
         fwrite(line, 1, len, pFile);
+
+	char* p = malloc(128);
+	memcpy(p, line, 127);
+
+        char* p1 = strstr(p, " ");
+	if (!p1) {
+            p1 = strstr(p, "=");
+	}
+        
+	if (p1 != NULL && i < K) {
+	    *p1 = '\0';	
+            lens[i] = p1 - p;		
+            bufs[i] = p;
+	    i++;
+	}
     }
+    bufs_len = i;
 
     //------------
     char key_buf[2048];
     int size = sprintf(key_buf, "%s\n", key);
     fwrite(key_buf, 1, size, pFile);
 
-    char buf[4096];
     int n;
-    while (!feof(pTmpfile)) {
-       n = fread(buf, 1, sizeof(buf), pTmpfile);
-       if (n > 0)
-           fwrite(buf, 1, n, pFile);
-       else {
-           DEF_COMB_CLEAN();
-	   return -7;
-       }
+   
+    while (NULL != fgets(line, sizeof(line), pTmpfile)) {
+        if (line[0] == '#')
+            continue; 	       
+        
+        if (0 == WDStrExists(line, bufs, lens, bufs_len)) {
+            n = strlen(line);
+            fwrite(line, 1, n, pFile);
+        }
     }
     
+    for (int i = 0; i < bufs_len; i++) {
+        free(bufs[i]);
+    }
+
     DEF_COMB_CLEAN(); 
+
     return 0;
 }
 
@@ -1465,9 +1500,9 @@ label_2:
 	    }
 	}
         if (ret == 0)
-	    printf("\033[1m\n\033[40;33mUnRegProducer %s ok\n\033[0m", g_producer);  	
+	    printf("\033[1m\033[40;33m\nUnRegProducer %s ok\n\033[0m", g_producer);  	
 	else
-	    printf("\033[1m\n\033[40;33mUnRegProducer %s error\n\033[0m", g_producer);  	
+	    printf("\033[1m\033[40;33m\nUnRegProducer %s error\n\033[0m", g_producer);  	
 	return 0;    
     }
 
@@ -1520,7 +1555,7 @@ label_2:
     char* param_1[4] = {"watchapp", "nodroxe", NULL, NULL};  
     param_1[2] = roxe_param;
 
-   // printf("%s\n", param_1[2]);
+  //  printf("%s\n", param_1[2]);
     
     char run_buf[256];
     snprintf(run_buf, sizeof(run_buf), "%s/watchapp", dir);

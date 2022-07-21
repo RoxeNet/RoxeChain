@@ -225,7 +225,7 @@ void SetupSign()
 
 //The first parameter is the program name
 //The second parameter is divided by '[   ]'
-//for example  ls '[ls -al]'
+//for example watchapp ls '[ls -al]'
 
 
 int main(int argc, char* argv[])
