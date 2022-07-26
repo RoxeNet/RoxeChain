@@ -931,10 +931,13 @@ int WDParseLine(char* line, const char* flag, char* out, int out_size)
          p++;
      }
      int i = strlen(p);
-     *(p + i - 1) = '\0';
+     if (i > 1) {
+         *(p + i - 1) = '\0';
+         strncpy(out, p, out_size);
+	 return 0;
+     }
 
-     strncpy(out, p, out_size);
-     return 0;
+     return -2;
 }
 
 int WDParseDefconf(const char* filename, TArrAddr** plisten, TArrAddr** test_peer, TArrAddr** main_peer)
@@ -1192,37 +1195,50 @@ void WDCheckStatus(const char* file)
     }
 
     fseek(pFile, 0, SEEK_END);
-    //int pos = ftell(pFile);
-    //fseek(pFile, pos -2048, 0);
+    int pos = ftell(pFile);
+    pos -= 256;
+    fseek(pFile, pos, 0);
 
     char buf[2048];
     char* p;
+
     char out[256];
     int64_t n = 0;
     int len = 0;
+    int size = 0;
 
     char sync1[] = "data syn complete";
     char sync2[] = "data sync ...";
-    char* sync = sync1;
+    char* sync = sync2;
 
     printf("....        \n");
     fflush(stdout);
-
+    
     while(1) {
-        p = fgets(buf, sizeof(buf), pFile);
-        if (p) {
+        if (feof(pFile)) {
+            pos = ftell(pFile);           
+            pos -= 512;
+            fseek(pFile, pos, 0);
+            continue;
+        }
+
+	memset(buf, 0, sizeof(buf));
+	size = fread(buf, 1, sizeof(buf) -1, pFile);
+
+	if (size > 0) {
             p = strstr(buf, "#");
 	    if (p) {
-	        n = atol(p+1);    
+	        n = atoll(p+1);    
                 len = sprintf(out, "block num: %ld", n);
 	    }
             
 	    p = strstr(buf, "latency: ");
             if (p) {
 	        p += 9;
-	        n = atol(p+1);	 
-                len += sprintf(&out[len], " latency: %ldms", n);
-		sync = n <= 1000 ? sync1 : sync2;
+	        n = atoll(p);	 
+
+		len += sprintf(&out[len], " latency: %ld ms", n);
+		sync = n <= (int64_t)1000 ? sync1 : sync2;
 	    }
              
 	    if (p) {
@@ -1606,16 +1622,21 @@ label_WL_1:
 	    } 
 	    goto label_WL_1;
 	}
+
+        if (ret != 0) {
+           printf("\033[32mcreate wallet error!\033[0m\n");
+           return 0;
+        }
     }
     else {
         printf("read wallet ok\n"); 
         ret = WDUnlockWallet(g_wallet, g_wallet_key);
+        if (ret != 0) {
+            printf("\033[32mcreate wallet error!\033[0m\n"); 
+	    return 0;
+        }
     }
-    if (ret != 0) {
-        printf("\033[32mcreate wallet error!\033[0m\n"); 
-	return 0;
-    }
- 
+  
     //--------9--------- 
     char user_file[1024];
     snprintf(user_file, sizeof(user_file), "%s/user.info", dir);

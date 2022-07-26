@@ -1,4 +1,4 @@
-CC=gcc  
+CC=gcc
 CFLAGS=-Wall
 EXE=roxe
 EXE_WATCH=watchapp
