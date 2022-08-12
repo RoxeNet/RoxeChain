@@ -42,7 +42,6 @@ char* g_producer_url = NULL;
 
 char* g_home = NULL;
 
-
 int WDCopyFile(char* file, char* bakfile)
 {
     FILE* pFile = fopen(file, "rb");
@@ -495,7 +494,7 @@ int WDCombineFile(const char* tmpfile, const char* def_conf, char* key, const ch
 
     //------------
     char key_buf[2048];
-    int size = sprintf(key_buf, "%s\n", key);
+    int size = sprintf(key_buf, "\n%s\n", key);
     fwrite(key_buf, 1, size, pFile);
 
     int n;
@@ -1215,13 +1214,12 @@ void WDCheckStatus(const char* file)
     fflush(stdout);
     
     while(1) {
-        if (feof(pFile)) {
-            pos = ftell(pFile);           
-            pos -= 512;
+	if (feof(pFile)) {
+            pos = ftell(pFile);
+	    pos -= 512;
             fseek(pFile, pos, 0);
-            continue;
-        }
-
+	    continue;
+	}
 	memset(buf, 0, sizeof(buf));
 	size = fread(buf, 1, sizeof(buf) -1, pFile);
 
@@ -1246,9 +1244,9 @@ void WDCheckStatus(const char* file)
 		printf("\033[K");
                 printf("\033[1m\033[40;33m%s status: %s\n\033[0m", out, sync);       
 		fflush(stdout);
-	    }	     
+	    }	   
+	    sleep(1);  
 	}
-	sleep(1);
     }
 
     fclose(pFile);
@@ -1317,6 +1315,8 @@ void Usge()
 
 int main(int argc, char* argv[])
 {
+   setenv("LD_LIBRARY_PATH", "./", 1);
+
     if (argc > 1) {
 	char* p = argv[1];    
 	int ok = 0;
@@ -1639,7 +1639,7 @@ label_WL_1:
   
     //--------9--------- 
     char user_file[1024];
-    snprintf(user_file, sizeof(user_file), "%s/user.info", dir);
+    snprintf(user_file, sizeof(user_file), "%s/user.info-%s", dir, g_producer);
 
     if (WDFileExists(user_file) != 0) {
         WDCreateUserInfo(g_producer, userfile, wallet_file, user_file);         
