@@ -1055,12 +1055,12 @@ int WDParseDefconf(const char* filename, TArrAddr** plisten, TArrAddr** test_pee
         }
 
 	if (0 == WDParseLine(line, "is-mainnet", out, 16)) {
-            g_ismainnet = strcmp(out, "true") == 0 ? 1 : 0;
+            g_ismainnet = strncmp(out, "true", 4) == 0 ? 1 : 0;
             continue;
         }
        
         if (0 == WDParseLine(line, "is-producer", out, 16)) {
-            g_isproducer = strcmp(out, "true") == 0 ? 1 : 0;
+            g_isproducer = strncmp(out, "true", 4) == 0 ? 1 : 0;
             continue;
 	}
 
@@ -1076,6 +1076,9 @@ int WDParseDefconf(const char* filename, TArrAddr** plisten, TArrAddr** test_pee
 
 
         if (0 == WDParseLine(line, "producer-name", g_producer, 64)) {
+            char* p1 = strstr(g_producer, "\r");
+            if (p1) 
+                *p1 = '\0';	    
             continue;
         }
     }
@@ -1287,7 +1290,7 @@ int WDTestUrl(char* url)
     int port;
 
     if (0 != WDParseUrl(url, host, &port)) {
-        printf("\033[1m\033[40;33murl %s error\n\033[0m", url);
+        printf("\033[1m\033[40;33murl: %s error\n\033[0m", url);
         return -1;
     }
 
@@ -1315,6 +1318,8 @@ void Usge()
 
 int main(int argc, char* argv[])
 {
+   const char* def_ver = "1.0.3";
+
    setenv("LD_LIBRARY_PATH", "./", 1);
 
     if (argc > 1) {
@@ -1376,7 +1381,7 @@ int main(int argc, char* argv[])
 	}	
 	return 0;    
     }
-    printf("\n      ====== Configure and start nodroxe ======\n");	
+    printf("\n      ====== Configure (V%s) and start nodroxe ======\n", def_ver);	
 
 
     memset(g_producer, 0 , sizeof(g_producer));
@@ -1404,11 +1409,12 @@ int main(int argc, char* argv[])
     // read user.txt 
     char g_priv[256];
     char pub[256];
-   
+    int ret = 0;
+    
     char userfile[1024]; 
     snprintf(userfile, sizeof(userfile), "%s/key.dat", dat_path);
-
-    int ret = WDReadKey(userfile, g_priv, pub);
+//#if 0
+    ret = WDReadKey(userfile, g_priv, pub);
     if (ret != 0) {
         if (0 != GetKey(pub, g_priv)) {
 	    printf("\033[1m\033[40;33mGetKey error\033[0m\n");    
@@ -1419,6 +1425,8 @@ int main(int argc, char* argv[])
     else {
         printf("read public key ok\n");
     }
+
+//#endif
 
     //------- 2 -------
     char key[1024];
@@ -1478,6 +1486,7 @@ label_2:
     else
         g_producer_url = g_test_url;
 
+    printf("checkurl %s url: %s\n", (g_ismainnet == 1? "mainnet": "testnet"), g_producer_url);
     ret = WDTestUrl(g_producer_url);
     if (ret != 0)
         return 0;
